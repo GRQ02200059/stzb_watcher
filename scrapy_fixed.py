@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+改进版抓取脚本 - 修复版本
+"""
+
 import json
 import os
 from datetime import datetime
@@ -9,13 +15,11 @@ import zlib
 # 全局变量维护zlib数据流状态
 current_zlib_data = bytearray()
 is_collecting = False
-output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "capture_new")  # 存储目录名
+output_dir = "decompressed_data_report"  # 存储目录名
 current_msg_type = None
 
 # 消息类型统计
 message_type_stats = defaultdict(int)
-# 已发现的消息类型
-discovered_message_types = set()
 
 # 创建存储目录（如果不存在）
 os.makedirs(output_dir, exist_ok=True)
@@ -27,7 +31,9 @@ def create_message_type_dirs():
         "000002bc",  # 战斗数据
         "000010ff",  # 系统状态
         "000015f95", # 其他类型
-        "unknown"    # 未知类型（包含所有非000开头的类型）
+        "00018697",  # 新发现类型
+        "000002c7",  # 新发现类型
+        "unknown"    # 未知类型
     ]
     
     for msg_type in message_types:
@@ -37,20 +43,11 @@ def create_message_type_dirs():
 
 def ensure_message_type_dir(msg_type):
     """确保消息类型目录存在"""
-    global discovered_message_types
-    
     type_dir = os.path.join(output_dir, msg_type)
     if not os.path.exists(type_dir):
         os.makedirs(type_dir, exist_ok=True)
-        print(f"[+]  发现新消息类型: {msg_type} -> 创建目录: {type_dir}")
-        discovered_message_types.add(msg_type)
-        return type_dir
-    elif msg_type not in discovered_message_types:
-        print(f"[+]  使用现有目录: {type_dir}")
-        discovered_message_types.add(msg_type)
-        return type_dir
-    else:
-        return type_dir
+        print(f"[+] 动态创建消息类型目录: {type_dir}")
+    return type_dir
 
 # 初始化目录
 create_message_type_dirs()
@@ -58,11 +55,10 @@ create_message_type_dirs()
 def print_statistics():
     """打印消息类型统计"""
     print("\n" + "="*60)
-    print(" 消息类型统计")
+    print("📊 消息类型统计")
     print("="*60)
     total_count = sum(message_type_stats.values())
     print(f"总处理数据包: {total_count}")
-    print(f"已发现消息类型: {len(discovered_message_types)} 种")
     print("消息类型分布:")
     for msg_type, count in sorted(message_type_stats.items(), key=lambda x: x[1], reverse=True):
         percentage = (count / total_count * 100) if total_count > 0 else 0
@@ -71,7 +67,7 @@ def print_statistics():
 
 def generate_final_report():
     """生成最终报告"""
-    print("\n 生成最终报告...")
+    print("\n📄 生成最终报告...")
     
     report = []
     report.append("# 游戏数据抓取报告")
@@ -80,20 +76,19 @@ def generate_final_report():
     
     # 统计信息
     total_count = sum(message_type_stats.values())
-    report.append("##  抓取统计")
+    report.append("## 📊 抓取统计")
     report.append(f"- 总处理数据包: {total_count}")
-    report.append(f"- 已发现消息类型: {len(discovered_message_types)} 种")
     report.append("")
     
     # 消息类型统计
-    report.append("## ️ 消息类型统计")
+    report.append("## 🏷️ 消息类型统计")
     for msg_type, count in sorted(message_type_stats.items(), key=lambda x: x[1], reverse=True):
         percentage = (count / total_count * 100) if total_count > 0 else 0
         report.append(f"- {msg_type}: {count} 个 ({percentage:.1f}%)")
     report.append("")
     
     # 文件统计
-    report.append("##  文件统计")
+    report.append("## 📁 文件统计")
     for msg_type in message_type_stats.keys():
         type_dir = os.path.join(output_dir, msg_type)
         if os.path.exists(type_dir):
@@ -106,7 +101,7 @@ def generate_final_report():
     with open(report_file, 'w', encoding='utf-8') as f:
         f.write('\n'.join(report))
     
-    print(f" 报告已保存: {report_file}")
+    print(f"✅ 报告已保存: {report_file}")
 
 def process_packet(packet):
     global current_zlib_data, is_collecting, current_msg_type
@@ -124,22 +119,10 @@ def process_packet(packet):
             if len(payload) >= 8:
                 msg_type = bytearray(payload[4:8])
                 current_msg_type = msg_type
-                msg_type_hex = msg_type.hex()
-                
-                # 检查是否为标准消息类型（以000开头）
-                if msg_type_hex.startswith('000'):
-                    print(f"[+] ZLIB头发现 | 类型: {msg_type_hex}")
-                    # 立即为新消息类型创建目录
-                    ensure_message_type_dir(msg_type_hex)
-                else:
-                    print(f"[+] ZLIB头发现 | 非标准类型: {msg_type_hex} -> 归类到unknown")
-                    # 非标准类型归类到unknown
-                    ensure_message_type_dir("unknown")
+                print(f"[+] ZLIB头发现 | 类型: {msg_type.hex()}")
             else:
                 current_msg_type = bytearray(b'\x00\x00\x00\x00')
                 print(f"[+] ZLIB头发现 | 类型: 未知")
-                # 为未知类型创建目录
-                ensure_message_type_dir("unknown")
             
             print("[+] 检测到zlib头部，开始收集数据流")
 
@@ -163,11 +146,6 @@ def process_packet(packet):
                     
                     # 获取消息类型
                     msg_type = current_msg_type.hex() if current_msg_type else "unknown"
-                    
-                    # 检查是否为标准消息类型，非标准类型归类到unknown
-                    if not msg_type.startswith('000'):
-                        msg_type = "unknown"
-                    
                     message_type_stats[msg_type] += 1
                     
                     # 确保消息类型目录存在
@@ -204,11 +182,6 @@ def process_packet(packet):
                             # 继续处理修复后的数据
                             timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")[:-3]
                             msg_type = current_msg_type.hex() if current_msg_type else "unknown"
-                            
-                            # 检查是否为标准消息类型，非标准类型归类到unknown
-                            if not msg_type.startswith('000'):
-                                msg_type = "unknown"
-                            
                             message_type_stats[msg_type] += 1
                             type_dir = ensure_message_type_dir(msg_type)
                             filename = f"decompressed_{timestamp}_{msg_type}_fixed.json"
@@ -242,10 +215,10 @@ import sys
 
 def signal_handler(signum, frame):
     """处理中断信号"""
-    print("\n[*] 正在停止抓取...")
+    print("\n🛑 正在停止抓取...")
     print_statistics()
     generate_final_report()
-    print("[*] 抓取已停止")
+    print("👋 抓取已停止")
     sys.exit(0)
 
 # 设置信号处理
@@ -253,24 +226,26 @@ signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
 # 启动实时嗅探（过滤TCP流量）
-print("[*] 开始监听网络流量...")
+print("🚀 开始监听网络流量...")
 print("="*60)
-print("过滤条件: src host 45.253.141.10 and tcp")
+print("过滤条件: src host 42.186.64.43 and tcp")
 print("数据将按消息类型分组存储")
 print("按 Ctrl+C 停止抓取")
 print("="*60)
 
 try:
     sniff(
-        filter="src host 45.253.141.10 and tcp",
+        filter="src host 42.186.64.43 and tcp",
         prn=process_packet,
         store=0  # 不存储数据包以节省内存
     )
 except KeyboardInterrupt:
-    print("\n[*] 用户停止抓取")
+    print("\n🛑 用户停止抓取")
     print_statistics()
     generate_final_report()
 except Exception as e:
-    print(f"\n[!] 抓取出错: {str(e)}")
+    print(f"\n❌ 抓取出错: {str(e)}")
     print_statistics()
     generate_final_report()
+
+
