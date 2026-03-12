@@ -3,7 +3,8 @@
 > 《率土之滨》战场实时监控与数据分析平台
 
 游戏战报采集系统，配合 Web 仪表盘实现团队战斗数据的实时展示、多维分析与考勤管理。
-
+本项目前后端分离， 可以将前端部署在服务器上， 示例演示如下：
+http://49.233.95.225:1689/ 
 ---
 
 ## Features
@@ -104,6 +105,20 @@ stzb_watcher/
 - 本项目仅用于个人学习与团队内部数据管理，请遵守相关法律法规及游戏服务条款
 
 ---
+## 开发计划
+- 添加战斗模拟功能， 基于现有战报建模游戏里的战斗逻辑。
+- 胜率预测， 基于大量战报进行深度学习训练， 依靠模型来预测出征胜负。
+
+## 功能演示
+<img width="1265" height="675" alt="image" src="https://github.com/user-attachments/assets/3570d085-4055-421b-bb90-385ec4b763f7" />
+<img width="1258" height="664" alt="image" src="https://github.com/user-attachments/assets/638fcef1-a27b-4a35-9ddb-22b2499ef8f4" />
+<img width="1262" height="670" alt="image" src="https://github.com/user-attachments/assets/afd36633-c1ed-49b4-9737-ebc9c5b41653" />
+<img width="1268" height="669" alt="image" src="https://github.com/user-attachments/assets/9f08f1b0-af04-46b8-b150-ac2079e146ce" />
+<img width="1274" height="650" alt="image" src="https://github.com/user-attachments/assets/b579cf72-613a-4dbc-b747-e5ff9e7d71a0" />
+<img width="1262" height="670" alt="image" src="https://github.com/user-attachments/assets/1769818a-10ae-4a87-8325-0001a345e590" />
+<img width="1259" height="668" alt="image" src="https://github.com/user-attachments/assets/acd6285b-a4d7-46c5-bd70-23f70b872e3c" />
+<img width="1251" height="671" alt="image" src="https://github.com/user-attachments/assets/cec2b2fe-6d72-4352-a51f-26320f939f1e" />
+<img width="1280" height="668" alt="image" src="https://github.com/user-attachments/assets/569f56f0-d8c5-4768-be7f-f578233d2692" />
 
 ## License
 
