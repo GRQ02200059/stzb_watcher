@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>等距地图测试</title>
+    <script src="https://cdn.staticfile.org/konva/8.4.3/konva.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #F0F0F0;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <script>
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        const stage = new Konva.Stage({
+            container: 'container',
+            width: width,
+            height: height,
+            draggable: true  // 使整个舞台可拖动
+        });
+
+        const layer = new Konva.Layer();
+        const selectionLayer = new Konva.Layer();  // 新的图层用于选择效果
+
+        stage.add(layer);
+        stage.add(selectionLayer);  // 将新图层添加到舞台
+
+        const tileWidth = 150;
+        const tileHeight = 75;
+
+        let selectedPolygon = null;  // 跟踪选定的多边形
+
+        const bigImage = new Image();
+        bigImage.src = 'map2.png'; // 替换为你的大图像的路径
+
+        bigImage.onload = function() {
+            for (let x = 0; x < 10; x++) {
+                for (let y = 0; y < 10; y++) {
+                    const isoX = (x - y) * tileWidth / 2;
+                    const isoY = (x + y) * tileHeight / 2;
+
+                    const tile = new Konva.Image({
+                        x: isoX + width / 2,
+                        y: isoY,
+                        image: bigImage,
+                        width: tileWidth,
+                        height: tileHeight
+                    });
+                    tile.setListening(false); // 禁止图块监听事件
+                    const tilePolygon = new Konva.Line({
+                        points: [
+                            isoX + width / 2, isoY + tileHeight / 2,  // 顶点
+                            isoX + width / 2 + tileWidth / 2, isoY + tileHeight,  // 右点
+                            isoX + width / 2 + tileWidth, isoY + tileHeight / 2,  // 底点
+                            isoX + width / 2 + tileWidth / 2, isoY  // 左点
+                        ],
+                        fill: 'transparent',  // 使多边形不可见
+                        listening: true,  // 使多边形可以监听事件
+                        closed: true,  // 闭合线条以创建多边形
+                    });
+
+                    tilePolygon.on('click', function(e) {
+                        e.cancelBubble = true;  // 阻止事件冒泡
+
+                        // 清除之前选定的多边形
+                        if (selectedPolygon) {
+                            selectedPolygon.destroy();
+                        }
+
+                        // 为选定的图块创建新的多边形
+                        selectedPolygon = new Konva.Line({
+                            points: [
+                                this.points()[0], this.points()[1],  // 顶点
+                                this.points()[2], this.points()[3],  // 右点
+                                this.points()[4], this.points()[5],  // 底点
+                                this.points()[6], this.points()[7]  // 左点
+                            ],
+                            fill: 'gary',
+                            // stroke: 'black',
+                            // strokeWidth: 2,
+                            closed: true,
+                            opacity: 0.2  // 使多边形半透明
+                        });
+
+                        // 将新的多边形添加到选择图层
+                        selectionLayer.add(selectedPolygon);
+                        selectionLayer.draw();
+                    });
+
+                    layer.add(tile);
+                    layer.add(tilePolygon);  // 将多边形添加到图层
+                }
+            }
+
+            layer.draw();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+
+# 日志文件
+*.log
+
+# 二进制/抓包文件
+*.pcap
+*.bin
+*.zip
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# 虚拟环境
+venv/
+env/
+.venv/
+
+# 临时/输出文件
+out
+mytou
+mytcp.bin
+
+# 大型数据目录（可选，按需注释掉）
+capture_new/
+decompressed_data/
+decompressed_data_report/
+downloaded_images/
+hero_image/
+
+# frp 二进制
+frp/
+frp_0.67.0_windows_amd64/
+frp_tmp/
+frp_tmp2/
+frp_0.67.0_windows_amd64.zip
+frp_setup.zip
+

@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>率土战场指挥台</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+:root{
+  --bg:#06090f;--panel:#0b1019;--panel2:#0f1620;--border:#1c2a3a;
+  --gold:#c8a044;--gold2:#e8c86a;--red:#e05050;--green:#46b06e;
+  --blue:#4a8fe0;--cyan:#3ab8c8;--purple:#9060d0;--orange:#d07030;
+  --text:#d4cfc0;--text2:#7a8a9a;--muted:#3a4a5a;
+  --glow:0 0 24px #c8a04450;
+  --font-body:'SimSun','宋体','STSong',serif;
+  --font-mono:'Share Tech Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);color:var(--text);min-height:100vh;
+  background-image:
+    radial-gradient(ellipse at 10% 10%,#0d1a2e 0%,transparent 50%),
+    radial-gradient(ellipse at 90% 90%,#08130e 0%,transparent 50%),
+    radial-gradient(ellipse at 50% 50%,#070a12 0%,transparent 80%);
+  font-size:15px;
+}
+
+/* ===== HEADER ===== */
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 28px;border-bottom:1px solid var(--border);
+  background:linear-gradient(90deg,#080c18 0%,#0c1422 40%,#0c1422 60%,#080c18 100%);
+  box-shadow:0 2px 16px #00000060;
+}
+header h1{
+  font-size:1.4rem;letter-spacing:.4em;color:var(--gold);
+  text-shadow:var(--glow);
+  font-family:var(--font-body);
+}
+.hdr-right{display:flex;gap:18px;align-items:center;}
+.conn-dot{width:9px;height:9px;border-radius:50%;background:var(--red);display:inline-block;margin-right:5px;}
+.conn-dot.live{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hdr-stat{font-family:var(--font-mono);font-size:.72rem;color:var(--text2);}
+.hdr-stat span{color:var(--gold);}
+.github-link{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--font-mono);font-size:.7rem;
+  color:var(--text2);text-decoration:none;
+  border:1px solid var(--muted);border-radius:4px;
+  padding:4px 10px;
+  transition:all .18s;
+  white-space:nowrap;
+}
+.github-link:hover{
+  color:var(--gold);border-color:var(--gold);
+  text-shadow:0 0 8px var(--gold);
+  box-shadow:0 0 10px #c8a04430;
+}
+.github-link svg{flex-shrink:0;opacity:.7;}
+.github-link:hover svg{opacity:1;}
+.github-banner{
+  position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+  z-index:9999;
+  display:flex;align-items:center;gap:8px;
+  background:rgba(11,16,25,0.92);backdrop-filter:blur(8px);
+  border:1px solid var(--gold);border-radius:24px;
+  padding:7px 22px;
+  box-shadow:0 0 24px #c8a04430,0 2px 16px #00000080;
+  font-family:var(--font-mono);font-size:.78rem;
+  color:var(--text2);
+  text-decoration:none;
+  transition:all .2s;
+  animation:banner-in .5s ease;
+}
+.github-banner:hover{
+  color:var(--gold);
+  border-color:var(--gold2);
+  box-shadow:0 0 36px #c8a04460,0 2px 20px #00000080;
+  transform:translateX(-50%) translateY(-2px);
+}
+.github-banner svg{opacity:.8;}
+.github-banner:hover svg{opacity:1;}
+.github-banner .gb-star{
+  color:var(--gold);font-size:.9rem;
+  animation:star-pulse 2s infinite;
+}
+@keyframes banner-in{
+  from{opacity:0;transform:translateX(-50%) translateY(16px);}
+  to{opacity:1;transform:translateX(-50%) translateY(0);}
+}
+@keyframes star-pulse{
+  0%,100%{text-shadow:none;}
+  50%{text-shadow:0 0 10px var(--gold);}
+}
+
+/* ===== NAV TABS ===== */
+nav{
+  display:flex;background:var(--panel);border-bottom:1px solid var(--border);
+  overflow-x:auto;scrollbar-width:none;
+}
+nav::-webkit-scrollbar{display:none;}
+nav button{
+  flex-shrink:0;padding:11px 22px;
+  background:none;border:none;border-bottom:2px solid transparent;
+  color:var(--text2);cursor:pointer;
+  font-family:var(--font-body);font-size:.9rem;
+  letter-spacing:.1em;transition:all .18s;white-space:nowrap;
+}
+nav button:hover{color:var(--text);background:#111c2a;}
+nav button.active{
+  color:var(--gold);border-bottom-color:var(--gold);
+  background:linear-gradient(180deg,transparent,#111820);
+  text-shadow:0 0 12px #c8a04460;
+}
+
+/* ===== MAIN ===== */
+.page{display:none;padding:18px 20px;animation:fadeIn .25s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== GRID CARDS ===== */
+.cards-row{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+.stat-card{
+  flex:1;min-width:120px;
+  background:linear-gradient(135deg,var(--panel),var(--panel2));
+  border:1px solid var(--border);border-radius:8px;
+  padding:16px 20px;text-align:center;
+  box-shadow:0 2px 8px #00000040;
+  transition:border-color .2s,box-shadow .2s;
+}
+.stat-card:hover{border-color:#2a3e55;box-shadow:0 4px 16px #00000060;}
+.stat-card .val{font-family:var(--font-mono);font-size:2rem;color:var(--gold);line-height:1.1;}
+.stat-card .lbl{font-size:.72rem;color:var(--text2);margin-top:6px;letter-spacing:.12em;}
+
+/* ===== TABLES ===== */
+.tbl-wrap{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:8px;overflow:hidden;
+  box-shadow:0 2px 12px #00000050;
+}
+.tbl-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 18px;border-bottom:1px solid var(--border);
+  background:linear-gradient(90deg,#080e18,#0a1220);
+}
+.tbl-head h3{
+  font-size:.88rem;letter-spacing:.15em;color:var(--gold);
+  font-family:var(--font-body);
+}
+.tbl-controls{display:flex;gap:8px;align-items:center;}
+.tbl-scroll{max-height:calc(100vh - 160px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+table{width:100%;border-collapse:collapse;font-size:1rem;font-family:var(--font-body);}
+thead th{
+  padding:9px 12px;background:#090f1c;color:var(--text2);text-align:left;
+  font-weight:600;letter-spacing:.08em;font-size:.82rem;
+  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1;
+  font-family:var(--font-body);
+}
+tbody tr{border-bottom:1px solid #111c28;transition:background .1s;}
+tbody tr:hover{background:#0f1a28;}
+tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rank-1{color:var(--gold2);font-weight:700;}
+.rank-2{color:#b8b8c8;}
+.rank-3{color:#c07840;}
+
+/* ===== BADGES ===== */
+.badge{
+  display:inline-block;padding:2px 8px;border-radius:3px;font-size:.7rem;
+  font-family:var(--font-mono);
+}
+.badge-win{background:#152a1a;color:var(--green);border:1px solid #1e4028;}
+.badge-lose{background:#2a1515;color:var(--red);border:1px solid #402020;}
+.badge-draw{background:#252515;color:var(--gold);border:1px solid #3a3a18;}
+.badge-city{background:#142030;color:var(--blue);border:1px solid #1e3048;}
+.badge-main{background:#1c1228;color:var(--purple);border:1px solid #2e1e40;}
+.badge-field{background:#141828;color:var(--cyan);border:1px solid #1e2840;}
+
+/* ===== FILTERS ===== */
+.filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+.filters select,.filters input{
+  background:var(--panel2);border:1px solid var(--border);
+  border-radius:5px;color:var(--text);padding:6px 11px;font-size:.88rem;outline:none;
+  font-family:var(--font-body);transition:border-color .15s;
+}
+.filters select:focus,.filters input:focus{border-color:var(--gold);box-shadow:0 0 0 2px #c8a04420;}
+.btn{
+  padding:6px 16px;background:var(--panel2);border:1px solid var(--border);
+  border-radius:5px;color:var(--text2);cursor:pointer;font-size:.88rem;
+  transition:all .18s;font-family:var(--font-body);
+}
+.btn:hover{border-color:var(--gold);color:var(--gold);background:#141e2c;}
+.btn-primary{background:#162416;border-color:var(--green);color:var(--green);}
+.btn-primary:hover{background:#1e3020;}
+
+/* ===== SPLIT LAYOUT ===== */
+.split2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.split3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+@media(max-width:900px){.split2,.split3{grid-template-columns:1fr;}}
+
+/* ===== REALTIME FEED ===== */
+.feed{max-height:320px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.feed-item{
+  padding:8px 16px;border-bottom:1px solid #0e1820;font-size:.88rem;
+  display:flex;gap:10px;align-items:baseline;animation:slideIn .25s ease;
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
+.feed-time{font-family:var(--font-mono);font-size:.67rem;color:var(--muted);flex-shrink:0;}
+.feed-body{flex:1;line-height:1.5;}
+
+/* ===== BAR CHART ===== */
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:.82rem;}
+.bar-label{width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);text-align:right;}
+.bar-track{flex:1;height:14px;background:#090f1c;border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+.bar-fill{height:100%;border-radius:3px;transition:width .6s ease;}
+.bar-val{width:60px;font-family:var(--font-mono);font-size:.72rem;color:var(--text2);}
+
+/* ===== TOAST ===== */
+#toast{
+  position:fixed;bottom:24px;right:24px;padding:10px 18px;
+  background:#0f1e10;border:1px solid var(--green);border-radius:6px;
+  font-size:.85rem;color:var(--green);opacity:0;
+  transition:opacity .3s;pointer-events:none;z-index:999;
+  max-width:320px;box-shadow:0 4px 20px #00000080;
+  font-family:var(--font-body);
+}
+
+/* ===== PROGRESS BAR ===== */
+.prog{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:4px;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;transition:width .5s;}XiaoWei',serif;}
+.btn:hover{border-color:var(--gold);color:var(--gold);}
+.btn-primary{background:#1a2a18;border-color:var(--green);color:var(--green);}
+.btn-primary:hover{background:#223020;}
+
+/* ===== SPLIT LAYOUT ===== */
+.split2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.split3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+@media(max-width:900px){.split2,.split3{grid-template-columns:1fr;}}
+
+/* ===== REALTIME FEED ===== */
+.feed{max-height:320px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.feed-item{padding:7px 14px;border-bottom:1px solid #101820;font-size:.78rem;
+  display:flex;gap:10px;align-items:baseline;animation:slideIn .3s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.feed-time{font-family:'Share Tech Mono',monospace;font-size:.67rem;color:var(--muted);flex-shrink:0;}
+.feed-body{flex:1;line-height:1.4;}
+
+/* ===== BAR CHART ===== */
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:5px;font-size:.76rem;}
+.bar-label{width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);text-align:right;}
+.bar-track{flex:1;height:16px;background:#0d1520;border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;transition:width .6s ease;}
+.bar-val{width:60px;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--text2);}
+
+/* ===== TOAST ===== */
+#toast{position:fixed;bottom:20px;right:20px;padding:9px 16px;background:#162016;
+  border:1px solid var(--green);border-radius:5px;font-size:.8rem;color:var(--green);
+  opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;max-width:300px;}
+
+/* ===== PROGRESS BAR ===== */
+.prog{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:4px;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;transition:width .5s;}
+</style>
+</head>
+<body>
+<header>
+  <h1>⚔ 率土战场指挥台</h1>
+  <div class='hdr-right'>
+    <span class='hdr-stat'><span class='conn-dot' id='cdot'></span><span id='cstat'>连接中</span></span>
+    <span class='hdr-stat'>战报 <span id='hc-battles'>0</span></span>
+    <span class='hdr-stat'>武勋 <span id='hc-wx'>0</span></span>
+    <span class='hdr-stat'>在线 <span id='hc-time'>--:--:--</span></span>
+    <span class='hdr-stat' style='margin-left:12px'>
+      <select id='profile-select' onchange='if(this.value)switchProfile(this.value)' style='background:var(--bg2);color:var(--fg);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:0.85rem;cursor:pointer'>
+        <option value=''>-- 账号 --</option>
+      </select>
+    </span>
+  </div>
+</header>
+<nav>
+  <button style='display:none' onclick='switchTab(0,this)'>📡 实时战报</button>
+  <button onclick='switchTab(1,this)' style='display:none'>🏆 排行榜</button>
+  <button onclick='switchTab(2,this)' style='display:none'>⚔ 武勋统计</button>
+  <button onclick='switchTab(3,this)' style='display:none'>💎 势力值</button>
+  <button onclick='switchTab(4,this)' style='display:none'>🏯 打城考勤</button>
+  <button onclick='switchTab(5,this)' style='display:none'>📋 打城排表</button>
+  <button onclick='switchTab(6,this)'>📊 战场分析</button>
+  <button onclick='switchTab(7,this)'>🧑‍🤝‍🧑 玩家队伍</button>
+  <button onclick='switchTab(8,this)' style='display:none'>🎯 自定义积分</button>
+  <button onclick='switchTab(9,this)' style='display:none'>🗄 数据同步</button>
+  <button class='active' onclick='switchTab(10,this)'>📜 全部战报</button>
+  <button onclick='switchTab(11,this)' style='display:none'>👥 队伍统计</button>
+  <button onclick='switchTab(12,this)' style='display:none'>🗺 城池地图</button>
+  <button onclick='switchTab(13,this)' style='display:none'>📋 玩家战绩</button>
+  <button onclick='switchTab(14,this)'>🏰 同盟成员</button>
+  <button onclick='switchTab(15,this)'>⚔ 分组武勋</button>
+  <button onclick='switchTab(16,this)'>📋 攻城考勤</button>
+  <button onclick='switchTab(17,this)'>🗡 战场态势</button>
+  <button onclick='switchTab(18,this)'>🏛 联盟列表</button>
+  <button onclick='switchTab(19,this)' style='display:none'>📣 游戏公告</button>
+  <button onclick='switchTab(20,this)' style='display:none'>🌏 战区玩家</button>
+  <button onclick='switchTab(21,this)'>💬 战场消息</button>
+  <button onclick='switchTab(22,this)'>⚔ 武将阵容</button>
+  <button onclick='switchTab(23,this)'>📊 团数据</button>
+  <button onclick='switchTab(24,this)'>⚔ 战斗模拟</button>
+</nav>
+<!-- TAB 0: 实时战报 -->
+<div class='page' id='tab0'>
+  <div class='cards-row'>
+    <div class='stat-card'><div class='val' id='sc0-battles'>0</div><div class='lbl'>今日战报</div></div>
+    <div class='stat-card'><div class='val' id='sc0-wx'>0</div><div class='lbl'>今日武勋</div></div>
+    <div class='stat-card'><div class='val' id='sc0-players'>0</div><div class='lbl'>活跃玩家</div></div>
+    <div class='stat-card'><div class='val' id='sc0-sync'>0</div><div class='lbl'>数据同步</div></div>
+  </div>
+  <div class='split2'>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>⚔ 实时战报流</h3>
+        <div class='tbl-controls'><input id='srch-battle' placeholder='搜索玩家...' style='width:120px'/></div>
+      </div>
+      <div class='feed' id='battle-feed'></div>
+    </div>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>📡 事件流</h3><span class='hdr-stat' id='evt-cnt'>0条</span></div>
+      <div class='feed' id='evt-feed'></div>
+    </div>
+  </div>
+</div>
+<!-- TAB 1: 排行榜 -->
+<div class='page' id='tab1'>
+  <div class='filters'>
+    <select id='rnk-period' onchange='loadRanking()'>
+      <option value='24h'>24小时</option>
+      <option value='week'>本周</option>
+      <option value='season'>赛季</option>
+    </select>
+    <span style='color:var(--text2);font-size:.75rem'>维度:</span>
+    <select id='rnk-dim' onchange='loadRanking()'>
+      <option value='player'>玩家</option>
+      <option value='union'>联盟/盟</option>
+      <option value='zone'>州</option>
+    </select>
+    <span style='color:var(--text2);font-size:.75rem'>指标:</span>
+    <select id='rnk-metric' onchange='loadRanking()'>
+      <option value='wuxun'>武勋</option>
+      <option value='battles'>出战次数</option>
+      <option value='power'>势力值</option>
+    </select>
+    <button class='btn btn-primary' onclick='loadRanking()'>🔄 刷新</button>
+  </div>
+  <div class='split2'>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3 id='rnk-title'>🏆 24小时玩家武勋榜</h3><span class='hdr-stat' id='rnk-count'></span></div>
+      <div class='tbl-scroll'>
+        <table><thead><tr>
+          <th style='width:42px'>名次</th>
+          <th>名称</th>
+          <th id='rnk-th-group'>联盟</th>
+          <th id='rnk-th-val'>武勋</th>
+          <th>出战</th>
+          <th>打城</th>
+          <th>胜率</th>
+        </tr></thead>
+        <tbody id='rnk-body'></tbody></table>
+      </div>
+    </div>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>📊 Top 15 榜单</h3></div>
+      <div style='padding:12px' id='rnk-bars'></div>
+    </div>
+  </div>
+</div>
+<!-- TAB 2: 武勋 -->
+<div class='page' id='tab2'>
+  <div class='filters'>
+    <select id='wx-period'><option value='24h'>24小时</option><option value='week'>本周</option><option value='season'>赛季</option></select>
+    <select id='wx-scope'><option value='player'>玩家</option><option value='union'>联盟</option></select>
+    <button class='btn btn-primary' onclick='loadWuxun()'>刷新</button>
+  </div>
+  <div class='split2'>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>⚔ 武勋排行</h3></div>
+      <div class='tbl-scroll'><table><thead><tr><th>#</th><th>名称</th><th>武勋</th><th>出战</th><th>打城</th><th>大城</th></tr></thead>
+      <tbody id='wx-body'></tbody></table></div>
+    </div>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>📊 武勋分布</h3></div>
+      <div class='tbl-scroll' id='wx-bars' style='padding:12px'></div>
+    </div>
+  </div>
+</div>
+<!-- TAB 3: 势力值 -->
+<div class='page' id='tab3'>
+  <div class='filters'>
+    <select id='pw-period'><option value='24h'>24小时</option><option value='week'>本周</option><option value='season'>赛季</option></select>
+    <select id='pw-scope'><option value='player'>玩家</option><option value='union'>联盟</option></select>
+    <button class='btn btn-primary' onclick='loadPower()'>刷新</button>
+  </div>
+  <div class='tbl-wrap'>
+    <div class='tbl-head'><h3>💎 势力值排行</h3></div>
+    <div class='tbl-scroll'><table><thead><tr><th>#</th><th>名称</th><th>最高势力</th><th>累计势力</th><th>出战</th></tr></thead>
+    <tbody id='pw-body'></tbody></table></div>
+  </div>
+</div>
+<!-- TAB 4: 打城考勤 -->
+<div class='page' id='tab4'>
+  <div class='filters'>
+    <select id='att-period'><option value='24h'>24小时</option><option value='week'>本周</option></select>
+    <input id='att-union' placeholder='联盟名过滤...' style='width:140px'/>
+    <button class='btn btn-primary' onclick='loadAttendance()'>刷新</button>
+  </div>
+  <div class='tbl-wrap'>
+    <div class='tbl-head'><h3>🏯 打城考勤统计</h3></div>
+    <div class='tbl-scroll'><table><thead><tr><th>#</th><th>玩家</th><th>联盟</th><th>总出战</th><th>打城</th><th>大城</th><th>野战</th><th>武勋</th><th>胜场</th></tr></thead>
+    <tbody id='att-body'></tbody></table></div>
+  </div>
+</div>
+<!-- TAB 5: 打城排表 -->
+<div class='page' id='tab5'>
+  <div class='filters'>
+    <input id='sch-session' placeholder='场次ID，如 20260311_01' style='width:180px'/>
+    <input id='sch-interval' placeholder='间隔分钟' style='width:80px' value='3'/>
+    <button class='btn btn-primary' onclick='generateSchedule()'>🗓 智能生成排表</button>
+    <button class='btn' onclick='loadSchedule()'>刷新</button>
+  </div>
+  <div class='tbl-wrap'>
+    <div class='tbl-head'><h3>📋 打城排表（3分钟一城）</h3></div>
+    <div class='tbl-scroll'><table><thead><tr><th>场次</th><th>序号</th><th>格子ID</th><th>格子编码</th><th>预计时间</th><th>分配队伍</th><th>备注</th></tr></thead>
+    <tbody id='sch-body'></tbody></table></div>
+  </div>
+</div>
+<!-- TAB 6: 战场分析 -->
+<div class='page' id='tab6'>
+  <div class='filters' style='display:flex;align-items:center;gap:10px;flex-wrap:wrap'>
+    <select id='ana-period'><option value='24h'>近24小时</option><option value='week'>本周</option><option value='all'>全部</option></select>
+    <button class='btn btn-primary' onclick='loadAnalysis()'>🔍 分析</button>
+    <span id='ana-update-time' style='color:var(--text2);font-size:.72rem;margin-left:auto'></span>
+  </div>
+  <!-- 核心数据卡片 -->
+  <div class='cards-row' style='margin-bottom:14px'>
+    <div class='stat-card'><div class='val' id='ana-c-total'>—</div><div class='lbl'>总战报</div></div>
+    <div class='stat-card'><div class='val' id='ana-c-wr' style='color:var(--green)'>—</div><div class='lbl'>攻方胜率</div></div>
+    <div class='stat-card'><div class='val' id='ana-c-night' style='color:var(--purple)'>—</div><div class='lbl'>夜战占比</div></div>
+    <div class='stat-card'><div class='val' id='ana-c-nwr' style='color:var(--cyan)'>—</div><div class='lbl'>夜战胜率</div></div>
+    <div class='stat-card'><div class='val' id='ana-c-unions'>—</div><div class='lbl'>参战联盟</div></div>
+    <div class='stat-card'><div class='val' id='ana-c-players'>—</div><div class='lbl'>参战玩家</div></div>
+  </div>
+  <!-- 第一行：24小时热力 + 夜战对比 -->
+  <div class='split2' style='margin-bottom:14px'>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>🕐 24小时活跃热力</h3></div>
+      <div id='ana-hour' style='padding:14px 16px'></div>
+    </div>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>🌙 夜战 vs 白天</h3></div>
+      <div id='ana-night' style='padding:14px 16px'></div>
+    </div>
+  </div>
+  <!-- 第三行：对战联盟 + 顶级玩家 -->
+  <div class='split2'>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>🏰 对阵联盟胜负</h3></div>
+      <div class='tbl-scroll'><table><thead><tr>
+        <th>联盟</th><th>对战</th><th>我胜</th><th>胜率</th><th>彼胜</th>
+      </tr></thead>
+      <tbody id='ana-union'></tbody></table></div>
+    </div>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>🏆 最活跃玩家</h3></div>
+      <div class='tbl-scroll'><table><thead><tr>
+        <th>#</th><th>玩家</th><th>联盟</th><th>出战</th><th>胜率</th><th>峰值战力</th>
+      </tr></thead>
+      <tbody id='ana-top'></tbody></table></div>
+    </div>
+  </div>
+</div>
+<!-- TAB 7: 玩家队伍 -->
+<div class='page' id='tab7'>
+  <!-- 玩家队伍统计面板 -->
+  <div class='tbl-wrap'>
+    <div class='tbl-head'>
+      <h3>👤 玩家队伍一览</h3>
+      <div class='tbl-controls' style='display:flex;gap:8px;align-items:center'>
+        <input id='pbt-player' placeholder='玩家名过滤...' style='width:130px'/>
+        <select id='pbt-side'>
+          <option value=''>攻守全部</option>
+          <option value='atk'>攻方</option>
+          <option value='def'>守方</option>
+        </select>
+        <button class='btn btn-primary' onclick='loadPlayerBattleTeams()'>查询</button>
+        <span id='pbt-count' style='color:var(--text2);font-size:.72rem'></span>
+      </div>
+    </div>
+    <div class='tbl-scroll'>
+      <table><thead><tr>
+        <th>#</th>
+        <th>玩家名</th>
+        <th style='color:var(--text2);font-size:.72rem'>同盟·团名</th>
+        <th>武将 · 进阶★ · 技能</th>
+        <th>总战数</th>
+        <th>胜场</th>
+        <th>胜率</th>
+      </tr></thead>
+      <tbody id='pbt-body'></tbody></table>
+    </div>
+  </div>
+</div>
+<!-- TAB 8: 自定义积分 -->
+<div class='page' id='tab8'>
+  <div class='filters'>
+    <input id='cs-union' placeholder='联盟过滤...' style='width:140px'/>
+    <button class='btn btn-primary' onclick='recalcScores()'>⚡ 重新计算积分</button>
+    <button class='btn' onclick='loadScores()'>刷新</button>
+  </div>
+  <div class='tbl-wrap'>
+    <div class='tbl-head'><h3>🎯 自定义积分榜</h3></div>
+    <div class='tbl-scroll'><table><thead><tr><th>#</th><th>玩家</th><th>联盟</th><th>积分</th><th>出战</th><th>胜场</th><th>武勋</th><th>打城</th></tr></thead>
+    <tbody id='cs-body'></tbody></table></div>
+  </div>
+</div>
+<!-- TAB 9: 数据同步 -->
+<div class='page' id='tab9'>
+  <div class='cards-row'>
+    <div class='stat-card'><div class='val' id='sync-battles'>0</div><div class='lbl'>战报</div></div>
+    <div class='stat-card'><div class='val' id='sync-dbsync'>0</div><div class='lbl'>DB同步</div></div>
+    <div class='stat-card'><div class='val' id='sync-notify'>0</div><div class='lbl'>通知</div></div>
+    <div class='stat-card'><div class='val' id='sync-err'>0</div><div class='lbl'>错误</div></div>
+  </div>
+  <div class='tbl-wrap'>
+    <div class='tbl-head'><h3>🗄 数据表同步详情</h3></div>
+    <div class='tbl-scroll'><table><thead><tr><th>表名</th><th>总操作</th><th>插入</th><th>更新</th><th>删除</th></tr></thead>
+    <tbody id='sync-body'></tbody></table></div>
+  </div>
+</div>
+<!-- TAB 10: 全部战报 -->
+<div class='page active' id='tab10'>
+  <div class='filters'>
+    <input id='ba-player' placeholder='玩家名...' style='width:120px'/>
+    <input id='ba-union' placeholder='联盟名...' style='width:120px'/>
+    <select id='ba-result'>
+      <option value=''>全部结果</option>
+      <option value='1'>攻方胜</option>
+      <option value='2'>守方胜</option>
+      <option value='3'>攻方溃</option>
+      <option value='5'>双溃</option>
+    </select>
+    <select id='ba-ftype'>
+      <option value=''>全部类型</option>
+      <option value='0'>野战</option>
+      <option value='33'>大城</option>
+      <option value='80'>攻城</option>
+    </select>
+    <select id='ba-period'>
+      <option value=''>全部时间</option>
+      <option value='24h'>24小时</option>
+      <option value='week'>本周</option>
+    </select>
+    <button class='btn btn-primary' onclick='loadBattlesAll(1)'>🔍 搜索</button>
+    <span class='hdr-stat' id='ba-total'></span>
+  </div>
+  <div class='tbl-wrap'>
+    <div class='tbl-head'><h3>📜 全部战报</h3>
+      <div class='tbl-controls' id='ba-pages'></div>
+    </div>
+    <div class='tbl-scroll'>
+      <table style='table-layout:fixed;width:100%'><thead><tr>
+        <th style='width:10%'>时间/类型</th>
+        <th style='width:9%'>攻方</th>
+        <th style='width:7%'>攻方武将</th>
+        <th style='width:17%;text-align:center'>结果</th>
+        <th style='width:17%'>守方武将</th>
+        <th style='width:9%'>守方</th>
+        <th style='width:8%;text-align:center'>详情</th>
+      </tr></thead>
+      <tbody id='ba-body'></tbody></table>
+    </div>
+  </div>
+</div>
+<!-- TAB 11: 队伍统计 -->
+<div class='page' id='tab11'>
+  <div class='filters'>
+    <input id='tm-player' placeholder='玩家名过滤...' style='width:150px'/>
+    <select id='tm-side'>
+      <option value=''>攻守双方</option>
+      <option value='atk'>攻方</option>
+      <option value='def'>守方</option>
+    </select>
+    <button class='btn btn-primary' onclick='loadTeamStats()'>🔍 查询</button>
+    <span class='hdr-stat' id='tm-total'></span>
+  </div>
+  <div class='tbl-wrap'>
+    <div class='tbl-head'><h3>👥 玩家队伍统计</h3></div>
+    <div class='tbl-scroll'>
+      <table><thead><tr>
+        <th>#</th><th>玩家</th><th>联盟</th><th>攻守</th><th>队伍组合</th><th>使用次数</th><th>胜场</th><th>胜率</th>
+      </tr></thead>
+      <tbody id='tm-body'></tbody></table>
+    </div>
+  </div>
+</div>
+<!-- TAB 12: 城池地图 -->
+<div class='page' id='tab12'>
+  <div class='cards-row' id='map-cards'></div>
+  <div class='split2'>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>🏯 城池列表</h3>
+        <div class='tbl-controls'>
+          <input id='map-filter' placeholder='搜索城池名...' style='width:130px' oninput='filterMapCities()'/>
+        </div>
+      </div>
+      <div class='tbl-scroll'>
+        <table><thead><tr>
+          <th>WID</th><th>坐标</th><th>类型</th><th>城池名</th><th>占领方</th><th>更新时间</th>
+        </tr></thead>
+        <tbody id='map-body'></tbody></table>
+      </div>
+    </div>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>📊 类型分布</h3></div>
+      <div style='padding:12px' id='map-type-bars'></div>
+    </div>
+  </div>
+</div>
+<!-- TAB 13: 玩家战绩 -->
+<div class='page' id='tab13'>
+  <div class='tbl-wrap'>
+    <div class='tbl-head'><h3>📋 玩家战绩库</h3>
+      <div class='tbl-controls'>
+        <input id='ps-filter' placeholder='搜索玩家名...' style='width:140px' oninput='filterPlayerStats()'/>
+        <span id='ps-count' style='color:var(--text2);font-size:.75rem'></span>
+      </div>
+    </div>
+    <div class='tbl-scroll'>
+      <table><thead><tr>
+        <th>玩家名</th><th>UID</th><th>城池</th><th>领地</th><th>最高兵力</th><th>最高势力</th><th>总武勋</th><th>本周武勋</th><th>击杀敌军</th><th>夺地</th><th>赛季</th><th>更新时间</th>
+      </tr></thead>
+      <tbody id='ps-body'></tbody></table>
+    </div>
+  </div>
+</div>
+<!-- TAB 14: 同盟成员 -->
+<div class='page' id='tab14'>
+  <div class='cards-row' id='team-cards'></div>
+  <div class='split2'>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>🏰 同盟成员列表</h3>
+        <div class='tbl-controls'>
+          <input id='tu-filter' placeholder='搜索玩家...' style='width:130px' oninput='filterTeamUsers()'/>
+          <span id='tu-count' style='color:var(--text2);font-size:.75rem'></span>
+        </div>
+      </div>
+      <div class='tbl-scroll'>
+        <table><thead><tr>
+          <th>玩家名</th><th>UID</th><th>职位</th><th>势力值</th><th>武勋</th><th>本周贡献</th><th>总贡献</th><th>分组</th><th>加入时间</th>
+        </tr></thead>
+        <tbody id='tu-body'></tbody></table>
+      </div>
+    </div>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>📊 武勋 TOP10</h3></div>
+      <div style='padding:12px' id='tu-top-bars'></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 15: 分组武勋 -->
+<div class='page' id='tab15'>
+  <div class='cards-row' id='gw-cards'></div>
+  <div class='tbl-wrap'>
+    <div class='tbl-head'><h3>⚔ 分组本周武勋</h3>
+      <div class='tbl-controls'>
+        <button class='btn btn-primary' onclick='loadGroupWu()'>刷新</button>
+        <span style='color:var(--text2);font-size:.72rem'>更新武勋请先同步成员数据</span>
+      </div>
+    </div>
+    <div class='tbl-scroll'>
+      <table><thead><tr>
+        <th>分组名称</th><th>人数</th><th>总武勋</th><th>平均武勋</th><th>0武勋人数</th><th>武勋分布</th>
+      </tr></thead>
+      <tbody id='gw-body'></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 16: 攻城考勤 -->
+<div class='page' id='tab16'>
+  <div class='cards-row' id='task-cards'></div>
+  <div style='display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:14px'>
+    <!-- 左上：任务列表 -->
+    <div class='tbl-wrap' style='grid-column:1;grid-row:1'>
+      <div class='tbl-head'><h3>📋 攻城任务列表</h3>
+        <div class='tbl-controls'>
+          <button class='btn btn-primary' onclick='loadTasks()'>刷新</button>
+          <button class='btn' onclick='showCreateTask()' style='border-color:var(--green);color:var(--green)'>+ 新建任务</button>
+          <span id='task-count' style='color:var(--text2);font-size:.72rem'></span>
+        </div>
+      </div>
+      <div class='tbl-scroll'>
+        <table><thead><tr>
+          <th>任务名</th><th>坐标</th><th>时间</th><th>目标组</th><th>目标</th><th>实到</th><th>操作</th>
+        </tr></thead>
+        <tbody id='task-body'></tbody></table>
+      </div>
+    </div>
+    <!-- 右：考勤详情（独占两行）-->
+    <div class='tbl-wrap' id='task-detail-panel' style='display:none;grid-column:2;grid-row:1/3'>
+      <div class='tbl-head'><h3 id='task-detail-title'>考勤详情</h3>
+        <div class='tbl-controls'>
+          <button class='btn' onclick='loadTaskBattles()' style='border-color:var(--cyan);color:var(--cyan)'>⚔️ 该城战报</button>
+          <button class='btn' onclick='exportTaskExcel()' style='border-color:var(--gold);color:var(--gold)'>导出CSV</button>
+          <button class='btn' onclick='closeTaskDetail()' style='border-color:var(--text2);color:var(--text2)'>关闭</button>
+        </div>
+      </div>
+      <div class='tbl-scroll'>
+        <table><thead><tr><th>名字</th><th>分组</th><th>主力次</th><th>拆迁次</th><th>主力队</th><th>拆迁队</th><th>状态</th></tr></thead>
+        <tbody id='task-detail-body'></tbody></table>
+      </div>
+    </div>
+    <!-- 左下：该城战报 -->
+    <div class='tbl-wrap' id='task-battles-wrap' style='display:none;grid-column:1;grid-row:2'>
+      <div class='tbl-head'><h3>⚔️ 该城战报（任务成员）</h3><span class='hdr-stat' id='task-battles-count'></span></div>
+      <div class='tbl-scroll'>
+        <table><thead><tr><th>时间</th><th>攻方</th><th>类型</th><th>结果</th><th>武将</th></tr></thead>
+        <tbody id='task-battles-body'></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 新建任务弹窗 -->
+<div id='create-task-modal' style='display:none;position:fixed;inset:0;background:#000a;z-index:200;align-items:center;justify-content:center;'>
+  <div style='background:var(--panel);border:1px solid var(--gold);border-radius:8px;width:640px;max-width:96vw;max-height:90vh;overflow-y:auto;padding:24px;position:relative'>
+    <button onclick='closeCreateTask()' style='position:absolute;top:10px;right:14px;background:none;border:none;color:var(--text2);font-size:1.2rem;cursor:pointer'>✕</button>
+    <h3 style='color:var(--gold);letter-spacing:.15em;margin-bottom:16px;font-size:.9rem'>新建攻城任务</h3>
+    <div style='display:grid;gap:12px'>
+      <div><label style='font-size:.75rem;color:var(--text2)'>任务名称</label>
+        <input id='ct-name' style='width:100%;margin-top:4px' placeholder='例如：内黄LV5'></div>
+      <div style='display:grid;grid-template-columns:1fr 1fr;gap:8px'>
+        <div><label style='font-size:.75rem;color:var(--text2)'>坐标 (WID或X,Y)</label>
+          <input id='ct-pos' style='width:100%;margin-top:4px' placeholder='例如：1570731 或 157,731' oninput='onCtPosInput()'></div>
+        <div><label style='font-size:.75rem;color:var(--text2)'>任务时间</label>
+          <input id='ct-time' type='datetime-local' style='width:100%;margin-top:4px'></div>
+      </div>
+      <!-- 成员选择模式切换 -->
+      <div style='border:1px solid var(--border);border-radius:6px;overflow:hidden'>
+        <div style='display:flex;border-bottom:1px solid var(--border)'>
+          <button id='ct-mode-group' onclick='switchCreateMode("group")' style='flex:1;padding:7px;font-size:.78rem;background:var(--cyan);color:#0a1420;border:none;cursor:pointer;font-weight:600'>👥 按分组选人</button>
+          <button id='ct-mode-nearby' onclick='switchCreateMode("nearby")' style='flex:1;padding:7px;font-size:.78rem;background:var(--panel2);color:var(--text2);border:none;cursor:pointer'>⚡ 智能分配（按距离）</button>
+        </div>
+        <!-- 按分组 -->
+        <div id='ct-panel-group' style='padding:12px'>
+          <label style='font-size:.75rem;color:var(--text2)'>目标分组（留空=全员）</label>
+          <div style='display:flex;gap:6px;margin-top:6px;flex-wrap:wrap' id='ct-group-tags'></div>
+          <input id='ct-groups' style='width:100%;margin-top:6px' placeholder='手动输入，用逗号分隔，例如：A组,B组'>
+          <span style='font-size:.68rem;color:var(--text2)'>点击上方标签快速选择，或手动输入</span>
+        </div>
+        <!-- 智能分配 -->
+        <div id='ct-panel-nearby' style='display:none;padding:12px'>
+          <div style='display:flex;align-items:center;gap:8px;margin-bottom:10px'>
+            <span style='font-size:.75rem;color:var(--text2)'>距城最近</span>
+            <input id='ct-nearby-limit' type='number' min='1' max='100' value='20' style='width:60px;font-size:.8rem'>
+            <span style='font-size:.72rem;color:var(--text2)'>人</span>
+            <button class='btn' style='font-size:.72rem;padding:2px 8px;border-color:var(--cyan);color:var(--cyan)' onclick='previewNearby()'>查询</button>
+            <span id='ct-nearby-status' style='font-size:.7rem;color:var(--text2)'></span>
+          </div>
+          <div id='ct-nearby-list' style='max-height:220px;overflow-y:auto'></div>
+        </div>
+      </div>
+      <div style='display:flex;gap:8px;margin-top:4px'>
+        <button class='btn btn-primary' onclick='createTask()'>创建任务</button>
+        <button class='btn' onclick='closeCreateTask()'>取消</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 统计确认弹窗 -->
+<div id='stats-confirm-modal' style='display:none;position:fixed;inset:0;background:#000b;z-index:300;align-items:center;justify-content:center;'>
+  <div style='background:var(--panel);border:1px solid var(--gold);border-radius:10px;width:400px;max-width:92vw;padding:28px 28px 22px;position:relative;box-shadow:0 8px 40px #0008'>
+    <div style='display:flex;align-items:center;gap:12px;margin-bottom:16px'>
+      <span style='font-size:1.6rem'>⚔️</span>
+      <div><h3 style='color:var(--gold);margin:0;font-size:.95rem;letter-spacing:.05em'>开始统计考勤</h3>
+        <p style='color:var(--text2);font-size:.78rem;margin:4px 0 0'>将统计该任务所有成员的出战情况</p></div>
+    </div>
+    <div id='stats-confirm-info' style='background:var(--panel2);border-radius:6px;padding:10px 14px;margin-bottom:18px;font-size:.8rem;color:var(--text2);line-height:1.7'></div>
+    <div style='display:flex;gap:10px;justify-content:flex-end'>
+      <button class='btn' onclick='closeStatsConfirm()' style='padding:6px 18px'>取消</button>
+      <button id='stats-confirm-btn' class='btn btn-primary' onclick='confirmDoStatistics()' style='padding:6px 18px;border-color:var(--gold);color:var(--gold)'>✅ 确认统计</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 17: 战场态势 -->
+<div class='page' id='tab17'>
+  <div class='cards-row' id='bf-cards'></div>
+  <!-- 子标签 -->
+  <div id='bf-subtabs' style='display:flex;gap:8px;margin-bottom:12px'>
+    <button class='btn btn-primary active' data-t='field'>🗡 战场态势 (000018aa)</button>
+    <button class='btn' data-t='queue'>📋 出征队列 (000018ae)</button>
+  </div>
+  <!-- 战场态势面板 -->
+  <div id='bf-panel-field'>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>🗡 攻城战场实时动态</h3>
+        <div class='tbl-controls'>
+          <button class='btn btn-primary' onclick='loadBattleField()'>刷新</button>
+          <span style='color:var(--text2);font-size:.72rem'>数据来自 000018aa</span>
+        </div>
+      </div>
+      <div class='tbl-scroll'>
+        <table><thead><tr>
+          <th>WID</th><th>坐标</th><th>城池</th><th>攻击者</th><th>附近人数</th><th>附近成员</th><th>更新时间</th>
+        </tr></thead>
+        <tbody id='bf-body'></tbody></table>
+      </div>
+    </div>
+  </div>
+  <!-- 出征队列面板 -->
+  <div id='bf-panel-queue' style='display:none'>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>📋 出征队列快照</h3>
+        <div class='tbl-controls'>
+          <button class='btn btn-primary' onclick='loadBattleField()'>刷新</button>
+          <span style='color:var(--text2);font-size:.72rem'>数据来自 000018ae · 按玩家聚合</span>
+        </div>
+      </div>
+      <div class='tbl-scroll'>
+        <table><thead><tr>
+          <th>玩家</th><th>身份</th><th>分组</th><th>出征队数</th><th>战力</th><th>槽位</th><th>上阵武将</th><th>目标城</th>
+        </tr></thead>
+        <tbody id='bq-body'></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 18: 联盟列表 -->
+<div class='page' id='tab18'>
+  <div class='cards-row' id='ul-cards'></div>
+  <div class='tbl-wrap'>
+    <div class='tbl-head'><h3>🏛 全区联盟列表</h3>
+      <div class='tbl-controls'>
+        <button class='btn btn-primary' onclick='loadUnionList()'>刷新</button>
+        <span style='color:var(--text2);font-size:.72rem'>数据来自 000002bc 联盟排行包</span>
+      </div>
+    </div>
+    <div class='tbl-scroll'>
+      <table><thead><tr>
+        <th>排名</th><th>联盟名</th><th>等级</th><th>势力值</th><th>人数</th><th>占城分</th><th>NPC城</th><th>区域</th><th>更新时间</th>
+      </tr></thead>
+      <tbody id='ul-body'></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 19: 游戏公告 -->
+<div class='page' id='tab19'>
+  <div class='tbl-wrap'>
+    <div class='tbl-head'><h3>📣 游戏公告</h3>
+      <div class='tbl-controls'>
+        <button class='btn btn-primary' onclick='loadAnnouncements()'>刷新</button>
+        <span style='color:var(--text2);font-size:.72rem'>数据来自 0000030c 公告包</span>
+      </div>
+    </div>
+    <div id='ann-list' style='padding:14px;display:flex;flex-direction:column;gap:12px'></div>
+  </div>
+</div>
+
+<!-- TAB 20: 战区玩家 -->
+<div class='page' id='tab20'>
+  <div class='cards-row' id='zp-cards'></div>
+  <div class='split2'>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>🌏 战区玩家</h3>
+        <div class='tbl-controls'>
+          <input id='zp-name' placeholder='搜索玩家名...' style='width:130px' oninput='filterZonePlayers()'/>
+          <span id='zp-count' style='color:var(--text2);font-size:.72rem'></span>
+        </div>
+      </div>
+      <div class='tbl-scroll'>
+        <table><thead><tr>
+          <th>#</th><th>玩家名</th><th>势力值</th><th>联盟</th><th>WID</th><th>最后活跃</th>
+        </tr></thead>
+        <tbody id='zp-body'></tbody></table>
+      </div>
+    </div>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>📊 联盟势力分布</h3></div>
+      <div style='padding:12px' id='zp-union-bars'></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 21: 战场消息 -->
+<div class='page' id='tab21'>
+  <div class='cards-row'>
+    <div class='stat-card'><div class='val' id='msg-chat-count'>0</div><div class='lbl'>聊天消息</div></div>
+  </div>
+  <div class='tbl-wrap'>
+    <div class='tbl-head'>
+      <h3>💬 战场聊天消息</h3>
+      <div class='tbl-controls'>
+        <button class='btn btn-primary' onclick='loadMsgHistory()'>加载历史</button>
+        <input id='msg-search' placeholder='搜索...' style='width:150px' oninput='renderMsgList()'/>
+        <button onclick='clearMsgList()' style='font-size:.72rem;padding:3px 8px;background:var(--panel2);border:1px solid var(--border);color:var(--text2);border-radius:3px;cursor:pointer;'>清空</button>
+      </div>
+    </div>
+    <div class='tbl-scroll' style='max-height:600px'>
+      <table><thead><tr>
+        <th>时间</th><th>类型</th><th>发送者</th><th>同盟</th><th style='min-width:300px'>内容</th>
+      </tr></thead>
+      <tbody id='msg-body'></tbody></table>
+    </div>
+  </div>
+</div>
+
+<div id='toast'></div>
+
+<!-- TAB 23: 团数据 -->
+<div class='page' id='tab23'>
+  <!-- 时间筛选栏 -->
+  <div style='display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap'>
+    <button class='btn btn-primary' onclick='loadTeamReport("today")'   id='tr-btn-today'   >今日</button>
+    <button class='btn'            onclick='loadTeamReport("yesterday")' id='tr-btn-yesterday'>昨日</button>
+    <button class='btn'            onclick='loadTeamReport("week")'    id='tr-btn-week'    >本周</button>
+    <button class='btn'            onclick='loadTeamReport("lastweek")' id='tr-btn-lastweek'>上周</button>
+    <button class='btn'            onclick='loadTeamReport("all")'     id='tr-btn-all'     >全部</button>
+    <span style='color:var(--border)'>|</span>
+    <select id='tr-dim' onchange='_trPeriod&&loadTeamReport(_trPeriod)' style='background:var(--panel2);color:var(--text);border:1px solid var(--border);padding:4px 8px;border-radius:4px'>
+      <option value='group'>按分组</option>
+      <option value='player'>按成员</option>
+    </select>
+    <select id='tr-group' onchange='_trPeriod&&loadTeamReport(_trPeriod)' style='background:var(--panel2);color:var(--text);border:1px solid var(--border);padding:4px 8px;border-radius:4px'>
+      <option value=''>全部分组</option>
+    </select>
+    <span id='tr-update-time' style='color:var(--text2);font-size:.72rem;margin-left:auto'></span>
+  </div>
+  <!-- 汇总卡片 -->
+  <div class='cards-row' id='tr-cards'></div>
+  <!-- 数据表 -->
+  <div class='tbl-wrap'>
+    <div class='tbl-head'>
+      <h3 id='tr-table-title'>📊 分组战斗数据</h3>
+      <div class='tbl-controls'>
+        <button class='btn' onclick='exportTeamReportCSV()'>📥 导出CSV</button>
+      </div>
+    </div>
+    <div class='tbl-scroll'>
+      <table>
+        <thead id='tr-thead'></thead>
+        <tbody id='tr-body'></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 22: 武将阵容胜率 -->
+<div class='page' id='tab22'>
+  <div class='cards-row' id='combo-cards'></div>
+  <div style='display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap'>
+    <label style='color:var(--text2);font-size:.8rem'>最少出战次数：</label>
+    <input id='combo-min' type='number' min='1' value='3' style='background:var(--panel2);color:var(--text);border:1px solid var(--border);padding:4px 8px;border-radius:4px;width:70px;text-align:center'>
+    <button class='btn btn-primary' onclick='loadHeroCombo()'>🔍 统计</button>
+    <span style='color:var(--text2);font-size:.72rem'>基于战报武将出战记录实时计算</span>
+  </div>
+  <div class='tbl-wrap'>
+    <div class='tbl-head'><h3>⚔ 三人组合胜率排行</h3></div>
+    <div class='tbl-scroll'>
+      <table><thead><tr>
+        <th>#</th><th>武将组合</th><th>出战</th><th>胜</th><th>败</th><th>平</th><th>胜率</th><th>胜率条</th>
+      </tr></thead>
+      <tbody id='combo-body'></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- 战报详情弹窗 -->
+<div id='modal-overlay' style='display:none;position:fixed;inset:0;background:#000a;z-index:100;align-items:center;justify-content:center;'>
+  <div id='modal-box' style='background:var(--panel);border:1px solid var(--gold);border-radius:8px;width:560px;max-width:95vw;max-height:85vh;overflow-y:auto;padding:20px;position:relative;box-shadow:0 0 40px #c8a04430;'>
+    <button onclick='closeModal()' style='position:absolute;top:10px;right:14px;background:none;border:none;color:var(--text2);font-size:1.2rem;cursor:pointer;'>✕</button>
+    <h3 id='modal-title' style='color:var(--gold);letter-spacing:.15em;margin-bottom:14px;font-size:.9rem;'>战报详情</h3>
+    <div id='modal-body'></div>
+  </div>
+</div>
+<!-- TAB 24: 战斗模拟 -->
+<div class='page' id='tab24'>
+
+<!-- ===== 游戏风格战斗模拟器 ===== -->
+<div id="stzb-sim" style="
+  width:100%;min-height:60vh;
+  background:linear-gradient(160deg,#08080e 0%,#0e1018 40%,#0a1210 100%);
+  position:relative;overflow:hidden;
+  font-family:'SimSun','宋体',serif;
+">
+
+<!-- 背景纹理 -->
+<div style="position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(ellipse 80% 60% at 50% 0%,#1a2a1a22 0%,transparent 70%),
+  repeating-linear-gradient(0deg,transparent,transparent 39px,#ffffff05 39px,#ffffff05 40px),
+  repeating-linear-gradient(90deg,transparent,transparent 39px,#ffffff05 39px,#ffffff05 40px);"></div>
+
+<!-- 顶部血条 header -->
+<div style="position:relative;display:flex;align-items:stretch;justify-content:space-between;
+  padding:10px 18px 0;gap:10px;">
+
+  <!-- 攻方 -->
+  <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+    <div style="color:#e4dd9e;font-size:.78rem;letter-spacing:.1em">攻方队伍</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="flex:1;height:8px;background:#000;border-radius:2px;overflow:hidden;position:relative">
+        <div id="sim-blue-hpbar-hurt" style="position:absolute;height:100%;width:100%;background:#598ed770;transition:width .6s"></div>
+        <div id="sim-blue-hpbar" style="position:absolute;height:100%;width:100%;
+          background:linear-gradient(90deg,#3a6eb0,#5aaaf0);transition:width .6s"></div>
+      </div>
+      <span id="sim-blue-hp-text" style="font-size:.68rem;color:#aac8f0;white-space:nowrap;font-family:monospace"></span>
+    </div>
+    <div style="color:#fff;font-size:.7rem;opacity:.6">攻方 | 战斗模拟</div>
+  </div>
+
+  <!-- 中间VS -->
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 14px;gap:3px">
+    <div style="color:#e4dd9e;font-size:1.1rem;font-weight:700;letter-spacing:.2em;text-shadow:0 0 12px #c8a04460">VS</div>
+    <div style="display:flex;gap:6px;margin-top:4px">
+      <button onclick="runSimulate(1)" id="sim-btn-single"
+        style="background:linear-gradient(135deg,#c8a044,#a07830);border:none;color:#1a1200;font-weight:700;
+               font-size:.75rem;padding:5px 14px;border-radius:4px;cursor:pointer;font-family:inherit;
+               letter-spacing:.1em;box-shadow:0 2px 8px #c8a04440">
+        开始战斗
+      </button>
+      <button onclick="runSimulate(100)" id="sim-btn-100"
+        style="background:#1a2030;border:1px solid #4a6090;color:#8ab0d0;
+               font-size:.72rem;padding:5px 10px;border-radius:4px;cursor:pointer;font-family:inherit">
+        x100
+      </button>
+      <button onclick="runSimulate(1000)" id="sim-btn-1000"
+        style="background:#1a2030;border:1px solid #4a6090;color:#8ab0d0;
+               font-size:.72rem;padding:5px 10px;border-radius:4px;cursor:pointer;font-family:inherit">
+        x1000
+      </button>
+    </div>
+    <span id="sim-status" style="font-size:.65rem;color:#46b06e;margin-top:2px"></span>
+  </div>
+
+  <!-- 守方 -->
+  <div style="flex:1;display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+    <div style="color:#e4dd9e;font-size:.78rem;letter-spacing:.1em">守方队伍</div>
+    <div style="display:flex;align-items:center;gap:8px;width:100%">
+      <span id="sim-red-hp-text" style="font-size:.68rem;color:#f0a0a0;white-space:nowrap;font-family:monospace"></span>
+      <div style="flex:1;height:8px;background:#000;border-radius:2px;overflow:hidden;position:relative">
+        <div id="sim-red-hpbar-hurt" style="position:absolute;height:100%;right:0;width:100%;background:#d04040a0;transition:width .6s"></div>
+        <div id="sim-red-hpbar" style="position:absolute;height:100%;right:0;width:100%;
+          background:linear-gradient(270deg,#b03030,#e05050);transition:width .6s"></div>
+      </div>
+    </div>
+    <div style="color:#fff;font-size:.7rem;opacity:.6">守方 | 战斗模拟</div>
+  </div>
+
+</div>
+
+<!-- 士气行 -->
+<div style="display:flex;justify-content:space-between;padding:6px 18px;">
+  <div style="display:flex;align-items:center;gap:6px">
+    <span style="font-size:.65rem;color:#8ab0d0">士气</span>
+    <input id="sim-blue-morale" type="number" value="100" min="0" max="200"
+      style="width:52px;font-size:.72rem;background:#0d1520;border:1px solid #2a4060;
+             color:#aac8f0;padding:2px 6px;border-radius:3px;text-align:center">
+    <button onclick="simAddHero('blue')"
+      style="background:none;border:1px solid #4a8fe0;color:#4a8fe0;font-size:.65rem;
+             padding:2px 8px;border-radius:3px;cursor:pointer;font-family:inherit">+ 武将</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px">
+    <button onclick="simAddHero('red')"
+      style="background:none;border:1px solid #e05050;color:#e05050;font-size:.65rem;
+             padding:2px 8px;border-radius:3px;cursor:pointer;font-family:inherit">+ 武将</button>
+    <span style="font-size:.65rem;color:#f0a0a0">士气</span>
+    <input id="sim-red-morale" type="number" value="100" min="0" max="200"
+      style="width:52px;font-size:.72rem;background:#200d0d;border:1px solid #602a2a;
+             color:#f0a0a0;padding:2px 6px;border-radius:3px;text-align:center">
+  </div>
+</div>
+
+<!-- 卡牌区 -->
+<div style="display:flex;justify-content:space-between;padding:0 12px 12px;gap:10px">
+
+  <!-- 攻方卡牌 -->
+  <div id="sim-blue-heroes" style="flex:1;display:flex;gap:8px;justify-content:flex-end"></div>
+
+  <!-- 中间间距 -->
+  <div style="width:80px;flex-shrink:0"></div>
+
+  <!-- 守方卡牌 -->
+  <div id="sim-red-heroes" style="flex:1;display:flex;gap:8px;justify-content:flex-start"></div>
+
+</div>
+
+<!-- 结果区 -->
+<div id="sim-stat-box" style="display:none;margin:0 12px 12px;
+  background:#00000040;border:1px solid #2a3a2a;border-radius:6px;padding:12px">
+  <div class="cards-row" id="sim-stat-cards"></div>
+</div>
+
+<!-- 战斗日志 -->
+<div id="sim-log-box" style="display:none;margin:0 12px 12px">
+  <div style="display:flex;align-items:center;justify-content:space-between;
+    padding:6px 12px;background:#00000060;border-top:1px solid #e4dd9e30;">
+    <span style="color:#e4dd9e;font-size:.78rem;letter-spacing:.1em">战斗记录</span>
+    <button onclick="simToggleLog()" id="sim-log-toggle"
+      style="background:none;border:1px solid #3a4a5a;color:#7a8a9a;
+             font-size:.68rem;padding:2px 10px;border-radius:3px;cursor:pointer">收起</button>
+  </div>
+  <div id="sim-log-content"
+    style="padding:8px 14px;font-family:monospace;font-size:.7rem;line-height:2;
+           max-height:420px;overflow-y:auto;background:#06080c;
+           scrollbar-width:thin;scrollbar-color:#2a3a4a transparent"></div>
+</div>
+
+</div><!-- /stzb-sim -->
+
+</div>
+</div>
+
+<script src="/static/hero_data.js"></script><script src="/static/herocfg.js"></script><script src="/static/app1.js"></script><script src="/static/app2.js"></script><script src="/static/sim.js?v=4"></script>
+<a class='github-banner' href='https://github.com/GRQ02200059/stzb_watcher' target='_blank' title='源码地址，欢迎 Star'>
+  <svg width='15' height='15' viewBox='0 0 16 16' fill='currentColor'><path d='M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z'/></svg>
+  源码开源 · GitHub
+  <span class='gb-star'>★</span>
+  求 Star
+</a>
+</body></html>

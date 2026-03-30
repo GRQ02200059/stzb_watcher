@@ -1,0 +1,46 @@
+html,
+body {
+	padding: 0;
+	margin: 0;
+	background-color: black;
+	height: 100vh;
+}
+
+@font-face {
+	font-family: "FZLanTingHei_L_GBK";
+	src: url(/assets/FZLanTingHei_L_GBK.TTF);
+}
+
+@font-face {
+	font-family: "FZLBJW";
+	src: url(/assets/FZLBJW.ttf);
+}
+
+@font-face {
+	font-family: "FZLBJW_B";
+	src: url(/assets/FZLBJW_B.ttf);
+}
+
+#app{
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+    justify-content: center;
+	background-image: url(/assets/ui/bg.png);
+	background-position: right;
+	background-size: cover;
+	background-repeat: no-repeat;
+	overflow: hidden auto;
+	font-family: "FZLanTingHei_L_GBK";
+	user-select: none;
+}
+
+#app::-webkit-scrollbar{
+	display: none;
+}
+
+.gray{
+	filter: grayscale(100%);
+}

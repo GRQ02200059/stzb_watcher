@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>数据加载测试</title></head>
+<body style="background:#111;color:#ccc;font-family:monospace;padding:20px">
+<h2 style="color:#c9a84c">数据加载诊断</h2>
+<pre id="log"></pre>
+<script>
+function log(msg, color) {
+  const el = document.getElementById('log');
+  el.innerHTML += `<span style="color:${color||'#ccc'}">${msg}</span>\n`;
+  console.log(msg);
+}
+
+async function test() {
+  // 1. 测试目录列表
+  log('=== 测试目录访问 ===', '#c9a84c');
+  const dirs = [
+    '../decompressed_data_report/000002bc/',
+    '../decompressed_data_report/0000000a/',
+    '../capture_new/000002bc/',
+    '../capture_new/0000000a/',
+  ];
+  for (const dir of dirs) {
+    try {
+      const r = await fetch(dir);
+      const html = await r.text();
+      const files = [...html.matchAll(/href="(decompressed_[^"]+\.json)"/g)].map(m => m[1]);
+      log(`[${r.status}] ${dir} -> ${files.length} 个文件`, files.length > 0 ? '#2ecc71' : '#e74c3c');
+      if (files.length > 0) {
+        log(`  第一个文件: ${files[0]}`, '#888');
+        // 2. 测试读取第一个文件
+        const fileUrl = dir + files[0];
+        const r2 = await fetch(fileUrl);
+        const data = await r2.json();
+        log(`  文件内容类型: ${Array.isArray(data) ? 'Array len='+data.length : typeof data}`, '#888');
+        if (Array.isArray(data) && data[4]) {
+          const arr = data[4];
+          log(`  data[4] 类型: ${Array.isArray(arr) ? 'Array len='+arr.length : typeof arr}`, '#2ecc71');
+        }
+      }
+    } catch(e) {
+      log(`[ERR] ${dir}: ${e.message}`, '#e74c3c');
+    }
+  }
+
+  // 3. 测试战报目录
+  log('\n=== 测试战报数据 ===', '#c9a84c');
+  for (const dir of ['../decompressed_data_report/0000000a/', '../capture_new/0000000a/']) {
+    try {
+      const r = await fetch(dir);
+      const html = await r.text();
+      const files = [...html.matchAll(/href="(decompressed_[^"]+\.json)"/g)].map(m => m[1]);
+      log(`[${r.status}] ${dir} -> ${files.length} 个文件`, files.length > 0 ? '#2ecc71' : '#e74c3c');
+      for (const f of files.slice(0, 2)) {
+        const r2 = await fetch(dir + f);
+        const data = await r2.json();
+        log(`  ${f}: type=${Array.isArray(data)?'Array len='+data.length:typeof data}`, '#888');
+        if (Array.isArray(data)) {
+          // 找battle_id
+          let found = false;
+          for (const item of data) {
+            if (item && item.battle_id) { log(`  -> battle_id=${item.battle_id}`, '#2ecc71'); found=true; break; }
+            if (Array.isArray(item)) {
+              for (const sub of item) {
+                if (sub && sub.battle_id) { log(`  -> [nested] battle_id=${sub.battle_id}`, '#2ecc71'); found=true; break; }
+              }
+              if (found) break;
+            }
+          }
+          if (!found) log(`  -> 未找到battle_id，data[0]类型: ${typeof data[0]}`, '#e67e22');
+        }
+      }
+    } catch(e) {
+      log(`[ERR] ${dir}: ${e.message}`, '#e74c3c');
+    }
+  }
+}
+
+test();
+</script>
+</body></html>
+

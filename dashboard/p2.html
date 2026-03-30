@@ -1,0 +1,185 @@
+<header>
+  <div class="logo">
+    <div class="logo-hex">&#9876;</div>
+    <div>
+      <div class="logo-t">战情指挥台</div>
+      <div class="logo-s">RATE OF THREE KINGDOMS &middot; INTEL DASHBOARD</div>
+    </div>
+  </div>
+  <div class="hdr-center">
+    <div class="hdr-stat"><div class="hdr-stat-v" id="hc-unions">--</div><div class="hdr-stat-l">联盟总数</div></div>
+    <div class="hdr-divider"></div>
+    <div class="hdr-stat"><div class="hdr-stat-v" id="hc-battles">--</div><div class="hdr-stat-l">战报数量</div></div>
+    <div class="hdr-divider"></div>
+    <div class="hdr-stat"><div class="hdr-stat-v" id="hc-players">--</div><div class="hdr-stat-l">独立玩家</div></div>
+  </div>
+  <div class="hdr-r">
+    <div class="live-badge"><div class="dot"></div>REALTIME</div>
+    <div id="clock"></div>
+    <span id="load-status">尚未加载</span>
+    <button class="btn" onclick="loadAll()">刷新数据</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('union',this)">联盟排行</div>
+  <div class="tab" onclick="switchTab('battle',this)">战报列表</div>
+  <div class="tab" onclick="switchTab('battlestats',this)">战报统计</div>
+  <div class="tab" onclick="switchTab('player',this)">玩家统计</div>
+  <div class="tab" onclick="switchTab('overview',this)">态势总览</div>
+</div>
+
+<div class="main">
+
+<!-- 联盟排行 -->
+<div class="page active" id="page-union">
+  <div class="stat-row">
+    <div class="scard" style="animation-delay:.05s"><div class="lbl">联盟总数</div><div class="val" id="s-total">--</div><div class="sub">本服在册联盟</div><div class="corner"></div></div>
+    <div class="scard" style="animation-delay:.10s"><div class="lbl">最高战力</div><div class="val" id="s-maxpow">--</div><div class="sub" id="s-maxname">--</div><div class="corner"></div></div>
+    <div class="scard" style="animation-delay:.15s"><div class="lbl">最多成员</div><div class="val" id="s-maxmem">--</div><div class="sub" id="s-maxmemname">--</div><div class="corner"></div></div>
+    <div class="scard" style="animation-delay:.20s"><div class="lbl">最高等级</div><div class="val" id="s-maxlv">--</div><div class="sub" id="s-maxlvname">--</div><div class="corner"></div></div>
+  </div>
+  <div class="pgrid pgrid3">
+    <div class="panel" style="animation-delay:.25s">
+      <div class="ph"><div class="pt">联盟战力排行榜</div><span class="pb" id="union-ts">--</span></div>
+      <div class="pbody" style="padding:0">
+        <table class="rtbl"><thead><tr>
+          <th style="padding-left:18px;width:54px">排名</th><th>联盟名称</th><th>等级</th><th>战力</th><th>成员</th><th>区域</th>
+        </tr></thead><tbody id="union-tbody"></tbody></table>
+      </div>
+    </div>
+    <div class="panel" style="animation-delay:.30s">
+      <div class="ph"><div class="pt">战力分布图</div><span class="pb">TOP 20</span></div>
+      <div class="chart-w" id="union-chart"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 战报分析 -->
+<div class="page" id="page-battle">
+  <div class="stat-row">
+    <div class="scard" style="animation-delay:.05s"><div class="lbl">战报总数</div><div class="val" id="b-total">--</div><div class="sub">已解析战报</div><div class="corner"></div></div>
+    <div class="scard" style="animation-delay:.10s"><div class="lbl">攻方胜率</div><div class="val" id="b-atkwin">--</div><div class="sub">攻击方胜利比例</div><div class="corner"></div></div>
+    <div class="scard" style="animation-delay:.15s"><div class="lbl">独立玩家</div><div class="val" id="b-players">--</div><div class="sub">出现过的玩家数</div><div class="corner"></div></div>
+    <div class="scard" style="animation-delay:.20s"><div class="lbl">参战联盟</div><div class="val" id="b-unions">--</div><div class="sub">参战联盟数</div><div class="corner"></div></div>
+  </div>
+  <div class="pgrid pgrid2">
+    <div class="panel" style="animation-delay:.25s">
+      <div class="ph"><div class="pt">战报列表</div><span class="pb" id="b-ts">--</span></div>
+      <div class="pbody"><div class="blist" id="battle-list"></div></div>
+    </div>
+    <div class="panel" style="animation-delay:.30s">
+      <div class="ph"><div class="pt">胜负分析</div></div>
+      <div class="pbody">
+        <div id="winlose-chart"></div>
+        <div class="deco-line"></div>
+        <div class="ph" style="border:none;padding:0 0 12px;background:none"><div class="pt">高频武将出场榜</div></div>
+        <div id="hero-freq"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 态势总览 -->
+<div class="page" id="page-overview">
+  <div class="stat-row">
+    <div class="scard" style="animation-delay:.05s"><div class="lbl">消息类型</div><div class="val" id="o-types">--</div><div class="sub">已识别协议类型</div><div class="corner"></div></div>
+    <div class="scard" style="animation-delay:.10s"><div class="lbl">数据文件</div><div class="val" id="o-files">--</div><div class="sub">已解压JSON文件</div><div class="corner"></div></div>
+    <div class="scard" style="animation-delay:.15s"><div class="lbl">目标服务器</div><div class="val" style="font-size:14px">45.253</div><div class="sub">45.253.141.10:8001 TCP</div><div class="corner"></div></div>
+    <div class="scard" style="animation-delay:.20s"><div class="lbl">抓包状态</div><div class="val" style="color:var(--win);font-size:18px">运行中</div><div class="sub">scrapy.py 监听中</div><div class="corner"></div></div>
+  </div>
+  <div class="pgrid pgrid2">
+    <div class="panel" style="animation-delay:.25s">
+      <div class="ph"><div class="pt">消息类型分布</div></div>
+      <div class="pbody" id="type-chart"></div>
+    </div>
+    <div class="panel" style="animation-delay:.30s">
+      <div class="ph"><div class="pt">消息类型说明</div></div>
+      <div class="pbody" style="padding:0">
+        <table class="rtbl"><thead><tr><th style="padding-left:18px">类型ID</th><th>含义</th><th>优先级</th></tr></thead>
+        <tbody id="type-tbody"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 战报统计 -->
+<div class="page" id="page-battlestats">
+  <div class="stat-row">
+    <div class="scard" style="animation-delay:.05s"><div class="lbl">总战报数</div><div class="val" id="bs-total">--</div><div class="sub">已解析战报</div><div class="corner"></div></div>
+    <div class="scard" style="animation-delay:.10s"><div class="lbl">攻方胜率</div><div class="val" id="bs-atkwin">--</div><div class="sub">攻击方胜利占比</div><div class="corner"></div></div>
+    <div class="scard" style="animation-delay:.15s"><div class="lbl">最热武将</div><div class="val" style="font-size:16px" id="bs-tophero">--</div><div class="sub" id="bs-tophero-sub">--</div><div class="corner"></div></div>
+    <div class="scard" style="animation-delay:.20s"><div class="lbl">最强组合</div><div class="val" style="font-size:11px;line-height:1.4" id="bs-topcombo">--</div><div class="sub">出场最多的武将组合</div><div class="corner"></div></div>
+  </div>
+  <div class="pgrid pgrid2">
+    <div class="panel" style="animation-delay:.25s">
+      <div class="ph"><div class="pt">武将出场频次 TOP 30</div><span class="pb" id="bs-hero-ts">--</span></div>
+      <div class="pbody" id="bs-hero-chart"></div>
+    </div>
+    <div class="panel" style="animation-delay:.30s">
+      <div class="ph"><div class="pt">战斗结果分布</div></div>
+      <div class="pbody" id="bs-result-chart"></div>
+      <div class="deco-line" style="margin:0 18px"></div>
+      <div class="ph" style="border:none;background:none;padding:14px 18px 8px"><div class="pt">攻方武将组合 TOP 10</div></div>
+      <div class="pbody" id="bs-combo-chart"></div>
+    </div>
+  </div>
+  <div class="pgrid pgrid2" style="margin-top:20px">
+    <div class="panel" style="animation-delay:.35s">
+      <div class="ph"><div class="pt">联盟战绩排行</div></div>
+      <div class="pbody" style="padding:0">
+        <table class="rtbl"><thead><tr><th style="padding-left:18px">联盟</th><th>总战斗</th><th>胜利</th><th>胜率</th></tr></thead>
+        <tbody id="bs-union-tbody"></tbody></table>
+      </div>
+    </div>
+    <div class="panel" style="animation-delay:.40s">
+      <div class="ph"><div class="pt">城池类型分布</div></div>
+      <div class="pbody" id="bs-city-chart"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 玩家统计 -->
+<div class="page" id="page-player">
+  <div class="stat-row">
+    <div class="scard" style="animation-delay:.05s"><div class="lbl">玩家总数</div><div class="val" id="p-total">--</div><div class="sub">参战玩家数</div><div class="corner"></div></div>
+    <div class="scard" style="animation-delay:.10s"><div class="lbl">最强玩家</div><div class="val" style="font-size:16px" id="p-top">--</div><div class="sub" id="p-top-sub">--</div><div class="corner"></div></div>
+    <div class="scard" style="animation-delay:.15s"><div class="lbl">平均胜率</div><div class="val" id="p-avgwin">--</div><div class="sub">全服玩家均值</div><div class="corner"></div></div>
+    <div class="scard" style="animation-delay:.20s"><div class="lbl">最热武将</div><div class="val" style="font-size:16px" id="p-top-hero">--</div><div class="sub">出场频次最高</div><div class="corner"></div></div>
+  </div>
+  <div class="pgrid pgrid3">
+    <div class="panel" style="animation-delay:.25s">
+      <div class="ph"><div class="pt">玩家战绩排行</div><span class="pb" id="p-ts">--</span></div>
+      <div class="pbody" style="padding:0">
+        <table class="rtbl"><thead><tr>
+          <th style="padding-left:18px;width:54px">排名</th>
+          <th>玩家</th>
+          <th>联盟</th>
+          <th>战斗</th>
+          <th>胜率</th>
+          <th>常用武将</th>
+        </tr></thead><tbody id="player-tbody"></tbody></table>
+      </div>
+    </div>
+    <div class="panel" style="animation-delay:.30s">
+      <div class="ph"><div class="pt">武将出场统计</div></div>
+      <div class="pbody" id="player-hero-chart"></div>
+      <div class="deco-line" style="margin:0 18px"></div>
+      <div class="ph" style="border:none;background:none;padding:14px 18px 8px"><div class="pt">联盟玩家数分布</div></div>
+      <div class="pbody" id="player-union-chart"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end main -->
+
+<!-- 战报详情弹窗 -->
+<div class="overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-h">
+      <div class="modal-t" id="modal-title">战报详情</div>
+      <button class="close-btn" onclick="closeModal()">&#x2715;</button>
+    </div>
+    <div class="modal-b" id="modal-body"></div>
+  </div>
+</div>

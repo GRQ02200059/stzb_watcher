@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>率土战报分析系统</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --bg:       #0d0f14;
+  --bg2:      #13161e;
+  --bg3:      #1a1e2a;
+  --border:   #2a2f42;
+  --gold:     #c8a96e;
+  --gold2:    #f0d080;
+  --red:      #e05c5c;
+  --blue:     #5c9ee0;
+  --green:    #5cc87e;
+  --text:     #d4c9b0;
+  --text2:    #8a8070;
+  --accent:   #c8a96e;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { height:100%; background:var(--bg); color:var(--text); font-family:'Noto Serif SC',serif; }
+
+/* ===== 顶部 ===== */
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 28px; height:56px;
+  background:linear-gradient(90deg,#0d0f14,#1a1626);
+  border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:100;
+}
+.logo { font-size:18px; font-weight:700; letter-spacing:4px; color:var(--gold); text-shadow:0 0 20px #c8a96e55; }
+.logo span { color:var(--text2); font-size:12px; font-weight:400; margin-left:12px; letter-spacing:1px; }
+.nav { display:flex; gap:4px; }
+.nav-btn {
+  padding:6px 16px; border:none; background:transparent; color:var(--text2);
+  cursor:pointer; font-family:inherit; font-size:13px; border-radius:4px;
+  transition:all .2s; letter-spacing:1px;
+}
+.nav-btn:hover,.nav-btn.active { background:var(--bg3); color:var(--gold); }
+.status-dot { width:8px;height:8px;border-radius:50%;background:#5cc87e;box-shadow:0 0 8px #5cc87e; }
+.status-info { display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2); }
+
+/* ===== 主体布局 ===== */
+.main { padding:24px 28px; max-width:1600px; margin:0 auto; }
+.page { display:none; }
+.page.active { display:block; }
+
+/* ===== 卡片 ===== */
+.card {
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:20px;
+  position:relative;
+  overflow:hidden;
+}
+.card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:.4;
+}
+.card-title {
+  font-size:12px; letter-spacing:3px; color:var(--text2);
+  text-transform:uppercase; margin-bottom:16px;
+  display:flex; align-items:center; gap:8px;
+}
+.card-title::before { content:''; display:inline-block; width:3px;height:14px;background:var(--gold);border-radius:2px; }
+
+/* ===== 统计数字 ===== */
+.stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:16px; margin-bottom:24px; }
+.stat-card {
+  background:var(--bg2); border:1px solid var(--border); border-radius:8px;
+  padding:20px 24px; position:relative; overflow:hidden;
+}
+.stat-card::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold)40,transparent);
+}
+.stat-num { font-size:36px; font-weight:700; font-family:'JetBrains Mono',monospace; color:var(--gold2); line-height:1; }
+.stat-label { font-size:11px; color:var(--text2); letter-spacing:2px; margin-top:6px; }
+.stat-sub { font-size:11px; color:var(--text2); margin-top:4px; }
+
+/* ===== 图表区 ===== */
+.chart-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
+.chart-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:24px; }
+.chart-box { height:300px; }
+.chart-box-lg { height:380px; }
+
+/* ===== 表格 ===== */
+.tbl-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { background:var(--bg3); color:var(--text2); font-weight:600; font-size:11px;
+     letter-spacing:2px; padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); }
+td { padding:9px 14px; border-bottom:1px solid #1e2230; color:var(--text); }
+tr:hover td { background:#1a1e2a; }
+.badge { display:inline-block; padding:2px 8px; border-radius:3px; font-size:11px; font-family:'JetBrains Mono',monospace; }
+.badge-gold { background:#2a2010; color:var(--gold); border:1px solid #3a3020; }
+.badge-red  { background:#2a1010; color:var(--red);  border:1px solid #3a2020; }
+.badge-blue { background:#101a2a; color:var(--blue); border:1px solid #20303a; }
+.badge-green{ background:#102a18; color:var(--green);border:1px solid #20403a; }
+
+/* ===== 筛选器 ===== */
+.filter-bar { display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; align-items:center; }
+.filter-bar input, .filter-bar select {
+  background:var(--bg3); border:1px solid var(--border); color:var(--text);
+  padding:7px 14px; border-radius:4px; font-family:inherit; font-size:13px;
+  outline:none; min-width:180px;
+}
+.filter-bar input:focus, .filter-bar select:focus { border-color:var(--gold); }
+.btn {
+  padding:7px 18px; border:1px solid var(--border); border-radius:4px;
+  background:var(--bg3); color:var(--gold); cursor:pointer; font-family:inherit;
+  font-size:13px; letter-spacing:1px; transition:all .2s;
+}
+.btn:hover { background:var(--gold); color:var(--bg); }
+.btn-primary { background:var(--gold); color:var(--bg); border-color:var(--gold); }
+.btn-primary:hover { background:var(--gold2); }
+
+/* ===== 分页 ===== */
+.pagination { display:flex; gap:8px; align-items:center; margin-top:16px; justify-content:center; }
+.page-btn { padding:5px 12px; border:1px solid var(--border); border-radius:4px;
+            background:var(--bg3); color:var(--text2); cursor:pointer; font-size:12px; }
+.page-btn:hover,.page-btn.active { border-color:var(--gold); color:var(--gold); }
+.page-info { color:var(--text2); font-size:12px; }
+
+/* ===== 进度条 ===== */
+.progress-wrap { display:flex; align-items:center; gap:10px; }
+.progress-bar { flex:1; height:4px; background:var(--bg3); border-radius:2px; overflow:hidden; }
+.progress-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,var(--gold),var(--gold2)); transition:width .6s; }
+
+/* ===== 英雄头像 ===== */
+.hero-tag {
+  display:inline-flex; align-items:center; gap:4px;
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:4px; padding:2px 8px; font-size:12px; margin:2px;
+}
+.hero-tag img { width:20px;height:20px;border-radius:2px;object-fit:cover; }
+
+/* ===== 详情弹窗 ===== */
+.modal-overlay {
+  display:none; position:fixed; inset:0; background:#000a;
+  z-index:1000; align-items:center; justify-content:center;
+}
+.modal-overlay.open { display:flex; }
+.modal {
+  background:var(--bg2); border:1px solid var(--border); border-radius:10px;
+  padding:28px; max-width:800px; width:90%; max-height:85vh;
+  overflow-y:auto; position:relative;
+}
+.modal-close {
+  position:absolute; top:14px; right:16px;
+  background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;
+}
+.modal-close:hover { color:var(--red); }
+.vs-row { display:grid; grid-template-columns:1fr auto 1fr; gap:16px; align-items:start; margin:16px 0; }
+.vs-label { text-align:center; font-size:28px; font-weight:700; color:var(--gold); }
+.side-box { background:var(--bg3); border-radius:6px; padding:14px; }
+.side-title { font-size:12px; letter-spacing:2px; color:var(--text2); margin-bottom:8px; }
+.side-name { font-size:16px; font-weight:700; color:var(--text); margin-bottom:4px; }
+.side-union { font-size:12px; color:var(--gold); }
+
+/* ===== loading ===== */
+.loading { text-align:center; padding:60px; color:var(--text2); letter-spacing:3px; font-size:13px; }
+.loading::after { content:''; display:inline-block; width:16px;height:16px;
+  border:2px solid var(--border); border-top-color:var(--gold);
+  border-radius:50%; animation:spin .8s linear infinite; margin-left:10px; vertical-align:middle; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ===== 响应式 ===== */
+@media(max-width:900px) {
+  .chart-grid,.chart-grid-3 { grid-template-columns:1fr; }
+  .stat-grid { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:20px">
+    <div class="logo">率土战报<span>BATTLE ANALYTICS</span></div>
+    <nav class="nav">
+      <button class="nav-btn active" onclick="showPage('overview')">总览</button>
+      <button class="nav-btn" onclick="showPage('battles')">战报</button>
+      <button class="nav-btn" onclick="showPage('heroes')">武将</button>
+      <button class="nav-btn" onclick="showPage('players')">玩家</button>
+      <button class="nav-btn" onclick="showPage('unions')">联盟</button>
+      <button class="nav-btn" onclick="showPage('scores')">积分</button>
+      <button class="nav-btn" onclick="showPage('intel')">情报</button>
+      <button class="nav-btn" onclick="showPage('field')">战场</button>
+    </nav>
+  </div>
+  <div class="status-info">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">连接中...</span>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ===== 总览页 ===== -->
+<div class="page active" id="page-overview">
+  <div class="stat-grid" id="overview-stats"><div class="loading">加载中</div></div>
+  <div class="chart-grid">
+    <div class="card">
+      <div class="card-title">战报结果分布</div>
+      <div class="chart-box" id="chart-result"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">联盟战报活跃度 TOP 15</div>
+      <div class="chart-box" id="chart-union-active"></div>
+    </div>
+  </div>
+  <div class="chart-grid">
+    <div class="card">
+      <div class="card-title">武将出场频率 TOP 20</div>
+      <div class="chart-box-lg" id="chart-scores-top"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">武勋排行 TOP 20</div>
+      <div class="chart-box-lg" id="chart-wuxun-top"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">积分详情</div>
+    <div class="tbl-wrap" id="scores-table"><div class="loading">加载中</div></div>
+  </div>
+</div>
+<!-- ===== 战场页 ===== -->
+<div class="page" id="page-field">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div style="color:var(--text2);font-size:12px;letter-spacing:2px">攻城战场实时动态 · 000018aa</div>
+    <button class="btn btn-primary" onclick="fieldLoaded=false;loadField()">刷新</button>
+  </div>
+  <div class="card">
+    <div class="card-title">当前战场态势</div>
+    <div class="tbl-wrap" id="field-table"><div class="loading">加载中</div></div>
+  </div>
+</div>
+
+<!-- ===== 情报页 ===== -->
+<div class="page" id="page-intel">
+  <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+    <button class="btn btn-primary" onclick="showIntelTab('locations')" id="itab-locations">玩家坐标</button>
+    <button class="btn" onclick="showIntelTab('heroes')" id="itab-heroes">英雄背包</button>
+    <button class="btn" onclick="showIntelTab('cities')" id="itab-cities">联盟城池</button>
+    <button class="btn" onclick="showIntelTab('dbtables')" id="itab-dbtables">DB同步统计</button>
+  </div>
+
+  <!-- 玩家坐标 -->
+  <div id="intel-locations">
+    <div class="filter-bar">
+      <input type="text" id="f-loc-name" placeholder="搜索玩家名称">
+      <button class="btn btn-primary" onclick="loadLocations()">搜索</button>
+    </div>
+    <div class="chart-grid">
+      <div class="card">
+        <div class="card-title">战力分布 TOP 30</div>
+        <div class="chart-box" id="chart-loc-power"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">积分排行（玩家）</div>
+        <div class="chart-box" id="chart-loc-level"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">玩家坐标列表</div>
+      <div class="tbl-wrap" id="locations-table"><div class="loading">加载中</div></div>
+    </div>
+  </div>
+
+  <!-- 英雄背包 -->
+  <div id="intel-heroes" style="display:none">
+    <div class="chart-grid">
+      <div class="card">
+        <div class="card-title">背包英雄出现次数 TOP 30</div>
+        <div class="chart-box-lg" id="chart-bag-freq"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">平均等级 TOP 30</div>
+        <div class="chart-box-lg" id="chart-bag-level"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">英雄背包详情（按等级排序）</div>
+      <div class="tbl-wrap" id="herobag-table"><div class="loading">加载中</div></div>
+    </div>
+  </div>
+
+  <!-- 联盟城池 -->
+  <div id="intel-cities" style="display:none">
+    <div class="filter-bar">
+      <input type="text" id="f-city-union" placeholder="按联盟筛选">
+      <input type="text" id="f-city-player" placeholder="按玩家筛选">
+      <button class="btn btn-primary" onclick="loadCities()">搜索</button>
+    </div>
+    <div class="chart-grid">
+      <div class="card">
+        <div class="card-title">数据来源分布</div>
+        <div class="chart-box" id="chart-city-src"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">城池战力 TOP 30</div>
+        <div class="chart-box" id="chart-city-power"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">联盟城池列表</div>
+      <div class="tbl-wrap" id="cities-table"><div class="loading">加载中</div></div>
+    </div>
+  </div>
+
+  <!-- DB同步统计 -->
+  <div id="intel-dbtables" style="display:none">
+    <div class="chart-grid">
+      <div class="card">
+        <div class="card-title">DB表同步操作分布</div>
+        <div class="chart-box-lg" id="chart-dbtbl-ops"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">英雄解锁统计 TOP 30</div>
+        <div class="chart-box-lg" id="chart-hero-unlock"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">DB表同步详情</div>
+      <div class="tbl-wrap" id="dbtables-table"><div class="loading">加载中</div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- 战报详情弹窗 -->
+<div class="modal-overlay" id="battle-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+const API = 'http://127.0.0.1:8765'
+let heroAvatars = {}
+let currentPage = 1
+
+// 尝试加载英雄头像映射
+fetch('../hero_scraper/output/heroes.json').then(r=>r.json()).then(data=>{
+  data.forEach(h=>{ if(h.id&&h.avatar) heroAvatars[h.name]=h.avatar })
+}).catch(()=>{})
+
+// ===== 导航 =====
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'))
+  document.getElementById('page-'+name).classList.add('active')
+  event.target.classList.add('active')
+  if(name==='overview') loadOverview()
+  else if(name==='battles') loadBattles(1)
+  else if(name==='heroes') loadHeroes()
+  else if(name==='players') loadPlayers()
+  else if(name==='unions') loadUnions()
+  else if(name==='scores') loadScores()
+  else if(name==='intel') { showIntelTab('locations') }
+  else if(name==='field') loadField()
+}
+
+// ===== 状态检查 =====
+async function checkStatus(){
+  try{
+    const d=await fetch(API+'/api/status').then(r=>r.json())
+    document.getElementById('status-dot').style.background='#5cc87e'
+    document.getElementById('status-text').textContent=`在线 · ${d.stats.battles}场战报`
+  }catch{
+    document.getElementById('status-dot').style.background='#e05c5c'
+    document.getElementById('status-text').textContent='API离线'
+  }
+}
+
+// ===== ECharts 工具 =====
+function initChart(id){ return echarts.init(document.getElementById(id), null, {renderer:'canvas'}) }
+
+const COLORS = ['#c8a96e','#5c9ee0','#5cc87e','#e05c5c','#9e6ec8','#e0a05c','#5cc8c8','#e05ca0','#a0c85c','#c85c5c']
+
+function barChart(el, categories, values, opts={}) {
+  const c = typeof el==='string' ? initChart(el) : el
+  c.setOption({
+    backgroundColor:'transparent',
+    tooltip:{ trigger:'axis', backgroundColor:'#1a1e2a', borderColor:'#2a2f42', textStyle:{color:'#d4c9b0'} },
+    grid:{ left:'2%', right:'4%', bottom:'3%', top:'6%', containLabel:true },
+    xAxis:{ type:'category', data:categories, axisLabel:{color:'#8a8070',fontSize:11,rotate:opts.rotate||0}, axisLine:{lineStyle:{color:'#2a2f42'}} },
+    yAxis:{ type:'value', axisLabel:{color:'#8a8070',fontSize:11}, splitLine:{lineStyle:{color:'#1e2230'}} },
+    series:[{ type:'bar', data:values, itemStyle:{ color:opts.color||new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#c8a96e'},{offset:1,color:'#6a4a20'}]) }, barMaxWidth:40 }]
+  })
+  return c
+}
+
+function hbarChart(el, categories, values, opts={}) {
+  const c = typeof el==='string' ? initChart(el) : el
+  c.setOption({
+    backgroundColor:'transparent',
+    tooltip:{ trigger:'axis', backgroundColor:'#1a1e2a', borderColor:'#2a2f42', textStyle:{color:'#d4c9b0'} },
+    grid:{ left:'2%', right:'8%', bottom:'3%', top:'3%', containLabel:true },
+    xAxis:{ type:'value', axisLabel:{color:'#8a8070',fontSize:11}, splitLine:{lineStyle:{color:'#1e2230'}} },
+    yAxis:{ type:'category', data:categories, axisLabel:{color:'#d4c9b0',fontSize:11}, axisLine:{lineStyle:{color:'#2a2f42'}} },
+    series:[{ type:'bar', data:values, label:{show:true,position:'right',color:'#8a8070',fontSize:10,formatter:p=>p.value},
+      itemStyle:{ color:new echarts.graphic.LinearGradient(1,0,0,0,[{offset:0,color:opts.color||'#c8a96e'},{offset:1,color:'#2a1a0a'}]) }, barMaxWidth:28 }]
+  })
+  return c
+}
+
+function pieChart(el, seriesData, opts={}) {
+  const c = typeof el==='string' ? initChart(el) : el
+  c.setOption({
+    backgroundColor:'transparent',
+    tooltip:{ trigger:'item', backgroundColor:'#1a1e2a', borderColor:'#2a2f42', textStyle:{color:'#d4c9b0'}, formatter:'{b}: {c} ({d}%)' },
+    legend:{ orient:'vertical', right:'5%', top:'middle', textStyle:{color:'#8a8070',fontSize:11} },
+    series:[{ type:'pie', radius:['45%','72%'], center:['40%','50%'],
+      data: seriesData,
+      itemStyle:{ borderColor:'#0d0f14', borderWidth:2 },
+      label:{ color:'#8a8070', fontSize:10 }
+    }]
+  })
+  return c
+}
+
+// ===== 总览 =====
+async function loadOverview(){
+  const [st, hf, cb] = await Promise.all([
+    fetch(API+'/api/battle_stats').then(r=>r.json()),
+    fetch(API+'/api/heroes/freq').then(r=>r.json()),
+    fetch(API+'/api/heroes/combos?side=atk').then(r=>r.json())
+  ])
+
+  // 统计卡片
+  document.getElementById('overview-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${st.total}</div><div class="stat-label">总战报数</div></div>
+    <div class="stat-card"><div class="stat-num">${hf.length}</div><div class="stat-label">参战武将种类</div></div>
+    <div class="stat-card"><div class="stat-num">${cb.length}</div><div class="stat-label">不同阵容数</div></div>
+    <div class="stat-card"><div class="stat-num">${(st.result_dist.find(r=>r.result_desc==='攻方胜')||{cnt:0}).cnt}</div><div class="stat-label">攻方胜场</div></div>
+    <div class="stat-card"><div class="stat-num">${(st.result_dist.find(r=>r.result_desc==='守方胜')||{cnt:0}).cnt}</div><div class="stat-label">守方胜场</div></div>
+  `
+
+  // 结果饼图
+  pieChart('chart-result', st.result_dist.map((r,i)=>({name:r.result_desc, value:r.cnt, itemStyle:{color:COLORS[i]}}) ))
+
+  // 联盟活跃度
+  const us = st.union_stats.slice(0,15)
+  hbarChart('chart-union-active', us.map(u=>u.uname||'未知'), us.map(u=>u.total))
+
+  // 武将出场
+  const hf20 = hf.slice(0,20)
+  hbarChart('chart-hero-freq', hf20.map(h=>h.hero_name), hf20.map(h=>h.total), {color:'#5c9ee0'})
+
+  // 热门阵容
+  const cb15 = cb.slice(0,15)
+  hbarChart('chart-combo', cb15.map(c=>c.heroes_str), cb15.map(c=>c.cnt), {color:'#5cc87e'})
+}
+
+// ===== 战报列表 =====
+let totalBattles=0
+async function loadBattles(page=1){
+  currentPage=page
+  const player=document.getElementById('f-player').value
+  const union=document.getElementById('f-union').value
+  const result=document.getElementById('f-result').value
+  const el=document.getElementById('battles-table')
+  el.innerHTML='<div class="loading">加载中</div>'
+  const d=await fetch(`${API}/api/battles?page=${page}&size=25&player=${encodeURIComponent(player)}&union=${encodeURIComponent(union)}&result=${result}`).then(r=>r.json())
+  totalBattles=d.total
+  const RMAP={1:'badge-green',2:'badge-blue',0:'badge-gold',3:'badge-red',4:'badge-red',5:'badge-red'}
+  el.innerHTML=`<table>
+    <thead><tr><th>时间</th><th>攻方</th><th>守方</th><th>结果</th><th>地形</th><th>攻方武勋</th><th>守方武勋</th><th>详情</th></tr></thead>
+    <tbody>${d.data.map(b=>`
+      <tr>
+        <td style="font-size:11px;color:var(--text2);font-family:monospace">${b.time_str||'-'}</td>
+        <td><span style="color:var(--text)">${b.atk_name||'-'}</span><br><span style="font-size:11px;color:var(--gold)">${b.atk_union||''}</span></td>
+        <td><span style="color:var(--text)">${b.def_name||'-'}</span><br><span style="font-size:11px;color:var(--gold)">${b.def_union||''}</span></td>
+        <td><span class="badge ${RMAP[b.result]||'badge-gold'}">${b.result_desc||b.result}</span></td>
+        <td style="font-size:11px;color:var(--text2)">${b.city_type||0}型</td>
+        <td style="font-family:monospace;color:var(--gold)">${b.atk_gongxun||0}</td>
+        <td style="font-family:monospace;color:var(--gold)">${b.def_gongxun||0}</td>
+        <td><button class="btn" style="padding:3px 10px;font-size:11px" onclick="showBattle(${b.battle_id})">查看</button></td>
+      </tr>`).join('')}</tbody></table>`
+
+  // 分页
+  const total=Math.ceil(d.total/25)
+  const pg=document.getElementById('battles-page')
+  pg.innerHTML=`<span class="page-info">共 ${d.total} 条</span>`
+  if(page>1) pg.innerHTML+=`<button class="page-btn" onclick="loadBattles(${page-1})">上一页</button>`
+  for(let i=Math.max(1,page-2);i<=Math.min(total,page+2);i++){
+    pg.innerHTML+=`<button class="page-btn ${i===page?'active':''}" onclick="loadBattles(${i})">${i}</button>`
+  }
+  if(page<total) pg.innerHTML+=`<button class="page-btn" onclick="loadBattles(${page+1})">下一页</button>`
+}
+
+function clearFilter(){
+  document.getElementById('f-player').value=''
+  document.getElementById('f-union').value=''
+  document.getElementById('f-result').value=''
+  loadBattles(1)
+}
+
+// ===== 战报详情 =====
+async function showBattle(bid){
+  document.getElementById('modal-content').innerHTML='<div class="loading">加载中</div>'
+  document.getElementById('battle-modal').classList.add('open')
+  const d=await fetch(`${API}/api/battles/${bid}`).then(r=>r.json())
+  const b=d.battle; const heroes=d.heroes; const skills=d.skills
+  const atkH=heroes.filter(h=>h.side==='atk')
+  const defH=heroes.filter(h=>h.side==='def')
+  const atkS=skills.filter(s=>s.side==='atk')
+  const defS=skills.filter(s=>s.side==='def')
+  const RMAP2={1:'攻方胜',2:'守方胜',0:'平局',3:'攻方溃',4:'守方溃',5:'双溃',6:'守方胜(NPC)'}
+  const hpBar=(rem,max)=>max?`<div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:${Math.round(rem/max*100)}%"></div></div><span style="font-size:11px;color:var(--text2)">${rem}/${max}</span></div>`:''
+  const heroCards=(hs,ss)=>hs.map(h=>`
+    <div style="background:var(--bg);border-radius:6px;padding:10px;margin-bottom:8px">
+      <div style="font-weight:600;color:var(--gold);margin-bottom:4px">${h.hero_name} <span style="font-size:11px;color:var(--text2)">Lv.${h.level}</span></div>
+      ${hpBar(h.remain_hp,h.max_hp)}
+      <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">${ss.filter(s=>s.pos===h.pos).map(s=>`<span class="badge badge-blue">${s.skill_name} Lv.${s.skill_level}</span>`).join('')}</div>
+    </div>`).join('')
+  document.getElementById('modal-content').innerHTML=`
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:4px;font-family:monospace">${b.time_str} · ID: ${b.battle_id}</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span class="badge badge-gold">${b.result_desc||RMAP2[b.result]}</span>
+        <span style="font-size:12px;color:var(--text2)">地形: ${b.city_type}型</span>
+        <span style="font-size:12px;color:var(--text2)">天气: ${b.weather?'特殊':'正常'}</span>
+        <span style="font-size:12px;color:var(--text2)">${b.in_night?'夜战':''}</span>
+      </div>
+    </div>
+    <div class="vs-row">
+      <div class="side-box">
+        <div class="side-title">⚔ 攻方</div>
+        <div class="side-name">${b.atk_name||'—'}</div>
+        <div class="side-union">${b.atk_union||''}</div>
+        <div style="margin-top:8px;font-size:12px;color:var(--text2)">等级: ${b.atk_level} · 武勋: <span style="color:var(--gold)">${b.atk_gongxun}</span></div>
+        <div style="margin-top:12px">${heroCards(atkH,atkS)}</div>
+      </div>
+      <div class="vs-label">VS</div>
+      <div class="side-box">
+        <div class="side-title">🛡 守方</div>
+        <div class="side-name">${b.def_name||'—'}</div>
+        <div class="side-union">${b.def_union||''}</div>
+        <div style="margin-top:8px;font-size:12px;color:var(--text2)">等级: ${b.def_level} · 武勋: <span style="color:var(--gold)">${b.def_gongxun}</span></div>
+        <div style="margin-top:12px">${heroCards(defH,defS)}</div>
+      </div>
+    </div>`
+}
+function closeModal(){ document.getElementById('battle-modal').classList.remove('open') }
+document.getElementById('battle-modal').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeModal() })
+
+// ===== 武将页 =====
+async function loadHeroes(){
+  const [hf,cb] = await Promise.all([
+    fetch(API+'/api/heroes/freq').then(r=>r.json()),
+    fetch(API+'/api/heroes/combos?side=atk').then(r=>r.json())
+  ])
+  const h30=hf.slice(0,30)
+  hbarChart('chart-hero-total', h30.map(h=>h.hero_name), h30.map(h=>h.total))
+  const cb20=cb.slice(0,20)
+  hbarChart('chart-atk-combo', cb20.map(c=>c.heroes_str), cb20.map(c=>c.cnt), {color:'#5cc87e'})
+  document.getElementById('heroes-table').innerHTML=`<table>
+    <thead><tr><th>武将</th><th>总出场</th><th>攻方</th><th>守方</th><th>平均伤害</th></tr></thead>
+    <tbody>${hf.map((h,i)=>`<tr>
+      <td><span style="color:var(--text2);font-size:11px;margin-right:6px">${i+1}</span>${h.hero_name}</td>
+      <td><span class="badge badge-gold">${h.total}</span></td>
+      <td style="color:var(--red)">${h.atk_cnt}</td>
+      <td style="color:var(--blue)">${h.def_cnt}</td>
+      <td style="font-family:monospace;font-size:11px;color:var(--text2)">${Math.round(h.avg_dmg||0)}</td>
+    </tr>`).join('')}</tbody></table>`
+}
+
+// ===== 玩家页 =====
+async function loadPlayers(){
+  const kw=document.getElementById('f-player2').value
+  const all=await fetch(API+'/api/players').then(r=>r.json())
+  const data=kw ? all.filter(p=>p.player_name.includes(kw)||( p.union_name&&p.union_name.includes(kw))) : all
+  document.getElementById('players-table').innerHTML=`<table>
+    <thead><tr><th>#</th><th>玩家</th><th>联盟</th><th>战报数</th><th>攻</th><th>守</th><th>胜场</th><th>胜率</th><th>武勋</th><th>积分</th></tr></thead>
+    <tbody>${data.map((p,i)=>`<tr>
+      <td style="color:var(--text2);font-size:11px">${i+1}</td>
+      <td style="font-weight:600">${p.player_name}</td>
+      <td style="color:var(--gold);font-size:12px">${p.union_name||'—'}</td>
+      <td><span class="badge badge-gold">${p.battle_count}</span></td>
+      <td style="color:var(--red)">${p.atk_count}</td>
+      <td style="color:var(--blue)">${p.def_count}</td>
+      <td style="color:var(--green)">${p.win_count}</td>
+      <td>
+        <div class="progress-wrap">
+          <div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:${p.win_rate||0}%"></div></div>
+          <span style="font-size:11px;color:var(--text2)">${p.win_rate||0}%</span>
+        </div>
+      </td>
+      <td style="font-family:monospace;color:var(--gold)">${p.wuxun_total||0}</td>
+      <td style="font-family:monospace;font-weight:600;color:var(--gold2)">${Math.round(p.custom_score||0)}</td>
+    </tr>`).join('')}</tbody></table>`
+}
+
+// ===== 联盟页 =====
+async function loadUnions(){
+  const [unions, stats] = await Promise.all([
+    fetch(API+'/api/unions').then(r=>r.json()),
+    fetch(API+'/api/battle_stats').then(r=>r.json())
+  ])
+  const top=unions.slice(0,20)
+  // 战力图
+  hbarChart('chart-union-power', top.map(u=>u.name), top.map(u=>u.power), {color:'#c8a96e'})
+  // 胜率图
+  const us=stats.union_stats.slice(0,15)
+  const c=initChart('chart-union-wr')
+  c.setOption({
+    backgroundColor:'transparent',
+    tooltip:{trigger:'axis',backgroundColor:'#1a1e2a',borderColor:'#2a2f42',textStyle:{color:'#d4c9b0'}},
+    legend:{textStyle:{color:'#8a8070',fontSize:11}},
+    grid:{left:'2%',right:'4%',bottom:'3%',top:'10%',containLabel:true},
+    xAxis:{type:'category',data:us.map(u=>u.uname||'未知'),axisLabel:{color:'#8a8070',fontSize:10,rotate:15},axisLine:{lineStyle:{color:'#2a2f42'}}},
+    yAxis:{type:'value',axisLabel:{color:'#8a8070',fontSize:11},splitLine:{lineStyle:{color:'#1e2230'}}},
+    series:[
+      {name:'总场次',type:'bar',data:us.map(u=>u.total),itemStyle:{color:'#5c9ee0'},barMaxWidth:30},
+      {name:'胜场',type:'bar',data:us.map(u=>u.atk_wins),itemStyle:{color:'#5cc87e'},barMaxWidth:30}
+    ]
+  })
+  document.getElementById('unions-table').innerHTML=`<table>
+    <thead><tr><th>#</th><th>联盟</th><th>战力</th><th>成员数</th><th>等级</th><th>区域</th></tr></thead>
+    <tbody>${unions.map((u,i)=>`<tr>
+      <td style="color:var(--text2);font-size:11px">${i+1}</td>
+      <td style="font-weight:600;color:var(--gold)">${u.name}</td>
+      <td style="font-family:monospace">${(u.power||0).toLocaleString()}</td>
+      <td>${u.total_member||0}</td>
+      <td>${u.level||0}</td>
+      <td style="color:var(--text2)">${u.region||0}</td>
+    </tr>`).join('')}</tbody></table>`
+}
+
+// ===== 积分页 =====
+async function loadScores(){
+  const union=document.getElementById('f-union2').value
+  const [scores, wx] = await Promise.all([
+    fetch(`${API}/api/scores?union=${encodeURIComponent(union)}`).then(r=>r.json()),
+    fetch(API+'/api/wuxun?group=player').then(r=>r.json())
+  ])
+  // 积分Top20柱状图
+  const top=scores.slice(0,20)
+  barChart('chart-scores-top', top.map(p=>p.player_name), top.map(p=>Math.round(p.custom_score||0)), {rotate:20})
+  // 武勋Top20
+  const wx20=wx.slice(0,20)
+  barChart('chart-wuxun-top', wx20.map(p=>p.player_name), wx20.map(p=>p.total_wx||0), {rotate:20, color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#5c9ee0'},{offset:1,color:'#102040'}])})
+  // 表格
+  document.getElementById('scores-table').innerHTML=`<table>
+    <thead><tr><th>#</th><th>玩家</th><th>联盟</th><th>战报</th><th>攻</th><th>守</th><th>胜场</th><th>胜率</th><th>武勋</th><th>积分</th></tr></thead>
+    <tbody>${scores.map((p,i)=>`<tr>
+      <td style="color:${i<3?'var(--gold2)':'var(--text2)'};font-weight:${i<3?700:400};font-size:${i<3?'14px':'11px'}">${i+1}</td>
+      <td style="font-weight:600">${p.player_name}</td>
+      <td style="color:var(--gold);font-size:12px">${p.union_name||'—'}</td>
+      <td>${p.battle_count}</td>
+      <td style="color:var(--red)">${p.atk_count}</td>
+      <td style="color:var(--blue)">${p.def_count}</td>
+      <td style="color:var(--green)">${p.win_count}</td>
+      <td><div class="progress-wrap"><div class="progress-bar" style="width:60px"><div class="progress-fill" style="width:${p.win_rate||0}%"></div></div><span style="font-size:11px;color:var(--text2)">${p.win_rate||0}%</span></div></td>
+      <td style="font-family:monospace;color:var(--gold)">${p.wuxun_total||0}</td>
+      <td style="font-family:monospace;font-weight:700;color:var(--gold2);font-size:15px">${Math.round(p.custom_score||0)}</td>
+    </tr>`).join('')}</tbody></table>`
+}
+
+// ===== 情报页 =====
+let intelTabLoaded = {}
+
+function showIntelTab(tab) {
+  ['locations','heroes','cities','dbtables'].forEach(t => {
+    document.getElementById('intel-'+t).style.display = t===tab ? '' : 'none'
+    const btn = document.getElementById('itab-'+t)
+    btn.className = t===tab ? 'btn btn-primary' : 'btn'
+  })
+  if (!intelTabLoaded[tab]) {
+    intelTabLoaded[tab] = true
+    if (tab==='locations') loadLocations()
+    else if (tab==='heroes') loadHeroBag()
+    else if (tab==='cities') loadCities()
+    else if (tab==='dbtables') loadDbTables()
+  }
+}
+
+async function loadLocations() {
+  const name = document.getElementById('f-loc-name').value
+  const data = await fetch(`${API}/api/locations?name=${encodeURIComponent(name)}`).then(r=>r.json())
+  // 战力图
+  const top30 = [...data].sort((a,b)=>(b.power||0)-(a.power||0)).slice(0,30)
+  hbarChart('chart-loc-power', top30.map(p=>p.player_name||p.wid), top30.map(p=>p.power||0), {color:'#c8a96e'})
+  // 积分图
+  const topScore = [...data].sort((a,b)=>(b.score||0)-(a.score||0)).slice(0,30)
+  pieChart('chart-loc-level', topScore.map((p,i)=>({name:p.player_name||p.wid, value:p.score||0, itemStyle:{color:COLORS[i%10]}})))
+  // 表格
+  document.getElementById('locations-table').innerHTML = `<table>
+    <thead><tr><th>#</th><th>玩家</th><th>联盟</th><th>等级</th><th>战力</th><th>积分</th><th>坐标X</th><th>区域</th><th>城型</th><th>耐久</th></tr></thead>
+    <tbody>${data.map((p,i)=>`<tr>
+      <td style="color:var(--text2);font-size:11px">${i+1}</td>
+      <td style="font-weight:600">${p.player_name||'-'}</td>
+      <td style="color:var(--gold);font-size:12px">${p.union_name||'-'}</td>
+      <td>${p.level||0}</td>
+      <td style="font-family:monospace;color:var(--gold2)">${(p.power||0).toLocaleString()}</td>
+      <td style="font-family:monospace;color:var(--green)">${p.score||0}</td>
+      <td style="font-family:monospace;font-size:11px;color:var(--text2)">${(p.x||0).toFixed(1)}</td>
+      <td style="color:var(--text2)">${p.region||0}</td>
+      <td style="font-size:11px;color:var(--text2)">${p.city_type||0}型</td>
+      <td style="font-size:11px">${p.durability||0}</td>
+    </tr>`).join('')}</tbody></table>`
+}
+
+async function loadHeroBag() {
+  const [bag, stats] = await Promise.all([
+    fetch(`${API}/api/hero_bag`).then(r=>r.json()),
+    fetch(`${API}/api/hero_bag/stats`).then(r=>r.json())
+  ])
+  // 出现次数图
+  const st30 = stats.slice(0,30)
+  hbarChart('chart-bag-freq', st30.map(h=>h.hero_id), st30.map(h=>h.cnt), {color:'#5c9ee0'})
+  // 平均等级图
+  const stl30 = [...stats].sort((a,b)=>(b.avg_level||0)-(a.avg_level||0)).slice(0,30)
+  hbarChart('chart-bag-level', stl30.map(h=>h.hero_id), stl30.map(h=>Math.round(h.avg_level||0)), {color:'#5cc87e'})
+  // 表格
+  document.getElementById('herobag-table').innerHTML = `<table>
+    <thead><tr><th>#</th><th>英雄ID</th><th>等级</th><th>星级</th><th>血量</th><th>攻击</th><th>防御</th><th>速度</th><th>技能</th></tr></thead>
+    <tbody>${bag.map((h,i)=>`<tr>
+      <td style="color:var(--text2);font-size:11px">${i+1}</td>
+      <td style="font-family:monospace;color:var(--gold)">${h.hero_id}</td>
+      <td><span class="badge badge-gold">${h.level}</span></td>
+      <td style="color:var(--gold2)">${'★'.repeat(Math.min(h.star||0,5))}</td>
+      <td style="font-family:monospace;font-size:11px">${h.hp||0}</td>
+      <td style="color:var(--red);font-size:11px">${h.atk||0}</td>
+      <td style="color:var(--blue);font-size:11px">${h.def_val||0}</td>
+      <td style="color:var(--green);font-size:11px">${h.speed||0}</td>
+      <td style="font-size:10px;color:var(--text2);max-width:180px;overflow:hidden;text-overflow:ellipsis">${h.skill_str||'-'}</td>
+    </tr>`).join('')}</tbody></table>`
+}
+
+async function loadCities() {
+  const union = document.getElementById('f-city-union').value
+  const player = document.getElementById('f-city-player').value
+  const [cities, summary] = await Promise.all([
+    fetch(`${API}/api/union_cities?union=${encodeURIComponent(union)}&player=${encodeURIComponent(player)}`).then(r=>r.json()),
+    fetch(`${API}/api/union_cities/summary`).then(r=>r.json())
+  ])
+  // 数据来源饼图
+  pieChart('chart-city-src', summary.map((s,i)=>({name:s.msg_type, value:s.city_count, itemStyle:{color:COLORS[i%10]}}) ))
+  // 战力图
+  const top30 = cities.slice(0,30)
+  hbarChart('chart-city-power', top30.map(c=>c.player_name||c.wid), top30.map(c=>c.power||0), {color:'#c8a96e'})
+  // 表格
+  document.getElementById('cities-table').innerHTML = `<table>
+    <thead><tr><th>#</th><th>玩家</th><th>战力</th><th>HP</th><th>城型</th><th>英雄ID</th><th>WID</th><th>来源</th></tr></thead>
+    <tbody>${cities.map((c,i)=>`<tr>
+      <td style="color:var(--text2);font-size:11px">${i+1}</td>
+      <td style="font-weight:600">${c.player_name||'-'}</td>
+      <td style="font-family:monospace;color:var(--gold2)">${(c.power||0).toLocaleString()}</td>
+      <td style="font-size:11px">${c.hp||0}</td>
+      <td style="font-size:11px;color:var(--text2)">${c.city_type||0}</td>
+      <td style="font-size:10px;color:var(--blue);max-width:160px;overflow:hidden;text-overflow:ellipsis">${c.hero_ids||'-'}</td>
+      <td style="font-family:monospace;font-size:11px;color:var(--text2)">${c.wid||'-'}</td>
+      <td style="font-size:10px;color:var(--text2)">${c.source_type||'-'}</td>
+    </tr>`).join('')}</tbody></table>`
+}
+
+async function loadDbTables() {
+  const [tables, unlock] = await Promise.all([
+    fetch(`${API}/api/db_sync/tables`).then(r=>r.json()),
+    fetch(`${API}/api/hero_unlock`).then(r=>r.json())
+  ])
+  // DB表操作图
+  const c = initChart('chart-dbtbl-ops')
+  c.setOption({
+    backgroundColor:'transparent',
+    tooltip:{trigger:'axis',backgroundColor:'#1a1e2a',borderColor:'#2a2f42',textStyle:{color:'#d4c9b0'}},
+    legend:{textStyle:{color:'#8a8070',fontSize:11},top:0},
+    grid:{left:'2%',right:'4%',bottom:'3%',top:'12%',containLabel:true},
+    xAxis:{type:'category',data:tables.map(t=>t.table_name),axisLabel:{color:'#8a8070',fontSize:9,rotate:20},axisLine:{lineStyle:{color:'#2a2f42'}}},
+    yAxis:{type:'value',axisLabel:{color:'#8a8070',fontSize:11},splitLine:{lineStyle:{color:'#1e2230'}}},
+    series:[
+      {name:'插入',type:'bar',stack:'ops',data:tables.map(t=>t.inserts||0),itemStyle:{color:'#5cc87e'}},
+      {name:'更新',type:'bar',stack:'ops',data:tables.map(t=>t.updates||0),itemStyle:{color:'#5c9ee0'}},
+      {name:'删除',type:'bar',stack:'ops',data:tables.map(t=>t.deletes||0),itemStyle:{color:'#e05c5c'}}
+    ]
+  })
+  // 英雄解锁图
+  const ul30 = unlock.slice(0,30)
+  hbarChart('chart-hero-unlock', ul30.map(h=>h.hero_id), ul30.map(h=>h.unlock_count), {color:'#9e6ec8'})
+  // 表格
+  document.getElementById('dbtables-table').innerHTML = `<table>
+    <thead><tr><th>表名</th><th>总记录</th><th>插入</th><th>更新</th><th>删除</th></tr></thead>
+    <tbody>${tables.map(t=>`<tr>
+      <td style="font-family:monospace;color:var(--gold)">${t.table_name}</td>
+      <td><span class="badge badge-gold">${t.cnt}</span></td>
+      <td style="color:var(--green)">${t.inserts||0}</td>
+      <td style="color:var(--blue)">${t.updates||0}</td>
+      <td style="color:var(--red)">${t.deletes||0}</td>
+    </tr>`).join('')}</tbody></table>`
+}
+
+// ===== 战场页 =====
+let fieldLoaded = false
+async function loadField() {
+  if (fieldLoaded) return
+  fieldLoaded = true
+  const el = document.getElementById('field-table')
+  el.innerHTML = '<div class="loading">加载中</div>'
+  const data = await fetch(`${API}/api/battle_field`).then(r=>r.json()).catch(()=>[])
+  if (!data.length) { el.innerHTML = '<div style="color:var(--text2);padding:20px">暂无战场数据</div>'; return }
+  el.innerHTML = `<table>
+    <thead><tr>
+      <th>城池ID</th><th>城池名</th><th>坐标</th><th>攻击者</th><th>分组</th>
+      <th>附近成员数</th><th>附近成员</th><th>抓包时间</th>
+    </tr></thead>
+    <tbody>${data.map(r=>{
+      const nearby = (r.nearby_members||[]).map(m=>`<span class="badge badge-gold" style="margin:1px">${m.name}</span>`).join('')
+      const coord = (r.x&&r.y) ? `(${r.x},${r.y})` : '-'
+      const cityName = r.city_name || `wid:${r.wid}`
+      const ts = r.captured_at || ''
+      return `<tr>
+        <td style="font-family:monospace;color:var(--text2)">${r.wid}</td>
+        <td style="color:var(--gold)">${cityName}</td>
+        <td style="font-family:monospace;font-size:11px;color:var(--text2)">${coord}</td>
+        <td style="color:var(--gold2);font-weight:600">${r.attacker_name||('-')}</td>
+        <td><span class="badge badge-blue">${r.attacker_group||'-'}</span></td>
+        <td><span class="badge badge-green">${r.nearby_count||0}</span></td>
+        <td style="max-width:300px;word-break:break-all">${nearby||'-'}</td>
+        <td style="font-size:11px;color:var(--text2)">${ts}</td>
+      </tr>`
+    }).join('')}</tbody></table>`
+}
+
+// ===== 初始化 =====
+checkStatus()
+loadOverview()
+</script>
+</body>
+</html>id="chart-hero-freq"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">热门阵容 TOP 15（攻方）</div>
+      <div class="chart-box-lg" id="chart-combo"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 战报页 ===== -->
+<div class="page" id="page-battles">
+  <div class="filter-bar">
+    <input type="text" id="f-player" placeholder="搜索玩家名称">
+    <input type="text" id="f-union" placeholder="搜索联盟">
+    <select id="f-result">
+      <option value="">全部结果</option>
+      <option value="1">攻方胜</option>
+      <option value="2">守方胜</option>
+      <option value="0">平局</option>
+      <option value="3">攻方溃</option>
+      <option value="4">守方溃</option>
+    </select>
+    <button class="btn btn-primary" onclick="loadBattles(1)">搜索</button>
+    <button class="btn" onclick="clearFilter()">重置</button>
+  </div>
+  <div class="card">
+    <div class="tbl-wrap" id="battles-table"><div class="loading">加载中</div></div>
+    <div class="pagination" id="battles-page"></div>
+  </div>
+</div>
+
+<!-- ===== 武将页 ===== -->
+<div class="page" id="page-heroes">
+  <div class="chart-grid">
+    <div class="card">
+      <div class="card-title">武将总出场 TOP 30</div>
+      <div class="chart-box-lg" id="chart-hero-total"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">热门攻方阵容 TOP 20</div>
+      <div class="chart-box-lg" id="chart-atk-combo"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">武将详情</div>
+    <div class="tbl-wrap" id="heroes-table"><div class="loading">加载中</div></div>
+  </div>
+</div>
+
+<!-- ===== 玩家页 ===== -->
+<div class="page" id="page-players">
+  <div class="filter-bar">
+    <input type="text" id="f-player2" placeholder="搜索玩家">
+    <button class="btn btn-primary" onclick="loadPlayers()">搜索</button>
+  </div>
+  <div class="card">
+    <div class="tbl-wrap" id="players-table"><div class="loading">加载中</div></div>
+  </div>
+</div>
+
+<!-- ===== 联盟页 ===== -->
+<div class="page" id="page-unions">
+  <div class="chart-grid">
+    <div class="card">
+      <div class="card-title">联盟战力分布</div>
+      <div class="chart-box-lg" id="chart-union-power"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">联盟胜率对比</div>
+      <div class="chart-box-lg" id="chart-union-wr"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">联盟列表</div>
+    <div class="tbl-wrap" id="unions-table"><div class="loading">加载中</div></div>
+  </div>
+</div>
+
+<!-- ===== 积分页 ===== -->
+<div class="page" id="page-scores">
+  <div class="filter-bar">
+    <input type="text" id="f-union2" placeholder="按联盟筛选">
+    <button class="btn btn-primary" onclick="loadScores()">筛选</button>
+  </div>
+  <div class="chart-grid">
+    <div class="card">
+      <div class="card-title">玩家积分排行 TOP 20</div>
+      <div class="chart-box-lg" 
