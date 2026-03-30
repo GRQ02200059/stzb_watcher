@@ -1,0 +1,5893 @@
+[
+  {
+    "name": "白给丨江南",
+    "total": 457,
+    "wins": 100,
+    "losses": 101,
+    "win_rate": 21.88,
+    "atk": 222,
+    "def": 235,
+    "atk_win_rate": 25.68,
+    "def_win_rate": 18.3,
+    "union_count": 2,
+    "unions": [
+      "宫商角徽羽",
+      "雨丨剑挽流云"
+    ],
+    "heroes": [
+      {
+        "name": "刘备",
+        "count": 84
+      },
+      {
+        "name": "夏侯惇",
+        "count": 78
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 457
+      }
+    ],
+    "hero_count": 89
+  },
+  {
+    "name": "剑岚丨夜微凉",
+    "total": 54,
+    "wins": 7,
+    "losses": 12,
+    "win_rate": 12.96,
+    "atk": 27,
+    "def": 27,
+    "atk_win_rate": 22.22,
+    "def_win_rate": 3.7,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "孙权",
+        "count": 6
+      },
+      {
+        "name": "魏延",
+        "count": 6
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 54
+      }
+    ],
+    "hero_count": 39
+  },
+  {
+    "name": "",
+    "total": 37,
+    "wins": 1,
+    "losses": 27,
+    "win_rate": 2.7,
+    "atk": 1,
+    "def": 36,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 0,
+    "unions": [],
+    "heroes": [
+      {
+        "name": "郭嘉",
+        "count": 5
+      },
+      {
+        "name": "刘备",
+        "count": 5
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 20
+      },
+      {
+        "type": "同盟战报",
+        "count": 17
+      }
+    ],
+    "hero_count": 47
+  },
+  {
+    "name": "剑岚丨杜若",
+    "total": 26,
+    "wins": 6,
+    "losses": 5,
+    "win_rate": 23.08,
+    "atk": 13,
+    "def": 13,
+    "atk_win_rate": 30.77,
+    "def_win_rate": 15.38,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "妲己",
+        "count": 7
+      },
+      {
+        "name": "张机",
+        "count": 6
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 26
+      }
+    ],
+    "hero_count": 27
+  },
+  {
+    "name": "秋水烛龙",
+    "total": 21,
+    "wins": 1,
+    "losses": 4,
+    "win_rate": 4.76,
+    "atk": 14,
+    "def": 7,
+    "atk_win_rate": 7.14,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "马良",
+        "count": 5
+      },
+      {
+        "name": "黄月英",
+        "count": 4
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 21
+      }
+    ],
+    "hero_count": 22
+  },
+  {
+    "name": "剑岚丨壯壯",
+    "total": 20,
+    "wins": 6,
+    "losses": 4,
+    "win_rate": 30.0,
+    "atk": 17,
+    "def": 3,
+    "atk_win_rate": 35.29,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "诸葛亮",
+        "count": 8
+      },
+      {
+        "name": "荀彧",
+        "count": 4
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 20
+      }
+    ],
+    "hero_count": 16
+  },
+  {
+    "name": "剑岚丨小小",
+    "total": 19,
+    "wins": 3,
+    "losses": 2,
+    "win_rate": 15.79,
+    "atk": 9,
+    "def": 10,
+    "atk_win_rate": 22.22,
+    "def_win_rate": 10.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "冯紞",
+        "count": 3
+      },
+      {
+        "name": "高览",
+        "count": 3
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 19
+      }
+    ],
+    "hero_count": 28
+  },
+  {
+    "name": "剑岚丨青柠",
+    "total": 16,
+    "wins": 7,
+    "losses": 2,
+    "win_rate": 43.75,
+    "atk": 10,
+    "def": 6,
+    "atk_win_rate": 30.0,
+    "def_win_rate": 66.67,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "严颜",
+        "count": 4
+      },
+      {
+        "name": "黄忠",
+        "count": 4
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 16
+      }
+    ],
+    "hero_count": 15
+  },
+  {
+    "name": "剑岚丨偲芳桜",
+    "total": 16,
+    "wins": 6,
+    "losses": 2,
+    "win_rate": 37.5,
+    "atk": 14,
+    "def": 2,
+    "atk_win_rate": 42.86,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "大乔",
+        "count": 5
+      },
+      {
+        "name": "张机",
+        "count": 5
+      },
+      {
+        "name": "鲁肃",
+        "count": 5
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 16
+      }
+    ],
+    "hero_count": 18
+  },
+  {
+    "name": "逍遥祖龙父",
+    "total": 15,
+    "wins": 5,
+    "losses": 0,
+    "win_rate": 33.33,
+    "atk": 7,
+    "def": 8,
+    "atk_win_rate": 14.29,
+    "def_win_rate": 50.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "庞统",
+        "count": 5
+      },
+      {
+        "name": "刘备",
+        "count": 5
+      },
+      {
+        "name": "董卓",
+        "count": 5
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 14
+      },
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 12
+  },
+  {
+    "name": "在三二等我",
+    "total": 15,
+    "wins": 0,
+    "losses": 9,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 15,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "田续",
+        "count": 2
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 15
+      }
+    ],
+    "hero_count": 2
+  },
+  {
+    "name": "剑岚丨今生",
+    "total": 14,
+    "wins": 7,
+    "losses": 1,
+    "win_rate": 50.0,
+    "atk": 11,
+    "def": 3,
+    "atk_win_rate": 36.36,
+    "def_win_rate": 100.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "司马炎",
+        "count": 3
+      },
+      {
+        "name": "贾充",
+        "count": 3
+      },
+      {
+        "name": "羊祜",
+        "count": 3
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 14
+      }
+    ],
+    "hero_count": 26
+  },
+  {
+    "name": "决云丨老白",
+    "total": 10,
+    "wins": 3,
+    "losses": 4,
+    "win_rate": 30.0,
+    "atk": 9,
+    "def": 1,
+    "atk_win_rate": 33.33,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "关银屏",
+        "count": 3
+      },
+      {
+        "name": "刘备",
+        "count": 3
+      },
+      {
+        "name": "赵云",
+        "count": 3
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 10
+      }
+    ],
+    "hero_count": 21
+  },
+  {
+    "name": "龍丨马到功成",
+    "total": 10,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 10.0,
+    "atk": 4,
+    "def": 6,
+    "atk_win_rate": 25.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "貂蝉",
+        "count": 4
+      },
+      {
+        "name": "马良",
+        "count": 4
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 10
+      }
+    ],
+    "hero_count": 9
+  },
+  {
+    "name": "默言大帝",
+    "total": 8,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 2,
+    "def": 6,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "步皇后",
+        "count": 2
+      },
+      {
+        "name": "袁术",
+        "count": 2
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 8
+      }
+    ],
+    "hero_count": 7
+  },
+  {
+    "name": "榴莲吹泡泡",
+    "total": 8,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 7,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "田续",
+        "count": 2
+      },
+      {
+        "name": "马腾",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 8
+      }
+    ],
+    "hero_count": 15
+  },
+  {
+    "name": "南粤神机营",
+    "total": 8,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 6,
+    "def": 2,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "贾诩",
+        "count": 4
+      },
+      {
+        "name": "袁术",
+        "count": 4
+      },
+      {
+        "name": "华雄",
+        "count": 4
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 8
+      }
+    ],
+    "hero_count": 13
+  },
+  {
+    "name": "剑岚丨墨染",
+    "total": 7,
+    "wins": 3,
+    "losses": 1,
+    "win_rate": 42.86,
+    "atk": 4,
+    "def": 3,
+    "atk_win_rate": 25.0,
+    "def_win_rate": 66.67,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 5
+      },
+      {
+        "name": "曹操",
+        "count": 5
+      },
+      {
+        "name": "夏侯惇",
+        "count": 5
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 7
+      }
+    ],
+    "hero_count": 8
+  },
+  {
+    "name": "剑岚丨轩辕",
+    "total": 7,
+    "wins": 3,
+    "losses": 2,
+    "win_rate": 42.86,
+    "atk": 7,
+    "def": 0,
+    "atk_win_rate": 42.86,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "杜预",
+        "count": 3
+      },
+      {
+        "name": "卫瓘",
+        "count": 3
+      },
+      {
+        "name": "吕蒙",
+        "count": 3
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 7
+      }
+    ],
+    "hero_count": 9
+  },
+  {
+    "name": "長凨丨大花河",
+    "total": 7,
+    "wins": 1,
+    "losses": 2,
+    "win_rate": 14.29,
+    "atk": 3,
+    "def": 4,
+    "atk_win_rate": 33.33,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "黄月英",
+        "count": 2
+      },
+      {
+        "name": "刘备",
+        "count": 2
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 6
+      },
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 9
+  },
+  {
+    "name": "霖锋丨星云",
+    "total": 7,
+    "wins": 0,
+    "losses": 2,
+    "win_rate": 0.0,
+    "atk": 6,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "吕布",
+        "count": 3
+      },
+      {
+        "name": "张机",
+        "count": 3
+      },
+      {
+        "name": "孙权",
+        "count": 3
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 7
+      }
+    ],
+    "hero_count": 15
+  },
+  {
+    "name": "剑岚丨朐阳侯",
+    "total": 6,
+    "wins": 4,
+    "losses": 0,
+    "win_rate": 66.67,
+    "atk": 6,
+    "def": 0,
+    "atk_win_rate": 66.67,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 2
+      },
+      {
+        "name": "吕蒙",
+        "count": 2
+      },
+      {
+        "name": "曹操",
+        "count": 2
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 6
+      }
+    ],
+    "hero_count": 12
+  },
+  {
+    "name": "剑岚丨橘子",
+    "total": 6,
+    "wins": 3,
+    "losses": 1,
+    "win_rate": 50.0,
+    "atk": 5,
+    "def": 1,
+    "atk_win_rate": 60.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "关兴＆张苞",
+        "count": 2
+      },
+      {
+        "name": "诸葛亮",
+        "count": 2
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 6
+      }
+    ],
+    "hero_count": 11
+  },
+  {
+    "name": "壹丨骑当千",
+    "total": 6,
+    "wins": 2,
+    "losses": 2,
+    "win_rate": 33.33,
+    "atk": 2,
+    "def": 4,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "马超",
+        "count": 2
+      },
+      {
+        "name": "张辽",
+        "count": 2
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 6
+      }
+    ],
+    "hero_count": 8
+  },
+  {
+    "name": "天凉丨白羽",
+    "total": 6,
+    "wins": 0,
+    "losses": 4,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 5,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "魏续",
+        "count": 1
+      },
+      {
+        "name": "王烈",
+        "count": 1
+      },
+      {
+        "name": "小乔＆大乔",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 6
+      }
+    ],
+    "hero_count": 5
+  },
+  {
+    "name": "南海丨剑魔",
+    "total": 5,
+    "wins": 4,
+    "losses": 0,
+    "win_rate": 80.0,
+    "atk": 0,
+    "def": 5,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 80.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 3
+      },
+      {
+        "name": "吕蒙",
+        "count": 3
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 5
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "長樂乄微凉",
+    "total": 5,
+    "wins": 0,
+    "losses": 2,
+    "win_rate": 0.0,
+    "atk": 2,
+    "def": 3,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "刘虞",
+        "count": 1
+      },
+      {
+        "name": "荣晦",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 5
+      }
+    ],
+    "hero_count": 11
+  },
+  {
+    "name": "横槊指天狼",
+    "total": 4,
+    "wins": 3,
+    "losses": 0,
+    "win_rate": 75.0,
+    "atk": 4,
+    "def": 0,
+    "atk_win_rate": 75.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "雨丨剑挽流云"
+    ],
+    "heroes": [
+      {
+        "name": "吕布",
+        "count": 1
+      },
+      {
+        "name": "甄洛",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 4
+      }
+    ],
+    "hero_count": 10
+  },
+  {
+    "name": "紫禁丨划水怪",
+    "total": 4,
+    "wins": 2,
+    "losses": 0,
+    "win_rate": 50.0,
+    "atk": 4,
+    "def": 0,
+    "atk_win_rate": 50.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 3
+      },
+      {
+        "name": "李儒",
+        "count": 3
+      },
+      {
+        "name": "黄月英",
+        "count": 3
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 4
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "白马乄番茄",
+    "total": 4,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 25.0,
+    "atk": 4,
+    "def": 0,
+    "atk_win_rate": 25.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "木鹿大王",
+        "count": 2
+      },
+      {
+        "name": "兀突骨",
+        "count": 2
+      },
+      {
+        "name": "妲己",
+        "count": 2
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 4
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "剑岚丨墨初",
+    "total": 4,
+    "wins": 1,
+    "losses": 1,
+    "win_rate": 25.0,
+    "atk": 2,
+    "def": 2,
+    "atk_win_rate": 50.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "楼班",
+        "count": 1
+      },
+      {
+        "name": "荀彧",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 4
+      }
+    ],
+    "hero_count": 11
+  },
+  {
+    "name": "风花丨沽酒",
+    "total": 4,
+    "wins": 1,
+    "losses": 1,
+    "win_rate": 25.0,
+    "atk": 4,
+    "def": 0,
+    "atk_win_rate": 25.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "文鸯",
+        "count": 2
+      },
+      {
+        "name": "司马昭",
+        "count": 2
+      },
+      {
+        "name": "甄洛",
+        "count": 2
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 4
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "阿丨根",
+    "total": 4,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 4,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "生旦净末丑"
+    ],
+    "heroes": [
+      {
+        "name": "徐盛",
+        "count": 2
+      },
+      {
+        "name": "荀攸",
+        "count": 1
+      },
+      {
+        "name": "全琮",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 4
+      }
+    ],
+    "hero_count": 5
+  },
+  {
+    "name": "洪武丶浮白",
+    "total": 4,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 3,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "甘宁",
+        "count": 3
+      },
+      {
+        "name": "吕蒙",
+        "count": 3
+      },
+      {
+        "name": "陆抗",
+        "count": 3
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 4
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "贼丨好色",
+    "total": 4,
+    "wins": 0,
+    "losses": 2,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 3,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "甘宁",
+        "count": 1
+      },
+      {
+        "name": "吕蒙",
+        "count": 1
+      },
+      {
+        "name": "陆抗",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 4
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "江东旧主",
+    "total": 3,
+    "wins": 3,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 3,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "生旦净末丑"
+    ],
+    "heroes": [
+      {
+        "name": "蜀三相",
+        "count": 1
+      },
+      {
+        "name": "卫子夫",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 3
+      }
+    ],
+    "hero_count": 8
+  },
+  {
+    "name": "剑凨丨壿壿蚊",
+    "total": 3,
+    "wins": 3,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 3,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "雨丨剑挽流云"
+    ],
+    "heroes": [
+      {
+        "name": "王异",
+        "count": 1
+      },
+      {
+        "name": "吕蒙",
+        "count": 1
+      },
+      {
+        "name": "曹操",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 3
+      }
+    ],
+    "hero_count": 9
+  },
+  {
+    "name": "洪武丶禁伊尉",
+    "total": 3,
+    "wins": 2,
+    "losses": 0,
+    "win_rate": 66.67,
+    "atk": 3,
+    "def": 0,
+    "atk_win_rate": 66.67,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "孙坚",
+        "count": 1
+      },
+      {
+        "name": "诸葛亮",
+        "count": 1
+      },
+      {
+        "name": "袁绍",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 3
+      }
+    ],
+    "hero_count": 9
+  },
+  {
+    "name": "剑岚丨莽撞人",
+    "total": 3,
+    "wins": 2,
+    "losses": 0,
+    "win_rate": 66.67,
+    "atk": 2,
+    "def": 1,
+    "atk_win_rate": 50.0,
+    "def_win_rate": 100.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "刘备",
+        "count": 2
+      },
+      {
+        "name": "马良",
+        "count": 2
+      },
+      {
+        "name": "周泰",
+        "count": 2
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 3
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "天凉丨焲天天",
+    "total": 3,
+    "wins": 2,
+    "losses": 0,
+    "win_rate": 66.67,
+    "atk": 3,
+    "def": 0,
+    "atk_win_rate": 66.67,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "武锋训练营"
+    ],
+    "heroes": [
+      {
+        "name": "曹纯",
+        "count": 1
+      },
+      {
+        "name": "马超",
+        "count": 1
+      },
+      {
+        "name": "张辽",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 3
+      }
+    ],
+    "hero_count": 9
+  },
+  {
+    "name": "九魅丨小鱼妹",
+    "total": 3,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 33.33,
+    "atk": 3,
+    "def": 0,
+    "atk_win_rate": 33.33,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "黄月英",
+        "count": 1
+      },
+      {
+        "name": "周泰",
+        "count": 1
+      },
+      {
+        "name": "严颜",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 3
+      }
+    ],
+    "hero_count": 9
+  },
+  {
+    "name": "上将军吕布",
+    "total": 3,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 33.33,
+    "atk": 1,
+    "def": 2,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "马超",
+        "count": 2
+      },
+      {
+        "name": "甄洛",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 3
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "医丨谁的谁",
+    "total": 3,
+    "wins": 1,
+    "losses": 2,
+    "win_rate": 33.33,
+    "atk": 0,
+    "def": 3,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 33.33,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 3
+      },
+      {
+        "name": "曹操",
+        "count": 3
+      },
+      {
+        "name": "夏侯惇",
+        "count": 3
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 3
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "德影",
+    "total": 3,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 3,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "夏侯渊",
+        "count": 2
+      },
+      {
+        "name": "凌统",
+        "count": 2
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 3
+      }
+    ],
+    "hero_count": 5
+  },
+  {
+    "name": "洪武丶定鼎",
+    "total": 3,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 2,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "刘备",
+        "count": 1
+      },
+      {
+        "name": "马良",
+        "count": 1
+      },
+      {
+        "name": "夏侯惇",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 3
+      }
+    ],
+    "hero_count": 9
+  },
+  {
+    "name": "欢都丨华青",
+    "total": 3,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 3,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "刘备",
+        "count": 2
+      },
+      {
+        "name": "乐进",
+        "count": 2
+      },
+      {
+        "name": "周泰",
+        "count": 2
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 3
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "王慕天",
+    "total": 3,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 2,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "黄月英",
+        "count": 1
+      },
+      {
+        "name": "卫瓘",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 3
+      }
+    ],
+    "hero_count": 7
+  },
+  {
+    "name": "剑海星耀",
+    "total": 3,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 3,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "马岱",
+        "count": 1
+      },
+      {
+        "name": "关羽",
+        "count": 1
+      },
+      {
+        "name": "张绣",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 3
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "糖豆豆儿",
+    "total": 3,
+    "wins": 0,
+    "losses": 2,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 2,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "陆抗",
+        "count": 1
+      },
+      {
+        "name": "乐进",
+        "count": 1
+      },
+      {
+        "name": "周泰",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 3
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "白给丨天狐",
+    "total": 3,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 3,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "雨丨剑挽流云"
+    ],
+    "heroes": [
+      {
+        "name": "孙坚",
+        "count": 1
+      },
+      {
+        "name": "小乔＆大乔",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 2
+      },
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 4
+  },
+  {
+    "name": "巡猎I幽灵",
+    "total": 2,
+    "wins": 2,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 2,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "马岱",
+        "count": 1
+      },
+      {
+        "name": "关羽",
+        "count": 1
+      },
+      {
+        "name": "徐庶",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "剑岚丨子云君",
+    "total": 2,
+    "wins": 2,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 2,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "公孙瓒",
+        "count": 1
+      },
+      {
+        "name": "张辽",
+        "count": 1
+      },
+      {
+        "name": "马超",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "長凨丨破浪",
+    "total": 2,
+    "wins": 2,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 0,
+    "def": 2,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 100.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "王异",
+        "count": 2
+      },
+      {
+        "name": "吕蒙",
+        "count": 2
+      },
+      {
+        "name": "曹操",
+        "count": 2
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "洪武丶道衍",
+    "total": 2,
+    "wins": 2,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 1,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 100.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "马岱",
+        "count": 1
+      },
+      {
+        "name": "徐晃",
+        "count": 1
+      },
+      {
+        "name": "张绣",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "壹分丨芥末神",
+    "total": 2,
+    "wins": 2,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 0,
+    "def": 2,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 100.0,
+    "union_count": 1,
+    "unions": [
+      "武锋训练营"
+    ],
+    "heroes": [
+      {
+        "name": "曹纯",
+        "count": 2
+      },
+      {
+        "name": "文鸯",
+        "count": 2
+      },
+      {
+        "name": "张辽",
+        "count": 2
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "雲丨惊蛰",
+    "total": 2,
+    "wins": 2,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 0,
+    "def": 2,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 100.0,
+    "union_count": 1,
+    "unions": [
+      "风丨蜀道难"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 1
+      },
+      {
+        "name": "贾诩",
+        "count": 1
+      },
+      {
+        "name": "郭嘉",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "剑凨丨蚊62",
+    "total": 2,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 50.0,
+    "atk": 1,
+    "def": 1,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "徐盛",
+        "count": 1
+      },
+      {
+        "name": "华雄",
+        "count": 1
+      },
+      {
+        "name": "文丑",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "景丨風雲",
+    "total": 2,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 50.0,
+    "atk": 1,
+    "def": 1,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "王异",
+        "count": 1
+      },
+      {
+        "name": "吕蒙",
+        "count": 1
+      },
+      {
+        "name": "马良",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 5
+  },
+  {
+    "name": "桃园丨巨炮",
+    "total": 2,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 50.0,
+    "atk": 0,
+    "def": 2,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 50.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "曹纯",
+        "count": 1
+      },
+      {
+        "name": "华雄",
+        "count": 1
+      },
+      {
+        "name": "田丰",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "剑岚丨云梦开",
+    "total": 2,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 50.0,
+    "atk": 2,
+    "def": 0,
+    "atk_win_rate": 50.0,
+    "def_win_rate": 0.0,
+    "union_count": 2,
+    "unions": [
+      "唐丨天上人间",
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "公孙瓒",
+        "count": 1
+      },
+      {
+        "name": "马超",
+        "count": 1
+      },
+      {
+        "name": "张辽",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "又一丨渣爺",
+    "total": 2,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 50.0,
+    "atk": 2,
+    "def": 0,
+    "atk_win_rate": 50.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "大乔",
+        "count": 1
+      },
+      {
+        "name": "诸葛亮",
+        "count": 1
+      },
+      {
+        "name": "曹纯",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 5
+  },
+  {
+    "name": "洪武丶ICU",
+    "total": 2,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 50.0,
+    "atk": 0,
+    "def": 2,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 50.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "张飞",
+        "count": 1
+      },
+      {
+        "name": "诸葛亮",
+        "count": 1
+      },
+      {
+        "name": "孙权",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "维托",
+    "total": 2,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 50.0,
+    "atk": 2,
+    "def": 0,
+    "atk_win_rate": 50.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "沙摩柯",
+        "count": 1
+      },
+      {
+        "name": "曹植",
+        "count": 1
+      },
+      {
+        "name": "周泰",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "捌叁肆一菜鸟",
+    "total": 2,
+    "wins": 0,
+    "losses": 2,
+    "win_rate": 0.0,
+    "atk": 2,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "关银屏",
+        "count": 1
+      },
+      {
+        "name": "严颜",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "吟风丶泽野",
+    "total": 2,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 2,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "武锋训练营"
+    ],
+    "heroes": [
+      {
+        "name": "关兴＆张苞",
+        "count": 1
+      },
+      {
+        "name": "袁绍",
+        "count": 1
+      },
+      {
+        "name": "邓艾",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "岚丨天",
+    "total": 2,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 2,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "陆抗",
+        "count": 1
+      },
+      {
+        "name": "张机",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 4
+  },
+  {
+    "name": "欧皇丨言",
+    "total": 2,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 2,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "全民公敌"
+    ],
+    "heroes": [
+      {
+        "name": "关兴＆张苞",
+        "count": 1
+      },
+      {
+        "name": "诸葛亮",
+        "count": 1
+      },
+      {
+        "name": "姜维",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "莽丨靓仔无主",
+    "total": 2,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 2,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 1
+  },
+  {
+    "name": "洪武丶宝哥",
+    "total": 2,
+    "wins": 0,
+    "losses": 2,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "陆抗",
+        "count": 1
+      },
+      {
+        "name": "辛宪英",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "洪武丶神歌",
+    "total": 2,
+    "wins": 0,
+    "losses": 2,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 2,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "王异",
+        "count": 1
+      },
+      {
+        "name": "吕蒙",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "洪武丶l十l",
+    "total": 2,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 2,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "王异",
+        "count": 2
+      },
+      {
+        "name": "吕蒙",
+        "count": 2
+      },
+      {
+        "name": "曹操",
+        "count": 2
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "風丨随风",
+    "total": 2,
+    "wins": 0,
+    "losses": 2,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 2,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "曹操",
+        "count": 1
+      },
+      {
+        "name": "曹仁",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 2
+  },
+  {
+    "name": "剑岚丨大荭袍",
+    "total": 2,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "袁绍",
+        "count": 1
+      },
+      {
+        "name": "李儒",
+        "count": 1
+      },
+      {
+        "name": "吕蒙",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "江夏十五骑",
+    "total": 2,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 2,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 0
+  },
+  {
+    "name": "剑来丶瓜樂",
+    "total": 2,
+    "wins": 0,
+    "losses": 2,
+    "win_rate": 0.0,
+    "atk": 2,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 1
+      },
+      {
+        "name": "吕蒙",
+        "count": 1
+      },
+      {
+        "name": "曹操",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "剑岚丨揽月",
+    "total": 2,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 2,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 1
+      },
+      {
+        "name": "程昱",
+        "count": 1
+      },
+      {
+        "name": "郭嘉",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "杂鱼",
+    "total": 2,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 2,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "关羽",
+        "count": 1
+      },
+      {
+        "name": "魏延",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "洪武丶嘉",
+    "total": 2,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 2,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "孙桓",
+        "count": 1
+      },
+      {
+        "name": "司马徽",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 5
+  },
+  {
+    "name": "白给丨潇洒包",
+    "total": 2,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 2,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "关兴＆张苞",
+        "count": 2
+      },
+      {
+        "name": "诸葛亮",
+        "count": 2
+      },
+      {
+        "name": "袁绍",
+        "count": 2
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "剑岚丨碎风",
+    "total": 2,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "司马孚",
+        "count": 1
+      },
+      {
+        "name": "张曼成",
+        "count": 1
+      },
+      {
+        "name": "全琮",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "冥独",
+    "total": 2,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 2,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "陆逊",
+        "count": 1
+      },
+      {
+        "name": "张机",
+        "count": 1
+      },
+      {
+        "name": "周瑜",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 2
+      }
+    ],
+    "hero_count": 6
+  },
+  {
+    "name": "桃园丨七煞",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 1
+      },
+      {
+        "name": "程昱",
+        "count": 1
+      },
+      {
+        "name": "郭嘉",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "武锋丨阿祖",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 100.0,
+    "union_count": 1,
+    "unions": [
+      "风丨蜀道难"
+    ],
+    "heroes": [
+      {
+        "name": "凌统",
+        "count": 1
+      },
+      {
+        "name": "袁术",
+        "count": 1
+      },
+      {
+        "name": "典韦",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "剑岚丨花花",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 1
+      },
+      {
+        "name": "程昱",
+        "count": 1
+      },
+      {
+        "name": "郭嘉",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "风x抚州",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "王异",
+        "count": 1
+      },
+      {
+        "name": "吕蒙",
+        "count": 1
+      },
+      {
+        "name": "曹操",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "凛風乄81",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "刘备",
+        "count": 1
+      },
+      {
+        "name": "魏延",
+        "count": 1
+      },
+      {
+        "name": "乐进",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "桃园丨小虾",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "吕布",
+        "count": 1
+      },
+      {
+        "name": "张机",
+        "count": 1
+      },
+      {
+        "name": "孙权",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "凛風乄魔皇",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "大雪刮凛風"
+    ],
+    "heroes": [
+      {
+        "name": "马岱",
+        "count": 1
+      },
+      {
+        "name": "关羽",
+        "count": 1
+      },
+      {
+        "name": "张绣",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "桃园丨立月尤",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "陆抗",
+        "count": 1
+      },
+      {
+        "name": "张机",
+        "count": 1
+      },
+      {
+        "name": "皇甫嵩",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "华夏丨奕崽",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "雨丨剑挽流云"
+    ],
+    "heroes": [
+      {
+        "name": "甘宁",
+        "count": 1
+      },
+      {
+        "name": "陆抗",
+        "count": 1
+      },
+      {
+        "name": "吕蒙",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "長凨丨小萌新",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 100.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "曹纯",
+        "count": 1
+      },
+      {
+        "name": "马超",
+        "count": 1
+      },
+      {
+        "name": "张辽",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "巡猎丨倾心月",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "生旦净末丑"
+    ],
+    "heroes": [
+      {
+        "name": "吕布",
+        "count": 1
+      },
+      {
+        "name": "张机",
+        "count": 1
+      },
+      {
+        "name": "袁术",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "巡猎丨彭城",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "赵云",
+        "count": 1
+      },
+      {
+        "name": "张机",
+        "count": 1
+      },
+      {
+        "name": "魏延",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "剑凨丨橘政宗",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "雨丨剑挽流云"
+    ],
+    "heroes": [
+      {
+        "name": "诸葛亮",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 2
+  },
+  {
+    "name": "香丨升哥哥",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 100.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "甘宁",
+        "count": 1
+      },
+      {
+        "name": "张机",
+        "count": 1
+      },
+      {
+        "name": "孙权",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "百川丨东到海",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "黄月英",
+        "count": 1
+      },
+      {
+        "name": "董卓",
+        "count": 1
+      },
+      {
+        "name": "卫瓘",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "景丨山河锦绣",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 100.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 1
+      },
+      {
+        "name": "程昱",
+        "count": 1
+      },
+      {
+        "name": "郭嘉",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "吟风丶宜阳",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "武锋训练营"
+    ],
+    "heroes": [
+      {
+        "name": "王异",
+        "count": 1
+      },
+      {
+        "name": "曹丕",
+        "count": 1
+      },
+      {
+        "name": "吕蒙",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "洪武丶天吉星",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 100.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "马岱",
+        "count": 1
+      },
+      {
+        "name": "关羽",
+        "count": 1
+      },
+      {
+        "name": "张绣",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "巡猎丨三哥",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "赵云",
+        "count": 1
+      },
+      {
+        "name": "张机",
+        "count": 1
+      },
+      {
+        "name": "魏延",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "雨迟丨心月狐",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "祝融夫人",
+        "count": 1
+      },
+      {
+        "name": "郭嘉",
+        "count": 1
+      },
+      {
+        "name": "夏侯惇",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "广州十三幺",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 100.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 1
+      },
+      {
+        "name": "程昱",
+        "count": 1
+      },
+      {
+        "name": "郭嘉",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "法号丶施暴",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 100.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 1
+      },
+      {
+        "name": "程昱",
+        "count": 1
+      },
+      {
+        "name": "郭嘉",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "巡猎丨洛阳",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "马超",
+        "count": 1
+      },
+      {
+        "name": "曹纯",
+        "count": 1
+      },
+      {
+        "name": "张辽",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "苟道是沧桑",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 1
+      },
+      {
+        "name": "曹操",
+        "count": 1
+      },
+      {
+        "name": "夏侯惇",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "夏亚",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "马岱",
+        "count": 1
+      },
+      {
+        "name": "关羽",
+        "count": 1
+      },
+      {
+        "name": "张绣",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "長凨丨金克丝",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "马岱",
+        "count": 1
+      },
+      {
+        "name": "徐晃",
+        "count": 1
+      },
+      {
+        "name": "张绣",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "长亭丨星辰",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "张宁",
+        "count": 1
+      },
+      {
+        "name": "李儒",
+        "count": 1
+      },
+      {
+        "name": "朱儁",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "巡猎丨元夕",
+    "total": 1,
+    "wins": 1,
+    "losses": 0,
+    "win_rate": 100.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 100.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "生旦净末丑"
+    ],
+    "heroes": [
+      {
+        "name": "刘备",
+        "count": 1
+      },
+      {
+        "name": "马良",
+        "count": 1
+      },
+      {
+        "name": "夏侯惇",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "藏玉阁丨玉墨",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 1
+      },
+      {
+        "name": "曹操",
+        "count": 1
+      },
+      {
+        "name": "夏侯惇",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "巡猎丨百越",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "王异",
+        "count": 1
+      },
+      {
+        "name": "张辽",
+        "count": 1
+      },
+      {
+        "name": "夏侯惇",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "武锋l焱妃",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "邓艾",
+        "count": 1
+      },
+      {
+        "name": "兀突骨",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 2
+  },
+  {
+    "name": "凛风乄拆将军",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 0,
+    "unions": [],
+    "heroes": [
+      {
+        "name": "马超",
+        "count": 1
+      },
+      {
+        "name": "曹纯",
+        "count": 1
+      },
+      {
+        "name": "张辽",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "百川丨天赐福",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 0
+  },
+  {
+    "name": "冬酒",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "一分也是爱"
+    ],
+    "heroes": [
+      {
+        "name": "诸葛亮",
+        "count": 1
+      },
+      {
+        "name": "魏延",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "夜夜00",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "雨丨孤舟辞月"
+    ],
+    "heroes": [
+      {
+        "name": "马腾",
+        "count": 1
+      },
+      {
+        "name": "夏侯月姬",
+        "count": 1
+      },
+      {
+        "name": "徐庶",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "迷靓丨404",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "雨丨剑挽流云"
+    ],
+    "heroes": [
+      {
+        "name": "何太后",
+        "count": 1
+      },
+      {
+        "name": "小乔＆大乔",
+        "count": 1
+      },
+      {
+        "name": "田丰",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "铁甲尚在",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "魏续",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 2
+  },
+  {
+    "name": "菜猫丨胡汉三",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 0
+  },
+  {
+    "name": "华夏丨脆皮咩",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 1
+      },
+      {
+        "name": "曹操",
+        "count": 1
+      },
+      {
+        "name": "夏侯惇",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "亡命徒丨呗呗",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "风丨蜀道难"
+    ],
+    "heroes": [
+      {
+        "name": "祝融夫人",
+        "count": 1
+      },
+      {
+        "name": "华雄",
+        "count": 1
+      },
+      {
+        "name": "曹操",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "巡猎丨临淄",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "曹纯",
+        "count": 1
+      },
+      {
+        "name": "马超",
+        "count": 1
+      },
+      {
+        "name": "张辽",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "巡猎丨铁马",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "王异",
+        "count": 1
+      },
+      {
+        "name": "吕蒙",
+        "count": 1
+      },
+      {
+        "name": "曹操",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "百川丨浮世",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "陆抗",
+        "count": 1
+      },
+      {
+        "name": "刘备",
+        "count": 1
+      },
+      {
+        "name": "周泰",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "铁血军魂",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 0,
+    "unions": [],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 1
+      },
+      {
+        "name": "程昱",
+        "count": 1
+      },
+      {
+        "name": "郭嘉",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "华夏丨夜海亚",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "王异",
+        "count": 1
+      },
+      {
+        "name": "张辽",
+        "count": 1
+      },
+      {
+        "name": "夏侯惇",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "迷靓丨末羊",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "雨丨剑挽流云"
+    ],
+    "heroes": [
+      {
+        "name": "孟获",
+        "count": 1
+      },
+      {
+        "name": "吕布",
+        "count": 1
+      },
+      {
+        "name": "杨秋",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "乱世丨公子6",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 0
+  },
+  {
+    "name": "长安丨狐狸",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 0
+  },
+  {
+    "name": "剑凨丨橙子圆",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "刘备",
+        "count": 1
+      },
+      {
+        "name": "庞统",
+        "count": 1
+      },
+      {
+        "name": "张飞",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "乱世丨黄帝",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 0,
+    "unions": [],
+    "heroes": [
+      {
+        "name": "大乔",
+        "count": 1
+      },
+      {
+        "name": "陆抗",
+        "count": 1
+      },
+      {
+        "name": "周泰",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "梦翊丨河内",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "孙坚",
+        "count": 1
+      },
+      {
+        "name": "小乔＆大乔",
+        "count": 1
+      },
+      {
+        "name": "袁绍",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "桃园丨汩汩",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "魏续",
+        "count": 1
+      },
+      {
+        "name": "王烈",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 2
+  },
+  {
+    "name": "桃园丨远歌",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "生旦净末丑"
+    ],
+    "heroes": [
+      {
+        "name": "孙坚",
+        "count": 1
+      },
+      {
+        "name": "小乔＆大乔",
+        "count": 1
+      },
+      {
+        "name": "袁绍",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "巡猎丨瞎搞",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 1
+  },
+  {
+    "name": "瞎搞丨不会玩",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 0,
+    "unions": [],
+    "heroes": [
+      {
+        "name": "袁术",
+        "count": 1
+      },
+      {
+        "name": "华雄",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "凛風乄奈何",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "大雪刮凛風"
+    ],
+    "heroes": [],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 0
+  },
+  {
+    "name": "知玄丶天龙泉",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "生旦净末丑"
+    ],
+    "heroes": [
+      {
+        "name": "关银屏",
+        "count": 1
+      },
+      {
+        "name": "张机",
+        "count": 1
+      },
+      {
+        "name": "孙权",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "BBA丨带刀",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "张飞",
+        "count": 1
+      },
+      {
+        "name": "关羽",
+        "count": 1
+      },
+      {
+        "name": "法正",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "武锋丨魔神",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "武锋训练营"
+    ],
+    "heroes": [
+      {
+        "name": "李肃",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 2
+  },
+  {
+    "name": "临风丨寒戈朔",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "冯紞",
+        "count": 1
+      },
+      {
+        "name": "高览",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 2
+  },
+  {
+    "name": "凛风乄南哥",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "风丨蜀道难"
+    ],
+    "heroes": [
+      {
+        "name": "小乔＆大乔",
+        "count": 1
+      },
+      {
+        "name": "邓艾",
+        "count": 1
+      },
+      {
+        "name": "于禁",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "凛風乄妺妺妺",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "风丨蜀道难"
+    ],
+    "heroes": [
+      {
+        "name": "郭嘉",
+        "count": 1
+      },
+      {
+        "name": "金环三结",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "白给丨一坨",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "雨丨剑挽流云"
+    ],
+    "heroes": [
+      {
+        "name": "辛宪英",
+        "count": 1
+      },
+      {
+        "name": "关兴＆张苞",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "武神丨白大侠",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "魏续",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 2
+  },
+  {
+    "name": "哈姆霍克",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "公孙瓒",
+        "count": 1
+      },
+      {
+        "name": "祝融夫人",
+        "count": 1
+      },
+      {
+        "name": "张辽",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "风起丨十一",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 1
+      },
+      {
+        "name": "贾诩",
+        "count": 1
+      },
+      {
+        "name": "郭嘉",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "白给丨罐大帅",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "雨丨剑挽流云"
+    ],
+    "heroes": [
+      {
+        "name": "祝融夫人",
+        "count": 1
+      },
+      {
+        "name": "华雄",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 2
+  },
+  {
+    "name": "洪武丶王骑",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "刘备",
+        "count": 1
+      },
+      {
+        "name": "小乔",
+        "count": 1
+      },
+      {
+        "name": "徐庶",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "彦伊熙熙",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 0
+  },
+  {
+    "name": "壹块柒",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "雨丨剑挽流云"
+    ],
+    "heroes": [
+      {
+        "name": "关兴＆张苞",
+        "count": 1
+      },
+      {
+        "name": "卫瓘",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "亡命徒丨魉魅",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "灬亡命之徒灬"
+    ],
+    "heroes": [
+      {
+        "name": "孙坚",
+        "count": 1
+      },
+      {
+        "name": "诸葛亮",
+        "count": 1
+      },
+      {
+        "name": "小乔＆大乔",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "华夏丨怀瑾",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "杨秋",
+        "count": 1
+      },
+      {
+        "name": "侯选",
+        "count": 1
+      },
+      {
+        "name": "张横",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "凛風乄亽丷硬",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "风丨蜀道难"
+    ],
+    "heroes": [
+      {
+        "name": "大乔",
+        "count": 1
+      },
+      {
+        "name": "张机",
+        "count": 1
+      },
+      {
+        "name": "鲁肃",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "白首相知",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 0
+  },
+  {
+    "name": "桃园丨公子",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "雨丨剑挽流云"
+    ],
+    "heroes": [
+      {
+        "name": "公孙瓒",
+        "count": 1
+      },
+      {
+        "name": "张辽",
+        "count": 1
+      },
+      {
+        "name": "马超",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "迷靓丨惊鸿",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [
+      {
+        "name": "徐盛",
+        "count": 1
+      },
+      {
+        "name": "荀攸",
+        "count": 1
+      },
+      {
+        "name": "全琮",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "岚丨登锋陷阵",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "雨丨剑挽流云"
+    ],
+    "heroes": [
+      {
+        "name": "刘备",
+        "count": 1
+      },
+      {
+        "name": "袁术",
+        "count": 1
+      },
+      {
+        "name": "典韦",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "洪武丶天权",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "马岱",
+        "count": 1
+      },
+      {
+        "name": "张绣",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "剑岚丨三星照",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "陆抗",
+        "count": 1
+      },
+      {
+        "name": "张机",
+        "count": 1
+      },
+      {
+        "name": "皇甫嵩",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "北凉丨不悲凉",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "大乔",
+        "count": 1
+      },
+      {
+        "name": "张机",
+        "count": 1
+      },
+      {
+        "name": "黄月英",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "炎帝丨大米",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "杜预",
+        "count": 1
+      },
+      {
+        "name": "黄月英",
+        "count": 1
+      },
+      {
+        "name": "卫瓘",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "风王",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "荀彧",
+        "count": 1
+      },
+      {
+        "name": "贾诩",
+        "count": 1
+      },
+      {
+        "name": "郭嘉",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "長凨丨花里藏",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "司马恂",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 2
+  },
+  {
+    "name": "剑岚丨星辰",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "吕布",
+        "count": 1
+      },
+      {
+        "name": "张机",
+        "count": 1
+      },
+      {
+        "name": "孙权",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "灵魂丨天命",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 0
+  },
+  {
+    "name": "祝研知",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "关银屏",
+        "count": 1
+      },
+      {
+        "name": "魏延",
+        "count": 1
+      },
+      {
+        "name": "关兴＆张苞",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "洪武丶天浪星",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "小乔＆大乔",
+        "count": 1
+      },
+      {
+        "name": "诸葛亮",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 2
+  },
+  {
+    "name": "洪武丶四余",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "马良",
+        "count": 1
+      },
+      {
+        "name": "刘备",
+        "count": 1
+      },
+      {
+        "name": "夏侯惇",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "洪武丶烧得很",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "刘备",
+        "count": 1
+      },
+      {
+        "name": "马良",
+        "count": 1
+      },
+      {
+        "name": "夏侯惇",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "洪武丶老炮儿",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 0
+  },
+  {
+    "name": "長凨丨拂云",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨天上人间"
+    ],
+    "heroes": [
+      {
+        "name": "大乔",
+        "count": 1
+      },
+      {
+        "name": "张机",
+        "count": 1
+      },
+      {
+        "name": "孙权",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "千秋丨圣堂",
+    "total": 1,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "atk": 1,
+    "def": 0,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "唐丨无限江山"
+    ],
+    "heroes": [
+      {
+        "name": "大乔",
+        "count": 1
+      },
+      {
+        "name": "张机",
+        "count": 1
+      },
+      {
+        "name": "孙权",
+        "count": 1
+      }
+    ],
+    "battle_types": [
+      {
+        "type": "个人战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 3
+  },
+  {
+    "name": "吟风丶壹戰",
+    "total": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "atk": 0,
+    "def": 1,
+    "atk_win_rate": 0.0,
+    "def_win_rate": 0.0,
+    "union_count": 1,
+    "unions": [
+      "宫商角徽羽"
+    ],
+    "heroes": [],
+    "battle_types": [
+      {
+        "type": "同盟战报",
+        "count": 1
+      }
+    ],
+    "hero_count": 1
+  }
+]

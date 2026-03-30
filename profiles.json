@@ -1,0 +1,26 @@
+[
+  {
+    "profile_id": "42.186.96.143:3z5ddrkg06946",
+    "server_ip": "42.186.96.143",
+    "server_name": "X5377",
+    "role_id": "3z5ddrkg06946",
+    "role_name": "余烬丶天空",
+    "src_ip": "42.186.96.143:8001",
+    "db_path": "D:\\nettest\\stzb_42.186.96.143.db",
+    "cap_dir": "D:\\nettest\\capture_new\\stzb_42.186.96.143",
+    "created_at": "2026-03-12 23:12:09",
+    "last_used": "2026-03-30 17:57:13"
+  },
+  {
+    "profile_id": "42.186.96.143:3z5ddqy811007",
+    "server_ip": "42.186.96.143",
+    "server_name": "X5377",
+    "role_id": "3z5ddqy811007",
+    "role_name": "余烬丶小空空",
+    "src_ip": "42.186.96.143:8001",
+    "db_path": "D:\\nettest\\stzb_42.186.96.143.db",
+    "cap_dir": "D:\\nettest\\capture_new\\stzb_42.186.96.143",
+    "created_at": "2026-03-13 01:38:29",
+    "last_used": "2026-03-30 19:43:56"
+  }
+]

@@ -1,0 +1,4130 @@
+[
+  {
+    "id": 200001,
+    "name": "衣带密诏",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "友军单体",
+    "targetShow": "友军单体"
+  },
+  {
+    "id": 200002,
+    "name": "乱政",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200003,
+    "name": "金吾飞将",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200004,
+    "name": "胡笳离愁",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200005,
+    "name": "闭月",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200006,
+    "name": "四世三公",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200007,
+    "name": "将倾之柱",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200008,
+    "name": "黄天当立",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200009,
+    "name": "逆谋",
+    "type": "被动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200010,
+    "name": "天下无双",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200011,
+    "name": "算无遗策",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200013,
+    "name": "血溅黄砂",
+    "type": "被动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200015,
+    "name": "洛水佳人",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200016,
+    "name": "皇裔流离",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200017,
+    "name": "诸葛锦囊",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200019,
+    "name": "红颜铁骑",
+    "type": "被动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200020,
+    "name": "匠心不竭",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200021,
+    "name": "银龙冲阵",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200022,
+    "name": "长坂之吼",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200023,
+    "name": "魏武之世",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200024,
+    "name": "驱虎吞狼",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200025,
+    "name": "魏武之泽",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "友军单体",
+    "targetShow": "友军单体"
+  },
+  {
+    "id": 200026,
+    "name": "千里单骑",
+    "type": "追击",
+    "soldierType": "骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200027,
+    "name": "其疾如风",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2-3个目标)"
+  },
+  {
+    "id": 200028,
+    "name": "世仇",
+    "type": "追击",
+    "soldierType": "弓",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200029,
+    "name": "强势",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200030,
+    "name": "九锡黄龙",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200031,
+    "name": "玄武洰流",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200032,
+    "name": "复誓业火",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200033,
+    "name": "遗志",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "我军单体",
+    "targetShow": "我军单体"
+  },
+  {
+    "id": 200034,
+    "name": "侵掠如火",
+    "type": "被动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200035,
+    "name": "枭姬",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200036,
+    "name": "辅王抑寇",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200037,
+    "name": "母仪浮梦",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200038,
+    "name": "饮鸩之怨",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200039,
+    "name": "猛火",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200040,
+    "name": "节镇关东",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200041,
+    "name": "威震北疆",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200042,
+    "name": "献刀七星",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200043,
+    "name": "藏玉在怀",
+    "type": "追击",
+    "soldierType": "骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200044,
+    "name": "义勇军",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200046,
+    "name": "修罗姬返",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200047,
+    "name": "枭雄所愿",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200048,
+    "name": "重斩",
+    "type": "追击",
+    "soldierType": "步",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200049,
+    "name": "神速奔袭",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200050,
+    "name": "太平异道",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200051,
+    "name": "劫掠",
+    "type": "追击",
+    "soldierType": "骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200052,
+    "name": "坚盾阵",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200053,
+    "name": "黄巾军威",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200054,
+    "name": "温侯遗勇",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200055,
+    "name": "固军备战",
+    "type": "被动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200056,
+    "name": "直言",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200057,
+    "name": "骁勇",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200058,
+    "name": "奋威",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200061,
+    "name": "铁骑突击",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200062,
+    "name": "昭烈神思",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2-3个目标)"
+  },
+  {
+    "id": 200063,
+    "name": "挂印封金",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200064,
+    "name": "傲将奇兵",
+    "type": "追击",
+    "soldierType": "步",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200065,
+    "name": "沙场破阵",
+    "type": "追击",
+    "soldierType": "骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200066,
+    "name": "锐矛贯体",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200067,
+    "name": "索命连环",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200068,
+    "name": "忠义蜀后",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200070,
+    "name": "巾帼战阵",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200071,
+    "name": "默守贤义",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200072,
+    "name": "其徐如林",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200073,
+    "name": "六宫无怨",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2-3个目标)"
+  },
+  {
+    "id": 200074,
+    "name": "素衣伶姬",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200075,
+    "name": "决绝",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200076,
+    "name": "鬼谋",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200077,
+    "name": "拔箭啖睛",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200078,
+    "name": "猛虎啸",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200079,
+    "name": "奋不顾身",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "友军单体",
+    "targetShow": "友军单体"
+  },
+  {
+    "id": 200080,
+    "name": "破凰",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200081,
+    "name": "以逸待劳",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200082,
+    "name": "死战明志",
+    "type": "被动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200083,
+    "name": "八门金锁",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200084,
+    "name": "战伤无畏",
+    "type": "被动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200085,
+    "name": "炬石",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-3个目标)"
+  },
+  {
+    "id": 200086,
+    "name": "古锭之锋",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200087,
+    "name": "小霸王",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200088,
+    "name": "方阵突击",
+    "type": "追击",
+    "soldierType": "弓",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200089,
+    "name": "国太威仪",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200090,
+    "name": "火烧连营",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200091,
+    "name": "幻花乱影",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200092,
+    "name": "蝶舞红莲",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200093,
+    "name": "众望南疆",
+    "type": "被动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200094,
+    "name": "将门虎女",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200096,
+    "name": "北地枪王",
+    "type": "追击",
+    "soldierType": "骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200097,
+    "name": "突进",
+    "type": "主动",
+    "soldierType": "步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200098,
+    "name": "凿穿",
+    "type": "主动",
+    "soldierType": "步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200099,
+    "name": "车悬",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200100,
+    "name": "飞虹",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200101,
+    "name": "齐射",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200102,
+    "name": "箭岚",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200103,
+    "name": "强攻",
+    "type": "主动",
+    "soldierType": "步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200104,
+    "name": "乱击",
+    "type": "主动",
+    "soldierType": "步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200105,
+    "name": "枪阵",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200106,
+    "name": "斩铁",
+    "type": "主动",
+    "soldierType": "步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200107,
+    "name": "破魂",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200108,
+    "name": "重伤",
+    "type": "追击",
+    "soldierType": "弓步骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200109,
+    "name": "破甲",
+    "type": "追击",
+    "soldierType": "弓步骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200110,
+    "name": "浴血",
+    "type": "追击",
+    "soldierType": "弓步骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200111,
+    "name": "冲锋",
+    "type": "主动",
+    "soldierType": "步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200112,
+    "name": "死士突击",
+    "type": "主动",
+    "soldierType": "步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200113,
+    "name": "窃兵",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200114,
+    "name": "伏兵",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200115,
+    "name": "夹攻",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200116,
+    "name": "声东击西",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200117,
+    "name": "火箭",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200118,
+    "name": "火辎",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200119,
+    "name": "焰焚箕轸",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2-3个目标)"
+  },
+  {
+    "id": 200120,
+    "name": "竭泽",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200121,
+    "name": "溃堤",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200122,
+    "name": "水淹七军",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200123,
+    "name": "落石",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200124,
+    "name": "绝道",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200125,
+    "name": "危崖困军",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200126,
+    "name": "落雷",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200127,
+    "name": "迷阵",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200128,
+    "name": "狼烟",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200129,
+    "name": "毒泉",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200130,
+    "name": "楚歌四起",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2-3个目标)"
+  },
+  {
+    "id": 200131,
+    "name": "驱逐",
+    "type": "追击",
+    "soldierType": "弓步骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200132,
+    "name": "攻心",
+    "type": "追击",
+    "soldierType": "弓步骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200133,
+    "name": "收拢",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "友军单体",
+    "targetShow": "友军单体"
+  },
+  {
+    "id": 200134,
+    "name": "休整",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200135,
+    "name": "养精蓄锐",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200136,
+    "name": "青囊秘要",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200137,
+    "name": "急救",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "友军单体",
+    "targetShow": "友军单体"
+  },
+  {
+    "id": 200138,
+    "name": "包扎",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200139,
+    "name": "增援",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200141,
+    "name": "中级鼓舞",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200145,
+    "name": "初级离间",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200146,
+    "name": "中级离间",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200151,
+    "name": "中级防御",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200153,
+    "name": "防御之策",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200161,
+    "name": "中级谎报",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200173,
+    "name": "牵制之策",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200178,
+    "name": "坚守突击",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200179,
+    "name": "疾风突击",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200180,
+    "name": "速战坚守",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200181,
+    "name": "运筹帷握",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200182,
+    "name": "文韬武略",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200183,
+    "name": "成竹在胸",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200184,
+    "name": "百战精兵",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200185,
+    "name": "援军之策",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200186,
+    "name": "援军秘策",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200188,
+    "name": "毁墙",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200189,
+    "name": "投石轰击",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200190,
+    "name": "远攻强化",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200191,
+    "name": "坚守",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200192,
+    "name": "铁壁",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200193,
+    "name": "固阵",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200194,
+    "name": "避其锋芒",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200195,
+    "name": "奋起",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200196,
+    "name": "激昂",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200197,
+    "name": "犒劳",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200198,
+    "name": "大赏三军",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200199,
+    "name": "威压",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200200,
+    "name": "乱阵",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200201,
+    "name": "无心恋战",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200202,
+    "name": "假途",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200203,
+    "name": "劫粮",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200204,
+    "name": "神兵天降",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200205,
+    "name": "洞察",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200206,
+    "name": "追击",
+    "type": "追击",
+    "soldierType": "弓步骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200207,
+    "name": "攻其要害",
+    "type": "追击",
+    "soldierType": "弓步骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200208,
+    "name": "温酒斩将",
+    "type": "追击",
+    "soldierType": "弓步骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200209,
+    "name": "远攻之策",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200210,
+    "name": "远攻秘策",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200211,
+    "name": "挑衅",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200212,
+    "name": "辱骂",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200213,
+    "name": "反计",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200214,
+    "name": "规避",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200215,
+    "name": "空城",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200216,
+    "name": "冷静",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "我军单体",
+    "targetShow": "我军单体"
+  },
+  {
+    "id": 200217,
+    "name": "安抚军心",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200218,
+    "name": "看破",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200219,
+    "name": "了如指掌",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200220,
+    "name": "反计之策",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200221,
+    "name": "反击",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200222,
+    "name": "反击之策",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200223,
+    "name": "连战",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200224,
+    "name": "穷追猛打",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200225,
+    "name": "横扫",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200226,
+    "name": "长兵方阵",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200227,
+    "name": "佯攻",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200228,
+    "name": "战必断金",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200229,
+    "name": "奇袭",
+    "type": "追击",
+    "soldierType": "弓步骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200230,
+    "name": "措手不及",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200231,
+    "name": "先驱",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200232,
+    "name": "长驱直入",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200233,
+    "name": "先驱突击",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200234,
+    "name": "陷阱",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200235,
+    "name": "浑水摸鱼",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200236,
+    "name": "疑兵",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200237,
+    "name": "妖术",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200238,
+    "name": "援护",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "友军单体",
+    "targetShow": "友军单体"
+  },
+  {
+    "id": 200239,
+    "name": "移花接木",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200603,
+    "name": "白楼独舞",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200604,
+    "name": "乱离中宫",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200605,
+    "name": "飘零红颜",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200606,
+    "name": "勇将继传",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200607,
+    "name": "帝临回光",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200608,
+    "name": "陷阵营",
+    "type": "被动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200609,
+    "name": "伪帝",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200610,
+    "name": "逆反毒杀",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200611,
+    "name": "老骥伏枥",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200613,
+    "name": "强弓连射",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200614,
+    "name": "重谋",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "我军单体",
+    "targetShow": "我军单体"
+  },
+  {
+    "id": 200616,
+    "name": "苦肉计",
+    "type": "追击",
+    "soldierType": "步",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200617,
+    "name": "王佐之才",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200619,
+    "name": "强攻兵法",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200620,
+    "name": "坚守兵法",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200621,
+    "name": "速战兵法",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200622,
+    "name": "不攻",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200623,
+    "name": "锦马慑敌",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200624,
+    "name": "轻侠妄为",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200625,
+    "name": "竭忠",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200626,
+    "name": "吴之副督",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200627,
+    "name": "慎兵",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200628,
+    "name": "斧钺之利",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200629,
+    "name": "国士",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200630,
+    "name": "拔剑护主",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200631,
+    "name": "身佑废皇",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200632,
+    "name": "回马",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200633,
+    "name": "黄须虎子",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200634,
+    "name": "十二奇策",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "友军单体",
+    "targetShow": "友军单体"
+  },
+  {
+    "id": 200635,
+    "name": "奔袭",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200636,
+    "name": "远攻奇略",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200637,
+    "name": "悍将",
+    "type": "被动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200640,
+    "name": "以主制客",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200641,
+    "name": "水泽伏击",
+    "type": "追击",
+    "soldierType": "弓",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200642,
+    "name": "借刀斩叛",
+    "type": "被动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200643,
+    "name": "愈战愈勇",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200644,
+    "name": "步步为营",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200645,
+    "name": "深谋远虑",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200646,
+    "name": "疾风迅雷",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200647,
+    "name": "一骑当千",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200648,
+    "name": "白衣渡江",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200649,
+    "name": "怯弱",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200650,
+    "name": "存嗣流愿",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200651,
+    "name": "妒后",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200652,
+    "name": "双艳",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200653,
+    "name": "南中平蛮",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200654,
+    "name": "安途若素",
+    "type": "被动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200655,
+    "name": "虎步关右",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200656,
+    "name": "经久善战",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200657,
+    "name": "蜀中老将",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200658,
+    "name": "钝兵挫锐",
+    "type": "追击",
+    "soldierType": "弓步骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200659,
+    "name": "怯心夺志",
+    "type": "追击",
+    "soldierType": "弓步骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200660,
+    "name": "殉战",
+    "type": "被动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200662,
+    "name": "困守",
+    "type": "被动",
+    "soldierType": "弓",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200663,
+    "name": "云梯",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200666,
+    "name": "游击",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200669,
+    "name": "戒备",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200670,
+    "name": "谨言",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200671,
+    "name": "劫寨",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200672,
+    "name": "雀伏",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200673,
+    "name": "掎角之势",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200674,
+    "name": "一夫当关",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200676,
+    "name": "雄兵破敌",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200677,
+    "name": "险途暗渡",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200678,
+    "name": "名士在野",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200679,
+    "name": "尽忠迎驾",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200680,
+    "name": "定军扬威",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200681,
+    "name": "虎痴嗔怒",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200682,
+    "name": "猜忌",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200683,
+    "name": "伐谋",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200684,
+    "name": "道行险阻",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200685,
+    "name": "黄天余音",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200686,
+    "name": "符医术毒",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200687,
+    "name": "始计",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200688,
+    "name": "合流",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200689,
+    "name": "不动如山",
+    "type": "被动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200690,
+    "name": "闪击",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200691,
+    "name": "白刃",
+    "type": "指挥",
+    "soldierType": "步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200692,
+    "name": "奇佐鬼谋",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200693,
+    "name": "密谋定蜀",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200694,
+    "name": "火势风威",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200014,
+    "name": "酒池肉林",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200012,
+    "name": "辕门射戟",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200714,
+    "name": "万箭齐发",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200715,
+    "name": "十面埋伏",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200695,
+    "name": "拒盾",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200696,
+    "name": "迫近",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200697,
+    "name": "退避",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200698,
+    "name": "截断",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200665,
+    "name": "抢攻",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200069,
+    "name": "神威将女",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200059,
+    "name": "方天余烈",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200699,
+    "name": "疾行速战",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200700,
+    "name": "雪奋短兵",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200701,
+    "name": "据凉通叛",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200702,
+    "name": "先登死士",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200703,
+    "name": "北疆白马",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200716,
+    "name": "方圆",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200717,
+    "name": "鹤翼",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200718,
+    "name": "锋矢",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200704,
+    "name": "银龙孤胆",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200705,
+    "name": "定军绝战",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200706,
+    "name": "方阵掩杀",
+    "type": "追击",
+    "soldierType": "弓",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200707,
+    "name": "中郎尽粹",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200708,
+    "name": "幽兰洛神",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "友军单体",
+    "targetShow": "友军单体"
+  },
+  {
+    "id": 200709,
+    "name": "麦城追殇",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200710,
+    "name": "恶来当道",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200711,
+    "name": "阻挠",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200712,
+    "name": "智取仁守",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200713,
+    "name": "众叛亲离",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200719,
+    "name": "上将潘凤",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200720,
+    "name": "师君乐道",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200721,
+    "name": "折戟强攻",
+    "type": "主动",
+    "soldierType": "步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200722,
+    "name": "火积",
+    "type": "追击",
+    "soldierType": "弓",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200723,
+    "name": "南蛮强袭",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200724,
+    "name": "健卒不殆",
+    "type": "被动",
+    "soldierType": "弓步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200725,
+    "name": "愚勇",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200726,
+    "name": "莽撞",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200727,
+    "name": "伪刺",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200728,
+    "name": "临危",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200729,
+    "name": "顽抗",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200730,
+    "name": "火兽冲锋",
+    "type": "被动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200731,
+    "name": "全军突击",
+    "type": "主动",
+    "soldierType": "步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200732,
+    "name": "去疾",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200733,
+    "name": "行樵偶遇",
+    "type": "追击",
+    "soldierType": "骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200734,
+    "name": "擅兵不寡",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200735,
+    "name": "索敌",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200736,
+    "name": "二夫之勇",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200737,
+    "name": "明其虚实",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200738,
+    "name": "中宫追玺",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200739,
+    "name": "虎豹督军",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200740,
+    "name": "望族不息",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200741,
+    "name": "孤城死守",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200742,
+    "name": "白毦亲兵",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200743,
+    "name": "陈王求隐",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200744,
+    "name": "奇士薄寿",
+    "type": "被动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200745,
+    "name": "固陵杀将",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200746,
+    "name": "拒战言和",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200747,
+    "name": "近攻",
+    "type": "主动",
+    "soldierType": "步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200748,
+    "name": "远射",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200754,
+    "name": "胜兵求战",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200755,
+    "name": "攻其不备",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200756,
+    "name": "藤甲突击",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200757,
+    "name": "重整旗鼓",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200758,
+    "name": "连环",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200759,
+    "name": "觑隙",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200760,
+    "name": "花中秀",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200761,
+    "name": "疑兵避战",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200762,
+    "name": "智高性愎",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200763,
+    "name": "辅臣应势",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200764,
+    "name": "落首箭",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200765,
+    "name": "虎贲牙将",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200766,
+    "name": "兵无常势",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200767,
+    "name": "谋定后动",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200768,
+    "name": "传檄荆襄",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200769,
+    "name": "樊渊泅囚",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200770,
+    "name": "盲侯奋勇",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200771,
+    "name": "霸王渡江",
+    "type": "被动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200772,
+    "name": "夔吼象踏",
+    "type": "被动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200773,
+    "name": "金匮要略",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200774,
+    "name": "北狄互伐",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200775,
+    "name": "明妃",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200776,
+    "name": "覆舟不弃",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "我军单体",
+    "targetShow": "我军单体"
+  },
+  {
+    "id": 200777,
+    "name": "预识",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200778,
+    "name": "衡众",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "友军群体",
+    "targetShow": "友军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200779,
+    "name": "土垒督战",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200780,
+    "name": "斫方善辞",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2-3个目标)"
+  },
+  {
+    "id": 200781,
+    "name": "衡轭",
+    "type": "指挥",
+    "soldierType": "步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200782,
+    "name": "疏数",
+    "type": "指挥",
+    "soldierType": "弓骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200783,
+    "name": "鱼鳞",
+    "type": "指挥",
+    "soldierType": "弓步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200785,
+    "name": "破阵强袭",
+    "type": "追击",
+    "soldierType": "骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200790,
+    "name": "青丘媚祸",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200804,
+    "name": "明法御狄",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200805,
+    "name": "迟智难酬",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200791,
+    "name": "西乡武功",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200795,
+    "name": "人公将军",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200796,
+    "name": "地公将军",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200800,
+    "name": "众谋不懈",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200801,
+    "name": "利兵谋胜",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200824,
+    "name": "西陵克晋",
+    "type": "指挥",
+    "soldierType": "步",
+    "targetType": "我军单体",
+    "targetShow": "我军单体"
+  },
+  {
+    "id": 200825,
+    "name": "古之恶来",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200828,
+    "name": "难知如阴",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200829,
+    "name": "兼弱攻昧",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200833,
+    "name": "铁戟金戈",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200835,
+    "name": "谋主",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200175,
+    "name": "攻击强化",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200176,
+    "name": "防御强化",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200177,
+    "name": "速度强化",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200187,
+    "name": "冲车",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200638,
+    "name": "突击",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200639,
+    "name": "谋攻",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200784,
+    "name": "桃园结义",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200786,
+    "name": "掠敌之利",
+    "type": "追击",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200787,
+    "name": "分险",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200788,
+    "name": "枭雄",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200789,
+    "name": "凤仪亭",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200806,
+    "name": "唇枪舌剑",
+    "type": "增益",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200807,
+    "name": "千里疾行",
+    "type": "追击",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200808,
+    "name": "前军冲锋",
+    "type": "增益",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200809,
+    "name": "乱其军形",
+    "type": "增益",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200810,
+    "name": "训练有素",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200811,
+    "name": "领兵有方",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200812,
+    "name": "兵贵神速",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200813,
+    "name": "形兵之极",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军单体"
+  },
+  {
+    "id": 200814,
+    "name": "汜水关",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200815,
+    "name": "奇正之势",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200816,
+    "name": "磐阵善守",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200817,
+    "name": "极火佐攻",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200818,
+    "name": "反间",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200819,
+    "name": "疾战",
+    "type": "主动",
+    "soldierType": "步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200821,
+    "name": "励军",
+    "type": "主动",
+    "soldierType": "步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200822,
+    "name": "合众",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200823,
+    "name": "武锋",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200826,
+    "name": "绝水遏敌",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2-3个目标)"
+  },
+  {
+    "id": 200827,
+    "name": "并进",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200834,
+    "name": "人中吕布",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2-3个目标)"
+  },
+  {
+    "id": 200836,
+    "name": "平壑拒吴",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200837,
+    "name": "令明负榇",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200838,
+    "name": "焚舟叩营",
+    "type": "追击",
+    "soldierType": "步",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200839,
+    "name": "疾击其后",
+    "type": "追击",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200840,
+    "name": "猎敌之锋",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200841,
+    "name": "陷敌之谋",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200842,
+    "name": "形兵列阵",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军单体",
+    "targetShow": "我军单体"
+  },
+  {
+    "id": 200843,
+    "name": "疮痍累身",
+    "type": "被动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200844,
+    "name": "鼎足江东",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200845,
+    "name": "冢虎",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200846,
+    "name": "剑关叛立",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内1-2个目标)"
+  },
+  {
+    "id": 200847,
+    "name": "河内世泽",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200848,
+    "name": "未笄难言",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200849,
+    "name": "兵行巧变",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200850,
+    "name": "风声鹤唳",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2-3个目标)"
+  },
+  {
+    "id": 200851,
+    "name": "陷储立齐",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200852,
+    "name": "俭仪蹈和",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200853,
+    "name": "美人计",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军单体",
+    "targetShow": "我军单体"
+  },
+  {
+    "id": 200854,
+    "name": "投殳驱前",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200855,
+    "name": "六守精兵",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200856,
+    "name": "形兵险战",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军单体",
+    "targetShow": "我军单体"
+  },
+  {
+    "id": 200857,
+    "name": "计谕废立",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200858,
+    "name": "铁马撼岳",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军群体",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200859,
+    "name": "焚粮避祸",
+    "type": "被动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200860,
+    "name": "威震江左",
+    "type": "被动",
+    "soldierType": "步",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200861,
+    "name": "弃憾破合",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "我军群体",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200927,
+    "name": "将出关西",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200928,
+    "name": "竭忠尽智",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "我军群体(有效距离内2-3个目标)",
+    "targetShow": "我军群体(有效距离内2-3个目标)"
+  },
+  {
+    "id": 200929,
+    "name": "飒沓如星",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "我军群体（有效距离内2个目标）",
+    "targetShow": "我军群体（有效距离内2个目标）"
+  },
+  {
+    "id": 302046,
+    "name": "修罗姬返XP",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体（有效距离内2~3个目标）",
+    "targetShow": "敌军群体（有效距离内2~3个目标）"
+  },
+  {
+    "id": 302073,
+    "name": "六宫无怨XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体(有效距离内2-3个目标)",
+    "targetShow": "我军群体(有效距离内2-3个目标)"
+  },
+  {
+    "id": 302074,
+    "name": "素衣伶姬XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体(有效距离内2个目标)",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 302082,
+    "name": "死战明志XP",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 302083,
+    "name": "八门金锁XP",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体(有效距离内2个目标)",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 302089,
+    "name": "国太威仪XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体(有效距离内2个目标)",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 302093,
+    "name": "众望南疆XP",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 302605,
+    "name": "飘零红颜XP",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体(有效距离内2个目标)",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 302613,
+    "name": "强弓连射XP",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 302624,
+    "name": "轻侠妄为XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 302630,
+    "name": "拔剑护主XP",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 302640,
+    "name": "以主制客XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体(有效距离内3个目标)",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 302641,
+    "name": "水泽伏击XP",
+    "type": "追击",
+    "soldierType": "弓步骑",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 302700,
+    "name": "雪奋短兵XP",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 302702,
+    "name": "先登死士XP",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 302727,
+    "name": "伪刺XP",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 302743,
+    "name": "陈王求隐XP",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体(有效距离内2个目标)",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 302744,
+    "name": "奇士薄寿XP",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 300001,
+    "name": "汉末纷争XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 300002,
+    "name": "一还一报XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 300003,
+    "name": "红颜薄命XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体(有效距离内2个目标)",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 300004,
+    "name": "乱世毒计XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体(有效距离内2个目标)",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 300005,
+    "name": "孤胆铁卫XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "友军单体",
+    "targetShow": "友军单体"
+  },
+  {
+    "id": 300006,
+    "name": "无上孝灵XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体(有效距离内3个目标)",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 300007,
+    "name": "河北庭柱XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体(有效距离内3个目标)",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 300008,
+    "name": "蛮夷之力XP",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体(有效距离内2个目标)",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 300009,
+    "name": "婴城固守XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 300010,
+    "name": "母范之正XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "友军群体 (有效距离内2个目标)",
+    "targetShow": "友军群体 (有效距离内2个目标)"
+  },
+  {
+    "id": 300011,
+    "name": "各怀异心XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体(有效距离内3个目标)",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 300012,
+    "name": "各怀异心XP",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体(有效距离内3个目标)",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 300013,
+    "name": "壮猛有谋XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 300014,
+    "name": "善战无前XP",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体(有效距离内2个目标)",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 300015,
+    "name": "出其不意XP",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体(有效距离内3个目标)",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 300016,
+    "name": "医者仁心XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "友军群体 (有效距离内2个目标)",
+    "targetShow": "友军群体 (有效距离内2个目标)"
+  },
+  {
+    "id": 300017,
+    "name": "江东虎将XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 300018,
+    "name": "红颜祸水XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 300019,
+    "name": "大汉脊梁XP",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "友军群体 (有效距离内2个目标)",
+    "targetShow": "友军群体 (有效距离内2个目标)"
+  },
+  {
+    "id": 300020,
+    "name": "天妒英才XP",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军全体",
+    "targetShow": "敌军全体"
+  },
+  {
+    "id": 300021,
+    "name": "內贤之助XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军全体",
+    "targetShow": "我军全体"
+  },
+  {
+    "id": 300022,
+    "name": "择木而栖XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体(有效距离内3个目标)",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 300023,
+    "name": "不让须眉XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "友军群体 (有效距离内2个目标)",
+    "targetShow": "友军群体 (有效距离内2个目标)"
+  },
+  {
+    "id": 300024,
+    "name": "大贤天师XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体(有效距离内3个目标)",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 300025,
+    "name": "创业垂统XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体(有效距离内3个目标)",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 300026,
+    "name": "忠勇骁锐XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体(有效距离内3个目标)",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 300027,
+    "name": "社稷之臣XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体(有效距离内3个目标)",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 300028,
+    "name": "匹马一麾XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "我军群体(有效距离内3个目标)",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 300029,
+    "name": "当阳之威XP",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体(有效距离内3个目标)",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 300050,
+    "name": "追亡逐北XP",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 300051,
+    "name": "整旅厉卒XP",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 300052,
+    "name": "摧枯拉朽XP",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 300053,
+    "name": "成者自成XP",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 300054,
+    "name": "摧城拔寨XP",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 300055,
+    "name": "长辔远驭XP",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200930,
+    "name": "奇兵拒北",
+    "type": "指挥",
+    "soldierType": "弓步",
+    "targetType": "敌军群体(有效距离内2个目标)",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200933,
+    "name": "将门有将",
+    "type": "被动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200934,
+    "name": "言出必克",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "我军群体(有效距离内3个目标)",
+    "targetShow": "我军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200935,
+    "name": "以直报怨",
+    "type": "指挥",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200936,
+    "name": "酩酊不休",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200937,
+    "name": "全主诿异",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体(有效距离内3个目标)",
+    "targetShow": "敌军群体(有效距离内3个目标)"
+  },
+  {
+    "id": 200938,
+    "name": "三术奇谋",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200939,
+    "name": "登锋陷阵",
+    "type": "被动",
+    "soldierType": "骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200940,
+    "name": "文德椒房",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "我军群体(有效距离内2个目标)",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200941,
+    "name": "甚陷不惧",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200947,
+    "name": "威震河朔",
+    "type": "主动",
+    "soldierType": "弓",
+    "targetType": "敌军群体(有效距离内2个目标)",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200948,
+    "name": "怒浪伐敌",
+    "type": "追击",
+    "soldierType": "弓",
+    "targetType": "攻击目标",
+    "targetShow": "攻击目标"
+  },
+  {
+    "id": 200949,
+    "name": "势无虚动",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己",
+    "targetShow": "自己"
+  },
+  {
+    "id": 200950,
+    "name": "七步释嫌",
+    "type": "指挥",
+    "soldierType": "骑",
+    "targetType": "我军群体(有效距离内2个目标)",
+    "targetShow": "我军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200951,
+    "name": "虎步陷阵",
+    "type": "主动",
+    "soldierType": "步",
+    "targetType": "敌军单体",
+    "targetShow": "敌军单体"
+  },
+  {
+    "id": 200952,
+    "name": "抚民励德",
+    "type": "指挥",
+    "soldierType": "弓",
+    "targetType": "我军全体",
+    "targetShow": "我军全体"
+  },
+  {
+    "id": 200953,
+    "name": "筹策绝道",
+    "type": "主动",
+    "soldierType": "弓步骑",
+    "targetType": "敌军群体(有效距离内2个目标)",
+    "targetShow": "敌军群体(有效距离内2个目标)"
+  },
+  {
+    "id": 200955,
+    "name": "动如雷震",
+    "type": "主动",
+    "soldierType": "骑",
+    "targetType": "我军群体(有效距离内2-3个目标)",
+    "targetShow": "我军群体(有效距离内2-3个目标)"
+  },
+  {
+    "id": 200956,
+    "name": "三军齐出",
+    "type": "被动",
+    "soldierType": "弓步骑",
+    "targetType": "自己 ",
+    "targetShow": "自己 "
+  }
+]

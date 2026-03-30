@@ -1,0 +1,308 @@
+[
+    {
+        "featureInfo": [
+            {
+                "effectName": "善谋", 
+                "effectDesc": "第4,6回合，造成攻击伤害的武将主战法发动率提高#10%~30%#"
+            }, 
+            {
+                "effectName": "坚忍", 
+                "effectDesc": "受到的主动战法伤害降低#10%~20%#"
+            }, 
+            {
+                "effectName": "骁锐", 
+                "effectDesc": "攻击属性提高#5%~15%#"
+            }, 
+            {
+                "effectName": "至策", 
+                "effectDesc": "主动战法伤害提高#10%~20%#"
+            }, 
+            {
+                "effectName": "破敌", 
+                "effectDesc": "造成的攻击伤害无视目标#10%~20%#的防御属性"
+            }, 
+            {
+                "effectName": "英勇", 
+                "effectDesc": "造成攻击伤害的武将主战法发动率提高#5%~15%#"
+            }
+        ], 
+        "groupId": 2
+    }, 
+    {
+        "featureInfo": [
+            {
+                "effectName": "清毅", 
+                "effectDesc": "第#5~8#回合武将行动时获得洞察状态"
+            }, 
+            {
+                "effectName": "灵动", 
+                "effectDesc": "速度属性提高#10~30#"
+            }, 
+            {
+                "effectName": "沉稳", 
+                "effectDesc": "受到的指挥战法伤害降低#10%~20%#"
+            }, 
+            {
+                "effectName": "机敏", 
+                "effectDesc": "武将主战法发动率提高#3%~9%#"
+            }, 
+            {
+                "effectName": "稳固", 
+                "effectDesc": "防御属性提升#10%~20%#"
+            }, 
+            {
+                "effectName": "坚忍", 
+                "effectDesc": "受到的主动战法伤害降低#10%~20%#"
+            }, 
+            {
+                "effectName": "强韧", 
+                "effectDesc": "受到的普通攻击伤害降低#10%~20%#"
+            }
+        ], 
+        "groupId": 7
+    }, 
+    {
+        "featureInfo": [
+            {
+                "effectName": "强击", 
+                "effectDesc": "前#1~5#回合普通攻击不会触发反击"
+            }, 
+            {
+                "effectName": "奔袭", 
+                "effectDesc": "追击战法发动率提高#3%~9%#"
+            }, 
+            {
+                "effectName": "坚毅", 
+                "effectDesc": "前#2~6#回合免疫混乱及暴走"
+            }, 
+            {
+                "effectName": "无畏", 
+                "effectDesc": "追击战法伤害提高#10%~30%#"
+            }, 
+            {
+                "effectName": "骁锐", 
+                "effectDesc": "攻击属性提高#5%~15%#"
+            }, 
+            {
+                "effectName": "陷阵", 
+                "effectDesc": "普通攻击伤害提高#10%~30%#"
+            }
+        ], 
+        "groupId": 1
+    }, 
+    {
+        "featureInfo": [
+            {
+                "effectName": "骁锐", 
+                "effectDesc": "攻击属性提高#5%~15%#"
+            }, 
+            {
+                "effectName": "熟虑", 
+                "effectDesc": "需要准备的主动武将主战法发动率提升#6%~20%#"
+            }, 
+            {
+                "effectName": "击虚", 
+                "effectDesc": "正式回合后，目标每存在一种持续性伤害或控制效果，自身对其造成的伤害提升#3%~9%#，最多可计算5种"
+            }, 
+            {
+                "effectName": "亢厉", 
+                "effectDesc": "主动及追击武将主战法伤害提高#10%~30%#"
+            }, 
+            {
+                "effectName": "天资", 
+                "effectDesc": "谋略属性提高#5%~15%#"
+            }, 
+            {
+                "effectName": "至策", 
+                "effectDesc": "主动战法伤害提高#10%~20%#"
+            }
+        ], 
+        "groupId": 6
+    }, 
+    {
+        "featureInfo": [
+            {
+                "effectName": "天资", 
+                "effectDesc": "谋略属性提高#5%~15%#"
+            }, 
+            {
+                "effectName": "蓄锐", 
+                "effectDesc": "每2次普通攻击后，自身造成追击战法伤害增加#5%~15%#，可叠加"
+            }, 
+            {
+                "effectName": "选锋", 
+                "effectDesc": "普通攻击后，自身下一次造成策略伤害提高#10%~30%#"
+            }, 
+            {
+                "effectName": "坚毅", 
+                "effectDesc": "前#2~6#回合免疫混乱及暴走"
+            }, 
+            {
+                "effectName": "奔袭", 
+                "effectDesc": "追击战法发动率提高#3%~9%#"
+            }, 
+            {
+                "effectName": "骁锐", 
+                "effectDesc": "攻击属性提高#5%~15%#"
+            }
+        ], 
+        "groupId": 10
+    }, 
+    {
+        "featureInfo": [
+            {
+                "effectName": "筹算", 
+                "effectDesc": "造成策略伤害的武将主战法发动率提高#5%~15%#"
+            }, 
+            {
+                "effectName": "识破", 
+                "effectDesc": "前#1~4#回合，主动及追击武将主战法造成的伤害无视规避"
+            }, 
+            {
+                "effectName": "亢厉", 
+                "effectDesc": "主动及追击武将主战法伤害提高#10%~30%#"
+            }, 
+            {
+                "effectName": "天资", 
+                "effectDesc": "谋略属性提高#5%~15%#"
+            }, 
+            {
+                "effectName": "英勇", 
+                "effectDesc": "造成攻击伤害的武将主战法发动率提高#5%~15%#"
+            }, 
+            {
+                "effectName": "骁锐", 
+                "effectDesc": "攻击属性提高#5%~15%#"
+            }
+        ], 
+        "groupId": 4
+    }, 
+    {
+        "featureInfo": [
+            {
+                "effectName": "天资", 
+                "effectDesc": "谋略属性提高#5%~15%#"
+            }, 
+            {
+                "effectName": "颖悟", 
+                "effectDesc": "造成的策略伤害无视目标#10%~20%#的谋略属性"
+            }, 
+            {
+                "effectName": "驱火", 
+                "effectDesc": "燃烧及火攻伤害提高#10%~30%#"
+            }, 
+            {
+                "effectName": "炫惑", 
+                "effectDesc": "恐慌及妖术伤害提高#10%~30%#"
+            }, 
+            {
+                "effectName": "灵动", 
+                "effectDesc": "速度属性提高#10~30#"
+            }, 
+            {
+                "effectName": "筹算", 
+                "effectDesc": "造成策略伤害的武将主战法发动率提高#5%~15%#"
+            }
+        ], 
+        "groupId": 5
+    }, 
+    {
+        "featureInfo": [
+            {
+                "effectName": "济世", 
+                "effectDesc": "主战法每造成一次恢复效果，效果目标下一次受到伤害减少#5%~15%#，该效果可叠加"
+            }, 
+            {
+                "effectName": "威势", 
+                "effectDesc": "受到初始统率值低于自身武将的所有伤害降低#10%~20%#"
+            }, 
+            {
+                "effectName": "稳固", 
+                "effectDesc": "防御属性提升#10%~20%#"
+            }, 
+            {
+                "effectName": "灵动", 
+                "effectDesc": "速度属性提高#10~30#"
+            }, 
+            {
+                "effectName": "机敏", 
+                "effectDesc": "武将主战法发动率提高#3%~9%#"
+            }, 
+            {
+                "effectName": "惑言", 
+                "effectDesc": "正式回合后武将主战法成功施加的前#1-4#个控制效果(混乱\\暴走\\怯战\\犹豫)增加1回合"
+            }, 
+            {
+                "effectName": "不屈", 
+                "effectDesc": "每次受到伤害后，本回合受到所有伤害降低#3%-9%#，该效果可叠加"
+            }
+        ], 
+        "groupId": 9
+    }, 
+    {
+        "featureInfo": [
+            {
+                "effectName": "稳固", 
+                "effectDesc": "防御属性提升#10%~20%#"
+            }, 
+            {
+                "effectName": "不屈", 
+                "effectDesc": "每次受到伤害后，本回合受到所有伤害降低#3%-9%#，该效果可叠加"
+            }, 
+            {
+                "effectName": "济世", 
+                "effectDesc": "主战法每造成一次恢复效果，效果目标下一次受到伤害减少#5%~15%#，该效果可叠加"
+            }, 
+            {
+                "effectName": "机敏", 
+                "effectDesc": "武将主战法发动率提高#3%~9%#"
+            }, 
+            {
+                "effectName": "威势", 
+                "effectDesc": "受到初始统率值低于自身武将的所有伤害降低#10%~20%#"
+            }, 
+            {
+                "effectName": "艮止", 
+                "effectDesc": "自身无法普通攻击，谋略属性提高#10~30#"
+            }, 
+            {
+                "effectName": "惑言", 
+                "effectDesc": "正式回合后武将主战法成功施加的前#1-4#个控制效果(混乱\\暴走\\怯战\\犹豫)增加1回合"
+            }
+        ], 
+        "groupId": 8
+    }, 
+    {
+        "featureInfo": [
+            {
+                "effectName": "灵动", 
+                "effectDesc": "速度属性提高#10~30#"
+            }, 
+            {
+                "effectName": "机敏", 
+                "effectDesc": "武将主战法发动率提高#3%~9%#"
+            }, 
+            {
+                "effectName": "清毅", 
+                "effectDesc": "第#5~8#回合武将行动时获得洞察状态"
+            }, 
+            {
+                "effectName": "仁心", 
+                "effectDesc": "造成的恢复效果提高#5%~15%#"
+            }, 
+            {
+                "effectName": "坚忍", 
+                "effectDesc": "受到的主动战法伤害降低#10%~20%#"
+            }, 
+            {
+                "effectName": "艮止", 
+                "effectDesc": "自身无法普通攻击，谋略属性提高#10~30#"
+            }, 
+            {
+                "effectName": "惑言", 
+                "effectDesc": "正式回合后武将主战法成功施加的前#1-4#个控制效果(混乱\\暴走\\怯战\\犹豫)增加1回合"
+            }
+        ], 
+        "groupId": 3
+    }
+]
