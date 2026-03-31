@@ -1,13 +1,13 @@
 {
-  "profile_id": "42.186.96.143:3z5ddqy811007",
-  "server_ip": "42.186.96.143",
-  "server_name": "X5377",
-  "role_id": "3z5ddqy811007",
-  "role_name": "余烬丶小空空",
-  "src_ip": "42.186.96.143:8001",
-  "db_path": "D:\\nettest\\stzb_42.186.96.143.db",
-  "cap_dir": "D:\\nettest\\capture_new\\stzb_42.186.96.143",
-  "created_at": "2026-03-13 01:38:29",
-  "last_used": "2026-03-30 19:43:56",
-  "bound_at": "2026-03-30 19:43:56"
+  "profile_id": "45.253.141.10:pending",
+  "server_ip": "45.253.141.10",
+  "server_name": "45.253.141.10",
+  "role_id": "pending",
+  "role_name": "（等待角色信息）",
+  "src_ip": "45.253.141.10:8001",
+  "db_path": "D:\\nettest\\stzb_45.253.141.10.db",
+  "cap_dir": "D:\\nettest\\capture_new\\stzb_45.253.141.10",
+  "created_at": "2026-03-31 00:47:39",
+  "last_used": "2026-03-31 20:04:59",
+  "bound_at": "2026-03-31 20:04:59"
 }

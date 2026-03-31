@@ -259,12 +259,23 @@ def upsert_battle_834(conn, b):
         _att_pid = _pm_att.get_current_profile_id()
     except:
         _att_pid = ''
-    conn.execute('''
-        INSERT INTO attendance (battle_id, time, player_name, player_uid, union_name,
-                                fight_type, wid, gongxun, result, profile_id)
-        VALUES (?,?,?,?,?,?,?,?,?,?)
-    ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], b['def_union'],
-          b['fight_type'], b['wid'], b['atk_gongxun'], b['result'], _att_pid))
+    try:
+        conn.execute('''
+            INSERT INTO attendance (battle_id, time, player_name, player_uid, union_name,
+                                    fight_type, wid, gongxun, result, profile_id)
+            VALUES (?,?,?,?,?,?,?,?,?,?)
+        ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], b['def_union'],
+              b['fight_type'], b['wid'], b['atk_gongxun'], b['result'], _att_pid))
+    except sqlite3.OperationalError as _e:
+        if 'profile_id' in str(_e):
+            conn.execute('''
+                INSERT INTO attendance (battle_id, time, player_name, player_uid, union_name,
+                                        fight_type, wid, gongxun, result)
+                VALUES (?,?,?,?,?,?,?,?,?)
+            ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], b['def_union'],
+                  b['fight_type'], b['wid'], b['atk_gongxun'], b['result']))
+        else:
+            raise
     # battle_heroes
     for i, h in enumerate(b['heroes']):
         conn.execute('''
@@ -743,28 +754,60 @@ def upsert_battle_0a(conn, b):
         _att_pid = _pm_att.get_current_profile_id()
     except:
         _att_pid = ''
-    conn.execute('''
-        INSERT INTO attendance (battle_id, time, player_name, player_uid, union_name,
-                                fight_type, wid, gongxun, result, profile_id)
-        VALUES (?,?,?,?,?,?,?,?,?,?)
-    ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], b['atk_union'],
-          b['fight_type'], b['wid'], b['atk_gongxun'], b['result'], _att_pid))
-    # battle_heroes 攻方（含红度 star）
+    try:
+        conn.execute('''
+            INSERT INTO attendance (battle_id, time, player_name, player_uid, union_name,
+                                    fight_type, wid, gongxun, result, profile_id)
+            VALUES (?,?,?,?,?,?,?,?,?,?)
+        ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], b['atk_union'],
+              b['fight_type'], b['wid'], b['atk_gongxun'], b['result'], _att_pid))
+    except sqlite3.OperationalError as _e:
+        if 'profile_id' in str(_e):
+            conn.execute('''
+                INSERT INTO attendance (battle_id, time, player_name, player_uid, union_name,
+                                        fight_type, wid, gongxun, result)
+                VALUES (?,?,?,?,?,?,?,?,?)
+            ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], b['atk_union'],
+                  b['fight_type'], b['wid'], b['atk_gongxun'], b['result']))
+        else:
+            raise
+    # battle_heroes（兼容旧库无 star 列）
+    bh_cols = {r[1] for r in conn.execute('PRAGMA table_info(battle_heroes)').fetchall()}
+    has_star = 'star' in bh_cols
+
+    # battle_heroes 攻方
     for i, h in enumerate(b['atk_heroes']):
-        conn.execute('''
-            INSERT INTO battle_heroes (battle_id, side, pos, hero_id, hero_name,
-                                       level, max_hp, remain_hp, damage_taken, star)
-            VALUES (?,?,?,?,?,?,?,?,?,?)
-        ''', (b['battle_id'], 'atk', i, h['hero_id'], h['hero_name'],
-              h['level'], h['max_hp'], h['remain_hp'], h['damage_taken'], h.get('star', 0)))
-    # battle_heroes 守方（含红度 star）
+        if has_star:
+            conn.execute('''
+                INSERT INTO battle_heroes (battle_id, side, pos, hero_id, hero_name,
+                                           level, max_hp, remain_hp, damage_taken, star)
+                VALUES (?,?,?,?,?,?,?,?,?,?)
+            ''', (b['battle_id'], 'atk', i, h['hero_id'], h['hero_name'],
+                  h['level'], h['max_hp'], h['remain_hp'], h['damage_taken'], h.get('star', 0)))
+        else:
+            conn.execute('''
+                INSERT INTO battle_heroes (battle_id, side, pos, hero_id, hero_name,
+                                           level, max_hp, remain_hp, damage_taken)
+                VALUES (?,?,?,?,?,?,?,?,?)
+            ''', (b['battle_id'], 'atk', i, h['hero_id'], h['hero_name'],
+                  h['level'], h['max_hp'], h['remain_hp'], h['damage_taken']))
+
+    # battle_heroes 守方
     for i, h in enumerate(b['def_heroes']):
-        conn.execute('''
-            INSERT INTO battle_heroes (battle_id, side, pos, hero_id, hero_name,
-                                       level, max_hp, remain_hp, damage_taken, star)
-            VALUES (?,?,?,?,?,?,?,?,?,?)
-        ''', (b['battle_id'], 'def', i, h['hero_id'], h['hero_name'],
-              h['level'], h['max_hp'], h['remain_hp'], h['damage_taken'], h.get('star', 0)))
+        if has_star:
+            conn.execute('''
+                INSERT INTO battle_heroes (battle_id, side, pos, hero_id, hero_name,
+                                           level, max_hp, remain_hp, damage_taken, star)
+                VALUES (?,?,?,?,?,?,?,?,?,?)
+            ''', (b['battle_id'], 'def', i, h['hero_id'], h['hero_name'],
+                  h['level'], h['max_hp'], h['remain_hp'], h['damage_taken'], h.get('star', 0)))
+        else:
+            conn.execute('''
+                INSERT INTO battle_heroes (battle_id, side, pos, hero_id, hero_name,
+                                           level, max_hp, remain_hp, damage_taken)
+                VALUES (?,?,?,?,?,?,?,?,?)
+            ''', (b['battle_id'], 'def', i, h['hero_id'], h['hero_name'],
+                  h['level'], h['max_hp'], h['remain_hp'], h['damage_taken']))
     conn.commit()
     return True
 

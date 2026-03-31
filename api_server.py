@@ -65,6 +65,96 @@ CORS(app)
 # 启动实时写库线程
 _writer = start_writer_thread()
 
+def ensure_all_tables(db_path):
+    """对指定数据库执行所有建表操作，幂等安全"""
+    conn = sqlite3.connect(db_path)
+    conn.execute('PRAGMA journal_mode=WAL')
+    try:
+        # 1. db_build 基础表
+        from db_build import create_tables as _ct
+        _ct(conn)
+    except Exception as e:
+        print(f'[init] db_build create_tables: {e}')
+    try:
+        # 2. db_schema_v2 扩展表
+        import db_schema_v2 as _sv2
+        old_db = _sv2.DB_PATH
+        _sv2.DB_PATH = db_path
+        _sv2.migrate()
+        _sv2.DB_PATH = old_db
+    except Exception as e:
+        print(f'[init] db_schema_v2 migrate: {e}')
+    try:
+        # 3. team_users 表
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS team_users (
+                uid INTEGER NOT NULL,
+                profile_id TEXT NOT NULL DEFAULT \'\',
+                name TEXT,
+                contribute_total INTEGER DEFAULT 0,
+                contribute_week INTEGER DEFAULT 0,
+                pos INTEGER DEFAULT 0,
+                power INTEGER DEFAULT 0,
+                wuxun INTEGER DEFAULT 0,
+                group_name TEXT DEFAULT \'\',
+                join_time INTEGER DEFAULT 0,
+                wid INTEGER DEFAULT 0,
+                hero_config_id INTEGER DEFAULT 0,
+                hero_skills TEXT DEFAULT \'\',
+                account_id TEXT DEFAULT \'\',
+                updated_at TEXT,
+                PRIMARY KEY (uid, profile_id)
+            )
+        ''')
+        conn.commit()
+    except Exception as e:
+        print(f'[init] team_users: {e}')
+    try:
+        # 4. chat_messages 表
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS chat_messages (
+                id INTEGER PRIMARY KEY,
+                sender TEXT, uid TEXT, union_name TEXT,
+                text TEXT, time INTEGER, time_str TEXT, source_file TEXT
+            )
+        ''')
+        conn.commit()
+    except Exception as e:
+        print(f'[init] chat_messages: {e}')
+    try:
+        # 5. player_self 表
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS player_self (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                profile_id TEXT,
+                uid TEXT, name TEXT, union_name TEXT,
+                level INTEGER DEFAULT 0,
+                power INTEGER DEFAULT 0,
+                wuxun INTEGER DEFAULT 0,
+                updated_at TEXT
+            )
+        ''')
+        conn.commit()
+    except Exception as e:
+        print(f'[init] player_self: {e}')
+    try:
+        # 6. zone_players 表
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS zone_players (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                uid TEXT, name TEXT, union_name TEXT,
+                level INTEGER DEFAULT 0,
+                power INTEGER DEFAULT 0,
+                updated_at TEXT
+            )
+        ''')
+        conn.commit()
+    except Exception as e:
+        print(f'[init] zone_players: {e}')
+    conn.close()
+    print(f'[init] 全部表初始化完成: {db_path}')
+
+
 def get_db():
     with _db_lock:
         db_path = _current_db_path
@@ -103,10 +193,14 @@ def api_switch_profile():
         p = profile_manager.switch_profile(pid)
         # 立即更新当前 db 路径，不等 watcher 线程
         new_db = p.get('db_path', '')
-        if new_db and os.path.exists(new_db):
+        if new_db:
             with _db_lock:
                 _current_db_path = new_db
             print(f'[profile] 切换数据库: {new_db}')
+            try:
+                ensure_all_tables(new_db)
+            except Exception as _te:
+                print(f'[profile] 建表失败: {_te}')
         push_event('profile_changed', p)
         return jsonify({'ok': True, 'profile': p})
     except Exception as e:
@@ -167,12 +261,16 @@ def api_battle_stats():
     city_dist = rows_to_list(conn.execute('SELECT city_type, COUNT(*) as cnt FROM battles GROUP BY city_type ORDER BY cnt DESC').fetchall())
     hero_freq = rows_to_list(conn.execute('SELECT hero_name, COUNT(*) as cnt FROM battle_heroes WHERE hero_name NOT LIKE \'武将%\' GROUP BY hero_name ORDER BY cnt DESC LIMIT 50').fetchall())
     combo_freq = rows_to_list(conn.execute('''
-        SELECT GROUP_CONCAT(hero_name, '+') as combo, COUNT(*) as cnt
+        SELECT hero_name as combo, COUNT(*) as cnt
         FROM (
-            SELECT battle_id, side, GROUP_CONCAT(hero_name ORDER BY pos) as hero_name
-            FROM battle_heroes WHERE side=\'atk\' AND hero_name NOT LIKE \'武将%\'
+            SELECT battle_id, side,
+                   (SELECT GROUP_CONCAT(h2.hero_name, '+') FROM
+                    (SELECT hero_name FROM battle_heroes WHERE battle_id=bh.battle_id AND side=\'atk\' AND hero_name NOT LIKE \'武将%\' ORDER BY pos) h2
+                   ) as hero_name
+            FROM battle_heroes bh WHERE side=\'atk\' AND hero_name NOT LIKE \'武将%\'
             GROUP BY battle_id, side HAVING COUNT(*) >= 2
-        ) GROUP BY hero_name ORDER BY cnt DESC LIMIT 20
+        ) WHERE hero_name IS NOT NULL
+        GROUP BY hero_name ORDER BY cnt DESC LIMIT 20
     ''').fetchall())
     union_stats = rows_to_list(conn.execute('''
         SELECT u, uname, total, wins, ROUND(wins*100.0/total,1) as win_rate FROM (
@@ -217,7 +315,7 @@ def api_hero_combos():
                ROUND(SUM(CASE WHEN bv.result=1 THEN 1 ELSE 0 END)*100.0/COUNT(*),1) as win_rate
         FROM battle_heroes bh
         JOIN battles_v2 bv ON bv.battle_id=bh.battle_id
-        WHERE bh.side=? AND bh.hero_name NOT LIKE \'武将%\' AND bv.is_npc=0
+        WHERE bh.side=? AND bh.hero_name NOT LIKE \'武将%\' AND bv.fight_type >= 0
         GROUP BY bh.hero_name
         ORDER BY cnt DESC LIMIT 50
     ''', (side,)).fetchall()
@@ -231,7 +329,7 @@ def api_hero_combo_winrate():
     min_count = int(request.args.get('min', 3))
     fight_type = request.args.get('fight_type', '')
     conn = get_db()
-    where = "bv.is_npc=0"
+    where = "1=1"
     params = []
     if fight_type:
         where += " AND bv.fight_type=?"
@@ -451,15 +549,19 @@ def api_hero_unlock():
 @app.route('/api/db_sync/tables')
 def api_db_sync_tables():
     conn = get_db()
-    rows = conn.execute('''
-        SELECT table_name, COUNT(*) as cnt,
-               SUM(CASE WHEN op=1 THEN 1 ELSE 0 END) as inserts,
-               SUM(CASE WHEN op=2 THEN 1 ELSE 0 END) as updates,
-               SUM(CASE WHEN op=3 THEN 1 ELSE 0 END) as deletes
-        FROM db_sync GROUP BY table_name ORDER BY cnt DESC
-    ''').fetchall()
+    try:
+        rows = conn.execute('''
+            SELECT table_name, COUNT(*) as cnt,
+                   SUM(CASE WHEN op=1 THEN 1 ELSE 0 END) as inserts,
+                   SUM(CASE WHEN op=2 THEN 1 ELSE 0 END) as updates,
+                   SUM(CASE WHEN op=3 THEN 1 ELSE 0 END) as deletes
+            FROM db_sync GROUP BY table_name ORDER BY cnt DESC
+        ''').fetchall()
+        result = rows_to_list(rows)
+    except:
+        result = []
     conn.close()
-    return jsonify(rows_to_list(rows))
+    return jsonify(result)
 
 # ===== 重新导入数据 =====
 @app.route('/api/refresh', methods=['POST'])
@@ -526,9 +628,15 @@ def api_status():
     stats = {}
     for tbl in ['battles','unions','player_teams','wuxun','scores',
                'player_locations','player_heroes','union_cities','hero_unlock','db_sync']:
-        stats[tbl] = conn.execute(f'SELECT COUNT(*) FROM {tbl}').fetchone()[0]
-    last = conn.execute('SELECT time_str FROM battles ORDER BY time DESC LIMIT 1').fetchone()
-    stats['last_battle'] = last[0] if last else ''
+        try:
+            stats[tbl] = conn.execute(f'SELECT COUNT(*) FROM {tbl}').fetchone()[0]
+        except:
+            stats[tbl] = 0
+    try:
+        last = conn.execute('SELECT time_str FROM battles ORDER BY time DESC LIMIT 1').fetchone()
+        stats['last_battle'] = last[0] if last else ''
+    except:
+        stats['last_battle'] = ''
     conn.close()
     return jsonify({'ok': True, 'db': _current_db_path, 'stats': stats})
 
@@ -771,7 +879,7 @@ def api_battle_analysis():
     summary = conn.execute(f'''
         SELECT COUNT(*) as total,
                SUM(CASE WHEN result IN (1,11) THEN 1 ELSE 0 END) as atk_wins,
-               SUM(CASE WHEN in_night=1 THEN 1 ELSE 0 END) as night_cnt,
+               0 as night_cnt,
                COUNT(DISTINCT atk_union) as union_cnt,
                COUNT(DISTINCT atk_name) as player_cnt,
                AVG(atk_gongxun) as avg_wx
@@ -789,27 +897,26 @@ def api_battle_analysis():
                COUNT(*) as cnt
         FROM battles_v2 b {where} GROUP BY hour ORDER BY hour
     ''').fetchall()
-    # 夜战 vs 白天
-    night_day = conn.execute(f'''
-        SELECT in_night, COUNT(*) as cnt,
-               SUM(CASE WHEN result IN (1,11) THEN 1 ELSE 0 END) as atk_wins
-        FROM battles_v2 b {where} GROUP BY in_night
-    ''').fetchall()
+    # 夜战 vs 白天（battles_v2无in_night字段，返回空）
+    night_day = []
     # 战力段位分布
-    power_dist = conn.execute(f'''
-        SELECT
-          CASE
-            WHEN atk_power >= 10000000 THEN '1000w+'
-            WHEN atk_power >= 8000000  THEN '800w+'
-            WHEN atk_power >= 6000000  THEN '600w+'
-            WHEN atk_power >= 4000000  THEN '400w+'
-            WHEN atk_power >= 2000000  THEN '200w+'
-            ELSE '200w以下'
-          END as tier,
-          COUNT(*) as cnt
-        FROM battles_v2 b {where} AND atk_power > 0
-        GROUP BY tier ORDER BY MIN(atk_power) DESC
-    ''').fetchall()
+    try:
+        power_dist = conn.execute(f'''
+            SELECT
+              CASE
+                WHEN atk_power >= 10000000 THEN '1000w+'
+                WHEN atk_power >= 8000000  THEN '800w+'
+                WHEN atk_power >= 6000000  THEN '600w+'
+                WHEN atk_power >= 4000000  THEN '400w+'
+                WHEN atk_power >= 2000000  THEN '200w+'
+                ELSE '200w以下'
+              END as tier,
+              COUNT(*) as cnt
+            FROM battles_v2 b {where} AND atk_power > 0
+            GROUP BY tier ORDER BY MIN(atk_power) DESC
+        ''').fetchall()
+    except:
+        power_dist = []
     # 对阵联盟统计
     vs_union = conn.execute(f'''
         SELECT def_union, COUNT(*) as total,
@@ -847,23 +954,37 @@ def api_attendance():
     conn = get_db()
     now = int(__import__('time').time())
     since = now - 86400 if period == '24h' else (now - 7*86400 if period == 'week' else 0)
-    where = [f'time >= {since}'] if since else []
-    where.append(f"profile_id='{pid}'")
-    if union: where.append(f"union_name LIKE '%{union}%'")
-    w = ('WHERE ' + ' AND '.join(where)) if where else ''
-    rows = conn.execute(f'''
-        SELECT player_name, union_name,
-               COUNT(*) as total_battles,
-               SUM(CASE WHEN fight_type=80 THEN 1 ELSE 0 END) as city_battles,
-               SUM(CASE WHEN fight_type=33 THEN 1 ELSE 0 END) as main_city,
-               SUM(CASE WHEN fight_type=0 THEN 1 ELSE 0 END) as field_battles,
-               SUM(gongxun) as total_wx,
-               SUM(CASE WHEN result IN (1,11) THEN 1 ELSE 0 END) as wins
-        FROM attendance {w}
-        GROUP BY player_name ORDER BY total_battles DESC LIMIT 100
-    ''').fetchall()
-    conn.close()
-    return jsonify([dict(r) for r in rows])
+
+    try:
+        tbl_exists = conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='attendance'").fetchone()
+        if not tbl_exists:
+            conn.close()
+            return jsonify([])
+
+        cols = {r[1] for r in conn.execute("PRAGMA table_info(attendance)").fetchall()}
+        where = [f'time >= {since}'] if since else []
+        if 'profile_id' in cols and pid:
+            where.append(f"profile_id='{pid}'")
+        if union:
+            where.append(f"union_name LIKE '%{union}%'")
+        w = ('WHERE ' + ' AND '.join(where)) if where else ''
+
+        rows = conn.execute(f'''
+            SELECT player_name, union_name,
+                   COUNT(*) as total_battles,
+                   SUM(CASE WHEN fight_type=80 THEN 1 ELSE 0 END) as city_battles,
+                   SUM(CASE WHEN fight_type=33 THEN 1 ELSE 0 END) as main_city,
+                   SUM(CASE WHEN fight_type=0 THEN 1 ELSE 0 END) as field_battles,
+                   SUM(gongxun) as total_wx,
+                   SUM(CASE WHEN result IN (1,11) THEN 1 ELSE 0 END) as wins
+            FROM attendance {w}
+            GROUP BY player_name ORDER BY total_battles DESC LIMIT 100
+        ''').fetchall()
+        conn.close()
+        return jsonify([dict(r) for r in rows])
+    except:
+        conn.close()
+        return jsonify([])
 
 
 # ===== 打城排表 =====
@@ -1014,15 +1135,19 @@ def api_team_stats():
 def api_player_stats():
     name = request.args.get('name', '')
     conn = get_db()
-    where = ['1=1']; params = []
-    if name:
-        where.append('user_name LIKE ?'); params.append(f'%{name}%')
-    w = ' AND '.join(where)
-    rows = conn.execute(
-        f'SELECT * FROM player_stats WHERE {w} ORDER BY wuxun_total DESC, force_max DESC LIMIT 200', params
-    ).fetchall()
+    try:
+        where = ['1=1']; params = []
+        if name:
+            where.append('user_name LIKE ?'); params.append(f'%{name}%')
+        w = ' AND '.join(where)
+        rows = conn.execute(
+            f'SELECT * FROM player_stats WHERE {w} ORDER BY wuxun_total DESC, force_max DESC LIMIT 200', params
+        ).fetchall()
+        result = [dict(r) for r in rows]
+    except:
+        result = []
     conn.close()
-    return jsonify([dict(r) for r in rows])
+    return jsonify(result)
 
 
 # ===== 城池地图统计 =====
@@ -1048,30 +1173,27 @@ def api_map_cells():
 def api_map_stats():
     """城池统计：各类型数量，以及有名字的城池列表"""
     conn = get_db()
-    # 类型分布
-    type_dist = conn.execute('''
-        SELECT cell_type, city_name, COUNT(*) as cnt
-        FROM map_cells
-        WHERE city_name != '' AND city_name IS NOT NULL AND city_name != 'None'
-        GROUP BY cell_type, city_name
-        ORDER BY cell_type, cnt DESC
-    ''').fetchall()
-    # 总格子数
-    total = conn.execute('SELECT COUNT(*) FROM map_cells').fetchone()[0]
-    # 有名字的城池
-    named = conn.execute('''
-        SELECT wid, x, y, cell_type, city_name, owner_name, building_id, updated_at
-        FROM map_cells
-        WHERE city_name != '' AND city_name IS NOT NULL AND city_name != 'None'
-        ORDER BY cell_type DESC, wid
-        LIMIT 500
-    ''').fetchall()
+    try:
+        type_dist = conn.execute('''
+            SELECT cell_type, city_name, COUNT(*) as cnt
+            FROM map_cells
+            WHERE city_name != '' AND city_name IS NOT NULL AND city_name != 'None'
+            GROUP BY cell_type, city_name
+            ORDER BY cell_type, cnt DESC
+        ''').fetchall()
+        total = conn.execute('SELECT COUNT(*) FROM map_cells').fetchone()[0]
+        named = conn.execute('''
+            SELECT wid, x, y, cell_type, city_name, owner_name, building_id, updated_at
+            FROM map_cells
+            WHERE city_name != '' AND city_name IS NOT NULL AND city_name != 'None'
+            ORDER BY cell_type DESC, wid
+            LIMIT 500
+        ''').fetchall()
+        result = {'total_cells': total, 'type_dist': [dict(r) for r in type_dist], 'named_cities': [dict(r) for r in named]}
+    except:
+        result = {'total_cells': 0, 'type_dist': [], 'named_cities': []}
     conn.close()
-    return jsonify({
-        'total_cells': total,
-        'type_dist': [dict(r) for r in type_dist],
-        'named_cities': [dict(r) for r in named],
-    })
+    return jsonify(result)
 
 
 # ===== 战场消息历史 =====
@@ -1132,7 +1254,7 @@ def api_battles_all():
     else:
         members = request.args.get('members', '')
     offset = (page - 1) * size
-    where = ['result <= 6', 'is_npc=0']; params = []
+    where = ['result <= 6']; params = []
     if player:
         where.append('(atk_name LIKE ? OR def_name LIKE ?)')
         params += [f'%{player}%', f'%{player}%']
@@ -1163,8 +1285,50 @@ def api_battles_all():
         f'SELECT * FROM battles_v2 WHERE {w} ORDER BY time DESC LIMIT ? OFFSET ?',
         params + [size, offset]
     ).fetchall()
+
+    data = [dict(r) for r in rows]
+    # 兼容：battles_v2 可能没有 atk_hero1_id/def_hero1_id 等列，前端需要显示攻守武将
+    try:
+        battle_ids = [int(d.get('battle_id')) for d in data if d.get('battle_id') is not None]
+        if battle_ids:
+            placeholders = ','.join('?' * len(battle_ids))
+            hrows = conn.execute(
+                f'''SELECT battle_id, side, pos, hero_id
+                    FROM battle_heroes
+                    WHERE battle_id IN ({placeholders})
+                    ORDER BY battle_id, side, pos''',
+                battle_ids
+            ).fetchall()
+            hero_map = {}
+            for hr in hrows:
+                bid = int(hr[0])
+                sd = hr[1] or ''
+                hid = int(hr[3]) if hr[3] else 0
+                if hid <= 0:
+                    continue
+                if bid not in hero_map:
+                    hero_map[bid] = {'atk': [], 'def': []}
+                if sd in ('atk', 'def') and len(hero_map[bid][sd]) < 3:
+                    hero_map[bid][sd].append(hid)
+
+            for d in data:
+                bid = d.get('battle_id')
+                if bid not in hero_map:
+                    continue
+                atk_ids = hero_map[bid].get('atk', [])
+                def_ids = hero_map[bid].get('def', [])
+                for i in range(3):
+                    ak = f'atk_hero{i+1}_id'
+                    dk = f'def_hero{i+1}_id'
+                    if not d.get(ak) and i < len(atk_ids):
+                        d[ak] = atk_ids[i]
+                    if not d.get(dk) and i < len(def_ids):
+                        d[dk] = def_ids[i]
+    except Exception:
+        pass
+
     conn.close()
-    return jsonify({'total': total, 'page': page, 'size': size, 'data': [dict(r) for r in rows]})
+    return jsonify({'total': total, 'page': page, 'size': size, 'data': data})
 
 
 # ===== 玩家队伍统计 =====
@@ -1275,7 +1439,7 @@ def api_player_battle_teams():
 
     conn = get_db()
 
-    conds = ["is_npc=0"]
+    conds = ["1=1"]
     params = []
     if player:
         conds.append("(atk_name LIKE ? OR def_name LIKE ?)")
@@ -1286,12 +1450,12 @@ def api_player_battle_teams():
         SELECT atk_name, atk_uid, atk_union,
                def_name, def_union,
                result,
-               attack_all_hero_info, defend_all_hero_info,
-               all_skill_info,
-               atk_hero1_id, atk_hero2_id, atk_hero3_id,
-               def_hero1_id, def_hero2_id, def_hero3_id,
-               atk_advance, def_advance,
-               attack_clan_name, defend_clan_name
+               '' as attack_all_hero_info, '' as defend_all_hero_info,
+               '' as all_skill_info,
+               0 as atk_hero1_id, 0 as atk_hero2_id, 0 as atk_hero3_id,
+               0 as def_hero1_id, 0 as def_hero2_id, 0 as def_hero3_id,
+               '' as atk_advance, '' as def_advance,
+               '' as attack_clan_name, '' as defend_clan_name
         FROM battles_v2
         WHERE {where}
         ORDER BY battle_id DESC
@@ -1463,7 +1627,7 @@ def api_battles_v2():
     ftype  = request.args.get('fight_type', '')
     period = request.args.get('period', '')
     offset = (page - 1) * size
-    where = ['is_npc=0']; params = []
+    where = ['1=1']; params = []
     if player: where.append('atk_name LIKE ?'); params.append(f'%{player}%')
     if union:  where.append('def_union LIKE ?'); params.append(f'%{union}%')
     if ftype:  where.append('fight_type=?'); params.append(int(ftype))
@@ -1561,6 +1725,7 @@ def _init_task_tables():
             target_user_num INTEGER DEFAULT 0,
             complete_user_num INTEGER DEFAULT 0,
             user_list TEXT DEFAULT "{}",
+            profile_id TEXT DEFAULT '',
             created_at TEXT DEFAULT (datetime('now','localtime'))
         )
     ''')
@@ -1713,29 +1878,60 @@ def api_task_statistics(tid):
     try: user_list = json.loads(d['user_list'])
     except: user_list = {}
 
+    # 兼容不同库结构
+    bv_cols = {r[1] for r in conn.execute("PRAGMA table_info(battles_v2)").fetchall()}
+    has_garrison = 'garrison' in bv_cols
+    has_atk_hero1 = 'atk_hero1_id' in bv_cols
+
     complete = 0
     for uid, u in user_list.items():
         name = u['name']
-        # 主力次数（garrison=0，攻方出战）
-        atk_num = conn.execute(
-            'SELECT COUNT(*) FROM battles_v2 WHERE wid=? AND atk_name=? AND garrison=0',
-            (pos, name)
-        ).fetchone()[0]
-        # 拆迁次数（garrison=1，攻方出战）
-        dis_num = conn.execute(
-            'SELECT COUNT(*) FROM battles_v2 WHERE wid=? AND atk_name=? AND garrison=1',
-            (pos, name)
-        ).fetchone()[0]
-        # 主力队伍数（按主将ID去重，不同主将算不同队伍）
-        atk_team_num = conn.execute(
-            'SELECT COUNT(DISTINCT atk_hero1_id) FROM battles_v2 WHERE wid=? AND atk_name=? AND garrison=0 AND atk_hero1_id IS NOT NULL AND atk_hero1_id != 0',
-            (pos, name)
-        ).fetchone()[0]
-        # 拆迁队伍数
-        dis_team_num = conn.execute(
-            'SELECT COUNT(DISTINCT atk_hero1_id) FROM battles_v2 WHERE wid=? AND atk_name=? AND garrison=1 AND atk_hero1_id IS NOT NULL AND atk_hero1_id != 0',
-            (pos, name)
-        ).fetchone()[0]
+        if has_garrison:
+            # 主力次数（garrison=0，攻方出战）
+            atk_num = conn.execute(
+                'SELECT COUNT(*) FROM battles_v2 WHERE wid=? AND atk_name=? AND garrison=0',
+                (pos, name)
+            ).fetchone()[0]
+            # 拆迁次数（garrison=1，攻方出战）
+            dis_num = conn.execute(
+                'SELECT COUNT(*) FROM battles_v2 WHERE wid=? AND atk_name=? AND garrison=1',
+                (pos, name)
+            ).fetchone()[0]
+        else:
+            # 老/精简库没有 garrison，统一按总出战统计
+            atk_num = conn.execute(
+                'SELECT COUNT(*) FROM battles_v2 WHERE wid=? AND atk_name=?',
+                (pos, name)
+            ).fetchone()[0]
+            dis_num = 0
+
+        if has_garrison and has_atk_hero1:
+            # 主力队伍数（按主将ID去重，不同主将算不同队伍）
+            atk_team_num = conn.execute(
+                'SELECT COUNT(DISTINCT atk_hero1_id) FROM battles_v2 WHERE wid=? AND atk_name=? AND garrison=0 AND atk_hero1_id IS NOT NULL AND atk_hero1_id != 0',
+                (pos, name)
+            ).fetchone()[0]
+            # 拆迁队伍数
+            dis_team_num = conn.execute(
+                'SELECT COUNT(DISTINCT atk_hero1_id) FROM battles_v2 WHERE wid=? AND atk_name=? AND garrison=1 AND atk_hero1_id IS NOT NULL AND atk_hero1_id != 0',
+                (pos, name)
+            ).fetchone()[0]
+        elif has_atk_hero1:
+            atk_team_num = conn.execute(
+                'SELECT COUNT(DISTINCT atk_hero1_id) FROM battles_v2 WHERE wid=? AND atk_name=? AND atk_hero1_id IS NOT NULL AND atk_hero1_id != 0',
+                (pos, name)
+            ).fetchone()[0]
+            dis_team_num = 0
+        else:
+            # 没有 atk_hero1_id 时，从 battle_heroes 侧按 pos=0 去重
+            atk_team_num = conn.execute(
+                '''SELECT COUNT(DISTINCT bh.hero_id)
+                   FROM battle_heroes bh
+                   JOIN battles_v2 bv ON bv.battle_id = bh.battle_id
+                   WHERE bv.wid=? AND bv.atk_name=? AND bh.side='atk' AND bh.pos=0 AND bh.hero_id IS NOT NULL AND bh.hero_id != 0''',
+                (pos, name)
+            ).fetchone()[0]
+            dis_team_num = 0
         user_list[uid]['atk_num'] = atk_num
         user_list[uid]['dis_num'] = dis_num
         user_list[uid]['atk_team_num'] = atk_team_num
@@ -1863,10 +2059,9 @@ def api_battle_field():
         SELECT bf.wid, bf.attacker_uid, bf.nearby_uids, bf.nearby_count,
                bf.cap_time, bf.captured_at,
                tu.name as attacker_name, tu.group_name as attacker_group,
-               mc.city_name, mc.x, mc.y, mc.cell_type
+               '' as city_name, NULL as x, NULL as y, NULL as cell_type
         FROM battle_field bf
         LEFT JOIN team_users tu ON tu.uid = bf.attacker_uid AND tu.profile_id=?
-        LEFT JOIN map_cells mc ON mc.wid = bf.wid
         ORDER BY bf.cap_time DESC
         LIMIT 100
     ''', (get_current_pid(),)).fetchall()
@@ -2081,7 +2276,7 @@ def api_team_report():
         lw = today - timedelta(days=today.weekday()+7)
         t_from = day_start(lw); t_to = day_start(lw + timedelta(days=7)) - 1
 
-    where = ['bv.is_npc=0']; params = []
+    where = ['1=1']; params = []
     if t_from: where.append('bv.time >= ?'); params.append(t_from)
     if t_to:   where.append('bv.time <= ?'); params.append(t_to)
     if group:  where.append('tu.group_name = ?'); params.append(group)
@@ -2098,7 +2293,7 @@ def api_team_report():
                 SUM(CASE WHEN bv.fight_type IN (2,80,33) THEN 1 ELSE 0 END) as city_battles,
                 SUM(CASE WHEN bv.result=1 AND bv.fight_type IN (2,80,33) THEN 1 ELSE 0 END) as city_wins,
                 COALESCE(MAX(tu.wuxun), 0) as total_gongxun,
-                MAX(bv.atk_power) as max_power,
+                0 as max_power,
                 ROUND(SUM(CASE WHEN bv.result=1 THEN 1 ELSE 0 END)*100.0/COUNT(*),1) as win_rate
             FROM battles_v2 bv
             INNER JOIN team_users tu ON tu.name = bv.atk_name AND tu.profile_id=?
@@ -2114,7 +2309,7 @@ def api_team_report():
                 SUM(CASE WHEN bv.fight_type IN (2,80,33) THEN 1 ELSE 0 END) as city_battles,
                 SUM(CASE WHEN bv.result=1 AND bv.fight_type IN (2,80,33) THEN 1 ELSE 0 END) as city_wins,
                 COALESCE((SELECT SUM(wuxun) FROM team_users WHERE profile_id=? AND group_name=COALESCE(tu.group_name,\'未知\')),0) as total_gongxun,
-                MAX(bv.atk_power) as max_power,
+                0 as max_power,
                 ROUND(SUM(CASE WHEN bv.result=1 THEN 1 ELSE 0 END)*100.0/COUNT(*),1) as win_rate
             FROM battles_v2 bv
             INNER JOIN team_users tu ON tu.name = bv.atk_name AND tu.profile_id=?
@@ -2129,7 +2324,9 @@ def api_team_report():
     ''', [pid, pid]+params).fetchone()
     conn.close()
     summary = dict(summary_row) if summary_row else {}
-    summary['win_rate'] = round(summary.get('total_wins',0)*100/max(summary.get('total_battles',1),1),1)
+    total_wins = summary.get('total_wins') or 0
+    total_battles = summary.get('total_battles') or 0
+    summary['win_rate'] = round(total_wins * 100 / max(total_battles, 1), 1)
     return jsonify({'summary': summary, 'rows': [dict(r) for r in rows]})
 
 
@@ -2243,6 +2440,21 @@ if __name__ == '__main__':
     print('  GET  /api/scores?union=')
     print('  GET  /api/union_matrix')
     print('  POST /api/refresh')
+
+    # 自动建表：对当前激活的数据库（及所有已存在的 stzb_*.db）执行建表
+    try:
+        import glob as _glob
+        _dbs_to_init = set()
+        _dbs_to_init.add(_current_db_path)
+        for _f in _glob.glob(os.path.join(BASE_DIR, 'stzb*.db')):
+            _dbs_to_init.add(_f)
+        for _dbp in _dbs_to_init:
+            try:
+                ensure_all_tables(_dbp)
+            except Exception as _te:
+                print(f'[!] 建表失败 {_dbp}: {_te}')
+    except Exception as _ie:
+        print(f'[!] 自动建表失败: {_ie}')
 
     # 启动抓包线程（集成 scrapy_v2）
     try:

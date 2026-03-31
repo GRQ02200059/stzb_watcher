@@ -150,6 +150,7 @@ def process_one_packet(buf, stream_key):
             print(f'[{tag} key=0x{best_key:02x}] {msg_type_hex} -> {fn} ({len(best_dec)}B): {str(best_parsed)[:60]}')
             w = _get_writer()
             if w: w.process_data(msg_type_hex, best_parsed, fn)
+            _try_extract_role_from_data(seq, best_parsed, stream_key)
         else:
             fn = save_raw(msg_type_hex, 'xor_raw', body)
             print(f'[xor-raw tried:{[hex(k) for k in candidate_keys]}] {msg_type_hex} body={body[:8].hex()}')
@@ -168,6 +169,7 @@ def process_one_packet(buf, stream_key):
                     print(f'[zlib] {msg_type_hex} -> {fn} ({len(decompressed)}B)')
                     w = _get_writer()
                     if w: w.process_data(msg_type_hex, parsed, fn)
+                    _try_extract_role_from_data(seq, parsed, stream_key)
                 else:
                     fn = save_raw(msg_type_hex, 'zlib_raw', decompressed)
                     print(f'[zlib-raw] {msg_type_hex} -> {fn}')
@@ -187,6 +189,7 @@ def process_one_packet(buf, stream_key):
                             print(f'[zlib-trim-{trim}] {msg_type_hex} -> {fn}')
                             w = _get_writer()
                             if w: w.process_data(msg_type_hex, parsed, fn)
+                            _try_extract_role_from_data(seq, parsed, stream_key)
                             decomp_ok = True
                             break
                     except Exception:
@@ -206,6 +209,7 @@ def process_one_packet(buf, stream_key):
             print(f'[plain] {msg_type_hex} -> {fn} ({len(body)}B)')
             w = _get_writer()
             if w: w.process_data(msg_type_hex, parsed, fn)
+            _try_extract_role_from_data(seq, parsed, stream_key)
         else:
             fn = save_raw(msg_type_hex, 'plain_str', body)
             stats[msg_type_hex] += 1
@@ -240,6 +244,47 @@ def process_one_packet(buf, stream_key):
 PROFILE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'current_profile.json')
 
 
+def _try_extract_role_from_data(seq, parsed, stream_key):
+    """
+    从解析后的数据中尝试提取角色/服务器信息并触发绑定。
+    0x1395包: [3, role_id, [], role_id, ..., role_name]  -> 索引[1]=role_id, [7]=role_name
+    0xe66包:  [200, {'server': ['X5449', ...]}]          -> 索引[1]['server'][0]=server_name
+    """
+    global _last_sniff_role_id
+    if not isinstance(parsed, list) or len(parsed) < 2:
+        return
+    # 从 stream_key 还原 server_ip
+    server_ip = stream_key[0] if stream_key else ''
+    src_ip = f'{stream_key[0]}:{stream_key[1]}' if stream_key else ''
+    dst_ip = ''
+
+    # 0x1395 包特征: [3, str, list, str, int, ...]
+    if (len(parsed) >= 8 and parsed[0] == 3
+            and isinstance(parsed[1], str) and isinstance(parsed[2], list)
+            and isinstance(parsed[7], str)):
+        role_id   = str(parsed[1])
+        role_name = str(parsed[7])
+        if role_id and role_id != _last_sniff_role_id:
+            print(f'[bind] 识别到角色信息: role_id={role_id} role_name={role_name}')
+            _last_sniff_role_id = role_id
+            with _bind_lock:
+                bound_src = _bound_src_ip
+            _do_bind(src_ip, dst_ip, server_ip, role_name, '', role_id)
+        return
+
+    # 0xe66 包特征: [200, {'server': [...]}]
+    if (parsed[0] == 200 and isinstance(parsed[1], dict)
+            and 'server' in parsed[1]):
+        srv = parsed[1]['server']
+        server_name = str(srv[0]) if isinstance(srv, list) and srv else ''
+        if server_name:
+            # 只更新 server_name，复用已知 role_id
+            if _last_sniff_role_id and _last_sniff_role_id != 'pending':
+                print(f'[bind] 识别到服务器信息: server_name={server_name}')
+                _do_bind(src_ip, dst_ip, server_ip, '', server_name, _last_sniff_role_id)
+        return
+
+
 def _do_bind(src_ip, dst_ip, server_ip, role_name='', server_name='', role_id=''):
     """执行绑定：切换输出目录、写 profile、触发 sniff 重启"""
     global OUTPUT_DIR, _role_bound
@@ -247,13 +292,26 @@ def _do_bind(src_ip, dst_ip, server_ip, role_name='', server_name='', role_id=''
     _sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import profile_manager
 
-    # 没有真实 role_id 时不注册 profile，避免生成 ip:ip 格式的错误账号
+    # 没有真实 role_id 时先用 IP 注册临时账号，确保数据库和目录存在
     if not role_id:
         new_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                'capture_new', f'stzb_{server_ip.replace(":","_")}')
         os.makedirs(new_dir, exist_ok=True)
         OUTPUT_DIR = new_dir
         print(f'[bind] 报文目录切换为: {OUTPUT_DIR}（等待角色信息）')
+        # 注册临时 profile，确保数据库文件和表结构存在
+        try:
+            p = profile_manager.register_profile(
+                server_ip=server_ip,
+                role_id='pending',
+                role_name='（等待角色信息）',
+                server_name=server_ip,
+                src_ip=src_ip,
+            )
+            profile_manager.switch_profile(p['profile_id'])
+            print(f'[bind] 临时数据库已建立: {p["db_path"]}')
+        except Exception as _e:
+            print(f'[bind] 临时数据库建立失败: {_e}')
         _sniff_stop_event.set()
         return
 
