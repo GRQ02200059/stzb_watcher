@@ -849,9 +849,11 @@ def parse_team_users_67(fpath, data=None):
                     'group_name': grp, 'hero_config_id': hero_cfg,
                     'hero_skills': skills, 'join_time': jt,
                 })
-            except: continue
+            except:
+                continue
         return users
-    except: return []
+    except:
+        return []
 
 
 def upsert_team_users(conn, users, profile_id=''):

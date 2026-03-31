@@ -412,9 +412,9 @@ def try_bind_from_packet(packet, buf):
             elif not _last_sniff_role_id:
                 # 首次识别，直接绑定
                 _last_sniff_role_id = role_id
-                with _bind_lock:
-                    _bound_src_ip = src_ip
-                    _bound_dst_ip = dst_ip
+            with _bind_lock:
+                _bound_src_ip = src_ip
+                _bound_dst_ip = dst_ip
                 _do_bind(src_ip, dst_ip, ip_layer.src, role_name, server_name, role_id)
     except Exception:
         pass
@@ -452,7 +452,7 @@ def process_packet(packet):
             break
         elif consumed > 0:
             # 持续尝试从包中获取账号信息（包括账号切换）
-            try_bind_from_packet(packet, buf)
+                try_bind_from_packet(packet, buf)
             del buf[:consumed]
         else:
             del buf[:1]
@@ -542,8 +542,8 @@ except Exception as _e:
     _writer = None
 
 if __name__ == '__main__':
-    try:
-        run_sniff()
-    except KeyboardInterrupt:
-        print_statistics()
+try:
+    run_sniff()
+except KeyboardInterrupt:
+    print_statistics()
  

@@ -1254,7 +1254,7 @@ def api_battles_all():
     else:
         members = request.args.get('members', '')
     offset = (page - 1) * size
-    where = ['result <= 6']; params = []
+    where = ['result <= 6', 'result != 6', "COALESCE(result_desc,'') NOT LIKE '%NPC%'"]; params = []
     if player:
         where.append('(atk_name LIKE ? OR def_name LIKE ?)')
         params += [f'%{player}%', f'%{player}%']
