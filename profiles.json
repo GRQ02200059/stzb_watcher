@@ -9,7 +9,7 @@
     "db_path": "D:\\nettest\\stzb_42.186.96.143.db",
     "cap_dir": "D:\\nettest\\capture_new\\stzb_42.186.96.143",
     "created_at": "2026-03-12 23:12:09",
-    "last_used": "2026-03-31 10:36:25"
+    "last_used": "2026-03-31 22:33:20"
   },
   {
     "profile_id": "42.186.96.143:3z5ddqy811007",
@@ -21,7 +21,7 @@
     "db_path": "D:\\nettest\\stzb_42.186.96.143.db",
     "cap_dir": "D:\\nettest\\capture_new\\stzb_42.186.96.143",
     "created_at": "2026-03-13 01:38:29",
-    "last_used": "2026-03-31 19:58:21"
+    "last_used": "2026-03-31 23:17:08"
   },
   {
     "profile_id": "45.253.141.10:1w120d0q5381",
@@ -33,7 +33,7 @@
     "db_path": "D:\\nettest\\stzb_45.253.141.10.db",
     "cap_dir": "D:\\nettest\\capture_new\\stzb_45.253.141.10",
     "created_at": "2026-03-31 00:47:39",
-    "last_used": "2026-03-31 20:09:21"
+    "last_used": "2026-03-31 23:17:35"
   },
   {
     "profile_id": "45.253.141.10:pending",
@@ -45,6 +45,6 @@
     "db_path": "D:\\nettest\\stzb_45.253.141.10.db",
     "cap_dir": "D:\\nettest\\capture_new\\stzb_45.253.141.10",
     "created_at": "2026-03-31 00:47:39",
-    "last_used": "2026-03-31 20:08:23"
+    "last_used": "2026-03-31 23:17:38"
   }
 ]

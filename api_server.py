@@ -15,6 +15,7 @@ import os, time, threading
 BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_DB   = os.path.join(BASE_DIR, 'stzb.db')
 PROFILE_FILE = os.path.join(BASE_DIR, 'current_profile.json')
+REF_SCHEMA_DB = os.path.join(BASE_DIR, 'stzb_42.186.96.143.db')
 
 _current_db_path = DEFAULT_DB
 _db_lock         = threading.Lock()
@@ -64,6 +65,63 @@ CORS(app)
 
 # 启动实时写库线程
 _writer = start_writer_thread()
+
+def _sync_schema_from_reference(db_path, ref_db_path):
+    """把 db_path 的表结构补齐到 ref_db_path（只补表/补列，不删不改已有列）"""
+    if not ref_db_path or not os.path.exists(ref_db_path):
+        return
+    if os.path.abspath(db_path) == os.path.abspath(ref_db_path):
+        return
+
+    tgt = sqlite3.connect(db_path)
+    ref = sqlite3.connect(ref_db_path)
+    try:
+        tgt_tables = {r[0] for r in tgt.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")}
+        ref_rows = ref.execute("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").fetchall()
+
+        for tname, create_sql in ref_rows:
+            if not tname or not create_sql:
+                continue
+
+            # 目标库没有该表：直接按参考库建表
+            if tname not in tgt_tables:
+                try:
+                    tgt.execute(create_sql)
+                    tgt_tables.add(tname)
+                except Exception as e:
+                    print(f'[schema-sync] create table {tname} failed: {e}')
+                    continue
+
+            # 目标库有该表：补缺失列
+            try:
+                tgt_cols = {r[1] for r in tgt.execute(f'PRAGMA table_info({tname})').fetchall()}
+                ref_cols = ref.execute(f'PRAGMA table_info({tname})').fetchall()
+                for c in ref_cols:
+                    # PRAGMA table_info: cid, name, type, notnull, dflt_value, pk
+                    cname = c[1]
+                    ctype = c[2] or 'TEXT'
+                    cnotnull = c[3]
+                    cdflt = c[4]
+                    if cname in tgt_cols:
+                        continue
+                    alter = f'ALTER TABLE {tname} ADD COLUMN {cname} {ctype}'
+                    if cdflt is not None:
+                        alter += f' DEFAULT {cdflt}'
+                    elif cnotnull:
+                        # SQLite 对已有数据表新增 NOT NULL 列需默认值；无默认时降级为可空
+                        pass
+                    try:
+                        tgt.execute(alter)
+                    except Exception as e:
+                        print(f'[schema-sync] add column {tname}.{cname} failed: {e}')
+            except Exception as e:
+                print(f'[schema-sync] sync columns for {tname} failed: {e}')
+
+        tgt.commit()
+    finally:
+        ref.close()
+        tgt.close()
+
 
 def ensure_all_tables(db_path):
     """对指定数据库执行所有建表操作，幂等安全"""
@@ -151,6 +209,11 @@ def ensure_all_tables(db_path):
         conn.commit()
     except Exception as e:
         print(f'[init] zone_players: {e}')
+    try:
+        # 7. 以 42 库为参考补齐缺失表/列（只补不删，兼容旧库）
+        _sync_schema_from_reference(db_path, REF_SCHEMA_DB)
+    except Exception as e:
+        print(f'[init] schema sync from ref db failed: {e}')
     conn.close()
     print(f'[init] 全部表初始化完成: {db_path}')
 
@@ -747,6 +810,25 @@ def api_ranking_v2():
 
     conn.close()
     data = [dict(r) for r in rows]
+    # 最终兜底过滤：避免不同库里 is_npc/isnpc 存储格式不一致导致漏网
+    def _is_npc_row(d):
+        v1 = d.get('is_npc', 0)
+        v2 = d.get('isnpc', 0)
+        r  = d.get('result', 0)
+        desc = str(d.get('result_desc', '') or '').upper()
+
+        def _truthy(v):
+            if isinstance(v, str):
+                s = v.strip().lower()
+                return s in ('1', 'true', 'yes', 'y', 'npc')
+            try:
+                return int(v) != 0
+            except Exception:
+                return bool(v)
+
+        return _truthy(v1) or _truthy(v2) or int(r or 0) == 6 or ('NPC' in desc)
+
+    data = [d for d in data if not _is_npc_row(d)]
     for i, r in enumerate(data):
         r['rank'] = i + 1
         wr = round(r['wins'] / r['battles'] * 100, 1) if r['battles'] else 0
@@ -1254,7 +1336,14 @@ def api_battles_all():
     else:
         members = request.args.get('members', '')
     offset = (page - 1) * size
+    conn = get_db()
+    bv_cols = {r[1] for r in conn.execute("PRAGMA table_info(battles_v2)").fetchall()}
+
     where = ['result <= 6', 'result != 6', "COALESCE(result_desc,'') NOT LIKE '%NPC%'"]; params = []
+    if 'is_npc' in bv_cols:
+        where.append('COALESCE(is_npc, 0) = 0')
+    if 'isnpc' in bv_cols:
+        where.append('COALESCE(isnpc, 0) = 0')
     if player:
         where.append('(atk_name LIKE ? OR def_name LIKE ?)')
         params += [f'%{player}%', f'%{player}%']
@@ -1426,18 +1515,24 @@ def api_player_battle_teams():
     """从battles_v2统计每个玩家的队伍组合，含进阶星数、技能、战数、胜场"""
     player  = request.args.get('player', '')   # 模糊匹配玩家名
     side    = request.args.get('side', '')     # atk/def/''
+    debug_mode = request.args.get('debug', '') == '1'
 
-    # 内存缓存：无过滤条件时缓存60秒
+    # 内存缓存：按账号+库+查询参数缓存60秒
     import time as _time
     _cache = api_player_battle_teams.__dict__
-    cache_key = f'{player}|{side}'
+    cache_data = _cache.setdefault('_data', {})
+    with _db_lock:
+        _db_path = _current_db_path
+    _pid = get_current_pid()
+    cache_key = f'{_pid}|{_db_path}|{player}|{side}'
     now = _time.time()
-    if cache_key in _cache.get('_data', {}):
-        entry = _cache['_data'][cache_key]
+    if (not debug_mode) and cache_key in cache_data:
+        entry = cache_data[cache_key]
         if now - entry['ts'] < 60:
             return jsonify(entry['result'])
 
     conn = get_db()
+    bv_cols = {r[1] for r in conn.execute("PRAGMA table_info(battles_v2)").fetchall()}
 
     conds = ["1=1"]
     params = []
@@ -1445,22 +1540,32 @@ def api_player_battle_teams():
         conds.append("(atk_name LIKE ? OR def_name LIKE ?)")
         params += [f'%{player}%', f'%{player}%']
 
-    where = ' AND '.join(conds)
+    # 先按 NPC 过滤查询；若结果为空，再回退为不过滤（用于排查 is_npc/isnpc 字段不一致问题）
+    conds_npc = list(conds)
+    conds_npc.append('result != 6')
+    if 'is_npc' in bv_cols:
+        conds_npc.append('COALESCE(is_npc, 0) = 0')
+    if 'isnpc' in bv_cols:
+        conds_npc.append('COALESCE(isnpc, 0) = 0')
+
+    where = ' AND '.join(conds_npc)
     rows = conn.execute(f'''
-        SELECT atk_name, atk_uid, atk_union,
-               def_name, def_union,
-               result,
-               '' as attack_all_hero_info, '' as defend_all_hero_info,
-               '' as all_skill_info,
-               0 as atk_hero1_id, 0 as atk_hero2_id, 0 as atk_hero3_id,
-               0 as def_hero1_id, 0 as def_hero2_id, 0 as def_hero3_id,
-               '' as atk_advance, '' as def_advance,
-               '' as attack_clan_name, '' as defend_clan_name
+        SELECT *
         FROM battles_v2
         WHERE {where}
         ORDER BY battle_id DESC
         LIMIT 50000
     ''', params).fetchall()
+
+    if not rows:
+        where_fallback = ' AND '.join(conds)
+        rows = conn.execute(f'''
+            SELECT *
+            FROM battles_v2
+            WHERE {where_fallback}
+            ORDER BY battle_id DESC
+            LIMIT 50000
+        ''', params).fetchall()
     conn.close()
 
     from collections import defaultdict
@@ -1506,10 +1611,22 @@ def api_player_battle_teams():
     team_map = defaultdict(lambda: {'cnt':0,'wins':0,'union':'','uid':'','hero_stars':[0,0,0],'skills':'','heroes_str':'','clan_name':''})
 
     for row in rows:
-        atk_name, atk_uid, atk_union, def_name, def_union, result, \
-        atk_hero_info, def_hero_info, skill_info, \
-        ah1, ah2, ah3, dh1, dh2, dh3, \
-        atk_advance, def_advance, atk_clan_name, def_clan_name = row
+        r = dict(row)
+        atk_name = r.get('atk_name', '')
+        atk_uid = r.get('atk_uid', '')
+        atk_union = r.get('atk_union', '')
+        def_name = r.get('def_name', '')
+        def_union = r.get('def_union', '')
+        result = r.get('result', 0)
+        atk_hero_info = r.get('attack_all_hero_info', '')
+        def_hero_info = r.get('defend_all_hero_info', '')
+        skill_info = r.get('all_skill_info', '')
+        ah1, ah2, ah3 = r.get('atk_hero1_id', 0), r.get('atk_hero2_id', 0), r.get('atk_hero3_id', 0)
+        dh1, dh2, dh3 = r.get('def_hero1_id', 0), r.get('def_hero2_id', 0), r.get('def_hero3_id', 0)
+        atk_advance = r.get('atk_advance', '')
+        def_advance = r.get('def_advance', '')
+        atk_clan_name = r.get('attack_clan_name', '')
+        def_clan_name = r.get('defend_clan_name', '')
 
         # 攻方
         if side in ('', 'atk') and atk_name and atk_name.strip():
@@ -1567,12 +1684,122 @@ def api_player_battle_teams():
             'wins': wins,
             'win_rate': round(wins/cnt*100,1) if cnt else 0,
         })
+
+    # 回退：若 battles_v2 直解析结果为空，则改用 battle_heroes 聚合，避免因字段为空导致 0 条
+    if not data:
+        conn = get_db()
+        from collections import defaultdict as _dd
+        team2 = _dd(lambda: {'cnt':0,'wins':0,'union':'','uid':'','clan_name':'','hero_stars':[0,0,0],'skills':''})
+
+        where_common = ["b.result != 6"]
+        if 'is_npc' in bv_cols:
+            where_common.append("COALESCE(b.is_npc,0)=0")
+        if 'isnpc' in bv_cols:
+            where_common.append("COALESCE(b.isnpc,0)=0")
+        if player:
+            where_common.append("(b.atk_name LIKE ? OR b.def_name LIKE ?)")
+        w_common = ' AND '.join(where_common)
+        p_common = [f'%{player}%', f'%{player}%'] if player else []
+
+        rows2 = []
+        if side in ('', 'atk'):
+            rows2 += conn.execute(f'''
+                SELECT b.battle_id, b.result, b.atk_name as pname, COALESCE(b.atk_uid,'') as uid,
+                       COALESCE(b.atk_union,'') as union_name, COALESCE(b.attack_clan_name,'') as clan_name,
+                       bh.pos, bh.hero_id
+                FROM battles_v2 b
+                JOIN battle_heroes bh ON bh.battle_id=b.battle_id AND bh.side='atk'
+                WHERE {w_common} AND COALESCE(b.atk_name,'') != ''
+                ORDER BY b.battle_id DESC, bh.pos ASC
+            ''', p_common).fetchall()
+        if side in ('', 'def'):
+            rows2 += conn.execute(f'''
+                SELECT b.battle_id, b.result, b.def_name as pname, '' as uid,
+                       COALESCE(b.def_union,'') as union_name, COALESCE(b.defend_clan_name,'') as clan_name,
+                       bh.pos, bh.hero_id
+                FROM battles_v2 b
+                JOIN battle_heroes bh ON bh.battle_id=b.battle_id AND bh.side='def'
+                WHERE {w_common} AND COALESCE(b.def_name,'') != ''
+                ORDER BY b.battle_id DESC, bh.pos ASC
+            ''', p_common).fetchall()
+        conn.close()
+
+        battle_map = _dd(list)
+        battle_meta = {}
+        for r2 in rows2:
+            bid = int(r2[0] or 0)
+            result2 = int(r2[1] or 0)
+            pname2 = (r2[2] or '').strip()
+            uid2 = str(r2[3] or '')
+            union2 = r2[4] or ''
+            clan2 = r2[5] or ''
+            pos2 = int(r2[6] or 0)
+            hid2 = int(r2[7] or 0)
+            if not pname2 or hid2 <= 0:
+                continue
+            key_b = (pname2, uid2, bid)
+            battle_map[key_b].append((pos2, hid2))
+            battle_meta[key_b] = (union2, clan2, result2)
+
+        for (pname2, uid2, bid), hs in battle_map.items():
+            hs.sort(key=lambda x: x[0])
+            heroes_ids2 = '+'.join(str(hid) for _, hid in hs[:3])
+            if not heroes_ids2:
+                continue
+            union2, clan2, result2 = battle_meta[(pname2, uid2, bid)]
+            key2 = (pname2, uid2, heroes_ids2)
+            d2 = team2[key2]
+            d2['cnt'] += 1
+            d2['union'] = union2
+            d2['uid'] = uid2
+            d2['clan_name'] = clan2
+            if uid2:
+                if result2 in (1,7,11):
+                    d2['wins'] += 1
+            else:
+                if result2 in (2,6,12):
+                    d2['wins'] += 1
+
+        data = []
+        for (pname2, uid2, heroes_ids2), stat2 in team2.items():
+            cnt2 = stat2['cnt']
+            wins2 = stat2['wins']
+            data.append({
+                'player_name': pname2,
+                'uid': uid2,
+                'union': stat2['union'],
+                'clan_name': stat2['clan_name'],
+                'heroes_str': heroes_ids2,
+                'hero_stars': stat2['hero_stars'],
+                'skills': stat2['skills'],
+                'cnt': cnt2,
+                'wins': wins2,
+                'win_rate': round(wins2/cnt2*100,1) if cnt2 else 0,
+            })
     # 按玩家名排序，同玩家按出场数降序
     data.sort(key=lambda x: (x['player_name'], -x['cnt']))
+
+    if debug_mode:
+        return jsonify({
+            'debug_count': {
+                'stage1_rows': len(rows),
+                'stage1_groups': len(team_map),
+                'final_rows': len(data),
+                'used_fallback': len(team_map) == 0,
+                'cache_hit': False,
+            },
+            'debug_ctx': {
+                'db_path': _db_path,
+                'profile_id': _pid,
+                'side': side,
+                'player': player,
+                'where_stage1': where,
+            },
+            'data': data,
+        })
+
     # 写入缓存
-    if '_data' not in api_player_battle_teams.__dict__:
-        api_player_battle_teams._data = {}
-    api_player_battle_teams._data[cache_key] = {'ts': now, 'result': data}
+    cache_data[cache_key] = {'ts': now, 'result': data}
     return jsonify(data)
 
 

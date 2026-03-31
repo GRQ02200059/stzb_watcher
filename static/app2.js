@@ -665,7 +665,7 @@ async function loadTeamStats(){
 async function loadPlayerBattleTeams(){
   const player=document.getElementById('pbt-player').value;
   const side=document.getElementById('pbt-side').value;
-  const url=`/api/player_battle_teams?player=${encodeURIComponent(player)}&side=${encodeURIComponent(side)}`;
+  const url=`/api/player_battle_teams?player=${encodeURIComponent(player)}&side=${encodeURIComponent(side)}&_t=${Date.now()}`;
   const b=document.getElementById('pbt-body');
   const countEl=document.getElementById('pbt-count');
   b.innerHTML=`<tr><td colspan=7 style='color:var(--cyan);text-align:center;padding:20px'>⏳ 加载中...</td></tr>`;

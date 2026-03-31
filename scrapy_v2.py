@@ -452,7 +452,7 @@ def process_packet(packet):
             break
         elif consumed > 0:
             # 持续尝试从包中获取账号信息（包括账号切换）
-                try_bind_from_packet(packet, buf)
+            try_bind_from_packet(packet, buf)
             del buf[:consumed]
         else:
             del buf[:1]
@@ -542,8 +542,7 @@ except Exception as _e:
     _writer = None
 
 if __name__ == '__main__':
-try:
-    run_sniff()
-except KeyboardInterrupt:
-    print_statistics()
- 
+    try:
+        run_sniff()
+    except KeyboardInterrupt:
+        print_statistics()

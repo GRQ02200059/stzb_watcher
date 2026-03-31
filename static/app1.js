@@ -53,7 +53,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 setInterval(()=>{document.getElementById('hc-time').textContent=new Date().toLocaleTimeString('zh-CN',{hour12:false});},1000);
 
-async function apiFetch(url,opts){try{const r=await fetch(API+url,opts);return await r.json();}catch(e){showToast('请求失败: '+e,'var(--red)');return null;}}
+async function apiFetch(url,opts){
+  try{
+    const finalOpts = Object.assign({cache:'no-store'}, opts||{});
+    const r=await fetch(API+url,finalOpts);
+    return await r.json();
+  }catch(e){
+    showToast('请求失败: '+e,'var(--red)');
+    return null;
+  }
+}
 
 // ===== 战报详情弹窗 =====
 function openModal(){document.getElementById('modal-overlay').style.display='flex';}

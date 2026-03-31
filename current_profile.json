@@ -1,13 +1,13 @@
 {
-  "profile_id": "45.253.141.10:1w120d0q5381",
+  "profile_id": "45.253.141.10:pending",
   "server_ip": "45.253.141.10",
   "server_name": "45.253.141.10",
-  "role_id": "1w120d0q5381",
-  "role_name": "镇丨天璇",
+  "role_id": "pending",
+  "role_name": "（等待角色信息）",
   "src_ip": "45.253.141.10:8001",
   "db_path": "D:\\nettest\\stzb_45.253.141.10.db",
   "cap_dir": "D:\\nettest\\capture_new\\stzb_45.253.141.10",
   "created_at": "2026-03-31 00:47:39",
-  "last_used": "2026-03-31 20:09:21",
-  "bound_at": "2026-03-31 20:09:21"
+  "last_used": "2026-03-31 23:17:38",
+  "bound_at": "2026-03-31 23:17:38"
 }
