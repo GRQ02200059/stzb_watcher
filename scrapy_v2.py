@@ -213,9 +213,11 @@ def process_one_packet(buf, stream_key):
         else:
             fn = save_raw(msg_type_hex, 'plain_str', body)
             stats[msg_type_hex] += 1
-            print(f'[plain-str] {msg_type_hex} -> {fn} ({len(body)}B)')
+            plain_text = body.decode('utf-8', errors='replace').strip()
+            preview = plain_text if len(plain_text) <= 1000 else (plain_text[:1000] + ' ...')
+            print(f'[plain-str] {msg_type_hex} {preview}')
             w = _get_writer()
-            if w: w.process_data(msg_type_hex, body.decode('utf-8', errors='replace'), fn)
+            if w: w.process_data(msg_type_hex, plain_text, fn)
 
     # ===== 其他类型 =====
     else:

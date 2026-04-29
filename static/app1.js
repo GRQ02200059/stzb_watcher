@@ -3,6 +3,12 @@ let _battles=0,_wx=0,_players=new Set(),_sync=0,_evtCnt=0;
 
 const RESULT_MAP={0:'平局',1:'攻方胜',2:'守方胜',3:'攻方溃',4:'守方溃',5:'双溃',6:'守方胜(NPC)',7:'攻方胜',8:'攻方溃',9:'守方溃',10:'平局',11:'攻方胜',12:'守方胜',13:'攻方溃',14:'守方溃',15:'双溃'};
 const FIGHT_MAP={0:'野战',1:'援军',2:'援军',11:'攻城',27:'宝物',33:'大城',35:'援军',80:'攻城',102:'攻城',140:'攻城',141:'攻城',184:'攻城',194:'攻城',209:'攻城',224:'攻城'};
+const REGION_MAP={1:'司隶',2:'雍州',3:'兖州',4:'豫州',5:'冀州',6:'青州',7:'徐州',8:'凉州',9:'并州',10:'扬州',11:'益州',12:'幽州',13:'荆州'};
+
+function regionName(v){
+  const n=Number(v||0);
+  return REGION_MAP[n]||String(v||'');
+}
 
 function resultDesc(r,d){return r===0?'败':r===1?'胜':String(r);}
 function fightDesc(f,d){return String(f);}
@@ -31,13 +37,17 @@ function switchTab(i,el){
   else if(i===14 && typeof loadTeamUsers==='function') loadTeamUsers();
   else if(i===15 && typeof loadGroupWu==='function') loadGroupWu();
   else if(i===16 && typeof loadTasks==='function') loadTasks();
-  else if(i===17 && typeof loadBattleField==='function') loadBattleField();
-  else if(i===22 && typeof loadHeroCombo==='function') loadHeroCombo();
-  else if(i===23 && typeof loadTeamReport==='function') loadTeamReport('all');
-  else if(i===24 && typeof initSimulator==='function') initSimulator();
-  else if(i===18 && typeof loadUnionList==='function') loadUnionList();
-  else if(i===19 && typeof loadAnnouncements==='function') loadAnnouncements();
-  else if(i===20 && typeof loadZonePlayers==='function') loadZonePlayers();
+  else if(i===17 && typeof loadAllianceGroupTeams==='function') loadAllianceGroupTeams();
+  else if(i===18){ if(typeof loadUnionList==='function') loadUnionList(); if(typeof loadUnionPowerRank==='function') loadUnionPowerRank(); }
+  else if(i===20 && typeof loadAnnouncements==='function') loadAnnouncements();
+  else if(i===21 && typeof loadZonePlayers==='function') loadZonePlayers();
+  else if(i===22 && typeof loadMsgHistory==='function') loadMsgHistory();
+  else if(i===23 && typeof loadHeroCombo==='function') loadHeroCombo();
+  else if(i===24 && typeof loadTeamReport==='function') loadTeamReport('all');
+  else if(i===25 && typeof initSimulator==='function') initSimulator();
+  else if(i===26 && typeof loadStateRegionStats==='function') loadStateRegionStats();
+  else if(i===27 && typeof loadBattleMonitor==='function') loadBattleMonitor();
+  else if(i===28 && typeof loadBattleMonitor13a2==='function') loadBattleMonitor13a2();
 }
 
 // 页面加载时恢复上次的 tab
@@ -278,6 +288,7 @@ function connectSSE(){
     let evt;try{evt=JSON.parse(e.data);}catch{return;}
     addEvtFeed(evt);
     if(evt.type==='battle')onBattle(evt.data);
+    else if(evt.type==='battle_monitor_13a4'){ if(typeof renderBattleMonitor==='function') renderBattleMonitor(Object.assign({ok:true}, evt.data||{})); }
     else if(evt.type==='db_sync'){_sync++;document.getElementById('sc0-sync').textContent=_sync;}
     else if(evt.type==='chat_834'||evt.type==='battle_notice'){if(typeof onMsg834==='function')onMsg834(evt);}
     else if(evt.type==='profile_changed'){
@@ -360,3 +371,4 @@ function applyBattleSearch(){
     el.style.display=(!q||(el.dataset.name||'').includes(q))?'':'none';
   });
 }
+
