@@ -2,15 +2,19 @@
 """
 扩展数据导入 - 解析所有已知消息类型
 """
-import sqlite3, json, os, glob
+import sqlite3, json, os, glob, sys
 from datetime import datetime
 from db_extend import get_db, create_ext_tables
 
-DATA_ROOT = 'd:/nettest/decompressed_data_report'
+APP_DIR = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
+RESOURCE_DIR = getattr(sys, '_MEIPASS', APP_DIR)
+BASE_DIR = APP_DIR
+DATA_ROOT = os.path.join(APP_DIR, 'decompressed_data_report')
+CAPTURE_ROOT = os.path.join(APP_DIR, 'capture_new')
 
 # 加载英雄名称映射
 try:
-    with open('d:/nettest/hero_scraper/output/heroes.json','r',encoding='utf-8') as f:
+    with open(os.path.join(RESOURCE_DIR, 'hero_scraper', 'output', 'heroes.json'),'r',encoding='utf-8') as f:
         HERO_NAMES = {h['id']: h['name'] for h in json.load(f) if h.get('id')}
 except:
     HERO_NAMES = {}
@@ -40,7 +44,7 @@ def all_json_files(msg_types=None):
             if fn.endswith('.json'):
                 files.append((os.path.join(sdpath, fn), subdir))
     # capture_new 目录
-    cap_new = 'd:/nettest/capture_new'
+    cap_new = CAPTURE_ROOT
     if os.path.exists(cap_new):
         for subdir in os.listdir(cap_new):
             sdpath = os.path.join(cap_new, subdir)

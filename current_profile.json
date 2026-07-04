@@ -1,13 +1,13 @@
 {
-  "profile_id": "45.253.241.182:pending",
-  "server_ip": "45.253.241.182",
-  "server_name": "45.253.241.182",
+  "profile_id": "192.168.31.198:pending",
+  "server_ip": "192.168.31.198",
+  "server_name": "192.168.31.198",
   "role_id": "pending",
   "role_name": "（等待角色信息）",
-  "src_ip": "45.253.241.182:8001",
-  "db_path": "D:\\nettest\\stzb_45.253.241.182.db",
-  "cap_dir": "D:\\nettest\\capture_new\\stzb_45.253.241.182",
-  "created_at": "2026-04-22 06:37:29",
-  "last_used": "2026-04-25 09:33:55",
-  "bound_at": "2026-04-25 09:33:55"
+  "src_ip": "192.168.31.198:8001",
+  "db_path": "D:\\nettest\\stzb_192.168.31.198.db",
+  "cap_dir": "D:\\nettest\\capture_new\\stzb_192.168.31.198",
+  "created_at": "2026-05-06 00:00:47",
+  "last_used": "2026-05-06 00:00:47",
+  "bound_at": "2026-05-06 00:00:47"
 }

@@ -2,11 +2,13 @@
 """
 扩展数据库表 - 解析更多消息类型
 """
-import sqlite3, json, os, glob
+import sqlite3, json, os, glob, sys
 from datetime import datetime
 
-DB_PATH = 'd:/nettest/stzb.db'
-DATA_ROOT = 'd:/nettest/decompressed_data_report'
+APP_DIR = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = APP_DIR
+DB_PATH = os.path.join(APP_DIR, 'stzb.db')
+DATA_ROOT = os.path.join(APP_DIR, 'decompressed_data_report')
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)

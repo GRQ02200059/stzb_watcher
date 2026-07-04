@@ -24,6 +24,7 @@ function switchTab(i,el){
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   localStorage.setItem('lastTab', i);
+  if(i===29 && typeof loadAncientChinaMapDemo==='function') loadAncientChinaMapDemo();
   if(i===1 && typeof loadRanking==='function') loadRanking();
   else if(i===2 && typeof loadWuxun==='function') loadWuxun();
   else if(i===3 && typeof loadPower==='function') loadPower();

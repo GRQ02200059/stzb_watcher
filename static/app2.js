@@ -495,6 +495,113 @@ async function loadBattleMonitor13a2(){
   renderBattleMonitor13a2(r);
 }
 
+function loadAncientChinaMapDemo(){
+  const svg = document.getElementById('ancient-map-svg');
+  if(!svg) return;
+  const wrap = document.getElementById('ancient-map-wrap');
+  if(wrap && !document.getElementById('ancient-map-loading')){
+    wrap.insertAdjacentHTML('beforeend', `<div id="ancient-map-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#e6d1a0;font-size:.86rem;letter-spacing:.14em;background:rgba(18,12,8,.55);backdrop-filter:blur(2px);z-index:3">正在展卷汉末十三州…</div>`);
+  }
+  const tz = [
+    {name:'幽州', fill:'#3d3023', c:[117.5,41.3], poly:[[113,39],[117,39],[121.8,39.5],[124.8,42],[126.5,46.5],[121.5,49],[114,48],[111,44],[113,39]]},
+    {name:'并州', fill:'#4a3828', c:[112.6,38.1], poly:[[108,34.5],[112.5,34.5],[115.8,36],[116.8,40.5],[114,42.5],[110,43],[107.5,40],[108,34.5]]},
+    {name:'冀州', fill:'#58412d', c:[115.4,37.3], poly:[[112.2,34.6],[119,34.8],[120.6,37.8],[119.3,41.2],[116.5,42.4],[113.6,41],[112.2,34.6]]},
+    {name:'青州', fill:'#654934', c:[119.9,36.8], poly:[[118.2,35],[121,35],[122.5,36],[123.2,38.5],[121.4,39.8],[119.2,38.8],[118.2,35]]},
+    {name:'徐州', fill:'#72513a', c:[118.8,33.6], poly:[[116.2,31],[120.8,31],[121.8,34.7],[118.5,35.2],[116.4,34.1],[116.2,31]]},
+    {name:'兖州', fill:'#805942', c:[115.6,35.7], poly:[[113.2,34.1],[117,34.2],[118.2,35.8],[117.2,37.2],[114.5,37.6],[113.2,34.1]]},
+    {name:'豫州', fill:'#8d6349', c:[113.7,33.8], poly:[[110.8,31.2],[116,31.2],[117.1,34],[115.1,35.1],[111.2,34.6],[110.8,31.2]]},
+    {name:'司隶', fill:'#9b6d52', c:[109.8,34.3], poly:[[107.2,33.2],[111.2,33.2],[111.5,35.6],[108.6,36.2],[107.2,33.2]]},
+    {name:'雍州', fill:'#a97a5c', c:[103.8,35.2], poly:[[95,32],[107.5,32],[108.8,35.8],[106.8,39.6],[102,40.5],[96.5,39.2],[93.8,35.5],[95,32]]},
+    {name:'凉州', fill:'#b78969', c:[95.8,39.1], poly:[[80,34],[95,34],[97,39.5],[95.5,42.8],[88,46.2],[80.5,44.5],[78.2,39.2],[80,34]]},
+    {name:'扬州', fill:'#946848', c:[119.2,29.8], poly:[[116.3,25.2],[122.5,25.1],[122.6,31.2],[117.8,31.4],[116.3,25.2]]},
+    {name:'荆州', fill:'#7b563d', c:[112.4,29.8], poly:[[107.5,26.5],[116.8,26.5],[117.2,31.4],[111.5,31.8],[108.3,30.2],[107.5,26.5]]},
+    {name:'益州', fill:'#694a35', c:[103.2,29.1], poly:[[97,22.3],[108.8,22.3],[108.8,31.5],[103.5,32.2],[98.5,30.2],[97,22.3]]},
+    {name:'交州', fill:'#5b4030', c:[109.1,22.4], poly:[[104.2,19.3],[113.5,19.3],[113.2,24.5],[108.6,25.9],[104.2,24],[104.2,19.3]]}
+  ];
+  const rivers = [
+    [[97,33],[101,33.4],[106,31.4],[111.5,30.7],[118.5,31.2],[121,31.2]],
+    [[95,35.5],[102,36.2],[109,37.2],[118,37.8]],
+    [[111,23],[113,23.2],[115,23.2]]
+  ];
+  fetch('/static/china_full.geojson')
+    .then(r => r.json())
+    .then(geo => {
+      const features = Array.isArray(geo.features) ? geo.features : [];
+      const points = [];
+      const walk = (coords)=>{
+        if(!Array.isArray(coords)) return;
+        if(typeof coords[0] === 'number' && typeof coords[1] === 'number') return void points.push(coords);
+        coords.forEach(walk);
+      };
+      features.forEach(f=> walk(f.geometry && f.geometry.coordinates));
+      tz.forEach(z => walk(z.poly));
+      if(!points.length) return;
+      let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+      points.forEach(([x,y])=>{ if(x<minX)minX=x; if(x>maxX)maxX=x; if(y<minY)minY=y; if(y>maxY)maxY=y; });
+      const viewW=1200, viewH=760, pad=54;
+      const sx=(viewW-pad*2)/(maxX-minX), sy=(viewH-pad*2)/(maxY-minY), scale=Math.min(sx,sy);
+      const ox=(viewW-(maxX-minX)*scale)/2, oy=(viewH-(maxY-minY)*scale)/2;
+      const project=([x,y])=>[ox+(x-minX)*scale, viewH-(oy+(y-minY)*scale)];
+      const ringToPath=(ring)=>ring.map((pt,i)=>{ const [px,py]=project(pt); return `${i===0?'M':'L'}${px.toFixed(2)},${py.toFixed(2)}`; }).join(' ')+' Z';
+      const toPath=(coords)=>{
+        if(!Array.isArray(coords)||!coords.length) return '';
+        if(typeof coords[0][0] === 'number') return ringToPath(coords);
+        if(typeof coords[0][0][0] === 'number') return coords.map(ringToPath).join(' ');
+        return coords.map(poly => Array.isArray(poly) ? poly.map(ringToPath).join(' ') : '').join(' ');
+      };
+      const riverPath = rivers.map(line => line.map((pt,i)=>{ const [px,py]=project(pt); return `${i===0?'M':'L'}${px.toFixed(2)},${py.toFixed(2)}`; }).join(' ')).join(' ');
+      const cityMarkers = [
+        {name:'洛阳', c:[112.45,34.62]}, {name:'长安', c:[108.94,34.34]}, {name:'成都', c:[104.06,30.67]},
+        {name:'邺城', c:[114.48,36.61]}, {name:'襄阳', c:[112.14,32.04]}, {name:'建业', c:[118.78,32.04]},
+        {name:'蓟城', c:[116.4,39.9]}, {name:'临淄', c:[118.31,36.82]}, {name:'番禺', c:[113.27,23.13]}
+      ];
+      svg.innerHTML = `
+        <defs>
+          <filter id='paperNoise'><feTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncA type='table' tableValues='0 0 .04 .07'/></feComponentTransfer></filter>
+          <filter id='goldGlow'><feDropShadow dx='0' dy='0' stdDeviation='4' flood-color='#c8a044' flood-opacity='.18'/></filter>
+          <linearGradient id='riverGrad' x1='0%' y1='0%' x2='100%' y2='0%'><stop offset='0%' stop-color='#214a61'/><stop offset='50%' stop-color='#4d86a6'/><stop offset='100%' stop-color='#214a61'/></linearGradient>
+          <linearGradient id='regionStroke' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#e2c57a'/><stop offset='100%' stop-color='#7e5a27'/></linearGradient>
+        </defs>
+        <rect x='0' y='0' width='1200' height='760' fill='#17110d'/>
+        <rect x='0' y='0' width='1200' height='760' fill='#f0dfb8' opacity='.05' filter='url(#paperNoise)'/>
+        <g opacity='.14'>
+          ${features.map(f => `<path d="${toPath(f.geometry && f.geometry.coordinates)}" fill="none" stroke="#8f7a52" stroke-width="0.8" stroke-opacity=".22"></path>`).join('')}
+        </g>
+        <path d='${riverPath}' stroke='url(#riverGrad)' stroke-width='5' fill='none' stroke-linecap='round' opacity='.7'/>
+        <g filter='url(#goldGlow)'>
+          ${tz.map(z => {
+            const path = ringToPath(z.poly);
+            const [cx,cy] = project(z.c);
+            return `<g class="han-region" data-name="${z.name}"><path d="${path}" fill="${z.fill}" fill-opacity=".82" stroke="url(#regionStroke)" stroke-width="2.2"></path><text x="${cx.toFixed(2)}" y="${cy.toFixed(2)}" text-anchor="middle" dominant-baseline="middle" fill="#f0ddb0" font-size="24" letter-spacing="4">${z.name}</text></g>`;
+          }).join('')}
+        </g>
+        <g opacity='.38'>
+          ${tz.map(z => `<path d="${ringToPath(z.poly)}" fill="none" stroke="#f6e7bc" stroke-opacity=".08" stroke-width="1"></path>`).join('')}
+        </g>
+        <g>
+          ${cityMarkers.map(city => { const [cx,cy]=project(city.c); return `<g><circle cx="${cx.toFixed(2)}" cy="${cy.toFixed(2)}" r="4.8" fill="#d8bf7a" stroke="#3b2910" stroke-width="1.8"></circle><circle cx="${cx.toFixed(2)}" cy="${cy.toFixed(2)}" r="10.8" fill="none" stroke="#d8bf7a" stroke-opacity=".24" stroke-width="1"></circle><text x="${(cx+10).toFixed(2)}" y="${(cy-8).toFixed(2)}" fill="#e7d4a0" font-size="14" letter-spacing="1">${city.name}</text></g>`; }).join('')}
+        </g>
+        <g opacity='.16'><text x='600' y='710' text-anchor='middle' fill='#b89657' font-size='74' letter-spacing='18'>大 汉 十 三 州</text></g>`;
+      svg.querySelectorAll('.han-region').forEach(el => {
+        el.addEventListener('mouseenter', () => {
+          const p = el.querySelector('path');
+          if(p){ p.setAttribute('fill-opacity', '.97'); p.setAttribute('stroke-width', '2.9'); }
+        });
+        el.addEventListener('mouseleave', () => {
+          const p = el.querySelector('path');
+          if(p){ p.setAttribute('fill-opacity', '.82'); p.setAttribute('stroke-width', '2.2'); }
+        });
+      });
+    })
+    .catch(err => {
+      svg.innerHTML = `<text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle' fill='#d8bf7a' font-size='20'>地图加载失败：${String(err && err.message || err)}</text>`;
+    })
+    .finally(() => {
+      const loading = document.getElementById('ancient-map-loading');
+      if(loading) loading.remove();
+    });
+}
+
 async function loadBattleMonitor(forcePush=true){
   ensureBattleMonitorControls();
   const r = await apiFetch('/api/battle_monitor');
@@ -2266,7 +2373,8 @@ function fillUnionFilterOptions(){
   if(!dl) return;
   const seen = new Set();
   const names = [];
-  (_ulData||[]).forEach(r=>{
+  const rows = Array.isArray(_ulData) ? _ulData : (Array.isArray(_ulData?.data) ? _ulData.data : []);
+  rows.forEach(r=>{
     const name = (r && r.name ? String(r.name) : '').trim();
     if(name && !seen.has(name)){
       seen.add(name);
@@ -2279,7 +2387,7 @@ function fillUnionFilterOptions(){
 
 async function loadUnionList(){
   const data = await apiFetch('/api/union_list');
-  _ulData = data || [];
+  _ulData = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
   fillUnionFilterOptions();
   const cards = document.getElementById('ul-cards');
   if(cards){
@@ -2927,6 +3035,7 @@ async function loadStateRegionStats(){
   const res = await apiFetch(`/api/state_region_stats?scope=${scope}&group=${encodeURIComponent(group)}`);
   if(!res) return;
   _srData = res;
+  const meta = res.meta || {};
 
   const groups = Array.isArray(res.groups) ? res.groups : [];
   const groupSel = document.getElementById('sr-group');
@@ -2943,6 +3052,7 @@ async function loadStateRegionStats(){
   const stateRows = res.state_rows || [];
   const groupRows = res.group_rows || [];
   const allianceRows = res.alliance_rows || [];
+  const emptyHint = meta.message || (res.error ? `加载失败：${res.error}` : '');
 
   const cards = document.getElementById('sr-cards');
   if(cards){
@@ -2955,9 +3065,14 @@ async function loadStateRegionStats(){
       <div class='stat-card'><div class='val' style='color:var(--green)'>${s.grouped_players||0}</div><div class='lbl'>已分组成员</div></div>
     `;
   }
+  const noteEl = document.getElementById('sr-note');
+  if(noteEl){
+    noteEl.textContent = emptyHint;
+    noteEl.style.display = emptyHint ? 'block' : 'none';
+  }
 
   const countEl = document.getElementById('sr-count');
-  if(countEl) countEl.textContent = `州 ${stateRows.length} 条 / 同盟 ${allianceRows.length} 条 / 分组 ${groupRows.length} 条`;
+  if(countEl) countEl.textContent = emptyHint ? emptyHint : `州 ${stateRows.length} 条 / 同盟 ${allianceRows.length} 条 / 分组 ${groupRows.length} 条`;
   const timeEl = document.getElementById('sr-update-time');
   if(timeEl) timeEl.textContent = `更新于 ${new Date().toLocaleTimeString('zh-CN',{hour12:false})}`;
 
@@ -2973,7 +3088,7 @@ async function loadStateRegionStats(){
         <td style='color:var(--gold)'>${fmt(r.avg_power||0)}</td>
         <td style='color:var(--text2)'>${fmt(r.max_power||0)}</td>
       </tr>`;
-    }).join('') || `<tr><td colspan='6' style='text-align:center;color:var(--text2);padding:20px'>暂无数据</td></tr>`;
+    }).join('') || `<tr><td colspan='6' style='text-align:center;color:var(--text2);padding:20px'>${esc(emptyHint || '暂无数据')}</td></tr>`;
   }
 
   renderStateMap(stateRows);
@@ -2982,15 +3097,19 @@ async function loadStateRegionStats(){
   if(stateBars){
     stateBars.innerHTML = '';
     const top = stateRows.slice(0,13);
-    const maxV = Math.max(1, ...top.map(r=>Number(r.total_power||0)));
-    top.forEach(r=>{
-      const pct = Math.round(Number(r.total_power||0) / maxV * 100);
-      stateBars.innerHTML += `<div class='bar-row'>
-        <div class='bar-label'>${esc(r.state||'未知')}</div>
-        <div class='bar-track'><div class='bar-fill' style='width:${pct}%;background:var(--blue)'></div></div>
-        <div class='bar-val'>${fmt(r.total_power||0)}</div>
-      </div>`;
-    });
+    if(!top.length && emptyHint){
+      stateBars.innerHTML = `<div style='text-align:center;color:var(--text2);padding:20px'>${esc(emptyHint)}</div>`;
+    } else {
+      const maxV = Math.max(1, ...top.map(r=>Number(r.total_power||0)));
+      top.forEach(r=>{
+        const pct = Math.round(Number(r.total_power||0) / maxV * 100);
+        stateBars.innerHTML += `<div class='bar-row'>
+          <div class='bar-label'>${esc(r.state||'未知')}</div>
+          <div class='bar-track'><div class='bar-fill' style='width:${pct}%;background:var(--blue)'></div></div>
+          <div class='bar-val'>${fmt(r.total_power||0)}</div>
+        </div>`;
+      });
+    }
   }
 
   const groupBody = document.getElementById('sr-group-body');
@@ -3005,22 +3124,26 @@ async function loadStateRegionStats(){
         <td class='${cls}' style='font-family:Share Tech Mono,monospace'>${fmt(r.total_power||0)}</td>
         <td style='font-size:.72rem;color:var(--text2);white-space:normal;line-height:1.45'>${esc(r.state_summary||'-')}</td>
       </tr>`;
-    }).join('') || `<tr><td colspan='6' style='text-align:center;color:var(--text2);padding:20px'>暂无数据</td></tr>`;
+    }).join('') || `<tr><td colspan='6' style='text-align:center;color:var(--text2);padding:20px'>${esc(emptyHint || '暂无数据')}</td></tr>`;
   }
 
   const groupBars = document.getElementById('sr-group-bars');
   if(groupBars){
     groupBars.innerHTML = '';
     const top = groupRows.slice(0,15);
-    const maxV = Math.max(1, ...top.map(r=>Number(r.player_count||0)));
-    top.forEach(r=>{
-      const pct = Math.round(Number(r.player_count||0) / maxV * 100);
-      groupBars.innerHTML += `<div class='bar-row'>
-        <div class='bar-label'>${esc((r.alliance_name||'未加入同盟') + ' / ' + (r.group_name||'未分组'))}</div>
-        <div class='bar-track'><div class='bar-fill' style='width:${pct}%;background:var(--purple)'></div></div>
-        <div class='bar-val'>${r.player_count||0}人</div>
-      </div>`;
-    });
+    if(!top.length && emptyHint){
+      groupBars.innerHTML = `<div style='text-align:center;color:var(--text2);padding:20px'>${esc(emptyHint)}</div>`;
+    } else {
+      const maxV = Math.max(1, ...top.map(r=>Number(r.player_count||0)));
+      top.forEach(r=>{
+        const pct = Math.round(Number(r.player_count||0) / maxV * 100);
+        groupBars.innerHTML += `<div class='bar-row'>
+          <div class='bar-label'>${esc((r.alliance_name||'未加入同盟') + ' / ' + (r.group_name||'未分组'))}</div>
+          <div class='bar-track'><div class='bar-fill' style='width:${pct}%;background:var(--purple)'></div></div>
+          <div class='bar-val'>${r.player_count||0}人</div>
+        </div>`;
+      });
+    }
   }
 }
 
@@ -4305,4 +4428,3 @@ function onMsg834(evt){
     renderMsgList();
   }
 }
-

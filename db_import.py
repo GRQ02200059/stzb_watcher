@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 # db_import.py - 数据导入部分（追加到 db_build.py 后运行）
-import sqlite3, json, os, re
+import sqlite3, json, os, re, sys
 from datetime import datetime
 
-DB_PATH = 'd:/nettest/stzb.db'
-DATA_ROOT = 'd:/nettest'
+APP_DIR = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
+RESOURCE_DIR = getattr(sys, '_MEIPASS', APP_DIR)
+BASE_DIR = APP_DIR
+DB_PATH = os.path.join(APP_DIR, 'stzb.db')
+DATA_ROOT = APP_DIR
 
 try:
-    with open(f'{DATA_ROOT}/hero_scraper/output/heroes.json', 'r', encoding='utf-8') as f:
+    with open(os.path.join(RESOURCE_DIR, 'hero_scraper', 'output', 'heroes.json'), 'r', encoding='utf-8') as f:
         HERO_NAMES = {str(h['id']): h['name'] for h in json.load(f) if h.get('id') and h.get('name')}
 except: HERO_NAMES = {}
 try:
-    with open(f'{DATA_ROOT}/hero_scraper/output/skills_full.json', 'r', encoding='utf-8') as f:
+    with open(os.path.join(RESOURCE_DIR, 'hero_scraper', 'output', 'skills_full.json'), 'r', encoding='utf-8') as f:
         SKILL_NAMES = {str(s['id']): s['name'] for s in json.load(f) if s.get('id') and s.get('name')}
 except: SKILL_NAMES = {}
 

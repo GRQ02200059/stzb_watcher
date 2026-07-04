@@ -5,7 +5,7 @@
 """
 from flask import Flask, jsonify, request, Response, stream_with_context
 from flask_cors import CORS
-import sqlite3, json, os, time, threading, ast
+import sqlite3, json, os, time, threading, ast, sys
 from realtime_writer import (start_writer_thread, event_queue, recent_events, _event_lock,
                              subscribe, unsubscribe, push_event,
                              parse_battle_monitor_13a4, build_battle_monitor_payload)
@@ -13,10 +13,12 @@ import profile_manager
 
 import os, time, threading
 
-BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_DB   = os.path.join(BASE_DIR, 'stzb.db')
-PROFILE_FILE = os.path.join(BASE_DIR, 'current_profile.json')
-REF_SCHEMA_DB = os.path.join(BASE_DIR, 'stzb_42.186.96.143.db')
+APP_DIR      = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
+RESOURCE_DIR = getattr(sys, '_MEIPASS', APP_DIR)
+BASE_DIR     = APP_DIR
+DEFAULT_DB   = os.path.join(APP_DIR, 'stzb.db')
+PROFILE_FILE = os.path.join(APP_DIR, 'current_profile.json')
+REF_SCHEMA_DB = os.path.join(APP_DIR, 'stzb_42.186.96.143.db')
 REGION_NAMES = {
     1: '司隶', 2: '雍州', 3: '兖州', 4: '豫州', 5: '冀州', 6: '青州',
     7: '徐州', 8: '凉州', 9: '并州', 10: '扬州', 11: '益州', 12: '幽州', 13: '荆州'
@@ -26,6 +28,179 @@ _current_db_path = DEFAULT_DB
 _db_lock         = threading.Lock()
 _initialized_dbs = set()
 _table_info_cache = {}
+
+REQUIRED_BV2_COLUMNS = {
+    'wid_name': 'TEXT DEFAULT ""',
+    'is_npc': 'INTEGER DEFAULT 0',
+    'is_ai': 'INTEGER DEFAULT 0',
+    'weather': 'INTEGER DEFAULT 0',
+    'in_night': 'INTEGER DEFAULT 0',
+    'in_night_mode': 'INTEGER DEFAULT 0',
+    'garrison': 'INTEGER DEFAULT 0',
+    'atk_unionid': 'INTEGER DEFAULT 0',
+    'def_unionid': 'INTEGER DEFAULT 0',
+    'atk_hp': 'INTEGER DEFAULT 0',
+    'def_hp': 'INTEGER DEFAULT 0',
+    'attack_hp': 'INTEGER DEFAULT 0',
+    'defend_hp': 'INTEGER DEFAULT 0',
+    'all_skill_info': 'TEXT DEFAULT ""',
+    'atk_advance': 'TEXT DEFAULT ""',
+    'def_advance': 'TEXT DEFAULT ""',
+    'attack_advance': 'TEXT DEFAULT ""',
+    'defend_advance': 'TEXT DEFAULT ""',
+    'atk_gear_info': 'TEXT DEFAULT ""',
+    'def_gear_info': 'TEXT DEFAULT ""',
+    'attacker_gear_info': 'TEXT DEFAULT ""',
+    'defender_gear_info': 'TEXT DEFAULT ""',
+    'attack_all_hero_info': 'TEXT DEFAULT ""',
+    'defend_all_hero_info': 'TEXT DEFAULT ""',
+    'attack_all_sub_hero_info': 'TEXT DEFAULT ""',
+    'defend_all_sub_hero_info': 'TEXT DEFAULT ""',
+    'atk_hero_type': 'TEXT DEFAULT ""',
+    'def_hero_type': 'TEXT DEFAULT ""',
+    'attack_hero_type': 'TEXT DEFAULT ""',
+    'defend_hero_type': 'TEXT DEFAULT ""',
+    'attack_clan_name': 'TEXT DEFAULT ""',
+    'defend_clan_name': 'TEXT DEFAULT ""',
+    'atk_clan_name': 'TEXT DEFAULT ""',
+    'def_clan_name': 'TEXT DEFAULT ""',
+    'atk_team_id': 'INTEGER DEFAULT 0',
+    'def_team_id': 'INTEGER DEFAULT 0',
+    'atk_hero1_id': 'INTEGER DEFAULT 0',
+    'atk_hero2_id': 'INTEGER DEFAULT 0',
+    'atk_hero3_id': 'INTEGER DEFAULT 0',
+    'def_hero1_id': 'INTEGER DEFAULT 0',
+    'def_hero2_id': 'INTEGER DEFAULT 0',
+    'def_hero3_id': 'INTEGER DEFAULT 0',
+    'atk_hero1_level': 'INTEGER DEFAULT 0',
+    'atk_hero2_level': 'INTEGER DEFAULT 0',
+    'atk_hero3_level': 'INTEGER DEFAULT 0',
+    'def_hero1_level': 'INTEGER DEFAULT 0',
+    'def_hero2_level': 'INTEGER DEFAULT 0',
+    'def_hero3_level': 'INTEGER DEFAULT 0',
+    'atk_hero1_star': 'INTEGER DEFAULT 0',
+    'atk_hero2_star': 'INTEGER DEFAULT 0',
+    'atk_hero3_star': 'INTEGER DEFAULT 0',
+    'def_hero1_star': 'INTEGER DEFAULT 0',
+    'def_hero2_star': 'INTEGER DEFAULT 0',
+    'def_hero3_star': 'INTEGER DEFAULT 0',
+}
+
+
+def _ensure_battles_v2_columns(conn):
+    """补齐 battles_v2 常用列，避免新库打开页面时报 no such column。"""
+    try:
+        existing = {r[1] for r in conn.execute('PRAGMA table_info(battles_v2)').fetchall()}
+    except Exception:
+        existing = set()
+    if not existing:
+        return
+    changed = False
+    for cname, cdef in REQUIRED_BV2_COLUMNS.items():
+        if cname in existing:
+            continue
+        try:
+            conn.execute(f'ALTER TABLE battles_v2 ADD COLUMN {cname} {cdef}')
+            changed = True
+        except Exception as e:
+            print(f'[init] add battles_v2.{cname} failed: {e}')
+    if changed:
+        conn.commit()
+
+
+def _ensure_task_tables(conn):
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            status INTEGER DEFAULT 0,
+            name TEXT NOT NULL,
+            time INTEGER NOT NULL,
+            pos TEXT NOT NULL,
+            target_groups TEXT DEFAULT "[]",
+            target_user_num INTEGER DEFAULT 0,
+            complete_user_num INTEGER DEFAULT 0,
+            user_list TEXT DEFAULT "{}",
+            profile_id TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now','localtime'))
+        )
+    ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS task_reports (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            task_id INTEGER NOT NULL,
+            battle_id INTEGER,
+            atk_name TEXT,
+            def_name TEXT,
+            wid TEXT,
+            garrison INTEGER DEFAULT 0,
+            atk_base_heroid INTEGER DEFAULT 0,
+            time INTEGER,
+            raw TEXT,
+            UNIQUE(battle_id)
+        )
+    ''')
+    conn.commit()
+
+
+def _table_exists(conn, table_name):
+    row = conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name=? LIMIT 1",
+        (table_name,),
+    ).fetchone()
+    return bool(row)
+
+
+def _ensure_state_region_tables(conn):
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS union_list (
+            union_id INTEGER PRIMARY KEY,
+            name TEXT,
+            level INTEGER DEFAULT 0,
+            power INTEGER DEFAULT 0,
+            force INTEGER DEFAULT 0,
+            total_member INTEGER DEFAULT 0,
+            occupy_city_value INTEGER DEFAULT 0,
+            total_npc_city INTEGER DEFAULT 0,
+            region INTEGER DEFAULT 0,
+            area INTEGER DEFAULT 0,
+            rank INTEGER DEFAULT 0,
+            refresh_time INTEGER DEFAULT 0,
+            updated_at TEXT
+        )
+    ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS player_power_rank (
+            user_id INTEGER PRIMARY KEY,
+            role_id TEXT,
+            name TEXT,
+            power INTEGER DEFAULT 0,
+            force INTEGER DEFAULT 0,
+            area INTEGER DEFAULT 0,
+            region INTEGER DEFAULT 0,
+            land_count INTEGER DEFAULT 0,
+            fort_count INTEGER DEFAULT 0,
+            branch_city_count INTEGER DEFAULT 0,
+            shu_cheng_count INTEGER DEFAULT 0,
+            refresh_time INTEGER DEFAULT 0,
+            rank INTEGER DEFAULT 0,
+            updated_at TEXT
+        )
+    ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS zone_players (
+            uid INTEGER PRIMARY KEY,
+            role_id TEXT,
+            name TEXT,
+            power INTEGER DEFAULT 0,
+            wid INTEGER DEFAULT 0,
+            pos_type INTEGER DEFAULT 0,
+            last_active INTEGER DEFAULT 0,
+            join_time INTEGER DEFAULT 0,
+            union_id INTEGER DEFAULT 0,
+            updated_at TEXT
+        )
+    ''')
+    conn.commit()
 
 
 def _load_profile():
@@ -75,7 +250,7 @@ _watcher_thread.start()
 
 # 初始化当前 DB
 _current_db_path = _load_profile()
-app = Flask(__name__, static_folder='static', static_url_path='/static')
+app = Flask(__name__, static_folder=os.path.join(RESOURCE_DIR, 'static'), static_url_path='/static')
 CORS(app)
 
 # 启动实时写库线程
@@ -212,24 +387,25 @@ def ensure_all_tables(db_path):
     except Exception as e:
         print(f'[init] player_self: {e}')
     try:
-        # 6. zone_players 表
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS zone_players (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                uid TEXT, name TEXT, union_name TEXT,
-                level INTEGER DEFAULT 0,
-                power INTEGER DEFAULT 0,
-                updated_at TEXT
-            )
-        ''')
-        conn.commit()
+        # 6. 州郡/同盟统计依赖表
+        _ensure_state_region_tables(conn)
     except Exception as e:
-        print(f'[init] zone_players: {e}')
+        print(f'[init] state region tables: {e}')
     try:
         # 7. 以 42 库为参考补齐缺失表/列（只补不删，兼容旧库）
         _sync_schema_from_reference(db_path, REF_SCHEMA_DB)
     except Exception as e:
         print(f'[init] schema sync from ref db failed: {e}')
+    try:
+        # 8. 打包版也能自给自足地补齐 battles_v2 常用列
+        _ensure_battles_v2_columns(conn)
+    except Exception as e:
+        print(f'[init] ensure battles_v2 columns: {e}')
+    try:
+        # 9. 任务相关表需要对当前库初始化，而不是只初始化默认库
+        _ensure_task_tables(conn)
+    except Exception as e:
+        print(f'[init] ensure task tables: {e}')
     _table_info_cache.pop(abs_db_path, None)
     conn.close()
     print(f'[init] 全部表初始化完成: {db_path}')
@@ -925,10 +1101,35 @@ def api_db_sync_tables():
 def api_refresh():
     import subprocess, sys
     try:
-        r1 = subprocess.run([sys.executable, 'd:/nettest/db_import.py'],
-                            capture_output=True, text=True, timeout=120)
-        r2 = subprocess.run([sys.executable, 'd:/nettest/db_import_ext.py'],
-                            capture_output=True, text=True, timeout=120)
+        if getattr(sys, 'frozen', False):
+            import db_import
+            import db_import_ext
+            from db_build import create_tables as _create_tables
+            from db_extend import create_ext_tables as _create_ext_tables, get_db as _get_ext_db
+
+            conn = get_db()
+            _create_tables(conn)
+            db_import.import_battles(conn)
+            db_import.import_unions(conn)
+            db_import.import_player_teams(conn)
+            db_import.calc_scores(conn)
+            conn.close()
+
+            ext_conn = _get_ext_db()
+            _create_ext_tables(ext_conn)
+            db_import_ext.import_player_locations(ext_conn)
+            db_import_ext.import_db_sync(ext_conn)
+            db_import_ext.import_union_cities(ext_conn)
+            db_import_ext.import_player_records(ext_conn)
+            db_import_ext.import_hero_unlock(ext_conn)
+            ext_conn.close()
+
+            return jsonify({'ok': True, 'output': 'refresh completed in packaged mode', 'err': ''})
+
+        r1 = subprocess.run([sys.executable, os.path.join(BASE_DIR, 'db_import.py')],
+                            capture_output=True, text=True, timeout=120, cwd=BASE_DIR)
+        r2 = subprocess.run([sys.executable, os.path.join(BASE_DIR, 'db_import_ext.py')],
+                            capture_output=True, text=True, timeout=120, cwd=BASE_DIR)
         out = r1.stdout[-1500:] + '\n---ext---\n' + r2.stdout[-1000:]
         return jsonify({'ok': True, 'output': out, 'err': r1.stderr[-300:]+r2.stderr[-300:]})
     except Exception as e:
@@ -2562,37 +2763,7 @@ def api_group_wu():
 # ===== 攻城考勤任务 (照搬 stzbHelper Task) =====
 def _init_task_tables():
     conn = get_db()
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS tasks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            status INTEGER DEFAULT 0,
-            name TEXT NOT NULL,
-            time INTEGER NOT NULL,
-            pos TEXT NOT NULL,
-            target_groups TEXT DEFAULT "[]",
-            target_user_num INTEGER DEFAULT 0,
-            complete_user_num INTEGER DEFAULT 0,
-            user_list TEXT DEFAULT "{}",
-            profile_id TEXT DEFAULT '',
-            created_at TEXT DEFAULT (datetime('now','localtime'))
-        )
-    ''')
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS task_reports (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            task_id INTEGER NOT NULL,
-            battle_id INTEGER,
-            atk_name TEXT,
-            def_name TEXT,
-            wid TEXT,
-            garrison INTEGER DEFAULT 0,
-            atk_base_heroid INTEGER DEFAULT 0,
-            time INTEGER,
-            raw TEXT,
-            UNIQUE(battle_id)
-        )
-    ''')
-    conn.commit()
+    _ensure_task_tables(conn)
     conn.close()
 
 _init_task_tables()
@@ -3079,7 +3250,7 @@ def api_union_list():
         ''').fetchall()
         return jsonify([dict(r) for r in rows])
     except Exception as e:
-        return jsonify({'error': str(e), 'data': []})
+        return jsonify([])
     finally:
         conn.close()
 
@@ -3282,6 +3453,43 @@ def api_state_region_stats():
 
     conn = get_db()
     try:
+        meta = {
+            'has_player_power_rank': _table_exists(conn, 'player_power_rank'),
+            'has_zone_players': _table_exists(conn, 'zone_players'),
+            'has_union_list': _table_exists(conn, 'union_list'),
+        }
+        meta['player_power_rank_count'] = conn.execute('SELECT COUNT(*) FROM player_power_rank').fetchone()[0] if meta['has_player_power_rank'] else 0
+        meta['zone_players_count'] = conn.execute('SELECT COUNT(*) FROM zone_players').fetchone()[0] if meta['has_zone_players'] else 0
+        meta['union_list_count'] = conn.execute('SELECT COUNT(*) FROM union_list').fetchone()[0] if meta['has_union_list'] else 0
+
+        if meta['player_power_rank_count'] <= 0:
+            missing_parts = ['个人势力排行']
+            if meta['union_list_count'] <= 0:
+                missing_parts.append('联盟列表')
+            if meta['zone_players_count'] <= 0:
+                missing_parts.append('战区玩家')
+            meta['ready'] = False
+            meta['message'] = '暂无州郡数据：当前库还没抓到' + ' / '.join(missing_parts) + '相关报文，请先在游戏里打开对应页面后再刷新。'
+            return jsonify({
+                'summary': {
+                    'total_players': 0,
+                    'total_power': 0,
+                    'state_count': 0,
+                    'group_count': 0,
+                    'alliance_count': 0,
+                    'grouped_players': 0,
+                    'scope': scope,
+                    'selected_group': group,
+                    'selected_alliance': alliance,
+                },
+                'state_rows': [],
+                'group_rows': [],
+                'alliance_rows': [],
+                'groups': [],
+                'alliances': [],
+                'meta': meta,
+            })
+
         rows = conn.execute('''
             WITH union_sources AS (
                 SELECT REPLACE(player_name, ' ', '') AS norm_name,
@@ -3455,6 +3663,8 @@ def api_state_region_stats():
         total_players = len(data)
         total_power = sum(int(r.get('power') or 0) for r in data)
         grouped_players = sum(1 for r in data if (r.get('group_name') or '未分组') != '未分组')
+        meta['ready'] = True
+        meta['message'] = ''
 
         return jsonify({
             'summary': {
@@ -3473,9 +3683,10 @@ def api_state_region_stats():
             'alliance_rows': alliance_rows,
             'groups': sorted(all_groups),
             'alliances': sorted(all_alliances),
+            'meta': meta,
         })
     except Exception as e:
-        return jsonify({'error': str(e), 'summary': {}, 'state_rows': [], 'group_rows': [], 'alliance_rows': [], 'groups': [], 'alliances': []})
+        return jsonify({'error': str(e), 'summary': {}, 'state_rows': [], 'group_rows': [], 'alliance_rows': [], 'groups': [], 'alliances': [], 'meta': {'ready': False, 'message': str(e)}})
     finally:
         conn.close()
 
@@ -3729,187 +3940,47 @@ def api_simulate_heroes():
         return jsonify({'ok': False, 'error': str(e), 'trace': traceback.format_exc()}), 500
 
 
-if __name__ == '__main__':
-    print('启动 API 服务器: http://127.0.0.1:8080')
-    print('接口列表:')
-    print('  GET  /api/status')
-    print('  GET  /api/unions')
-    print('  GET  /api/battles?page=1&size=30&player=&union=&result=')
-    print('  GET  /api/battles/{id}')
-    print('  GET  /api/battle_stats')
-    print('  GET  /api/heroes/freq')
-    print('  GET  /api/heroes/combos?side=atk')
-    print('  GET  /api/players')
-    print('  GET  /api/players/{name}')
-    print('  POST /api/simulate')
-    print('  GET  /api/simulate/heroes')
-    print('  GET  /api/wuxun?group=player|union')
-    print('  GET  /api/scores?union=')
-    print('  GET  /api/union_matrix')
-    print('  POST /api/refresh')
+def run_app(open_browser=True, start_sniffer=True, host='127.0.0.1', port=8765):
+    """给打包版和开发版共用的正式启动入口。"""
+    print(f'启动 API 服务器: http://{host}:{port}')
 
-    # 自动建表：对当前激活的数据库（及所有已存在的 stzb_*.db）执行建表
+    try:
+        os.makedirs(os.path.join(BASE_DIR, 'capture_new'), exist_ok=True)
+        os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
+    except Exception as e:
+        print(f'[startup] 创建运行目录失败: {e}')
+
     try:
         import glob as _glob
-        _dbs_to_init = set()
-        _dbs_to_init.add(_current_db_path)
+        _dbs_to_init = {_current_db_path}
         for _f in _glob.glob(os.path.join(BASE_DIR, 'stzb*.db')):
             _dbs_to_init.add(_f)
         for _dbp in _dbs_to_init:
             try:
                 ensure_all_tables(_dbp)
             except Exception as _te:
-                print(f'[!] 建表失败 {_dbp}: {_te}')
+                print(f'[startup] 建表失败 {_dbp}: {_te}')
     except Exception as _ie:
-        print(f'[!] 自动建表失败: {_ie}')
+        print(f'[startup] 自动建表失败: {_ie}')
 
-    # 启动抓包线程（集成 scrapy_v2）
-    try:
-        import scrapy_v2 as _scrapy
-        _sniff_t = threading.Thread(target=_scrapy.run_sniff, daemon=True, name='sniff')
-        _sniff_t.start()
-        print('[*] 抓包线程已启动')
-    except Exception as _se:
-        print(f'[!] 抓包线程启动失败: {_se}')
+    if start_sniffer:
+        try:
+            import scrapy_v2 as _scrapy
+            _sniff_t = threading.Thread(target=_scrapy.run_sniff, daemon=True, name='sniff')
+            _sniff_t.start()
+            print('[startup] 抓包线程已启动')
+        except Exception as _se:
+            print(f'[startup] 抓包线程启动失败: {_se}')
 
-    app.run(host='0.0.0.0', port=8080, debug=False)
+    if open_browser:
+        try:
+            import webbrowser
+            threading.Timer(1.5, lambda: webbrowser.open(f'http://{host}:{port}/')).start()
+        except Exception as e:
+            print(f'[startup] 自动打开浏览器失败: {e}')
 
-
-# ──────────────────────────────────────────────────────────
-# 战斗模拟接口
-# ──────────────────────────────────────────────────────────
-@app.route('/api/simulate', methods=['POST'])
-def api_simulate():
-    """
-    POST /api/simulate
-    body: {
-        "blue": {"morale":100, "heros":[{"id":1004,"level":40,"up":0,"equip_skills":[1018],"extra_attrs":{}}]},
-        "red":  {"morale":100, "heros":[...]},
-        "repeat": 1   // 1=单次详细, N>1=多次统计
-    }
-    """
-    try:
-        import sys, importlib
-        sys.path.insert(0, BASE_DIR)
-        # 强制清除缓存，确保加载最新战法
-        for mod_name in list(sys.modules.keys()):
-            if mod_name.startswith('battle_sim'):
-                del sys.modules[mod_name]
-        from battle_sim import BattleManager
-        data   = request.get_json(force=True)
-        repeat = int(data.get('repeat', 1))
-        config = {'blue': data['blue'], 'red': data['red']}
-
-        if repeat == 1:
-            bm  = BattleManager(config)
-            res = bm.result()
-            return jsonify({'ok': True, 'result': res})
-        else:
-            blue_wins = red_wins = draws = 0
-            for _ in range(repeat):
-                bm  = BattleManager(config)
-                res = bm.result()
-                w   = res['winner']
-                if '攻方' in w:  blue_wins += 1
-                elif '守方' in w: red_wins  += 1
-                else:            draws     += 1
-            return jsonify({
-                'ok': True,
-                'repeat': repeat,
-                'blue_wins': blue_wins,
-                'red_wins':  red_wins,
-                'draws':     draws,
-                'blue_rate': round(blue_wins / repeat * 100, 1),
-                'red_rate':  round(red_wins  / repeat * 100, 1),
-                'draw_rate': round(draws      / repeat * 100, 1),
-            })
-    except Exception as e:
-        import traceback
-        return jsonify({'ok': False, 'error': str(e), 'trace': traceback.format_exc()}), 500
-
-
-@app.route('/api/simulate/heroes', methods=['GET'])
-def api_simulate_heroes():
-    """GET /api/simulate/heroes - 返回可用武将和战法列表"""
-    try:
-        import sys, importlib
-        sys.path.insert(0, BASE_DIR)
-        # 强制清除缓存，确保每次加载最新战法
-        for mod_name in list(sys.modules.keys()):
-            if mod_name.startswith('battle_sim'):
-                del sys.modules[mod_name]
-        from battle_sim.data import HEROS, SKILLS
-        heroes = [
-            {
-                'id':   h['id'],
-                'name': h['name'],
-                'camp': h['camp'],
-                'army': h['army'],
-                'limit': h['limit'],
-                'skill': h['skill'],
-            }
-            for h in HEROS.values()
-        ]
-        skills = [
-            {
-                'id':         sk.id,
-                'name':       sk.name,
-                'desc':       sk.desc,
-                'skill_type': sk.skill_type,
-                'rate':       sk.rate,
-                'study':      sk.study,
-            }
-            for sk in SKILLS.values()
-        ]
-        return jsonify({'ok': True, 'heroes': heroes, 'skills': skills})
-    except Exception as e:
-        import traceback
-        return jsonify({'ok': False, 'error': str(e), 'trace': traceback.format_exc()}), 500
+    app.run(host=host, port=port, debug=False, use_reloader=False)
 
 
 if __name__ == '__main__':
-    print('启动 API 服务器: http://127.0.0.1:8080')
-    print('接口列表:')
-    print('  GET  /api/status')
-    print('  GET  /api/unions')
-    print('  GET  /api/battles?page=1&size=30&player=&union=&result=')
-    print('  GET  /api/battles/{id}')
-    print('  GET  /api/battle_stats')
-    print('  GET  /api/heroes/freq')
-    print('  GET  /api/heroes/combos?side=atk')
-    print('  GET  /api/players')
-    print('  GET  /api/players/{name}')
-    print('  POST /api/simulate')
-    print('  GET  /api/simulate/heroes')
-    print('  GET  /api/wuxun?group=player|union')
-    print('  GET  /api/scores?union=')
-    print('  GET  /api/union_matrix')
-    print('  POST /api/refresh')
-
-    # 自动建表：对当前激活的数据库（及所有已存在的 stzb_*.db）执行建表
-    try:
-        import glob as _glob
-        _dbs_to_init = set()
-        _dbs_to_init.add(_current_db_path)
-        for _f in _glob.glob(os.path.join(BASE_DIR, 'stzb*.db')):
-            _dbs_to_init.add(_f)
-        for _dbp in _dbs_to_init:
-            try:
-                ensure_all_tables(_dbp)
-            except Exception as _te:
-                print(f'[!] 建表失败 {_dbp}: {_te}')
-    except Exception as _ie:
-        print(f'[!] 自动建表失败: {_ie}')
-
-    # 启动抓包线程（集成 scrapy_v2）
-    try:
-        import scrapy_v2 as _scrapy
-        _sniff_t = threading.Thread(target=_scrapy.run_sniff, daemon=True, name='sniff')
-        _sniff_t.start()
-        print('[*] 抓包线程已启动')
-    except Exception as _se:
-        print(f'[!] 抓包线程启动失败: {_se}')
-
-    app.run(host='0.0.0.0', port=8080, debug=False)
-
-
+    run_app(open_browser=True, start_sniffer=True, host='0.0.0.0', port=8080)

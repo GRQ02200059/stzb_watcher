@@ -313,6 +313,7 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
   <button onclick='switchTab(26,this)'>🗺 州郡分布</button>
   <button onclick='switchTab(27,this)'>🛰 战场监控</button>
   <button onclick='switchTab(28,this)'>🧭 13A2 队伍索引</button>
+  <button onclick='switchTab(29,this)'>🗺 古代中国地图</button>
 </nav>
 <!-- TAB 0: 实时战报 -->
 <div class='page' id='tab0'>
@@ -1123,6 +1124,7 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
   </div>
 
   <div class='cards-row' id='sr-cards'></div>
+  <div id='sr-note' style='display:none;margin:10px 0 16px;padding:10px 12px;border:1px solid #5f4a1c;border-radius:8px;background:linear-gradient(180deg,#22180b 0%, #15110b 100%);color:#e6c98d;font-size:.78rem;line-height:1.65'></div>
 
   <div class='tbl-wrap' style='margin-bottom:16px'>
     <div class='tbl-head'>
@@ -1228,6 +1230,45 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
   <div class='tbl-wrap'>
     <div class='tbl-head'><h3>🧭 战场全局监控</h3><span class='hdr-stat' id='bm13-count'></span></div>
     <div class='feed' id='bm13-stream' style='max-height:calc(100vh - 240px);padding:10px'></div>
+  </div>
+</div>
+
+<div class='page' id='tab29'>
+  <div class='cards-row'>
+    <div class='stat-card'><div class='val'>九州</div><div class='lbl'>天下分野</div></div>
+    <div class='stat-card'><div class='val'>山河</div><div class='lbl'>古风底图</div></div>
+    <div class='stat-card'><div class='val'>墨金</div><div class='lbl'>视觉主题</div></div>
+    <div class='stat-card'><div class='val'>A版</div><div class='lbl'>静态展示</div></div>
+  </div>
+  <div class='filters'>
+    <button class='btn btn-primary' onclick='loadAncientChinaMapDemo()'>重绘地图</button>
+    <span style='color:var(--text2);font-size:.75rem'>先做 A：古风展示版，后续可继续叠加州郡、城池、队伍与路线</span>
+  </div>
+  <div class='tbl-wrap' style='overflow:hidden'>
+    <div class='tbl-head'><h3>🗺 中国古代舆图 · 山河卷</h3><span class='hdr-stat' id='anc-map-hint'>宣纸底纹 · 墨线州界 · 金色题签</span></div>
+    <div style='padding:18px'>
+      <div id='ancient-map-wrap' style='position:relative;min-height:720px;border:1px solid #3b2c17;border-radius:16px;overflow:hidden;background:
+        radial-gradient(circle at 50% 18%, rgba(255,240,205,.24) 0%, rgba(255,240,205,0) 32%),
+        radial-gradient(circle at 20% 80%, rgba(123,84,31,.14) 0%, rgba(123,84,31,0) 30%),
+        linear-gradient(180deg, #20160f 0%, #15100b 100%);
+        box-shadow:inset 0 0 0 1px rgba(232,200,106,.12), inset 0 0 120px rgba(0,0,0,.35), 0 8px 40px #00000066;'>
+        <div style='position:absolute;inset:14px;border:1px solid rgba(232,200,106,.18);border-radius:12px;pointer-events:none'></div>
+        <div style='position:absolute;left:24px;top:18px;z-index:2;color:#e6d1a0;text-shadow:0 1px 0 #000,0 0 18px rgba(200,160,68,.18)'>
+          <div style='font-size:1.3rem;letter-spacing:.28em'>大 汉 十 三 州 舆 图</div>
+          <div style='margin-top:6px;font-size:.74rem;color:#b49a66;letter-spacing:.18em'>山川形胜 · 九州烟云 · 仅作展示草图</div>
+        </div>
+        <svg id='ancient-map-svg' viewBox='0 0 1200 760' style='width:100%;height:720px;display:block'></svg>
+        <div style='position:absolute;right:24px;top:24px;z-index:2;width:200px;padding:14px 14px 12px;border:1px solid rgba(232,200,106,.18);border-radius:12px;background:rgba(20,14,10,.74);backdrop-filter:blur(2px)'>
+          <div style='color:#e6d1a0;font-size:.82rem;letter-spacing:.16em;margin-bottom:10px'>图例</div>
+          <div style='display:grid;gap:8px;font-size:.74rem;color:#c9b78d'>
+            <div style='display:flex;align-items:center;gap:8px'><span style='width:18px;height:10px;border-radius:999px;background:#b68a3a;display:inline-block'></span><span>州界墨金描边</span></div>
+            <div style='display:flex;align-items:center;gap:8px'><span style='width:18px;height:10px;border-radius:999px;background:#376f8f;display:inline-block'></span><span>江河水脉</span></div>
+            <div style='display:flex;align-items:center;gap:8px'><span style='width:18px;height:10px;border-radius:999px;background:#8e4d2b;display:inline-block'></span><span>山岭走势</span></div>
+            <div style='display:flex;align-items:center;gap:8px'><span style='width:18px;height:10px;border-radius:999px;background:#d8bf7a;display:inline-block'></span><span>州治城标</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 

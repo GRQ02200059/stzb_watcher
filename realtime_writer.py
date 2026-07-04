@@ -4,14 +4,16 @@ realtime_writer.py
 实时监控 capture_new 目录，解析新 JSON 文件写入 stzb.db
 同时维护内存事件队列，供 SSE 推送
 """
-import sqlite3, json, os, time, glob, threading, queue
+import sqlite3, json, os, time, glob, threading, queue, sys
 from datetime import datetime
 from collections import deque
 
-BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
-DB_PATH      = os.path.join(BASE_DIR, 'stzb.db')   # 默认，会被 profile 覆盖
-PROFILE_FILE = os.path.join(BASE_DIR, 'current_profile.json')
-CAP_DIR      = os.path.join(BASE_DIR, 'capture_new')  # 默认，会被 profile 覆盖
+APP_DIR      = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
+RESOURCE_DIR = getattr(sys, '_MEIPASS', APP_DIR)
+BASE_DIR     = APP_DIR
+DB_PATH      = os.path.join(APP_DIR, 'stzb.db')   # 默认，会被 profile 覆盖
+PROFILE_FILE = os.path.join(APP_DIR, 'current_profile.json')
+CAP_DIR      = os.path.join(APP_DIR, 'capture_new')  # 默认，会被 profile 覆盖
 POLL_SECS    = 1.5
 
 _writer_db_lock = threading.Lock()
@@ -79,7 +81,7 @@ def unsubscribe(q):
             pass
 
 try:
-    with open('d:/nettest/hero_scraper/output/heroes.json', 'r', encoding='utf-8') as f:
+    with open(os.path.join(RESOURCE_DIR, 'hero_scraper', 'output', 'heroes.json'), 'r', encoding='utf-8') as f:
         HERO_NAMES = {str(h['id']): h['name'] for h in json.load(f) if h.get('id')}
 except:
     HERO_NAMES = {}
@@ -2700,4 +2702,3 @@ def get_writer_instance():
 if __name__ == '__main__':
     w = RealtimeWriter()
     w.run()
-

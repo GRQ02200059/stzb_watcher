@@ -9,10 +9,10 @@ profile_manager.py
   但 team_users / attendance / tasks 等团队数据按 profile_id 隔离
 - profile_id = server_ip + ':' + role_id（全局唯一）
 """
-import json, os, time
+import json, os, time, sys
 from datetime import datetime
 
-BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR      = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
 PROFILES_FILE = os.path.join(BASE_DIR, 'profiles.json')   # 所有历史账号列表
 CURRENT_FILE  = os.path.join(BASE_DIR, 'current_profile.json')  # 当前激活账号
 

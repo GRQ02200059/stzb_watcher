@@ -21,7 +21,8 @@ from scapy.all import sniff, TCP, Raw
 import signal, sys
 
 # ===== 配置 =====
-OUTPUT_BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'capture_new')
+APP_DIR = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
+OUTPUT_BASE = os.path.join(APP_DIR, 'capture_new')
 OUTPUT_DIR  = OUTPUT_BASE  # 初始值，绑定账号后会切换到子目录
 GAME_PORT   = 8001
 BIND_CMD_ID = 0xe6  # 主公簿 cmdId，用于二阶段优化目录名
@@ -30,6 +31,8 @@ BIND_CMD_ID = 0xe6  # 主公簿 cmdId，用于二阶段优化目录名
 _bind_lock    = threading.Lock()
 _bound_src_ip = None   # 游戏服务器 IP:port
 _bound_dst_ip = None   # 本机 IP:port
+_candidate_src_ip = None
+_candidate_dst_ip = None
 # 是否已完成精确绑定（拿到 role_id）
 _role_bound   = False
 _last_sniff_role_id = None  # 上次抓包识别到的 role_id，防止重复触发
@@ -340,10 +343,10 @@ def _do_bind(src_ip, dst_ip, server_ip, role_name='', server_name='', role_id=''
 def try_bind_from_packet(packet, buf):
     """
     两阶段绑定：
-    阶段1: 抓到第一个有效包，立即用服务器 IP 建子目录（不等主公簿包）
-    阶段2: 后续若抓到主公簿包(seq==0xe6)，用角色名+服务器名优化目录名
+    阶段1: 只记录候选流，不立即建数据库/缩小过滤，避免误绑到错误IP
+    阶段2: 抓到角色/服务器相关报文后，再正式绑定并创建对应数据库
     """
-    global _bound_src_ip, _bound_dst_ip
+    global _bound_src_ip, _bound_dst_ip, _candidate_src_ip, _candidate_dst_ip
     if len(buf) < 14:
         return
     from scapy.layers.inet import IP
@@ -358,12 +361,13 @@ def try_bind_from_packet(packet, buf):
         with _bind_lock:
             already_bound = (_bound_src_ip is not None)
 
-        # ---- 阶段1：第一个包到来，立即用 IP 建目录 ----
+        # ---- 阶段1：第一个包到来，只记录候选流 ----
         if not already_bound:
             with _bind_lock:
-                _bound_src_ip = src_ip
-                _bound_dst_ip = dst_ip
-            _do_bind(src_ip, dst_ip, ip_layer.src)
+                if _candidate_src_ip != src_ip or _candidate_dst_ip != dst_ip:
+                    _candidate_src_ip = src_ip
+                    _candidate_dst_ip = dst_ip
+                    print(f'[bind] 记录候选连接: server={src_ip} client={dst_ip}')
             return
 
         # ---- 阶段2：尝试解析主公簿包，用角色名优化目录名 ----
@@ -417,7 +421,7 @@ def try_bind_from_packet(packet, buf):
             with _bind_lock:
                 _bound_src_ip = src_ip
                 _bound_dst_ip = dst_ip
-                _do_bind(src_ip, dst_ip, ip_layer.src, role_name, server_name, role_id)
+            _do_bind(src_ip, dst_ip, ip_layer.src, role_name, server_name, role_id)
     except Exception:
         pass
 
