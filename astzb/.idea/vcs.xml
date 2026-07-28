@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/.." vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third_party/hev-socks5-tunnel" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third_party/hev-socks5-tunnel/src/core" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third_party/hev-socks5-tunnel/third-part/hev-task-system" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third_party/hev-socks5-tunnel/third-part/lwip" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third_party/hev-socks5-tunnel/third-part/yaml" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third_party/sockstun" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third_party/sockstun/app/src/main/jni/hev-socks5-tunnel" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third_party/sockstun/app/src/main/jni/hev-socks5-tunnel/src/core" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third_party/sockstun/app/src/main/jni/hev-socks5-tunnel/third-part/hev-task-system" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third_party/sockstun/app/src/main/jni/hev-socks5-tunnel/third-part/lwip" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/third_party/sockstun/app/src/main/jni/hev-socks5-tunnel/third-part/yaml" vcs="Git" />
+  </component>
+</project>

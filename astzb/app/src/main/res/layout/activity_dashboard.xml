@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8FAFC">
+
+    <LinearLayout
+        android:id="@+id/dashboardRoot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingStart="8dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/clientStatusView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="状态：未连接"
+                android:textColor="#64748B"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRefreshPage"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:minWidth="0dp"
+                android:text="刷新"
+                android:textSize="12sp"
+                app:cornerRadius="14dp" />
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:id="@+id/battleFilterPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="#FFFFFF"
+            android:fillViewport="false"
+            android:paddingStart="8dp"
+            android:paddingTop="6dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="6dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/inputFilterPlayer"
+                    android:layout_width="112dp"
+                    android:layout_height="40dp"
+                    android:backgroundTint="#CBD5E1"
+                    android:hint="玩家"
+                    android:inputType="text"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp"
+                    android:singleLine="true"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/inputFilterUnion"
+                    android:layout_width="112dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:backgroundTint="#CBD5E1"
+                    android:hint="同盟"
+                    android:inputType="text"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp"
+                    android:singleLine="true"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/inputFilterTeamSide"
+                    android:layout_width="82dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:backgroundTint="#CBD5E1"
+                    android:hint="攻守"
+                    android:inputType="text"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp"
+                    android:singleLine="true"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
+
+                <EditText
+                    android:id="@+id/inputFilterTeamKeyword"
+                    android:layout_width="136dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:backgroundTint="#CBD5E1"
+                    android:hint="武将/战法"
+                    android:inputType="text"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp"
+                    android:singleLine="true"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
+
+                <EditText
+                    android:id="@+id/inputFilterFightType"
+                    android:layout_width="78dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:backgroundTint="#CBD5E1"
+                    android:hint="类型"
+                    android:inputType="number"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp"
+                    android:singleLine="true"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/inputFilterResult"
+                    android:layout_width="70dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:backgroundTint="#CBD5E1"
+                    android:hint="结果"
+                    android:inputType="number"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp"
+                    android:singleLine="true"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/inputFilterWid"
+                    android:layout_width="82dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:backgroundTint="#CBD5E1"
+                    android:hint="wid"
+                    android:inputType="number"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp"
+                    android:singleLine="true"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/inputFilterStartTime"
+                    android:layout_width="92dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:backgroundTint="#CBD5E1"
+                    android:hint="开始秒"
+                    android:inputType="number"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp"
+                    android:singleLine="true"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/inputFilterEndTime"
+                    android:layout_width="92dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:backgroundTint="#CBD5E1"
+                    android:hint="结束秒"
+                    android:inputType="number"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp"
+                    android:singleLine="true"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <HorizontalScrollView
+            android:id="@+id/taskSubTabScroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="#EFF6FF"
+            android:paddingStart="8dp"
+            android:paddingTop="6dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="6dp"
+            android:scrollbars="none"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:id="@+id/taskSubTabContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/moduleTitleView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="本机数据总览" />
+
+            <TextView
+                android:id="@+id/moduleSubtitleView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="本页展示 Android 本机 SQLite 中已迁移的数据能力。" />
+
+            <TextView
+                android:id="@+id/moduleKpiView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="完整战报 --  /  行军 --  /  成员 --  /  地图 --" />
+        </LinearLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:layout_weight="1"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#E2E8F0"
+            app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ScrollView
+                android:id="@+id/contentScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:fillViewport="true">
+
+                <TextView
+                    android:id="@+id/clientContentView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:lineSpacingExtra="3dp"
+                    android:padding="14dp"
+                    android:textColor="#1E3A8A"
+                    android:textIsSelectable="true"
+                    android:textSize="13sp"
+                    android:typeface="monospace" />
+            </ScrollView>
+
+            <ListView
+                android:id="@+id/battleListView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="#FFFFFF"
+                android:cacheColorHint="#00000000"
+                android:divider="#E2E8F0"
+                android:dividerHeight="1dp"
+                android:visibility="gone" />
+        </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:visibility="gone">
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/dashboardDomainGroup"
+            android:layout_width="1dp"
+            android:layout_height="1dp"
+            app:checkedButton="@id/dashDomainHome"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dashDomainHome"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:text="首页" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dashDomainBattle"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:text="战场" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dashDomainReport"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:text="战报" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dashDomainAnalysis"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:text="分析" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dashDomainOrg"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:text="组织" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dashDomainTools"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:text="工具" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dashDomainExt"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:text="扩展" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/dashboardTabGroup"
+            android:layout_width="1dp"
+            android:layout_height="1dp"
+            app:checkedButton="@id/btnLoadBattles"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnRefreshLocal" android:layout_width="1dp" android:layout_height="1dp" android:text="总览" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadBattles" android:layout_width="1dp" android:layout_height="1dp" android:text="全部战报" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadRanking" android:layout_width="1dp" android:layout_height="1dp" android:text="排行榜" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadHeroStats" android:layout_width="1dp" android:layout_height="1dp" android:text="武将阵容" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadTeamUsers" android:layout_width="1dp" android:layout_height="1dp" android:text="同盟成员" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadTaskAttendance" android:layout_width="1dp" android:layout_height="1dp" android:text="工程考勤" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadTeamReport" android:layout_width="1dp" android:layout_height="1dp" android:text="团数据" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadSimulatorResources" android:layout_width="1dp" android:layout_height="1dp" android:text="战斗模拟" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadMonitor" android:layout_width="1dp" android:layout_height="1dp" android:text="实时队伍监控" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadStateRegions" android:layout_width="1dp" android:layout_height="1dp" android:text="州郡分布" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadMapCells" android:layout_width="1dp" android:layout_height="1dp" android:text="城池地图" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadZonePlayers" android:layout_width="1dp" android:layout_height="1dp" android:text="战区玩家" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadChats" android:layout_width="1dp" android:layout_height="1dp" android:text="战场消息" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadPlayerProfile" android:layout_width="1dp" android:layout_height="1dp" android:text="玩家战绩" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadAnnouncements" android:layout_width="1dp" android:layout_height="1dp" android:text="游戏公告" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadDbSync" android:layout_width="1dp" android:layout_height="1dp" android:text="数据同步" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnLoadPackets" android:layout_width="1dp" android:layout_height="1dp" android:text="最近包" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/sidebarScrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#33000000"
+        android:elevation="40dp"
+        android:translationZ="40dp"
+        android:visibility="gone" />
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/mainTabGroup"
+        android:layout_width="252dp"
+        android:layout_height="match_parent"
+        android:layout_marginTop="56dp"
+        android:background="#FFFFFF"
+        android:elevation="56dp"
+        android:orientation="vertical"
+        android:paddingStart="12dp"
+        android:paddingTop="28dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="12dp"
+        android:translationZ="56dp"
+        android:visibility="gone"
+        app:singleSelection="true">
+
+        <com.google.android.material.button.MaterialButton android:id="@+id/tabAllPlayerTeams" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="全服玩家队伍" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/tabAllBattles" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="全部战报" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/tabAllianceMembers" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="同盟成员" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/tabGroupedWuxun" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="分组武勋" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/tabSiegeAttendance" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="工程考勤" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/tabAllianceMemberTeams" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="同盟成员队伍" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/tabBattleMessages" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="战场消息" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/tabTeamReport" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="团数据" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/tabSimulator" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="战斗模拟" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/tabStateRegions" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="州郡分布" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/tabBattleMonitor" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="实时队伍监控" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/tabTeamIndex13a2" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="辅助战场监控" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnToggleSidebar"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="64dp"
+        android:layout_height="40dp"
+        android:layout_gravity="start|center_vertical"
+        android:layout_marginStart="8dp"
+        android:elevation="72dp"
+        android:minWidth="0dp"
+        android:padding="0dp"
+        android:contentDescription="点击或右滑打开侧栏"
+        android:text="菜单"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:translationZ="72dp"
+        app:cornerRadius="12dp" />
+
+</FrameLayout>
