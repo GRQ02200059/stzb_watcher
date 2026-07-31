@@ -31,6 +31,7 @@ env/
 out
 mytou
 mytcp.bin
+.worktrees/
 
 # 大型数据目录（可选，按需注释掉）
 capture_new/
@@ -46,4 +47,3 @@ frp_tmp/
 frp_tmp2/
 frp_0.67.0_windows_amd64.zip
 frp_setup.zip
-
