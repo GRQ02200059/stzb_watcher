@@ -2,6 +2,7 @@ package com.local.stzb.data.battlefield
 
 import com.example.myapplication.LocalBattleField
 import com.example.myapplication.LocalFullBattle
+import com.example.myapplication.Local13A2TeamInsight
 import com.example.myapplication.LocalTeamMove
 import com.local.stzb.domain.battlefield.BattlefieldEvent
 import com.local.stzb.domain.battlefield.EventCategory
@@ -9,8 +10,9 @@ import com.local.stzb.domain.battlefield.EventPriority
 import com.local.stzb.domain.battlefield.EventTarget
 
 object BattlefieldEventMapper {
-    fun fromMove(move: LocalTeamMove): BattlefieldEvent {
+    fun fromMove(move: LocalTeamMove, insight: Local13A2TeamInsight = Local13A2TeamInsight.empty()): BattlefieldEvent {
         val arriveAt = normalizeEpochSeconds(move.arriveTime)
+        val lineup = insight.lineup.heroes.sortedBy { it.pos }
         return BattlefieldEvent(
             id = "march:${move.teamId}:$arriveAt",
             occurredAt = maxOf(normalizeEpochSeconds(move.startTime), arriveAt),
@@ -27,11 +29,23 @@ object BattlefieldEventMapper {
                 if (move.battleShow.isNotBlank()) add(move.battleShow)
             }.joinToString(" · "),
             details = buildList {
+                if (lineup.isNotEmpty()) {
+                    add("已记录队伍：${lineup.joinToString(" / ") { it.heroName.ifBlank { "武将${it.heroId}" } }}")
+                    lineup.forEach { hero ->
+                        val skills = hero.skills.joinToString(" / ") {
+                            "${it.skillName.ifBlank { "战法${it.skillId}" }}${if (it.level > 0) " Lv.${it.level}" else ""}"
+                        }.ifBlank { "战法未记录" }
+                        add("${hero.pos}号位 ${hero.heroName.ifBlank { "武将${hero.heroId}" }} Lv.${hero.level} 进阶${hero.star} · $skills")
+                    }
+                    if (insight.stats.battles > 0) {
+                        add("历史战绩：${insight.stats.battles}战 ${insight.stats.wins}胜 ${insight.stats.draws}平 ${insight.stats.loses}负 · 胜率 ${"%.1f".format(insight.stats.winRate)}%")
+                    }
+                }
                 add("行动：${armyStateText(move.moveType)} · 目标：${targetTypeText(move.targetType)}")
                 if (move.resideWid > 0) add("驻地：${widToXy(move.resideWid)}${if (move.stayWid > 0) " · 停留：${widToXy(move.stayWid)}" else ""}")
                 if (move.buffIdList.isNotBlank()) add("Buff：${move.buffIdList}")
                 if (move.battleEffect.isNotBlank()) add("战斗效果：${move.battleEffect}")
-                add("武将与兵力：地图包未下发，等待战报/队伍资料关联")
+                if (lineup.isEmpty()) add("武将与兵力：尚未匹配到已记录战报")
             },
             target = EventTarget.Team(move.teamId),
         )

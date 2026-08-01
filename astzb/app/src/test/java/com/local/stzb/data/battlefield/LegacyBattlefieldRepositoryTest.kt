@@ -2,6 +2,9 @@ package com.local.stzb.data.battlefield
 
 import com.example.myapplication.LocalBattleField
 import com.example.myapplication.LocalFullBattle
+import com.example.myapplication.Local13A2HeroLineup
+import com.example.myapplication.Local13A2Lineup
+import com.example.myapplication.Local13A2TeamInsight
 import com.example.myapplication.LocalTeamMove
 import com.local.stzb.domain.battlefield.EventCategory
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +34,28 @@ class LegacyBattlefieldRepositoryTest {
         assertEquals(1, snapshot.metrics.arrivingSoon)
         assertTrue(snapshot.capture.running)
         assertEquals(1, source.reads.get())
+    }
+
+    @Test
+    fun refreshPublishesRecordedLineupForMatchingMapTeam() = runBlocking {
+        val source = FakeBattlefieldSource().apply {
+            moves = listOf(move(teamId = 42, arriveTime = 1_700_000_600L))
+            teamInsights = mapOf(
+                42 to Local13A2TeamInsight.empty().copy(
+                    lineup = Local13A2Lineup(
+                        battleId = 99,
+                        side = "atk",
+                        timeStr = "",
+                        heroes = listOf(Local13A2HeroLineup(1, 101, "陆逊", 50, 5, emptyList())),
+                    ),
+                ),
+            )
+        }
+        val repository = LegacyBattlefieldRepository(source, Dispatchers.Unconfined)
+
+        repository.refresh()
+
+        assertEquals("已记录队伍：陆逊", repository.observeSnapshot().first().events.single().details.first())
     }
 
     @Test
@@ -258,6 +283,7 @@ class LegacyBattlefieldRepositoryTest {
         var battles = emptyList<LocalFullBattle>()
         var sieges = emptyList<LocalBattleField>()
         var reportedLastEventAt: Long? = null
+        var teamInsights = emptyMap<Int, Local13A2TeamInsight>()
         val reads = AtomicInteger()
 
         override fun captureRunning() = true
@@ -274,6 +300,7 @@ class LegacyBattlefieldRepositoryTest {
                 moves = moves.toList(),
                 battles = battles.toList(),
                 sieges = sieges.toList(),
+                teamInsights = teamInsights.toMap(),
             )
         }
     }

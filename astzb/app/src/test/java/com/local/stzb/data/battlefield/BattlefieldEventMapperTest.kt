@@ -3,6 +3,10 @@ package com.local.stzb.data.battlefield
 import com.example.myapplication.LocalTeamMove
 import com.example.myapplication.LocalBattleField
 import com.example.myapplication.LocalFullBattle
+import com.example.myapplication.Local13A2HeroLineup
+import com.example.myapplication.Local13A2Lineup
+import com.example.myapplication.Local13A2SkillLineup
+import com.example.myapplication.Local13A2TeamInsight
 import com.local.stzb.domain.battlefield.EventCategory
 import com.local.stzb.domain.battlefield.EventPriority
 import com.local.stzb.domain.battlefield.EventTarget
@@ -39,6 +43,35 @@ class BattlefieldEventMapperTest {
         assertEquals("前锋 · 测试盟", event.title)
         assertEquals("地图队伍 · 10,10 → 10,20 · 士气 88 · 队伍类型 2,22 / 1,31 / 3,23", event.summary)
         assertEquals(EventTarget.Team(42), event.target)
+    }
+
+    @Test
+    fun recordedTeamReplacesUnresolvedPlaceholderWithKnownLineup() {
+        val move = LocalTeamMove(
+            teamId = 42, moveType = 1, subjectId = 7, ownerUid = 7,
+            ownerName = "前锋", ownerUnion = "测试盟",
+            fromWid = 100010, toWid = 100020, currentWid = 100015,
+            fromXy = "10,10", toXy = "10,20", currentXy = "10,15",
+            startTime = 1_700_000_000L, arriveTime = 1_700_000_600L, speed = 0,
+        )
+        val insight = Local13A2TeamInsight.empty().copy(
+            lineup = Local13A2Lineup(
+                battleId = 99,
+                side = "def",
+                timeStr = "2026-08-01 12:00:00",
+                heroes = listOf(
+                    Local13A2HeroLineup(1, 101, "陆逊", 50, 5, listOf(Local13A2SkillLineup(1, "深谋远虑", 10))),
+                    Local13A2HeroLineup(2, 102, "周瑜", 50, 5, emptyList()),
+                    Local13A2HeroLineup(3, 103, "吕蒙", 50, 5, emptyList()),
+                ),
+            ),
+        )
+
+        val event = BattlefieldEventMapper.fromMove(move, insight)
+
+        assertEquals("已记录队伍：陆逊 / 周瑜 / 吕蒙", event.details.first())
+        assertEquals("1号位 陆逊 Lv.50 进阶5 · 深谋远虑 Lv.10", event.details[1])
+        assertFalse(event.details.any { it.contains("等待战报") })
     }
 
     @Test

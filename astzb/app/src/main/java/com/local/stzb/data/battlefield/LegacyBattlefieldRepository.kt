@@ -3,6 +3,7 @@ package com.local.stzb.data.battlefield
 import com.example.myapplication.LocalBattleField
 import com.example.myapplication.LocalBattleMonitorStore
 import com.example.myapplication.LocalFullBattle
+import com.example.myapplication.Local13A2TeamInsight
 import com.example.myapplication.LocalSocksCaptureServer
 import com.example.myapplication.LocalStzbRepository
 import com.example.myapplication.LocalTeamMove
@@ -28,6 +29,7 @@ data class LegacyBattlefieldData(
     val moves: List<LocalTeamMove>,
     val battles: List<LocalFullBattle>,
     val sieges: List<LocalBattleField>,
+    val teamInsights: Map<Int, Local13A2TeamInsight> = emptyMap(),
 )
 
 interface LegacyBattlefieldSource {
@@ -76,7 +78,7 @@ class LegacyBattlefieldRepository(
     override suspend fun refresh() = refreshMutex.withLock {
         val data = withContext(ioDispatcher) { source.read() }.normalizeTimestamps()
         val incoming = buildList {
-            addAll(data.moves.map(BattlefieldEventMapper::fromMove))
+            addAll(data.moves.map { move -> BattlefieldEventMapper.fromMove(move, data.teamInsights[move.teamId] ?: Local13A2TeamInsight.empty()) })
             addAll(data.battles.map(BattlefieldEventMapper::fromBattle))
             addAll(data.sieges.map(BattlefieldEventMapper::fromSiege))
         }.distinctBy(BattlefieldEvent::id).sortedWith(EVENT_ORDER)
@@ -176,7 +178,8 @@ class AndroidLegacyBattlefieldSource(
         return listOfNotNull(captured, arrival, battle).maxOrNull()
     }
 
-    override fun moves(): List<LocalTeamMove> = LocalBattleMonitorStore.latest()?.moves.orEmpty()
+    override fun moves(): List<LocalTeamMove> = LocalBattleMonitorStore.latest()?.moves
+        ?: LocalStzbRepository.loadMonitorMoves(0)
 
     override fun battles(): List<LocalFullBattle> = LocalStzbRepository.loadFullBattles(BATTLE_LIMIT)
 
@@ -184,7 +187,7 @@ class AndroidLegacyBattlefieldSource(
 
     override fun read(): LegacyBattlefieldData {
         val latest = LocalBattleMonitorStore.latest()
-        val moves = latest?.moves.orEmpty()
+        val moves = latest?.moves ?: LocalStzbRepository.loadMonitorMoves(0)
         val battles = battles()
         val sieges = sieges()
         return LegacyBattlefieldData(
@@ -197,6 +200,14 @@ class AndroidLegacyBattlefieldSource(
             moves = moves,
             battles = battles,
             sieges = sieges,
+            teamInsights = moves.distinctBy { it.teamId }.associate { move ->
+                move.teamId to LocalStzbRepository.load13A2TeamInsight(
+                    teamId = move.teamId,
+                    ownerName = move.ownerName,
+                    relatedWids = listOf(move.fromWid, move.currentWid, move.toWid),
+                    armyHeroType = move.armyHeroType,
+                )
+            },
         )
     }
 

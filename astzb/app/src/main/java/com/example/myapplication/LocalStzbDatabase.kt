@@ -2852,21 +2852,28 @@ object LocalStzbRepository {
         teamId: Int,
         ownerName: String = "",
         relatedWids: List<Int> = emptyList(),
+        armyHeroType: String = "",
     ): Local13A2TeamInsight {
         if (teamId <= 0) return Local13A2TeamInsight.empty()
         val candidateTeamIds = buildTeamIdCandidates(teamId, relatedWids)
         val idPlaceholders = candidateTeamIds.joinToString(",") { "?" }
         val name = ownerName.trim()
         val matchSql = "atk_team_id IN ($idPlaceholders) OR def_team_id IN ($idPlaceholders)"
+        val ownerMatchSql = if (name.isNotBlank()) " OR atk_name=? OR def_name=?" else ""
         val args = buildList {
             addAll(candidateTeamIds.map { it.toString() })
             addAll(candidateTeamIds.map { it.toString() })
+            if (name.isNotBlank()) {
+                add(name)
+                add(name)
+            }
         }.toTypedArray()
         val rows = db().rawQuery(
             """
-            SELECT battle_id,time,time_str,result,atk_team_id,def_team_id,atk_name,def_name,is_npc
+            SELECT battle_id,time,time_str,result,atk_team_id,def_team_id,atk_name,def_name,
+                   atk_hero_type,def_hero_type,is_npc
             FROM battles_v2
-            WHERE ($matchSql) AND $PLAYER_BATTLE_WHERE
+            WHERE (($matchSql)$ownerMatchSql) AND $PLAYER_BATTLE_WHERE
             ORDER BY time DESC, battle_id DESC
             LIMIT 120
             """.trimIndent(),
@@ -2884,6 +2891,8 @@ object LocalStzbRepository {
                             defTeamId = c.int("def_team_id"),
                             atkName = c.string("atk_name"),
                             defName = c.string("def_name"),
+                            atkHeroType = c.string("atk_hero_type"),
+                            defHeroType = c.string("def_hero_type"),
                             isNpc = c.int("is_npc"),
                         )
                     )
@@ -2947,7 +2956,10 @@ object LocalStzbRepository {
             compareByDescending<Local13A2Matchup> { it.loses }.thenBy { it.winRate }.thenByDescending { it.total }
         ).take(3)
 
-        val latest = rows.first()
+        val expectedHeroTypes = normalizeMapArmyHeroTypes(armyHeroType)
+        val latest = rows.firstOrNull { row ->
+            expectedHeroTypes.isNotEmpty() && row.heroTypesFor(candidateTeamIds, name) == expectedHeroTypes
+        } ?: rows.first()
         val side = latest.sideFor(candidateTeamIds, name)
         val lineupHeroes = loadBattleHeroes(latest.battleId)
             .filter { it.side == side }
@@ -3015,6 +3027,16 @@ object LocalStzbRepository {
             }
         }.distinct()
     }
+
+    private fun normalizeMapArmyHeroTypes(value: String): List<Int> = value
+        .split(';')
+        .mapNotNull { segment -> segment.substringAfter(',', "").toIntOrNull() }
+        .filter { it > 0 }
+
+    private fun normalizeBattleHeroTypes(value: String): List<Int> = value
+        .split(',')
+        .mapNotNull(String::toIntOrNull)
+        .filter { it > 0 }
 
     fun countRecordsByType(): Map<String, Int> {
         return db().rawQuery(
@@ -3498,6 +3520,8 @@ object LocalStzbRepository {
         val defTeamId: Int,
         val atkName: String,
         val defName: String,
+        val atkHeroType: String,
+        val defHeroType: String,
         val isNpc: Int,
     ) {
         fun sideFor(teamIds: List<Int>, ownerName: String): String {
@@ -3525,6 +3549,11 @@ object LocalStzbRepository {
         }
 
         fun isDraw(): Boolean = result !in setOf(1, 2, 6, 7, 11, 12)
+
+        fun heroTypesFor(teamIds: List<Int>, ownerName: String): List<Int> = when (sideFor(teamIds, ownerName)) {
+            "def" -> normalizeBattleHeroTypes(defHeroType)
+            else -> normalizeBattleHeroTypes(atkHeroType)
+        }
     }
 
     private data class Mutable13A2Matchup(
