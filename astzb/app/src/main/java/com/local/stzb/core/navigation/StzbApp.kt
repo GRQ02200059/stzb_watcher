@@ -24,6 +24,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.local.stzb.domain.battlefield.BattlefieldRepository
 import com.local.stzb.domain.battles.BattleRepository
+import com.local.stzb.domain.alliance.AllianceRepository
 import com.local.stzb.feature.battlefield.BattlefieldScreen
 import com.local.stzb.feature.battlefield.BattlefieldViewModel
 import com.local.stzb.feature.placeholder.PlaceholderScreen
@@ -31,12 +32,15 @@ import com.local.stzb.feature.battles.BattleDetailScreen
 import com.local.stzb.feature.battles.BattlesIntent
 import com.local.stzb.feature.battles.BattlesScreen
 import com.local.stzb.feature.battles.BattlesViewModel
+import com.local.stzb.feature.alliance.AllianceScreen
+import com.local.stzb.feature.alliance.AllianceViewModel
 import com.local.stzb.feature.tools.LegacyToolsScreen
 
 @Composable
 fun StzbApp(
     repository: BattlefieldRepository,
     battleRepository: BattleRepository,
+    allianceRepository: AllianceRepository,
     openLegacyDashboard: (String) -> Unit,
     openCaptureConsole: () -> Unit,
     modifier: Modifier = Modifier,
@@ -50,6 +54,8 @@ fun StzbApp(
     val battlefieldState by battlefieldViewModel.state.collectAsStateWithLifecycle()
     val battlesViewModel: BattlesViewModel = viewModel { BattlesViewModel(battleRepository) }
     val battlesState by battlesViewModel.state.collectAsStateWithLifecycle()
+    val allianceViewModel: AllianceViewModel = viewModel { AllianceViewModel(allianceRepository) }
+    val allianceState by allianceViewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier,
@@ -95,11 +101,7 @@ fun StzbApp(
                 }
             }
             composable(AppDestination.ALLIANCE.route) {
-                PlaceholderScreen(
-                    title = "同盟迁移中",
-                    message = "同盟与团数据暂时保留经典页面。",
-                    onOpenLegacy = { openLegacyDashboard("team_users") },
-                )
+                AllianceScreen(allianceState, allianceViewModel)
             }
             composable(AppDestination.MORE.route) {
                 LegacyToolsScreen(

@@ -15,6 +15,8 @@ import com.local.stzb.domain.battles.BattleDetail
 import com.local.stzb.domain.battles.BattleFilters
 import com.local.stzb.domain.battles.BattleRepository
 import com.local.stzb.domain.battles.BattleSummary
+import com.local.stzb.domain.alliance.AllianceRepository
+import com.local.stzb.domain.alliance.AllianceSnapshot
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
@@ -35,7 +37,7 @@ class StzbNavigationTest {
         )
         rule.setContent {
             AstzbTheme {
-                StzbApp(repository, EmptyBattleRepository, openLegacyDashboard = {}, openCaptureConsole = {})
+                StzbApp(repository, EmptyBattleRepository, EmptyAllianceRepository, openLegacyDashboard = {}, openCaptureConsole = {})
             }
         }
 
@@ -44,7 +46,8 @@ class StzbNavigationTest {
         rule.onNodeWithText("本机战报").assertIsDisplayed()
         rule.onNodeWithText("本机还没有完整战报").assertIsDisplayed()
         rule.onNodeWithText("同盟").performClick()
-        rule.onNodeWithText("同盟迁移中").assertIsDisplayed()
+        rule.onNodeWithText("同盟中心").assertIsDisplayed()
+        rule.onNodeWithText("本机还没有同盟成员数据").assertIsDisplayed()
         rule.onNodeWithText("更多").performClick()
         rule.onNodeWithText("经典抓包控制台").assertIsDisplayed()
     }
@@ -52,6 +55,10 @@ class StzbNavigationTest {
     private object EmptyBattleRepository : BattleRepository {
         override fun loadBattles(filters: BattleFilters): List<BattleSummary> = emptyList()
         override fun loadBattle(id: Int): BattleDetail? = null
+    }
+
+    private object EmptyAllianceRepository : AllianceRepository {
+        override fun load(query: String, group: String) = AllianceSnapshot(0, emptyList(), emptyList())
     }
 
     private class FakeBattlefieldRepository(initial: BattlefieldSnapshot) : BattlefieldRepository {
