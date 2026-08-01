@@ -1,0 +1,105 @@
+package com.local.stzb.feature.battlefield
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleStartEffect
+import com.local.stzb.core.ui.EmptyPanel
+import com.local.stzb.core.ui.ErrorPanel
+import com.local.stzb.core.ui.LoadState
+import com.local.stzb.core.ui.LoadingPanel
+import com.local.stzb.domain.battlefield.BattlefieldEvent
+
+@Composable
+fun BattlefieldScreen(
+    state: BattlefieldUiState,
+    onIntent: (BattlefieldIntent) -> Unit,
+    onEventClick: (BattlefieldEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LifecycleStartEffect(Unit) {
+        onIntent(BattlefieldIntent.SetActive(true))
+        onStopOrDispose { onIntent(BattlefieldIntent.SetActive(false)) }
+    }
+
+    Box(
+        modifier = modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing),
+        contentAlignment = Alignment.TopCenter,
+    ) {
+        when (val loadState = state.loadState) {
+            LoadState.Loading -> LoadingPanel()
+            is LoadState.Empty -> EmptyPanel(
+                message = loadState.message,
+                actionLabel = loadState.actionLabel,
+                onAction = { onIntent(BattlefieldIntent.Refresh) },
+            )
+            is LoadState.Error -> ErrorPanel(
+                message = loadState.message,
+                retryable = loadState.retryable,
+                onRetry = { onIntent(BattlefieldIntent.Refresh) },
+            )
+            is LoadState.Content -> BattlefieldContent(
+                snapshot = loadState.value,
+                refreshing = loadState.refreshing,
+                onIntent = onIntent,
+                onEventClick = onEventClick,
+            )
+        }
+    }
+}
+
+@Composable
+private fun BattlefieldContent(
+    snapshot: com.local.stzb.domain.battlefield.BattlefieldSnapshot,
+    refreshing: Boolean,
+    onIntent: (BattlefieldIntent) -> Unit,
+    onEventClick: (BattlefieldEvent) -> Unit,
+) {
+    val listState = rememberLazyListState()
+    Box(Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            state = listState,
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            item("header") { BattlefieldHeader(snapshot.capture, snapshot.paused, onIntent) }
+            item("metrics") { BattlefieldMetricsGrid(snapshot.metrics) }
+            item("filters") { EventCategoryFilters(snapshot.selectedCategories, onIntent) }
+            if (snapshot.bufferedEventCount > 0) {
+                item("buffered") {
+                    NewEventsButton(snapshot.bufferedEventCount, onClick = {
+                        onIntent(BattlefieldIntent.ConsumeBufferedEvents)
+                    })
+                }
+            }
+            items(snapshot.events, key = { it.id }) { event ->
+                BattlefieldEventCard(event, onClick = { onEventClick(event) })
+            }
+        }
+        if (refreshing) {
+            LinearProgressIndicator(
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter)
+                    .semantics { contentDescription = "正在刷新" },
+            )
+        }
+    }
+}

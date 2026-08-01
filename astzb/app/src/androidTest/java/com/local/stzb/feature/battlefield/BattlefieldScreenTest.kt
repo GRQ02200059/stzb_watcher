@@ -1,0 +1,148 @@
+package com.local.stzb.feature.battlefield
+
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.lifecycle.Lifecycle
+import com.local.stzb.core.designsystem.AstzbTheme
+import com.local.stzb.core.ui.LoadState
+import com.local.stzb.domain.battlefield.BattlefieldEvent
+import com.local.stzb.domain.battlefield.BattlefieldMetrics
+import com.local.stzb.domain.battlefield.BattlefieldSnapshot
+import com.local.stzb.domain.battlefield.CaptureStatus
+import com.local.stzb.domain.battlefield.EventCategory
+import com.local.stzb.domain.battlefield.EventPriority
+import com.local.stzb.domain.battlefield.EventTarget
+import org.junit.Rule
+import org.junit.Test
+
+class BattlefieldScreenTest {
+    @get:Rule
+    val rule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun contentShowsStatusMetricsFeedAndPauseAction() {
+        val snapshot = contentSnapshot()
+
+        rule.setContent {
+            AstzbTheme {
+                BattlefieldScreen(BattlefieldUiState(LoadState.Content(snapshot)), {}, {})
+            }
+        }
+
+        rule.onNodeWithText("实时战场").assertIsDisplayed()
+        rule.onNodeWithText("正在行军").assertIsDisplayed()
+        rule.onNodeWithText("前锋 · 测试盟").assertIsDisplayed()
+        rule.onNodeWithContentDescription("暂停实时刷新").assertIsDisplayed()
+    }
+
+    @Test
+    fun controlsExposeStateAndDispatchIntents() {
+        val intents = mutableListOf<BattlefieldIntent>()
+        val snapshot = contentSnapshot().copy(
+            paused = true,
+            bufferedEventCount = 3,
+            selectedCategories = setOf(EventCategory.MARCH),
+        )
+
+        rule.setContent {
+            AstzbTheme {
+                BattlefieldScreen(BattlefieldUiState(LoadState.Content(snapshot)), intents::add, {})
+            }
+        }
+
+        rule.onNodeWithContentDescription("继续实时刷新").performClick()
+        rule.onNodeWithText("行军").assertIsSelected().performClick()
+        rule.onNodeWithText("查看 3 条新动态").performClick()
+        rule.runOnIdle {
+            check(BattlefieldIntent.TogglePaused in intents)
+            check(BattlefieldIntent.ToggleCategory(EventCategory.MARCH) in intents)
+            check(BattlefieldIntent.ConsumeBufferedEvents in intents)
+        }
+    }
+
+    @Test
+    fun statePanelsAndRefreshIndicatorExposeActionsAndSemantics() {
+        var state = androidx.compose.runtime.mutableStateOf<BattlefieldUiState>(BattlefieldUiState())
+        val intents = mutableListOf<BattlefieldIntent>()
+        rule.setContent {
+            AstzbTheme {
+                BattlefieldScreen(state.value, intents::add, {})
+            }
+        }
+
+        rule.onNodeWithContentDescription("正在加载").assertIsDisplayed()
+        rule.runOnIdle {
+            state.value = BattlefieldUiState(LoadState.Empty("尚未收到战场动态", "启动抓包"))
+        }
+        rule.onNodeWithText("启动抓包").performClick()
+        rule.runOnIdle {
+            state.value = BattlefieldUiState(LoadState.Error("网络错误", retryable = true))
+        }
+        rule.onNodeWithText("重试").performClick()
+        rule.runOnIdle {
+            state.value = BattlefieldUiState(LoadState.Content(contentSnapshot(), refreshing = true))
+        }
+        rule.onNodeWithContentDescription("正在刷新").assertIsDisplayed()
+        rule.runOnIdle {
+            check(intents.count { it == BattlefieldIntent.Refresh } == 2)
+        }
+    }
+
+    @Test
+    fun lifecycleDispatchesActiveOnlyWhileStarted() {
+        val intents = mutableListOf<BattlefieldIntent>()
+        rule.setContent {
+            AstzbTheme {
+                BattlefieldScreen(BattlefieldUiState(), intents::add, {})
+            }
+        }
+        rule.runOnIdle {
+            check(BattlefieldIntent.SetActive(true) in intents)
+        }
+
+        rule.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
+        rule.runOnIdle {
+            check(BattlefieldIntent.SetActive(false) in intents)
+        }
+        rule.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+    }
+
+    @Test
+    fun eventCardDispatchesSelectedEvent() {
+        val snapshot = contentSnapshot()
+        var selected: BattlefieldEvent? = null
+        rule.setContent {
+            AstzbTheme {
+                BattlefieldScreen(
+                    BattlefieldUiState(LoadState.Content(snapshot)),
+                    onIntent = {},
+                    onEventClick = { selected = it },
+                )
+            }
+        }
+
+        rule.onNodeWithText("前锋 · 测试盟").performClick()
+        rule.runOnIdle { check(selected == snapshot.events.single()) }
+    }
+
+    private fun contentSnapshot() = BattlefieldSnapshot(
+        capture = CaptureStatus(true, "抓包运行中", 1_700_000_000L),
+        metrics = BattlefieldMetrics(12, 2, 8, 1),
+        events = listOf(
+            BattlefieldEvent(
+                id = "march:42:1700000600",
+                occurredAt = 1_700_000_600L,
+                category = EventCategory.MARCH,
+                priority = EventPriority.NORMAL,
+                title = "前锋 · 测试盟",
+                summary = "10,10 → 10,20",
+                target = EventTarget.Team(42),
+            ),
+        ),
+    )
+}
