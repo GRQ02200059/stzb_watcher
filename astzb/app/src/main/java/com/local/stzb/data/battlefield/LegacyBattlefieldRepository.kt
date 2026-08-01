@@ -13,6 +13,7 @@ import com.local.stzb.domain.battlefield.BattlefieldRepository
 import com.local.stzb.domain.battlefield.BattlefieldSnapshot
 import com.local.stzb.domain.battlefield.CaptureStatus
 import com.local.stzb.domain.battlefield.EventCategory
+import com.local.stzb.domain.battlefield.EventTarget
 import hev.sockstun.Preferences
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -81,37 +82,39 @@ class LegacyBattlefieldRepository(
             addAll(data.moves.map { move -> BattlefieldEventMapper.fromMove(move, data.teamInsights[move.teamId] ?: Local13A2TeamInsight.empty()) })
             addAll(data.battles.map(BattlefieldEventMapper::fromBattle))
             addAll(data.sieges.map(BattlefieldEventMapper::fromSiege))
-        }.distinctBy(BattlefieldEvent::id).sortedWith(EVENT_ORDER)
+        }.newestByPresentationKey()
 
         synchronized(lock) {
             latestData = data
             if (paused) {
                 incoming.forEach { event ->
-                    val previous = previousSourceEvents[event.id]
+                    val key = event.presentationKey
+                    val previous = previousSourceEvents[key]
                     when {
-                        previous == null -> buffered[event.id] = event
-                        previous != event && (event.id in visible || event.id in buffered) -> buffered[event.id] = event
+                        previous == null -> buffered[key] = event
+                        previous != event && (key in visible || key in buffered) -> buffered[key] = event
                     }
                 }
                 replaceWithNewest(buffered, buffered.values)
             } else {
                 incoming.forEach { event ->
-                    val previous = previousSourceEvents[event.id]
+                    val key = event.presentationKey
+                    val previous = previousSourceEvents[key]
                     when {
-                        event.id in visible -> visible[event.id] = event
-                        previous == null -> visible[event.id] = event
+                        key in visible -> visible[key] = event
+                        previous == null -> visible[key] = event
                     }
                 }
                 replaceWithNewest(visible, visible.values)
             }
-            previousSourceEvents = incoming.associateBy(BattlefieldEvent::id)
+            previousSourceEvents = incoming.associateBy(BattlefieldEvent::presentationKey)
             state.value = buildSnapshot()
         }
     }
 
     override fun setPaused(paused: Boolean) = synchronized(lock) {
         if (this.paused && !paused) {
-            replaceWithNewest(visible, visible.values + buffered.values)
+            replaceWithNewest(visible, buffered.values + visible.values)
             buffered.clear()
         }
         this.paused = paused
@@ -151,12 +154,10 @@ class LegacyBattlefieldRepository(
         events: Collection<BattlefieldEvent>,
     ) {
         val newest = events
-            .associateBy(BattlefieldEvent::id)
-            .values
-            .sortedWith(EVENT_ORDER)
+            .newestByPresentationKey()
             .take(EVENT_LIMIT)
         target.clear()
-        newest.forEach { target[it.id] = it }
+        newest.forEach { target[it.presentationKey] = it }
     }
 
     private companion object {
@@ -165,6 +166,17 @@ class LegacyBattlefieldRepository(
         val EVENT_ORDER = compareByDescending<BattlefieldEvent> { it.occurredAt }.thenBy { it.id }
     }
 }
+
+private val BattlefieldEvent.presentationKey: String
+    get() = if (category == EventCategory.MARCH && target is EventTarget.Team) {
+        "march-team:${target.teamId}"
+    } else {
+        id
+    }
+
+private fun Collection<BattlefieldEvent>.newestByPresentationKey(): List<BattlefieldEvent> =
+    sortedWith(compareByDescending<BattlefieldEvent> { it.occurredAt }.thenBy { it.id })
+        .distinctBy(BattlefieldEvent::presentationKey)
 
 class AndroidLegacyBattlefieldSource(
     private val preferences: Preferences,

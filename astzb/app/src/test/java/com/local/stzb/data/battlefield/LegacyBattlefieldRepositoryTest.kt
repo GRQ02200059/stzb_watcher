@@ -86,6 +86,51 @@ class LegacyBattlefieldRepositoryTest {
     }
 
     @Test
+    fun newerMarchForSameTeamOverwritesOlderCardButKeepsOtherTeamsAndSieges() = runBlocking {
+        val source = FakeBattlefieldSource().apply {
+            moves = listOf(
+                move(teamId = 7, arriveTime = 100, fromXy = "1,1", toXy = "2,2"),
+                move(teamId = 7, arriveTime = 200, fromXy = "3,3", toXy = "4,4"),
+                move(teamId = 8, arriveTime = 150),
+            )
+            sieges = listOf(siege(wid = 100020, sourceId = "siege-1"))
+        }
+        val repository = LegacyBattlefieldRepository(source, Dispatchers.Unconfined)
+
+        repository.refresh()
+        val events = repository.observeSnapshot().first().events
+
+        assertEquals(3, events.size)
+        assertEquals(listOf("march:7:200"), events.filter { it.id.startsWith("march:7:") }.map { it.id })
+        assertTrue(events.any { it.id == "march:8:150" })
+        assertTrue(events.any { it.id == "siege:100020:1" })
+    }
+
+    @Test
+    fun pausedSameTeamUpdatesUseOneBufferSlotAndResumeWithNewestCard() = runBlocking {
+        val source = FakeBattlefieldSource().apply {
+            moves = listOf(move(teamId = 7, arriveTime = 100))
+        }
+        val repository = LegacyBattlefieldRepository(source, Dispatchers.Unconfined)
+        repository.refresh()
+        repository.setPaused(true)
+
+        source.moves = listOf(move(teamId = 7, arriveTime = 200))
+        repository.refresh()
+        source.moves = listOf(move(teamId = 7, arriveTime = 300))
+        repository.refresh()
+
+        val paused = repository.observeSnapshot().first()
+        assertEquals(listOf("march:7:100"), paused.events.map { it.id })
+        assertEquals(1, paused.bufferedEventCount)
+
+        repository.setPaused(false)
+        val resumed = repository.observeSnapshot().first()
+        assertEquals(listOf("march:7:300"), resumed.events.map { it.id })
+        assertEquals(0, resumed.bufferedEventCount)
+    }
+
+    @Test
     fun filterOnlyChangesVisibilityAndCanBeRestored() = runBlocking {
         val source = FakeBattlefieldSource().apply {
             moves = listOf(move(teamId = 1, arriveTime = 101))
