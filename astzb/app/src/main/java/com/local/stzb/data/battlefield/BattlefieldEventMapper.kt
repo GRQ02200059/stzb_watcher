@@ -19,7 +19,20 @@ object BattlefieldEventMapper {
             title = listOf(move.ownerName.ifBlank { "未知玩家" }, move.ownerUnion)
                 .filter(String::isNotBlank)
                 .joinToString(" · "),
-            summary = "${location(move.fromXy, move.fromWid)} → ${location(move.toXy, move.toWid)}",
+            summary = buildList {
+                add("地图队伍")
+                add("${location(move.fromXy, move.fromWid)} → ${location(move.toXy, move.toWid)}")
+                if (move.morale > 0) add("士气 ${move.morale}")
+                if (move.armyHeroType.isNotBlank()) add("队伍类型 ${formatArmyHeroType(move.armyHeroType)}")
+                if (move.battleShow.isNotBlank()) add(move.battleShow)
+            }.joinToString(" · "),
+            details = buildList {
+                add("行动：${armyStateText(move.moveType)} · 目标：${targetTypeText(move.targetType)}")
+                if (move.resideWid > 0) add("驻地：${widToXy(move.resideWid)}${if (move.stayWid > 0) " · 停留：${widToXy(move.stayWid)}" else ""}")
+                if (move.buffIdList.isNotBlank()) add("Buff：${move.buffIdList}")
+                if (move.battleEffect.isNotBlank()) add("战斗效果：${move.battleEffect}")
+                add("武将与兵力：地图包未下发，等待战报/队伍资料关联")
+            },
             target = EventTarget.Team(move.teamId),
         )
     }
@@ -57,6 +70,24 @@ object BattlefieldEventMapper {
     }
 
     private fun widToXy(wid: Int): String = if (wid > 0) "${wid / 10_000},${wid % 10_000}" else ""
+
+    private fun formatArmyHeroType(value: String): String = value.trim(';').split(';').filter(String::isNotBlank).joinToString(" / ")
+
+    private fun armyStateText(state: Int): String = when (state) {
+        0 -> "已移除"
+        1 -> "行军"
+        2 -> "驻守"
+        5 -> "驻扎"
+        25 -> "调动"
+        else -> "状态 $state"
+    }
+
+    private fun targetTypeText(type: Int): String = when (type) {
+        0 -> "普通地块"
+        1 -> "土地"
+        2 -> "城池/建筑"
+        else -> "类型 $type"
+    }
 
     private fun battleResultText(result: Int): String = when (result) {
         0 -> "失败"

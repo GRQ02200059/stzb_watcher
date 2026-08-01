@@ -205,7 +205,7 @@ class LegacyBattlefieldRepositoryTest {
         repository.refresh()
         val published = repository.observeSnapshot().first().events.single()
         assertEquals("新玩家 · 测试盟", published.title)
-        assertEquals("20,20 → 30,30", published.summary)
+        assertEquals("地图队伍 · 20,20 → 30,30", published.summary)
 
         repository.setPaused(true)
         source.moves = listOf(newest)

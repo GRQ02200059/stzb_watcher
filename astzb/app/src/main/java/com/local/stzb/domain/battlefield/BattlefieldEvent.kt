@@ -19,6 +19,7 @@ data class BattlefieldEvent(
     val priority: EventPriority,
     val title: String,
     val summary: String,
+    val details: List<String> = emptyList(),
     val target: EventTarget = EventTarget.None,
 ) {
     val isUrgent: Boolean

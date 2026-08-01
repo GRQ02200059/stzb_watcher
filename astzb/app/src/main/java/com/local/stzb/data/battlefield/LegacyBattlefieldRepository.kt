@@ -170,29 +170,27 @@ class AndroidLegacyBattlefieldSource(
     override fun captureRunning(): Boolean = preferences.enable || LocalSocksCaptureServer.isRunning()
 
     override fun lastEventAt(): Long? {
-        val captured = LocalBattleMonitorStore.history().take(HISTORY_LIMIT).maxOfOrNull { normalizeEpochSeconds(it.capturedAt) }
+        val captured = LocalBattleMonitorStore.latest()?.let { normalizeEpochSeconds(it.capturedAt) }
         val arrival = moves().maxOfOrNull { normalizeEpochSeconds(it.arriveTime) }
         val battle = battles().maxOfOrNull { normalizeEpochSeconds(it.time) }
         return listOfNotNull(captured, arrival, battle).maxOrNull()
     }
 
-    override fun moves(): List<LocalTeamMove> = LocalBattleMonitorStore.history()
-        .take(HISTORY_LIMIT)
-        .flatMap { it.moves }
+    override fun moves(): List<LocalTeamMove> = LocalBattleMonitorStore.latest()?.moves.orEmpty()
 
     override fun battles(): List<LocalFullBattle> = LocalStzbRepository.loadFullBattles(BATTLE_LIMIT)
 
     override fun sieges(): List<LocalBattleField> = LocalStzbRepository.loadBattleFields(SIEGE_LIMIT)
 
     override fun read(): LegacyBattlefieldData {
-        val history = LocalBattleMonitorStore.history().take(HISTORY_LIMIT)
-        val moves = history.flatMap { it.moves }
+        val latest = LocalBattleMonitorStore.latest()
+        val moves = latest?.moves.orEmpty()
         val battles = battles()
         val sieges = sieges()
         return LegacyBattlefieldData(
             captureRunning = captureRunning(),
             lastEventAt = listOfNotNull(
-                history.maxOfOrNull { normalizeEpochSeconds(it.capturedAt) },
+                latest?.let { normalizeEpochSeconds(it.capturedAt) },
                 moves.maxOfOrNull { normalizeEpochSeconds(it.arriveTime) },
                 battles.maxOfOrNull { normalizeEpochSeconds(it.time) },
             ).maxOrNull(),

@@ -29,13 +29,15 @@ class BattlefieldEventMapperTest {
             startTime = 1_700_000_000L,
             arriveTime = 1_700_000_600L,
             speed = 100,
+            morale = 88,
+            armyHeroType = "2,22;1,31;3,23;",
         )
 
         val event = BattlefieldEventMapper.fromMove(move)
 
         assertEquals(EventCategory.MARCH, event.category)
         assertEquals("前锋 · 测试盟", event.title)
-        assertEquals("10,10 → 10,20", event.summary)
+        assertEquals("地图队伍 · 10,10 → 10,20 · 士气 88 · 队伍类型 2,22 / 1,31 / 3,23", event.summary)
         assertEquals(EventTarget.Team(42), event.target)
     }
 

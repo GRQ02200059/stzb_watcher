@@ -189,6 +189,9 @@ fun BattlefieldEventCard(
                     Text(formatEventTime(event.occurredAt), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Text(event.summary, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                event.details.forEach { detail ->
+                    Text(detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
                 AssistChip(
                     onClick = onClick,
                     label = { Text(event.priority.label, fontWeight = FontWeight.SemiBold) },

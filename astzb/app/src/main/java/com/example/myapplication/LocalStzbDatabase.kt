@@ -91,6 +91,14 @@ class LocalStzbDatabase(context: Context) : SQLiteOpenHelper(
                 start_time INTEGER,
                 arrive_time INTEGER,
                 speed INTEGER,
+                target_type INTEGER DEFAULT 0,
+                reside_wid INTEGER DEFAULT 0,
+                stay_wid INTEGER DEFAULT 0,
+                army_hero_type TEXT,
+                morale INTEGER DEFAULT 0,
+                buff_ids TEXT,
+                battle_show TEXT,
+                state_id INTEGER,
                 marker INTEGER,
                 captured_at INTEGER NOT NULL
             )
@@ -567,11 +575,21 @@ class LocalStzbDatabase(context: Context) : SQLiteOpenHelper(
             db.execSQL("DROP TABLE IF EXISTS siege_tasks_legacy")
             db.execSQL("CREATE INDEX IF NOT EXISTS idx_siege_tasks_city ON siege_tasks(city_id)")
         }
+        if (oldVersion < 15) {
+            db.execSQL("ALTER TABLE battle_monitor_moves ADD COLUMN target_type INTEGER DEFAULT 0")
+            db.execSQL("ALTER TABLE battle_monitor_moves ADD COLUMN reside_wid INTEGER DEFAULT 0")
+            db.execSQL("ALTER TABLE battle_monitor_moves ADD COLUMN stay_wid INTEGER DEFAULT 0")
+            db.execSQL("ALTER TABLE battle_monitor_moves ADD COLUMN army_hero_type TEXT")
+            db.execSQL("ALTER TABLE battle_monitor_moves ADD COLUMN morale INTEGER DEFAULT 0")
+            db.execSQL("ALTER TABLE battle_monitor_moves ADD COLUMN buff_ids TEXT")
+            db.execSQL("ALTER TABLE battle_monitor_moves ADD COLUMN battle_show TEXT")
+            db.execSQL("ALTER TABLE battle_monitor_moves ADD COLUMN state_id INTEGER")
+        }
     }
 
     companion object {
         private const val DB_NAME = "astzb_local.db"
-        private const val DB_VERSION = 14
+        private const val DB_VERSION = 15
     }
 }
 
@@ -669,8 +687,13 @@ object LocalStzbRepository {
     fun saveBattleMonitor(snapshot: LocalBattleMonitorSnapshot) {
         val database = db()
         val now = System.currentTimeMillis()
+        syncBattleMonitor(database, snapshot, now)
+    }
+
+    internal fun syncBattleMonitor(database: SQLiteDatabase, snapshot: LocalBattleMonitorSnapshot, now: Long) {
         database.beginTransaction()
         try {
+            database.delete("battle_monitor_moves", null, null)
             snapshot.moves.forEach { move ->
                 database.insertWithOnConflict(
                     "battle_monitor_moves",
@@ -691,6 +714,14 @@ object LocalStzbRepository {
                         put("start_time", move.startTime)
                         put("arrive_time", move.arriveTime)
                         put("speed", move.speed)
+                        put("target_type", move.targetType)
+                        put("reside_wid", move.resideWid)
+                        put("stay_wid", move.stayWid)
+                        put("army_hero_type", move.armyHeroType)
+                        put("morale", move.morale)
+                        put("buff_ids", move.buffIdList)
+                        put("battle_show", move.battleShow)
+                        move.stateId?.let { put("state_id", it) }
                         put("marker", snapshot.marker)
                         put("captured_at", now)
                     },
@@ -1213,7 +1244,8 @@ object LocalStzbRepository {
                 """
                 SELECT team_id,move_type,subject_id,owner_uid,owner_name,owner_union,
                        from_wid,to_wid,current_wid,from_xy,to_xy,current_xy,
-                       start_time,arrive_time,speed
+                       start_time,arrive_time,speed,target_type,reside_wid,stay_wid,
+                       army_hero_type,morale,buff_ids,battle_show,state_id
                 FROM battle_monitor_moves
                 ORDER BY captured_at DESC, arrive_time DESC, team_id DESC
                 """.trimIndent(),
@@ -1241,6 +1273,14 @@ object LocalStzbRepository {
                             startTime = c.long("start_time"),
                             arriveTime = c.long("arrive_time"),
                             speed = c.int("speed"),
+                            targetType = c.int("target_type"),
+                            resideWid = c.int("reside_wid"),
+                            stayWid = c.int("stay_wid"),
+                            armyHeroType = c.string("army_hero_type"),
+                            morale = c.int("morale"),
+                            buffIdList = c.string("buff_ids"),
+                            battleShow = c.string("battle_show"),
+                            stateId = c.getColumnIndex("state_id").takeIf { it >= 0 && !c.isNull(it) }?.let(c::getInt),
                         )
                     )
                 }
