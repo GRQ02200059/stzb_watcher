@@ -22,6 +22,7 @@ import com.local.stzb.domain.intel.IntelRepository
 import com.local.stzb.domain.intel.IntelSnapshot
 import com.local.stzb.domain.rankings.*
 import com.local.stzb.domain.teams.TeamsRepository
+import com.local.stzb.feature.capture.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
@@ -42,7 +43,7 @@ class StzbNavigationTest {
         )
         rule.setContent {
             AstzbTheme {
-                StzbApp(repository, EmptyTeamsRepository, EmptyBattleRepository, EmptyAllianceRepository, EmptyIntelRepository, EmptyRankingRepository, openLegacyDashboard = {}, openCaptureConsole = {})
+                StzbApp(repository, EmptyTeamsRepository, EmptyBattleRepository, EmptyAllianceRepository, EmptyIntelRepository, EmptyRankingRepository, EmptyCaptureController, openLegacyDashboard = {}, openCaptureConsole = {})
             }
         }
 
@@ -52,7 +53,10 @@ class StzbNavigationTest {
         rule.onNodeWithText("团队").performClick()
         rule.onNodeWithText("团队报表").assertIsDisplayed()
         rule.onNodeWithText("更多").performClick()
-        rule.onNodeWithText("经典抓包控制台").assertIsDisplayed()
+        rule.onNodeWithText("抓包启动台").performClick()
+        rule.onNodeWithText("启动抓包").assertIsDisplayed()
+        rule.onNodeWithContentDescription("返回更多").performClick()
+        rule.onNodeWithText("更多工具").assertIsDisplayed()
 
         rule.onNodeWithText("战报").performClick()
         rule.onNodeWithText("本机战报").assertIsDisplayed()
@@ -73,10 +77,18 @@ class StzbNavigationTest {
         rule.onNodeWithText("排行榜").performClick()
         rule.onNodeWithText("本机还没有战功榜数据").assertIsDisplayed()
         rule.onNodeWithText("返回").performClick()
-        rule.onNodeWithText("经典抓包控制台").assertIsDisplayed()
+        rule.onNodeWithText("抓包启动台").assertIsDisplayed()
     }
 
     private object EmptyTeamsRepository : TeamsRepository { override fun loadTeams() = emptyList<com.local.stzb.domain.teams.PlayerTeam>() }
+    private object EmptyCaptureController : CaptureConsoleController {
+        override fun observe() = MutableStateFlow(CaptureRuntime())
+        override suspend fun installedApps() = emptyList<InstalledApp>()
+        override suspend fun start(targetPackage: String) = Unit
+        override suspend fun stop() = Unit
+        override suspend fun clear() = Unit
+        override suspend fun prepareExport(kind: CaptureExportKind): CaptureExport? = null
+    }
 
     private object EmptyBattleRepository : BattleRepository {
         override fun loadBattles(filters: BattleFilters): List<BattleSummary> = emptyList()

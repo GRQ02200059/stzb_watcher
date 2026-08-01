@@ -1,5 +1,9 @@
 package com.local.stzb.core.navigation
 
+import android.app.Activity
+import android.net.VpnService
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
@@ -13,6 +17,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -46,6 +55,8 @@ import com.local.stzb.feature.teams.TeamsScreen
 import com.local.stzb.feature.teams.TeamsViewModel
 import com.local.stzb.feature.teamreport.TeamReportScreen
 import com.local.stzb.feature.teamreport.TeamReportViewModel
+import com.local.stzb.feature.capture.*
+import kotlinx.coroutines.launch
 
 @Composable
 fun StzbApp(
@@ -55,6 +66,7 @@ fun StzbApp(
     allianceRepository: AllianceRepository,
     intelRepository: IntelRepository,
     rankingRepository: RankingRepository,
+    captureController: CaptureConsoleController,
     openLegacyDashboard: (String) -> Unit,
     openCaptureConsole: () -> Unit,
     modifier: Modifier = Modifier,
@@ -76,6 +88,27 @@ fun StzbApp(
     val teamsState by teamsViewModel.state.collectAsStateWithLifecycle()
     val teamReportViewModel: TeamReportViewModel = viewModel { TeamReportViewModel(rankingRepository) }
     val teamReportState by teamReportViewModel.state.collectAsStateWithLifecycle()
+    val captureViewModel: CaptureConsoleViewModel = viewModel { CaptureConsoleViewModel(captureController) }
+    val captureState by captureViewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var pendingExport by remember { mutableStateOf<CaptureExport?>(null) }
+    val documentLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("*/*")) { uri ->
+        val export = pendingExport
+        pendingExport = null
+        if (uri != null && export != null) runCatching {
+            context.contentResolver.openOutputStream(uri)?.use { it.write(export.bytes) }
+                ?: error("无法打开导出位置")
+        }.onSuccess {
+            captureViewModel.onIntent(CaptureConsoleIntent.Message("已导出 ${export.name}"))
+        }.onFailure {
+            captureViewModel.onIntent(CaptureConsoleIntent.Message("导出失败：${it.message}"))
+        }
+    }
+    val vpnLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) captureViewModel.onIntent(CaptureConsoleIntent.StartApproved)
+        else captureViewModel.onIntent(CaptureConsoleIntent.Message("已取消 VPN 授权"))
+    }
 
     Scaffold(
         modifier = modifier,
@@ -127,7 +160,7 @@ fun StzbApp(
             }
             composable(AppDestination.MORE.route) {
                 LegacyToolsScreen(
-                    openCaptureConsole = openCaptureConsole,
+                    openCaptureConsole = { navController.navigate("capture-console") },
                     openLegacyDashboard = { openLegacyDashboard("ranking") },
                     openMap = { navController.navigate("map") },
                     openAnnouncements = { navController.navigate("announcements") },
@@ -144,6 +177,27 @@ fun StzbApp(
             }
             composable("rankings") {
                 RankingsScreen(rankingsState, rankingsViewModel, { navController.popBackStack() })
+            }
+            composable("capture-console") {
+                CaptureConsoleScreen(
+                    state = captureState,
+                    onIntent = captureViewModel::onIntent,
+                    onRequestVpnPermission = {
+                        val permission = VpnService.prepare(context)
+                        if (permission == null) captureViewModel.onIntent(CaptureConsoleIntent.StartApproved)
+                        else vpnLauncher.launch(permission)
+                    },
+                    onExport = { kind -> scope.launch {
+                        runCatching { captureViewModel.prepareExport(kind) }
+                            .onSuccess { export ->
+                                if (export == null) captureViewModel.onIntent(CaptureConsoleIntent.Message("当前没有可导出的解析包"))
+                                else { pendingExport = export; documentLauncher.launch(export.name) }
+                            }
+                            .onFailure { captureViewModel.onIntent(CaptureConsoleIntent.Message("导出准备失败：${it.message}")) }
+                    } },
+                    onOpenLegacy = openCaptureConsole,
+                    onBack = { navController.popBackStack() },
+                )
             }
         }
     }

@@ -63,7 +63,7 @@ fun LegacyToolsScreen(
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
         ) {
             Icon(Icons.Outlined.NetworkCheck, contentDescription = null)
-            Text("经典抓包控制台", modifier = Modifier.padding(start = 8.dp))
+            Text("抓包启动台", modifier = Modifier.padding(start = 8.dp))
         }
         OutlinedButton(
             onClick = openLegacyDashboard,
