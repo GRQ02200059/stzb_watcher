@@ -8,6 +8,8 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.asCoroutineDispatcher
+import java.util.concurrent.Executors
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -42,6 +44,33 @@ class RankingsViewModelTest {
         runCurrent()
         assertEquals("读取失败", viewModel.state.value.error)
         assertFalse(viewModel.state.value.loading)
+    }
+
+    @Test fun staleRequestCannotOverwriteLatestSelection() = runTest(dispatcher) {
+        val firstGate = java.util.concurrent.CountDownLatch(1)
+        val io = Executors.newFixedThreadPool(2).asCoroutineDispatcher()
+        val repository = object : RankingRepository {
+            override fun loadRankings() = RankingSnapshot(emptyList(), emptyList(), emptyList())
+            override fun loadTeamReport(dimension: ReportDimension, period: ReportPeriod, group: String): TeamReportSnapshot {
+                if (period == ReportPeriod.ALL) firstGate.await()
+                return TeamReportSnapshot(listOf(TeamReportRow(1, period.label, "", 1, 0, 0, 0, 0, 0, 0, 0, 0.0, 0.0, 0, 0.0)), emptyList())
+            }
+        }
+        try {
+            val viewModel = RankingsViewModel(repository, io)
+            runCurrent()
+            viewModel.setPage(RankingPage.TEAM_REPORT)
+            runCurrent()
+            viewModel.setPeriod(ReportPeriod.WEEK)
+            repeat(100) { if (viewModel.state.value.report == null) { Thread.sleep(5); runCurrent() } }
+            assertEquals("本周", viewModel.state.value.report!!.rows.single().name)
+            firstGate.countDown()
+            repeat(20) { Thread.sleep(5); runCurrent() }
+            assertEquals("本周", viewModel.state.value.report!!.rows.single().name)
+        } finally {
+            firstGate.countDown()
+            io.close()
+        }
     }
 
     private class FakeRepository(private val failure: Boolean = false) : RankingRepository {

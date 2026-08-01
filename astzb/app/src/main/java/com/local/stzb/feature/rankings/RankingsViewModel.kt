@@ -26,6 +26,7 @@ data class RankingsUiState(
 class RankingsViewModel(private val repository: RankingRepository, private val io: CoroutineDispatcher = Dispatchers.IO) : ViewModel() {
     private val _state = MutableStateFlow(RankingsUiState())
     val state: StateFlow<RankingsUiState> = _state.asStateFlow()
+    private var requestGeneration = 0L
     init { refresh() }
     fun setPage(value: RankingPage) { _state.value = _state.value.copy(page = value); refresh() }
     fun setCategory(value: RankingCategory) { _state.value = _state.value.copy(category = value) }
@@ -34,11 +35,17 @@ class RankingsViewModel(private val repository: RankingRepository, private val i
     fun setGroup(value: String) { _state.value = _state.value.copy(group = value); refresh() }
     fun refresh() {
         val requested = _state.value
+        val generation = ++requestGeneration
         _state.value = requested.copy(loading = true, error = null)
         viewModelScope.launch {
             runCatching { withContext(io) { if (requested.page == RankingPage.RANKINGS) repository.loadRankings() else repository.loadTeamReport(requested.dimension, requested.period, requested.group) } }
-                .onSuccess { result -> _state.value = if (result is RankingSnapshot) _state.value.copy(loading = false, rankings = result) else _state.value.copy(loading = false, report = result as TeamReportSnapshot) }
-                .onFailure { _state.value = _state.value.copy(loading = false, error = it.message ?: "排行数据加载失败") }
+                .onSuccess { result ->
+                    if (generation != requestGeneration) return@onSuccess
+                    _state.value = if (result is RankingSnapshot) _state.value.copy(loading = false, rankings = result) else _state.value.copy(loading = false, report = result as TeamReportSnapshot)
+                }
+                .onFailure {
+                    if (generation == requestGeneration) _state.value = _state.value.copy(loading = false, error = it.message ?: "排行数据加载失败")
+                }
         }
     }
 }
