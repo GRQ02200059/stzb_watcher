@@ -11,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import com.local.stzb.core.designsystem.AstzbTheme
 import com.local.stzb.core.ui.LoadState
 import com.local.stzb.domain.battlefield.BattlefieldEvent
+import com.local.stzb.domain.battlefield.BattlefieldHero
 import com.local.stzb.domain.battlefield.BattlefieldMetrics
 import com.local.stzb.domain.battlefield.BattlefieldSnapshot
 import com.local.stzb.domain.battlefield.CaptureStatus
@@ -128,6 +129,15 @@ class BattlefieldScreenTest {
 
         rule.onNodeWithText("前锋 · 测试盟").performClick()
         rule.runOnIdle { check(selected == snapshot.events.single()) }
+    }
+
+    @Test
+    fun heroPortraitUsesAccessibleInitialFallbackWhenIconIsUnavailable() {
+        val hero = BattlefieldHero("大营", 0, 0, "陆逊", 50, 5, emptyList())
+        rule.setContent { AstzbTheme { BattlefieldHeroPortrait(hero) } }
+
+        rule.onNodeWithContentDescription("大营 陆逊").assertIsDisplayed()
+        rule.onNodeWithText("陆").assertIsDisplayed()
     }
 
     private fun contentSnapshot() = BattlefieldSnapshot(
