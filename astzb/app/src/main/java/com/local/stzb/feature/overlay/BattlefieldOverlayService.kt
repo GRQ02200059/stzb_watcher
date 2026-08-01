@@ -19,15 +19,25 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import androidx.savedstate.SavedStateRegistry
+import androidx.savedstate.SavedStateRegistryController
+import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.local.stzb.StzbAppActivity
 import com.local.stzb.StzbApplication
 import com.local.stzb.core.designsystem.AstzbTheme
 import kotlinx.coroutines.*
 
-class BattlefieldOverlayService : Service(), LifecycleOwner {
+class BattlefieldOverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner, ViewModelStoreOwner {
     private val registry = LifecycleRegistry(this)
     override val lifecycle: Lifecycle get() = registry
+    private val savedStateController = SavedStateRegistryController.create(this)
+    override val savedStateRegistry: SavedStateRegistry get() = savedStateController.savedStateRegistry
+    override val viewModelStore = ViewModelStore()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val store = OverlayTeamStore()
     private lateinit var windowManager: WindowManager
@@ -37,6 +47,8 @@ class BattlefieldOverlayService : Service(), LifecycleOwner {
 
     override fun onCreate() {
         super.onCreate()
+        savedStateController.performAttach()
+        savedStateController.performRestore(null)
         registry.currentState = Lifecycle.State.CREATED
         windowManager = getSystemService(WindowManager::class.java)
         OverlayServiceState.setRunning(true)
@@ -67,13 +79,18 @@ class BattlefieldOverlayService : Service(), LifecycleOwner {
         overlayView = null
         OverlayServiceState.setRunning(false)
         registry.currentState = Lifecycle.State.DESTROYED
+        viewModelStore.clear()
         stopForeground(STOP_FOREGROUND_REMOVE)
         super.onDestroy()
     }
 
     private fun addOverlay() {
         val density = resources.displayMetrics.density
-        val view = ComposeView(this).apply { setViewTreeLifecycleOwner(this@BattlefieldOverlayService) }
+        val view = ComposeView(this).apply {
+            setViewTreeLifecycleOwner(this@BattlefieldOverlayService)
+            setViewTreeSavedStateRegistryOwner(this@BattlefieldOverlayService)
+            setViewTreeViewModelStoreOwner(this@BattlefieldOverlayService)
+        }
         val layout = WindowManager.LayoutParams(
             (370 * density).toInt(), WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
