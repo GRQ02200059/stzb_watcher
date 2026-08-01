@@ -23,14 +23,20 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.local.stzb.domain.battlefield.BattlefieldRepository
+import com.local.stzb.domain.battles.BattleRepository
 import com.local.stzb.feature.battlefield.BattlefieldScreen
 import com.local.stzb.feature.battlefield.BattlefieldViewModel
 import com.local.stzb.feature.placeholder.PlaceholderScreen
+import com.local.stzb.feature.battles.BattleDetailScreen
+import com.local.stzb.feature.battles.BattlesIntent
+import com.local.stzb.feature.battles.BattlesScreen
+import com.local.stzb.feature.battles.BattlesViewModel
 import com.local.stzb.feature.tools.LegacyToolsScreen
 
 @Composable
 fun StzbApp(
     repository: BattlefieldRepository,
+    battleRepository: BattleRepository,
     openLegacyDashboard: (String) -> Unit,
     openCaptureConsole: () -> Unit,
     modifier: Modifier = Modifier,
@@ -42,6 +48,8 @@ fun StzbApp(
         BattlefieldViewModel(repository)
     }
     val battlefieldState by battlefieldViewModel.state.collectAsStateWithLifecycle()
+    val battlesViewModel: BattlesViewModel = viewModel { BattlesViewModel(battleRepository) }
+    val battlesState by battlesViewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier,
@@ -77,11 +85,14 @@ fun StzbApp(
                 )
             }
             composable(AppDestination.BATTLES.route) {
-                PlaceholderScreen(
-                    title = "战报迁移中",
-                    message = "完整战报页面正在迁移到新版界面。",
-                    onOpenLegacy = { openLegacyDashboard("battles") },
-                )
+                if (battlesState.selected == null) {
+                    BattlesScreen(battlesState, battlesViewModel::onIntent)
+                } else {
+                    BattleDetailScreen(
+                        state = battlesState,
+                        onBack = { battlesViewModel.onIntent(BattlesIntent.CloseBattle) },
+                    )
+                }
             }
             composable(AppDestination.ALLIANCE.route) {
                 PlaceholderScreen(

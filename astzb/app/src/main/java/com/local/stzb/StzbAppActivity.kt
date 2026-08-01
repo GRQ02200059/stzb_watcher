@@ -22,6 +22,7 @@ class StzbAppActivity : ComponentActivity() {
             AstzbTheme {
                 StzbApp(
                     repository = repository,
+                    battleRepository = (application as StzbApplication).battleRepository,
                     openLegacyDashboard = ::openLegacyDashboard,
                     openCaptureConsole = ::openCaptureConsole,
                 )

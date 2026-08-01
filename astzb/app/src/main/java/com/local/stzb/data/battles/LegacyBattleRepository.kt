@@ -29,11 +29,15 @@ class LegacyBattleRepository(
             player = filters.query,
             unionName = filters.unionName,
             fightType = if (filters.siegeOnly) 1 else null,
-            result = filters.outcome?.toResultCode(),
+            result = null,
             wid = filters.wid,
-            limit = filters.limit,
+            limit = if (filters.outcome == null) filters.limit else maxOf(filters.limit * 3, 300),
         ),
-    ).map(LocalFullBattle::toSummary)
+    ).asSequence()
+        .map(LocalFullBattle::toSummary)
+        .filter { filters.outcome == null || it.outcome == filters.outcome }
+        .take(filters.limit)
+        .toList()
 
     override fun loadBattle(id: Int): BattleDetail? = source.loadBattle(id)?.toDetail()
 }
@@ -71,12 +75,6 @@ private fun Int.toOutcome() = when (this) {
     0, 10 -> BattleOutcome.DRAW
     2, 3, 4, 5, 8, 9 -> BattleOutcome.DEFEAT
     else -> BattleOutcome.OTHER
-}
-
-private fun BattleOutcome.toResultCode(): Int? = when (this) {
-    BattleOutcome.VICTORY -> 1
-    BattleOutcome.DRAW -> 0
-    BattleOutcome.DEFEAT, BattleOutcome.OTHER -> null
 }
 
 private fun resultLabel(result: Int) = when (result.toOutcome()) {

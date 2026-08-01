@@ -9,12 +9,15 @@ import com.example.myapplication.SkillNameResolver
 import com.local.stzb.data.battlefield.AndroidLegacyBattlefieldSource
 import com.local.stzb.data.battlefield.LegacyBattlefieldRepository
 import com.local.stzb.domain.battlefield.BattlefieldRepository
+import com.local.stzb.data.battles.LegacyBattleRepository
+import com.local.stzb.domain.battles.BattleRepository
 import hev.sockstun.Preferences
 
 class StzbApplication : Application() {
     val battlefieldRepository: BattlefieldRepository by lazy {
         LegacyBattlefieldRepository(AndroidLegacyBattlefieldSource(Preferences(this)))
     }
+    val battleRepository: BattleRepository by lazy { LegacyBattleRepository() }
 
     override fun onCreate() {
         super.onCreate()
