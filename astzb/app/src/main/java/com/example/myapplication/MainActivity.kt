@@ -62,12 +62,6 @@ class MainActivity : AppCompatActivity() {
         }
         setContentView(R.layout.activity_capture_console)
         StatusBarInsetHelper.applyTopSafeSpacing(findViewById(R.id.captureConsoleRoot))
-        LocalStzbCaptureWriter.init(applicationContext)
-        HeroNameResolver.init(applicationContext)
-        SkillNameResolver.init(applicationContext)
-        LocalStzbRepository.init(applicationContext)
-        LocalBattleSimulator.init(applicationContext)
-
         logsView = findViewById(R.id.logsView)
         statusView = findViewById(R.id.statusView)
         packageInput = findViewById(R.id.packageInput)
