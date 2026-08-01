@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -40,6 +41,7 @@ fun StzbApp(
     val battlefieldViewModel: BattlefieldViewModel = viewModel {
         BattlefieldViewModel(repository)
     }
+    val battlefieldState by battlefieldViewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier,
@@ -69,7 +71,7 @@ fun StzbApp(
         ) {
             composable(AppDestination.BATTLEFIELD.route) {
                 BattlefieldScreen(
-                    state = battlefieldViewModel.state.value,
+                    state = battlefieldState,
                     onIntent = battlefieldViewModel::onIntent,
                     onEventClick = {},
                 )

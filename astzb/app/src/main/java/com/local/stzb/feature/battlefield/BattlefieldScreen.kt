@@ -2,6 +2,7 @@ package com.local.stzb.feature.battlefield
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,17 +46,21 @@ fun BattlefieldScreen(
         contentAlignment = Alignment.TopCenter,
     ) {
         when (val loadState = state.loadState) {
-            LoadState.Loading -> LoadingPanel()
-            is LoadState.Empty -> EmptyPanel(
-                message = loadState.message,
-                actionLabel = loadState.actionLabel,
-                onAction = { onIntent(BattlefieldIntent.Refresh) },
-            )
-            is LoadState.Error -> ErrorPanel(
-                message = loadState.message,
-                retryable = loadState.retryable,
-                onRetry = { onIntent(BattlefieldIntent.Refresh) },
-            )
+            LoadState.Loading -> BattlefieldStatePanel { LoadingPanel() }
+            is LoadState.Empty -> BattlefieldStatePanel {
+                EmptyPanel(
+                    message = loadState.message,
+                    actionLabel = loadState.actionLabel,
+                    onAction = { onIntent(BattlefieldIntent.Refresh) },
+                )
+            }
+            is LoadState.Error -> BattlefieldStatePanel {
+                ErrorPanel(
+                    message = loadState.message,
+                    retryable = loadState.retryable,
+                    onRetry = { onIntent(BattlefieldIntent.Refresh) },
+                )
+            }
             is LoadState.Content -> BattlefieldContent(
                 snapshot = loadState.value,
                 refreshing = loadState.refreshing,
@@ -61,6 +68,14 @@ fun BattlefieldScreen(
                 onEventClick = onEventClick,
             )
         }
+    }
+}
+
+@Composable
+private fun BattlefieldStatePanel(content: @Composable () -> Unit) {
+    Column(Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 20.dp)) {
+        Text("实时战场", style = MaterialTheme.typography.headlineMedium)
+        Box(Modifier.weight(1f)) { content() }
     }
 }
 
