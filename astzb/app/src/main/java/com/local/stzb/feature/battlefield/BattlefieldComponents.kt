@@ -162,6 +162,10 @@ fun BattlefieldEventCard(
     modifier: Modifier = Modifier,
 ) {
     val accent = event.priority.color
+    if (event.category == EventCategory.MARCH && event.teamPresentation?.heroes?.isNotEmpty() == true) {
+        BattlefieldTeamCard(event, accent, onClick, modifier)
+        return
+    }
     Card(
         modifier = modifier
             .fillMaxWidth()

@@ -12,6 +12,8 @@ import com.local.stzb.core.designsystem.AstzbTheme
 import com.local.stzb.core.ui.LoadState
 import com.local.stzb.domain.battlefield.BattlefieldEvent
 import com.local.stzb.domain.battlefield.BattlefieldHero
+import com.local.stzb.domain.battlefield.BattlefieldSkill
+import com.local.stzb.domain.battlefield.BattlefieldTeamPresentation
 import com.local.stzb.domain.battlefield.BattlefieldMetrics
 import com.local.stzb.domain.battlefield.BattlefieldSnapshot
 import com.local.stzb.domain.battlefield.CaptureStatus
@@ -138,6 +140,39 @@ class BattlefieldScreenTest {
 
         rule.onNodeWithContentDescription("大营 陆逊").assertIsDisplayed()
         rule.onNodeWithText("陆").assertIsDisplayed()
+    }
+
+    @Test
+    fun recordedMarchUsesCompactThreeHeroCard() {
+        val event = contentSnapshot().events.single().copy(
+            summary = "地图队伍 · 10,10 → 10,20 · 士气 88",
+            teamPresentation = BattlefieldTeamPresentation(
+                heroes = listOf(
+                    BattlefieldHero("大营", 1, 0, "陆逊", 50, 5, listOf(BattlefieldSkill("深谋远虑", 10))),
+                    BattlefieldHero("中军", 2, 0, "周瑜", 49, 4, listOf(BattlefieldSkill("神兵天降", 10))),
+                    BattlefieldHero("前锋", 3, 0, "吕蒙", 48, 3, listOf(BattlefieldSkill("反计之策", 10))),
+                ),
+                routeText = "10,10 → 10,20",
+                moraleText = "士气 88",
+                stateText = "行军",
+                recordText = "12战 8胜1平3负 · 胜率 70.8%",
+                arrivalText = "到达 16:30:00",
+            ),
+        )
+        rule.setContent { AstzbTheme { BattlefieldEventCard(event, {}) } }
+
+        listOf("大营", "中军", "前锋", "陆逊", "周瑜", "吕蒙", "Lv.50 · 进阶5", "深谋远虑", "10,10 → 10,20", "士气 88", "12战 8胜1平3负 · 胜率 70.8%").forEach {
+            rule.onNodeWithText(it).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun unmatchedMarchKeepsGenericEventCard() {
+        val event = contentSnapshot().events.single()
+        rule.setContent { AstzbTheme { BattlefieldEventCard(event, {}) } }
+
+        rule.onNodeWithText("10,10 → 10,20").assertIsDisplayed()
+        rule.onNodeWithText("普通").assertIsDisplayed()
     }
 
     private fun contentSnapshot() = BattlefieldSnapshot(
