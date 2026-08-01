@@ -22,7 +22,7 @@ object LocalBattleMonitorParser {
         )
     }
 
-    private fun parse(raw: String, plainText: String = "", sourceLabel: String = ""): LocalBattleMonitorSnapshot? {
+    internal fun parse(raw: String, plainText: String = "", sourceLabel: String = ""): LocalBattleMonitorSnapshot? {
         val data = parseJsonArray(raw) ?: return null
         val subjects = linkedMapOf<Int, LocalSubject>()
         val mapStates = linkedMapOf<Int, LocalMapState>()
