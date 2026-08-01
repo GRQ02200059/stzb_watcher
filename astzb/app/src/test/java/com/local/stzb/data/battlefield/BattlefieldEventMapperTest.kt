@@ -72,6 +72,14 @@ class BattlefieldEventMapperTest {
         assertEquals("已记录队伍：陆逊 / 周瑜 / 吕蒙", event.details.first())
         assertEquals("1号位 陆逊 Lv.50 进阶5 · 深谋远虑 Lv.10", event.details[1])
         assertFalse(event.details.any { it.contains("等待战报") })
+        assertEquals(listOf("大营", "中军", "前锋"), event.teamPresentation!!.heroes.map { it.positionLabel })
+        assertEquals(listOf(101L, 102L, 103L), event.teamPresentation!!.heroes.map { it.heroId })
+        assertEquals(listOf("深谋远虑"), event.teamPresentation!!.heroes.first().skills.map { it.name })
+        assertEquals("10,10 → 10,20", event.teamPresentation!!.routeText)
+        assertEquals("士气 0", event.teamPresentation!!.moraleText)
+        assertEquals("到达 06:23:20", event.teamPresentation!!.arrivalText)
+
+        assertEquals(null, BattlefieldEventMapper.fromMove(move).teamPresentation)
     }
 
     @Test

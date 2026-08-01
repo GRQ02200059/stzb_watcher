@@ -4,6 +4,10 @@ import com.example.myapplication.LocalBattleField
 import com.example.myapplication.LocalFullBattle
 import com.example.myapplication.Local13A2TeamInsight
 import com.example.myapplication.LocalTeamMove
+import com.example.myapplication.HeroNameResolver
+import com.local.stzb.domain.battlefield.BattlefieldHero
+import com.local.stzb.domain.battlefield.BattlefieldSkill
+import com.local.stzb.domain.battlefield.BattlefieldTeamPresentation
 import com.local.stzb.domain.battlefield.BattlefieldEvent
 import com.local.stzb.domain.battlefield.EventCategory
 import com.local.stzb.domain.battlefield.EventPriority
@@ -46,6 +50,28 @@ object BattlefieldEventMapper {
                 if (move.buffIdList.isNotBlank()) add("Buff：${move.buffIdList}")
                 if (move.battleEffect.isNotBlank()) add("战斗效果：${move.battleEffect}")
                 if (lineup.isEmpty()) add("武将与兵力：尚未匹配到已记录战报")
+            },
+            teamPresentation = lineup.takeIf { it.isNotEmpty() }?.let { heroes ->
+                BattlefieldTeamPresentation(
+                    heroes = heroes.mapIndexed { index, hero ->
+                        BattlefieldHero(
+                            positionLabel = listOf("大营", "中军", "前锋").getOrElse(index) { "${hero.pos}号位" },
+                            heroId = hero.heroId,
+                            iconId = HeroNameResolver.iconIdOf(hero.heroId),
+                            name = hero.heroName.ifBlank { HeroNameResolver.nameOf(hero.heroId) },
+                            level = hero.level,
+                            advance = hero.star,
+                            skills = hero.skills.map { BattlefieldSkill(it.skillName.ifBlank { "战法${it.skillId}" }, it.level) },
+                        )
+                    },
+                    routeText = "${location(move.fromXy, move.fromWid)} → ${location(move.toXy, move.toWid)}",
+                    moraleText = "士气 ${move.morale}",
+                    stateText = armyStateText(move.moveType),
+                    recordText = if (insight.stats.battles > 0) {
+                        "${insight.stats.battles}战 ${insight.stats.wins}胜${insight.stats.draws}平${insight.stats.loses}负 · 胜率 ${"%.1f".format(insight.stats.winRate)}%"
+                    } else "暂无历史战绩",
+                    arrivalText = "到达 ${formatEventTime(arriveAt)}",
+                )
             },
             target = EventTarget.Team(move.teamId),
         )
@@ -120,6 +146,10 @@ object BattlefieldEventMapper {
         4 -> "练兵"
         else -> "战斗"
     }
+
+    private fun formatEventTime(epochSeconds: Long): String = java.time.Instant.ofEpochSecond(epochSeconds)
+        .atZone(java.time.ZoneId.systemDefault())
+        .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss", java.util.Locale.CHINA))
 }
 
 internal fun normalizeEpochSeconds(timestamp: Long): Long =
