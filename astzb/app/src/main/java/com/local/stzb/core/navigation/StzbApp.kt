@@ -25,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import com.local.stzb.domain.battlefield.BattlefieldRepository
 import com.local.stzb.domain.battles.BattleRepository
 import com.local.stzb.domain.alliance.AllianceRepository
+import com.local.stzb.domain.intel.IntelRepository
 import com.local.stzb.feature.battlefield.BattlefieldScreen
 import com.local.stzb.feature.battlefield.BattlefieldViewModel
 import com.local.stzb.feature.placeholder.PlaceholderScreen
@@ -34,6 +35,8 @@ import com.local.stzb.feature.battles.BattlesScreen
 import com.local.stzb.feature.battles.BattlesViewModel
 import com.local.stzb.feature.alliance.AllianceScreen
 import com.local.stzb.feature.alliance.AllianceViewModel
+import com.local.stzb.feature.intel.IntelPage
+import com.local.stzb.feature.intel.IntelScreen
 import com.local.stzb.feature.tools.LegacyToolsScreen
 
 @Composable
@@ -41,6 +44,7 @@ fun StzbApp(
     repository: BattlefieldRepository,
     battleRepository: BattleRepository,
     allianceRepository: AllianceRepository,
+    intelRepository: IntelRepository,
     openLegacyDashboard: (String) -> Unit,
     openCaptureConsole: () -> Unit,
     modifier: Modifier = Modifier,
@@ -107,7 +111,15 @@ fun StzbApp(
                 LegacyToolsScreen(
                     openCaptureConsole = openCaptureConsole,
                     openLegacyDashboard = { openLegacyDashboard("ranking") },
+                    openMap = { navController.navigate("map") },
+                    openAnnouncements = { navController.navigate("announcements") },
                 )
+            }
+            composable("map") {
+                IntelScreen(IntelPage.MAP, intelRepository.load(), { navController.popBackStack() }, intelRepository::load)
+            }
+            composable("announcements") {
+                IntelScreen(IntelPage.ANNOUNCEMENTS, intelRepository.load(), { navController.popBackStack() }, intelRepository::load)
             }
         }
     }

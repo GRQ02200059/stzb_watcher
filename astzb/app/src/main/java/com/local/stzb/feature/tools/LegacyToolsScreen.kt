@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.NetworkCheck
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
@@ -21,6 +23,8 @@ import androidx.compose.ui.unit.dp
 fun LegacyToolsScreen(
     openCaptureConsole: () -> Unit,
     openLegacyDashboard: () -> Unit,
+    openMap: () -> Unit,
+    openAnnouncements: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -28,6 +32,14 @@ fun LegacyToolsScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text("更多工具")
+        Button(onClick = openMap, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+            Icon(Icons.Outlined.Map, contentDescription = null)
+            Text("地图与城池", modifier = Modifier.padding(start = 8.dp))
+        }
+        OutlinedButton(onClick = openAnnouncements, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+            Icon(Icons.Outlined.Campaign, contentDescription = null)
+            Text("游戏公告", modifier = Modifier.padding(start = 8.dp))
+        }
         Button(
             onClick = openCaptureConsole,
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),

@@ -17,6 +17,8 @@ import com.local.stzb.domain.battles.BattleRepository
 import com.local.stzb.domain.battles.BattleSummary
 import com.local.stzb.domain.alliance.AllianceRepository
 import com.local.stzb.domain.alliance.AllianceSnapshot
+import com.local.stzb.domain.intel.IntelRepository
+import com.local.stzb.domain.intel.IntelSnapshot
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
@@ -37,7 +39,7 @@ class StzbNavigationTest {
         )
         rule.setContent {
             AstzbTheme {
-                StzbApp(repository, EmptyBattleRepository, EmptyAllianceRepository, openLegacyDashboard = {}, openCaptureConsole = {})
+                StzbApp(repository, EmptyBattleRepository, EmptyAllianceRepository, EmptyIntelRepository, openLegacyDashboard = {}, openCaptureConsole = {})
             }
         }
 
@@ -59,6 +61,10 @@ class StzbNavigationTest {
 
     private object EmptyAllianceRepository : AllianceRepository {
         override fun load(query: String, group: String) = AllianceSnapshot(0, emptyList(), emptyList())
+    }
+
+    private object EmptyIntelRepository : IntelRepository {
+        override fun load(mapQuery: String) = IntelSnapshot(0, 0, emptyList(), emptyList())
     }
 
     private class FakeBattlefieldRepository(initial: BattlefieldSnapshot) : BattlefieldRepository {
