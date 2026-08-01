@@ -94,14 +94,23 @@ private fun PlayerTeamCard(team: PlayerTeam) {
                         Text(position, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                         BattlefieldHeroPortrait(BattlefieldHero(position, hero.heroId, hero.iconId, hero.name, 0, 0, emptyList()))
                         Text(hero.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    }
-                }
-            }
-            if (team.skillNames.isNotEmpty()) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    team.skillNames.take(3).forEach { skill ->
-                        Surface(shape = RoundedCornerShape(7.dp), color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.weight(1f)) {
-                            Text(skill, Modifier.padding(horizontal = 6.dp, vertical = 5.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall)
+                        hero.skillNames.take(3).forEach { skill ->
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text(
+                                    skill,
+                                    Modifier.padding(horizontal = 5.dp, vertical = 4.dp),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            }
+                        }
+                        if (hero.skillNames.isEmpty()) {
+                            Text("战法未记录", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }

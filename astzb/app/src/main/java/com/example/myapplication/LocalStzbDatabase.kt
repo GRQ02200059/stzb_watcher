@@ -2304,9 +2304,9 @@ object LocalStzbRepository {
         val battleRows = db().rawQuery(
             """
             SELECT bv.battle_id,bv.result,bv.atk_name,bv.atk_union,bv.def_name,bv.def_union,
-                   bh.side,GROUP_CONCAT(bh.hero_name) AS heroes,
-                   GROUP_CONCAT(bh.hero_id) AS hero_ids,
-                   GROUP_CONCAT(COALESCE(bs.skill_name, '')) AS skills
+                   bh.side,GROUP_CONCAT(bh.pos || ':' || bh.hero_name) AS hero_entries,
+                   GROUP_CONCAT(bh.pos || ':' || bh.hero_id) AS hero_id_entries,
+                   GROUP_CONCAT(bh.pos || ':' || COALESCE(bs.skill_name, '')) AS skill_entries
             FROM battles_v2 bv
             JOIN battle_heroes bh ON bh.battle_id = bv.battle_id
             LEFT JOIN battle_skills bs ON bs.battle_id = bh.battle_id AND bs.side = bh.side AND bs.pos = bh.pos
@@ -2321,11 +2321,16 @@ object LocalStzbRepository {
                     val side = c.string("side")
                     val player = if (side == "def") c.string("def_name") else c.string("atk_name")
                     val union = if (side == "def") c.string("def_union") else c.string("atk_union")
-                    val heroes = c.string("heroes").split(',').map { it.trim() }.filter { it.isNotBlank() }.distinct().sorted()
-                    val heroIds = c.string("hero_ids").split(',').map { it.trim() }.filter { it.isNotBlank() }.distinct().joinToString("+")
-                    val skills = c.string("skills").split(',').map { it.trim() }.filter { it.isNotBlank() }.distinct().joinToString("+")
+                    val heroEntries = parsePositionEntries(c.string("hero_entries"))
+                    val heroIdEntries = parsePositionEntries(c.string("hero_id_entries"))
+                    val skillEntries = parsePositionEntries(c.string("skill_entries"))
+                    val positions = heroEntries.keys.sorted()
+                    val heroes = positions.mapNotNull { heroEntries[it]?.firstOrNull() }
+                    val heroIds = positions.mapNotNull { heroIdEntries[it]?.firstOrNull() }.joinToString("+")
+                    val heroSkills = positions.map { position -> skillEntries[position].orEmpty().distinct().take(3) }
+                    val skills = heroSkills.flatten().distinct().joinToString("+")
                     if (player.isNotBlank() && heroes.isNotEmpty()) {
-                        add(TeamBattleSeed(player, union, side, heroes.joinToString("+"), heroIds, skills, c.int("result")))
+                        add(TeamBattleSeed(player, union, side, heroes.joinToString("+"), heroIds, skills, heroSkills, c.int("result")))
                     }
                 }
             }
@@ -2333,7 +2338,7 @@ object LocalStzbRepository {
         val grouped = linkedMapOf<String, MutableTeamStat>()
         battleRows.forEach { row ->
             val key = "${row.player}|${row.unionName}|${row.side}|${row.heroes}|${row.heroIds}|${row.skills}"
-            val stat = grouped.getOrPut(key) { MutableTeamStat(row.player, row.unionName, row.side, row.heroes, row.heroIds, row.skills) }
+            val stat = grouped.getOrPut(key) { MutableTeamStat(row.player, row.unionName, row.side, row.heroes, row.heroIds, row.skills, row.heroSkills) }
             stat.battles += 1
             val win = if (row.side == "def") row.result in setOf(2, 6, 12) else row.result in setOf(1, 7, 11)
             if (win) stat.wins += 1
@@ -2346,6 +2351,7 @@ object LocalStzbRepository {
                 heroes = it.heroes,
                 heroIds = it.heroIds,
                 skills = it.skills,
+                heroSkills = it.heroSkills,
                 battles = it.battles,
                 wins = it.wins,
                 winRate = if (it.battles > 0) it.wins * 100.0 / it.battles else 0.0,
@@ -2353,6 +2359,16 @@ object LocalStzbRepository {
         }.sortedWith(compareByDescending<LocalPlayerBattleTeam> { it.battles }.thenByDescending { it.winRate })
         return if (hasLimit(limit)) rows.take(limit) else rows
     }
+
+    private fun parsePositionEntries(value: String): Map<Int, List<String>> = value
+        .split(',')
+        .mapNotNull { entry ->
+            val position = entry.substringBefore(':').toIntOrNull() ?: return@mapNotNull null
+            val text = entry.substringAfter(':', "").trim().takeIf(String::isNotBlank) ?: return@mapNotNull null
+            position to text
+        }
+        .groupBy({ it.first }, { it.second })
+        .mapValues { (_, entries) -> entries.distinct() }
 
     fun loadTeamReport(dim: String = "group", period: String = "all", group: String = "", limit: Int = 120): List<LocalTeamReportRow> {
         val groupByPlayer = dim == "player"
@@ -3497,6 +3513,7 @@ object LocalStzbRepository {
         val heroes: String,
         val heroIds: String,
         val skills: String,
+        val heroSkills: List<List<String>>,
         val result: Int,
     )
 
@@ -3507,6 +3524,7 @@ object LocalStzbRepository {
         val heroes: String,
         val heroIds: String,
         val skills: String,
+        val heroSkills: List<List<String>>,
         var battles: Int = 0,
         var wins: Int = 0,
     )
@@ -3726,6 +3744,7 @@ data class LocalPlayerBattleTeam(
     val heroes: String,
     val heroIds: String,
     val skills: String,
+    val heroSkills: List<List<String>> = emptyList(),
     val battles: Int,
     val wins: Int,
     val winRate: Double,

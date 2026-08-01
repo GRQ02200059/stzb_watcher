@@ -28,7 +28,12 @@ class LegacyTeamsRepository(
             side = row.side,
             heroes = names.mapIndexed { index, name ->
                 val id = ids.getOrElse(index) { 0L }
-                TeamHero(id, id.takeIf { it > 0 }?.let(iconIdFor) ?: 0L, name)
+                TeamHero(
+                    heroId = id,
+                    iconId = id.takeIf { it > 0 }?.let(iconIdFor) ?: 0L,
+                    name = name,
+                    skillNames = row.heroSkills.getOrElse(index) { emptyList() }.distinct().take(3),
+                )
             },
             skillNames = split(row.skills).distinct(),
             battles = row.battles,

@@ -1,6 +1,11 @@
 package com.local.stzb.domain.teams
 
-data class TeamHero(val heroId: Long, val iconId: Long, val name: String)
+data class TeamHero(
+    val heroId: Long,
+    val iconId: Long,
+    val name: String,
+    val skillNames: List<String> = emptyList(),
+)
 
 data class PlayerTeam(
     val player: String,

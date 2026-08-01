@@ -16,6 +16,11 @@ class LegacyTeamsRepositoryTest {
                     heroes = "陆逊+周瑜+吕蒙",
                     heroIds = "101+102+103",
                     skills = "深谋远虑++神兵天降/深谋远虑,反计之策",
+                    heroSkills = listOf(
+                        listOf("深谋远虑", "不攻", "十面埋伏", "多余战法"),
+                        listOf("神兵天降", "反计之策", "大赏三军"),
+                        listOf("白衣渡江", "道行险阻"),
+                    ),
                     battles = 12,
                     wins = 8,
                     winRate = 66.7,
@@ -27,6 +32,14 @@ class LegacyTeamsRepositoryTest {
 
         assertEquals(listOf("陆逊", "周瑜", "吕蒙"), team.heroes.map { it.name })
         assertEquals(listOf(1_101L, 1_102L, 1_103L), team.heroes.map { it.iconId })
+        assertEquals(
+            listOf(
+                listOf("深谋远虑", "不攻", "十面埋伏"),
+                listOf("神兵天降", "反计之策", "大赏三军"),
+                listOf("白衣渡江", "道行险阻"),
+            ),
+            team.heroes.map { it.skillNames },
+        )
         assertEquals(listOf("深谋远虑", "神兵天降", "反计之策"), team.skillNames)
         assertEquals("攻方", team.sideLabel)
     }
