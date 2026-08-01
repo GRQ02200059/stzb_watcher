@@ -126,6 +126,22 @@ class LegacyBattlefieldRepositoryTest {
     }
 
     @Test
+    fun pausingDoesNotBufferUnchangedHistoryBeyondSeenLimit() = runBlocking {
+        val source = FakeBattlefieldSource().apply {
+            moves = (1..2_501).map { move(teamId = it, arriveTime = it.toLong()) }
+        }
+        val repository = LegacyBattlefieldRepository(source, Dispatchers.Unconfined) { 0 }
+        repository.refresh()
+
+        repository.setPaused(true)
+        repository.refresh()
+        val snapshot = repository.observeSnapshot().first()
+
+        assertEquals(200, snapshot.events.size)
+        assertEquals(0, snapshot.bufferedEventCount)
+    }
+
+    @Test
     fun retainedEventPayloadUpdatesImmediatelyWhenRunning() = runBlocking {
         val source = FakeBattlefieldSource().apply {
             sieges = listOf(siege(wid = 100020, sourceId = "transport-1", nearbyCount = 2))

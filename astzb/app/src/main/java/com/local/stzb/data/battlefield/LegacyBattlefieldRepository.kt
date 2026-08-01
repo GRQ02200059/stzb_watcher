@@ -59,7 +59,7 @@ class LegacyBattlefieldRepository(
     private val refreshMutex = Mutex()
     private val visible = LinkedHashMap<String, BattlefieldEvent>()
     private val buffered = LinkedHashMap<String, BattlefieldEvent>()
-    private val seen = LinkedHashMap<String, BattlefieldEvent>()
+    private var previousSourceEvents = emptyMap<String, BattlefieldEvent>()
     private var paused = false
     private var categories = EventCategory.entries.toSet()
     private var latestData = LegacyBattlefieldData(
@@ -85,26 +85,24 @@ class LegacyBattlefieldRepository(
             latestData = data
             if (paused) {
                 incoming.forEach { event ->
-                    val previous = seen[event.id]
+                    val previous = previousSourceEvents[event.id]
                     when {
                         previous == null -> buffered[event.id] = event
                         previous != event && (event.id in visible || event.id in buffered) -> buffered[event.id] = event
                     }
-                    seen[event.id] = event
                 }
                 replaceWithNewest(buffered, buffered.values)
             } else {
                 incoming.forEach { event ->
-                    val previous = seen[event.id]
+                    val previous = previousSourceEvents[event.id]
                     when {
                         event.id in visible -> visible[event.id] = event
                         previous == null -> visible[event.id] = event
                     }
-                    seen[event.id] = event
                 }
                 replaceWithNewest(visible, visible.values)
             }
-            replaceWithNewest(seen, seen.values, SEEN_LIMIT)
+            previousSourceEvents = incoming.associateBy(BattlefieldEvent::id)
             state.value = buildSnapshot()
         }
     }
@@ -150,26 +148,17 @@ class LegacyBattlefieldRepository(
         target: LinkedHashMap<String, BattlefieldEvent>,
         events: Collection<BattlefieldEvent>,
     ) {
-        replaceWithNewest(target, events, EVENT_LIMIT)
-    }
-
-    private fun replaceWithNewest(
-        target: LinkedHashMap<String, BattlefieldEvent>,
-        events: Collection<BattlefieldEvent>,
-        limit: Int,
-    ) {
         val newest = events
             .associateBy(BattlefieldEvent::id)
             .values
             .sortedWith(EVENT_ORDER)
-            .take(limit)
+            .take(EVENT_LIMIT)
         target.clear()
         newest.forEach { target[it.id] = it }
     }
 
     private companion object {
         const val EVENT_LIMIT = 200
-        const val SEEN_LIMIT = 2_000
         const val ARRIVING_SOON_SECONDS = 300L
         val EVENT_ORDER = compareByDescending<BattlefieldEvent> { it.occurredAt }.thenBy { it.id }
     }
