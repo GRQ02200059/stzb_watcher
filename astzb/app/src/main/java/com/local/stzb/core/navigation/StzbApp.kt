@@ -26,6 +26,7 @@ import com.local.stzb.domain.battlefield.BattlefieldRepository
 import com.local.stzb.domain.battles.BattleRepository
 import com.local.stzb.domain.alliance.AllianceRepository
 import com.local.stzb.domain.intel.IntelRepository
+import com.local.stzb.domain.rankings.RankingRepository
 import com.local.stzb.feature.battlefield.BattlefieldScreen
 import com.local.stzb.feature.battlefield.BattlefieldViewModel
 import com.local.stzb.feature.placeholder.PlaceholderScreen
@@ -38,6 +39,8 @@ import com.local.stzb.feature.alliance.AllianceViewModel
 import com.local.stzb.feature.intel.IntelPage
 import com.local.stzb.feature.intel.IntelScreen
 import com.local.stzb.feature.tools.LegacyToolsScreen
+import com.local.stzb.feature.rankings.RankingsScreen
+import com.local.stzb.feature.rankings.RankingsViewModel
 
 @Composable
 fun StzbApp(
@@ -45,6 +48,7 @@ fun StzbApp(
     battleRepository: BattleRepository,
     allianceRepository: AllianceRepository,
     intelRepository: IntelRepository,
+    rankingRepository: RankingRepository,
     openLegacyDashboard: (String) -> Unit,
     openCaptureConsole: () -> Unit,
     modifier: Modifier = Modifier,
@@ -60,6 +64,8 @@ fun StzbApp(
     val battlesState by battlesViewModel.state.collectAsStateWithLifecycle()
     val allianceViewModel: AllianceViewModel = viewModel { AllianceViewModel(allianceRepository) }
     val allianceState by allianceViewModel.state.collectAsStateWithLifecycle()
+    val rankingsViewModel: RankingsViewModel = viewModel { RankingsViewModel(rankingRepository) }
+    val rankingsState by rankingsViewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier,
@@ -113,6 +119,7 @@ fun StzbApp(
                     openLegacyDashboard = { openLegacyDashboard("ranking") },
                     openMap = { navController.navigate("map") },
                     openAnnouncements = { navController.navigate("announcements") },
+                    openRankings = { navController.navigate("rankings") },
                 )
             }
             composable("map") {
@@ -120,6 +127,9 @@ fun StzbApp(
             }
             composable("announcements") {
                 IntelScreen(IntelPage.ANNOUNCEMENTS, intelRepository.load(), { navController.popBackStack() }, intelRepository::load)
+            }
+            composable("rankings") {
+                RankingsScreen(rankingsState, rankingsViewModel, { navController.popBackStack() })
             }
         }
     }

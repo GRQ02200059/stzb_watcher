@@ -19,6 +19,7 @@ import com.local.stzb.domain.alliance.AllianceRepository
 import com.local.stzb.domain.alliance.AllianceSnapshot
 import com.local.stzb.domain.intel.IntelRepository
 import com.local.stzb.domain.intel.IntelSnapshot
+import com.local.stzb.domain.rankings.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
@@ -39,7 +40,7 @@ class StzbNavigationTest {
         )
         rule.setContent {
             AstzbTheme {
-                StzbApp(repository, EmptyBattleRepository, EmptyAllianceRepository, EmptyIntelRepository, openLegacyDashboard = {}, openCaptureConsole = {})
+                StzbApp(repository, EmptyBattleRepository, EmptyAllianceRepository, EmptyIntelRepository, EmptyRankingRepository, openLegacyDashboard = {}, openCaptureConsole = {})
             }
         }
 
@@ -52,6 +53,8 @@ class StzbNavigationTest {
         rule.onNodeWithText("本机还没有同盟成员数据").assertIsDisplayed()
         rule.onNodeWithText("更多").performClick()
         rule.onNodeWithText("经典抓包控制台").assertIsDisplayed()
+        rule.onNodeWithText("排行与团队报表").performClick()
+        rule.onNodeWithText("本机还没有战功榜数据").assertIsDisplayed()
     }
 
     private object EmptyBattleRepository : BattleRepository {
@@ -65,6 +68,11 @@ class StzbNavigationTest {
 
     private object EmptyIntelRepository : IntelRepository {
         override fun load(mapQuery: String) = IntelSnapshot(0, 0, emptyList(), emptyList())
+    }
+
+    private object EmptyRankingRepository : RankingRepository {
+        override fun loadRankings() = RankingSnapshot(emptyList(), emptyList(), emptyList())
+        override fun loadTeamReport(dimension: ReportDimension, period: ReportPeriod, group: String) = TeamReportSnapshot(emptyList(), emptyList())
     }
 
     private class FakeBattlefieldRepository(initial: BattlefieldSnapshot) : BattlefieldRepository {

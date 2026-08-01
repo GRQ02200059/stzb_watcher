@@ -11,6 +11,7 @@ import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.NetworkCheck
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Campaign
+import androidx.compose.material.icons.outlined.Leaderboard
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
@@ -25,6 +26,7 @@ fun LegacyToolsScreen(
     openLegacyDashboard: () -> Unit,
     openMap: () -> Unit,
     openAnnouncements: () -> Unit,
+    openRankings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -39,6 +41,10 @@ fun LegacyToolsScreen(
         OutlinedButton(onClick = openAnnouncements, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
             Icon(Icons.Outlined.Campaign, contentDescription = null)
             Text("游戏公告", modifier = Modifier.padding(start = 8.dp))
+        }
+        Button(onClick = openRankings, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+            Icon(Icons.Outlined.Leaderboard, contentDescription = null)
+            Text("排行与团队报表", modifier = Modifier.padding(start = 8.dp))
         }
         Button(
             onClick = openCaptureConsole,

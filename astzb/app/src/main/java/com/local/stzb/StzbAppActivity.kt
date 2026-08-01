@@ -25,6 +25,7 @@ class StzbAppActivity : ComponentActivity() {
                     battleRepository = (application as StzbApplication).battleRepository,
                     allianceRepository = (application as StzbApplication).allianceRepository,
                     intelRepository = (application as StzbApplication).intelRepository,
+                    rankingRepository = (application as StzbApplication).rankingRepository,
                     openLegacyDashboard = ::openLegacyDashboard,
                     openCaptureConsole = ::openCaptureConsole,
                 )
