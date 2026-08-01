@@ -147,16 +147,20 @@ class BattlefieldScreenTest {
         val event = contentSnapshot().events.single().copy(
             summary = "地图队伍 · 10,10 → 10,20 · 士气 88",
             teamPresentation = BattlefieldTeamPresentation(
+                teamId = 42,
                 heroes = listOf(
                     BattlefieldHero("大营", 1, 0, "陆逊", 50, 5, listOf(BattlefieldSkill("深谋远虑", 10))),
                     BattlefieldHero("中军", 2, 0, "周瑜", 49, 4, listOf(BattlefieldSkill("神兵天降", 10))),
                     BattlefieldHero("前锋", 3, 0, "吕蒙", 48, 3, listOf(BattlefieldSkill("反计之策", 10))),
                 ),
                 routeText = "10,10 → 10,20",
+                destinationText = "10,20",
                 moraleText = "士气 88",
                 stateText = "行军",
                 recordText = "12战 8胜1平3负 · 胜率 70.8%",
                 arrivalText = "到达 16:30:00",
+                arrivalAt = 1_700_000_600L,
+                winRate = 70.8,
             ),
         )
         rule.setContent { AstzbTheme { BattlefieldEventCard(event, {}) } }

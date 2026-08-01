@@ -28,12 +28,16 @@ data class BattlefieldEvent(
 }
 
 data class BattlefieldTeamPresentation(
+    val teamId: Int,
     val heroes: List<BattlefieldHero>,
     val routeText: String,
+    val destinationText: String,
     val moraleText: String,
     val stateText: String,
     val recordText: String,
     val arrivalText: String,
+    val arrivalAt: Long?,
+    val winRate: Double?,
 )
 
 data class BattlefieldHero(

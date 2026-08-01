@@ -53,6 +53,7 @@ object BattlefieldEventMapper {
             },
             teamPresentation = lineup.takeIf { it.isNotEmpty() }?.let { heroes ->
                 BattlefieldTeamPresentation(
+                    teamId = move.teamId,
                     heroes = heroes.mapIndexed { index, hero ->
                         BattlefieldHero(
                             positionLabel = listOf("大营", "中军", "前锋").getOrElse(index) { "${hero.pos}号位" },
@@ -65,12 +66,15 @@ object BattlefieldEventMapper {
                         )
                     },
                     routeText = "${location(move.fromXy, move.fromWid)} → ${location(move.toXy, move.toWid)}",
+                    destinationText = location(move.toXy, move.toWid),
                     moraleText = "士气 ${move.morale}",
                     stateText = armyStateText(move.moveType),
                     recordText = if (insight.stats.battles > 0) {
                         "${insight.stats.battles}战 ${insight.stats.wins}胜${insight.stats.draws}平${insight.stats.loses}负 · 胜率 ${"%.1f".format(insight.stats.winRate)}%"
                     } else "暂无历史战绩",
                     arrivalText = "到达 ${formatEventTime(arriveAt)}",
+                    arrivalAt = arriveAt,
+                    winRate = insight.stats.winRate.takeIf { insight.stats.battles > 0 },
                 )
             },
             target = EventTarget.Team(move.teamId),

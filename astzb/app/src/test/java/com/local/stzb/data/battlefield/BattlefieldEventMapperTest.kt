@@ -7,6 +7,7 @@ import com.example.myapplication.Local13A2HeroLineup
 import com.example.myapplication.Local13A2Lineup
 import com.example.myapplication.Local13A2SkillLineup
 import com.example.myapplication.Local13A2TeamInsight
+import com.example.myapplication.Local13A2TeamStats
 import com.local.stzb.domain.battlefield.EventCategory
 import com.local.stzb.domain.battlefield.EventPriority
 import com.local.stzb.domain.battlefield.EventTarget
@@ -55,6 +56,7 @@ class BattlefieldEventMapperTest {
             startTime = 1_700_000_000L, arriveTime = 1_700_000_600L, speed = 0,
         )
         val insight = Local13A2TeamInsight.empty().copy(
+            stats = Local13A2TeamStats(10, 6, 2, 2, 60.0),
             lineup = Local13A2Lineup(
                 battleId = 99,
                 side = "def",
@@ -78,6 +80,11 @@ class BattlefieldEventMapperTest {
         assertEquals("10,10 → 10,20", event.teamPresentation!!.routeText)
         assertEquals("士气 0", event.teamPresentation!!.moraleText)
         assertEquals("到达 06:23:20", event.teamPresentation!!.arrivalText)
+        assertEquals(42, event.teamPresentation!!.teamId)
+        assertEquals("10,20", event.teamPresentation!!.destinationText)
+        assertEquals(1_700_000_600L, event.teamPresentation!!.arrivalAt)
+        assertEquals(60.0, event.teamPresentation!!.winRate)
+        assertEquals(listOf(5, 5, 5), event.teamPresentation!!.heroes.map { it.advance })
 
         assertEquals(null, BattlefieldEventMapper.fromMove(move).teamPresentation)
     }
