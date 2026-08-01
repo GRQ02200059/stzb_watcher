@@ -15,9 +15,12 @@ import com.local.stzb.domain.battlefield.EventPriority
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -35,17 +38,22 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class BattlefieldViewModelTest {
     private val dispatcher = StandardTestDispatcher()
+    private val viewModelStores = mutableListOf<ViewModelStore>()
 
     @Before
     fun setUp() = Dispatchers.setMain(dispatcher)
 
     @After
-    fun tearDown() = Dispatchers.resetMain()
+    fun tearDown() {
+        viewModelStores.forEach(ViewModelStore::clear)
+        viewModelStores.clear()
+        Dispatchers.resetMain()
+    }
 
     @Test
     fun snapshotAndEmptyStateComeFromRepository() = runTest(dispatcher) {
         val repository = FakeBattlefieldRepository(snapshot(paused = true))
-        val viewModel = BattlefieldViewModel(repository)
+        val viewModel = viewModel(repository)
         runCurrent()
 
         assertTrue(content(viewModel).value.paused)
@@ -65,7 +73,7 @@ class BattlefieldViewModelTest {
         val repository = FakeBattlefieldRepository(snapshot(events = listOf(event()))).apply {
             refreshHandler = { gate.await() }
         }
-        val viewModel = BattlefieldViewModel(repository)
+        val viewModel = viewModel(repository)
         runCurrent()
 
         viewModel.onIntent(BattlefieldIntent.Refresh)
@@ -84,7 +92,7 @@ class BattlefieldViewModelTest {
         val repository = FakeBattlefieldRepository(snapshot(events = listOf(event()))).apply {
             refreshHandler = { error("网络不可用") }
         }
-        val viewModel = BattlefieldViewModel(repository)
+        val viewModel = viewModel(repository)
         runCurrent()
 
         viewModel.onIntent(BattlefieldIntent.Refresh)
@@ -103,7 +111,7 @@ class BattlefieldViewModelTest {
         val repository = FakeBattlefieldRepository(snapshot(captureRunning = false)).apply {
             refreshHandler = { error("首次失败") }
         }
-        val viewModel = BattlefieldViewModel(repository)
+        val viewModel = viewModel(repository)
         runCurrent()
 
         viewModel.onIntent(BattlefieldIntent.Refresh)
@@ -124,7 +132,7 @@ class BattlefieldViewModelTest {
         val repository = FakeBattlefieldRepository(snapshot()).apply {
             observeFactory = { flow { error("数据流失败") } }
         }
-        val viewModel = BattlefieldViewModel(repository)
+        val viewModel = viewModel(repository)
         runCurrent()
         assertEquals(LoadState.Error("数据流失败"), viewModel.state.value.loadState)
 
@@ -139,7 +147,7 @@ class BattlefieldViewModelTest {
         val repository = FakeBattlefieldRepository(
             snapshot(selectedCategories = setOf(EventCategory.MARCH)),
         )
-        val viewModel = BattlefieldViewModel(repository)
+        val viewModel = viewModel(repository)
         runCurrent()
 
         repeat(3) {
@@ -160,11 +168,63 @@ class BattlefieldViewModelTest {
     }
 
     @Test
+    fun effectsAreSharedWithActiveCollectorsButNotReplayedAfterConsumption() = runTest(dispatcher) {
+        val repository = FakeBattlefieldRepository(
+            snapshot(selectedCategories = setOf(EventCategory.MARCH)),
+        )
+        val viewModel = viewModel(repository)
+        val effects: SharedFlow<BattlefieldEffect> = viewModel.effects
+        val first = async { effects.first() }
+        val second = async { effects.first() }
+        runCurrent()
+
+        viewModel.onIntent(BattlefieldIntent.ToggleCategory(EventCategory.MARCH))
+
+        val expected = BattlefieldEffect.ShowMessage("至少保留一种动态类型")
+        assertEquals(expected, first.await())
+        assertEquals(expected, second.await())
+        effects.test { expectNoEvents() }
+    }
+
+    @Test
+    fun identicalPeriodicRefreshFailuresAreCoalescedUntilRecovery() = runTest(dispatcher) {
+        val repository = FakeBattlefieldRepository(snapshot(events = listOf(event()))).apply {
+            refreshHandler = { error("网络不可用") }
+        }
+        val viewModel = viewModel(repository)
+
+        viewModel.onIntent(BattlefieldIntent.SetActive(true))
+        runCurrent()
+        repeat(40) {
+            advanceTimeBy(2_000)
+            runCurrent()
+        }
+
+        viewModel.effects.test {
+            assertEquals(BattlefieldEffect.ShowMessage("网络不可用"), awaitItem())
+            expectNoEvents()
+        }
+
+        repository.refreshHandler = {}
+        advanceTimeBy(2_000)
+        runCurrent()
+        repository.refreshHandler = { error("网络不可用") }
+        advanceTimeBy(2_000)
+        runCurrent()
+
+        viewModel.effects.test {
+            assertEquals(BattlefieldEffect.ShowMessage("网络不可用"), awaitItem())
+            expectNoEvents()
+        }
+        viewModel.onIntent(BattlefieldIntent.SetActive(false))
+    }
+
+    @Test
     fun backToBackPauseAndCategoryIntentsUseLatestRepositoryOwnedCommands() = runTest(dispatcher) {
         val repository = FakeBattlefieldRepository(snapshot()).apply {
             applyCommandsToSnapshot = false
         }
-        val viewModel = BattlefieldViewModel(repository)
+        val viewModel = viewModel(repository)
         runCurrent()
 
         viewModel.onIntent(BattlefieldIntent.TogglePaused)
@@ -185,12 +245,64 @@ class BattlefieldViewModelTest {
     }
 
     @Test
+    fun stalePauseSnapshotDoesNotOverwritePendingCommandAndMatchingSnapshotAcknowledgesIt() =
+        runTest(dispatcher) {
+            val repository = FakeBattlefieldRepository(snapshot()).apply {
+                applyCommandsToSnapshot = false
+            }
+            val viewModel = viewModel(repository)
+            runCurrent()
+
+            viewModel.onIntent(BattlefieldIntent.TogglePaused)
+            repository.snapshot.value = snapshot(paused = false, events = listOf(event("stale")))
+            runCurrent()
+            viewModel.onIntent(BattlefieldIntent.TogglePaused)
+            assertEquals(listOf(true, false), repository.pauseRequests)
+
+            repository.snapshot.value = snapshot(paused = false, events = listOf(event("ack")))
+            runCurrent()
+            repository.snapshot.value = snapshot(paused = true, events = listOf(event("external")))
+            runCurrent()
+            viewModel.onIntent(BattlefieldIntent.TogglePaused)
+            assertEquals(listOf(true, false, false), repository.pauseRequests)
+        }
+
+    @Test
+    fun staleFilterSnapshotDoesNotOverwritePendingCommandAndMatchingSnapshotAcknowledgesIt() =
+        runTest(dispatcher) {
+            val repository = FakeBattlefieldRepository(snapshot()).apply {
+                applyCommandsToSnapshot = false
+            }
+            val viewModel = viewModel(repository)
+            runCurrent()
+
+            viewModel.onIntent(BattlefieldIntent.ToggleCategory(EventCategory.MARCH))
+            repository.snapshot.value = snapshot(events = listOf(event("stale")))
+            runCurrent()
+            viewModel.onIntent(BattlefieldIntent.ToggleCategory(EventCategory.MARCH))
+            assertEquals(
+                listOf(EventCategory.entries.toSet() - EventCategory.MARCH, EventCategory.entries.toSet()),
+                repository.filterRequests,
+            )
+
+            repository.snapshot.value = snapshot(events = listOf(event("ack")))
+            runCurrent()
+            repository.snapshot.value = snapshot(
+                selectedCategories = setOf(EventCategory.MARCH),
+                events = listOf(event("external")),
+            )
+            runCurrent()
+            viewModel.onIntent(BattlefieldIntent.ToggleCategory(EventCategory.MARCH))
+            assertEquals(2, repository.filterRequests.size)
+        }
+
+    @Test
     fun activeAndManualRefreshRequestsAreSingleFlightAndCoalesced() = runTest(dispatcher) {
         val gate = CompletableDeferred<Unit>()
         val repository = FakeBattlefieldRepository(snapshot(events = listOf(event()))).apply {
             refreshHandler = { gate.await() }
         }
-        val viewModel = BattlefieldViewModel(repository)
+        val viewModel = viewModel(repository)
 
         viewModel.onIntent(BattlefieldIntent.SetActive(true))
         repeat(10) { viewModel.onIntent(BattlefieldIntent.Refresh) }
@@ -221,7 +333,7 @@ class BattlefieldViewModelTest {
                 }
             }
         }
-        val viewModel = BattlefieldViewModel(repository)
+        val viewModel = viewModel(repository)
 
         viewModel.onIntent(BattlefieldIntent.Refresh)
         runCurrent()
@@ -250,7 +362,7 @@ class BattlefieldViewModelTest {
                 }
             }
         }
-        val viewModel = BattlefieldViewModel(repository)
+        val viewModel = viewModel(repository)
 
         viewModel.onIntent(BattlefieldIntent.SetActive(true))
         runCurrent()
@@ -287,12 +399,11 @@ class BattlefieldViewModelTest {
                 }
             }
         }
-        val store = ViewModelStore()
-        val viewModel = ViewModelProvider(store, factory(repository))[BattlefieldViewModel::class.java]
+        val viewModel = viewModel(repository)
         viewModel.onIntent(BattlefieldIntent.SetActive(true))
         runCurrent()
 
-        store.clear()
+        viewModelStores.single().clear()
         runCurrent()
 
         assertTrue(refreshCancelled.isCompleted)
@@ -303,6 +414,11 @@ class BattlefieldViewModelTest {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
             BattlefieldViewModel(repository) as T
+    }
+
+    private fun viewModel(repository: BattlefieldRepository): BattlefieldViewModel {
+        val store = ViewModelStore().also(viewModelStores::add)
+        return ViewModelProvider(store, factory(repository))[BattlefieldViewModel::class.java]
     }
 
     private class FakeBattlefieldRepository(initialSnapshot: BattlefieldSnapshot) : BattlefieldRepository {
@@ -343,8 +459,8 @@ class BattlefieldViewModelTest {
         return loadState as LoadState.Content<BattlefieldSnapshot>
     }
 
-    private fun event() = BattlefieldEvent(
-        id = "event-1",
+    private fun event(id: String = "event-1") = BattlefieldEvent(
+        id = id,
         occurredAt = 1L,
         category = EventCategory.MARCH,
         priority = EventPriority.NORMAL,

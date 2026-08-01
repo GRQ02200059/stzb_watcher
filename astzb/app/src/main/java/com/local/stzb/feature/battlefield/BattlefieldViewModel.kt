@@ -12,11 +12,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -28,15 +31,24 @@ class BattlefieldViewModel(
     private var refreshJob: Job? = null
     private var snapshotJob: Job? = null
     private var latestSnapshot: BattlefieldSnapshot? = null
-    private var commandCategories: Set<EventCategory>? = null
-    private var commandPaused: Boolean? = null
+    private var pendingCategories: Set<EventCategory>? = null
+    private var pendingPaused: Boolean? = null
+    private var refreshFailureKey: String? = null
+    private var coalescedOverflowEffect: BattlefieldEffect? = null
     private var refreshing = false
 
     private val _state = MutableStateFlow(BattlefieldUiState())
     val state: StateFlow<BattlefieldUiState> = _state.asStateFlow()
 
-    private val effectQueue = Channel<BattlefieldEffect>(Channel.UNLIMITED)
-    val effects: Flow<BattlefieldEffect> = effectQueue.receiveAsFlow()
+    private val effectQueue = Channel<BattlefieldEffect>(EFFECT_QUEUE_CAPACITY)
+    val effects: SharedFlow<BattlefieldEffect> = effectQueue
+        .receiveAsFlow()
+        .onEach { flushCoalescedOverflowEffect() }
+        .shareIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 0),
+            replay = 0,
+        )
 
     init {
         startSnapshotCollection()
@@ -80,6 +92,7 @@ class BattlefieldViewModel(
         val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
             try {
                 repository.refresh()
+                refreshFailureKey = null
                 if (snapshotJob?.isActive != true) {
                     startSnapshotCollection()
                 }
@@ -119,8 +132,13 @@ class BattlefieldViewModel(
 
     private fun acceptSnapshot(snapshot: BattlefieldSnapshot) {
         latestSnapshot = snapshot
-        commandCategories = snapshot.selectedCategories
-        commandPaused = snapshot.paused
+        if (pendingCategories == snapshot.selectedCategories) {
+            pendingCategories = null
+        }
+        if (pendingPaused == snapshot.paused) {
+            pendingPaused = null
+        }
+        refreshFailureKey = null
         _state.value = BattlefieldUiState(snapshot.toLoadState(refreshing))
     }
 
@@ -134,7 +152,10 @@ class BattlefieldViewModel(
         val message = failure.message ?: "刷新失败"
         val snapshot = latestSnapshot
         if (snapshot != null && snapshot.hasContent()) {
-            effectQueue.trySend(BattlefieldEffect.ShowMessage(message))
+            if (refreshFailureKey != message) {
+                refreshFailureKey = message
+                enqueueEffect(BattlefieldEffect.ShowMessage(message))
+            }
         } else {
             _state.value = BattlefieldUiState(LoadState.Error(message))
         }
@@ -142,28 +163,45 @@ class BattlefieldViewModel(
 
     private fun toggleCategory(category: EventCategory) {
         val snapshot = latestSnapshot ?: return
-        val currentCategories = commandCategories ?: snapshot.selectedCategories
+        val currentCategories = pendingCategories ?: snapshot.selectedCategories
         val categories = if (category in currentCategories) {
             currentCategories - category
         } else {
             currentCategories + category
         }
         if (categories.isEmpty()) {
-            effectQueue.trySend(BattlefieldEffect.ShowMessage("至少保留一种动态类型"))
+            enqueueEffect(BattlefieldEffect.ShowMessage("至少保留一种动态类型"))
         } else {
-            commandCategories = categories
+            pendingCategories = categories
             repository.setFilter(categories)
         }
     }
 
     private fun togglePaused() {
         val snapshot = latestSnapshot ?: return
-        setPaused(!(commandPaused ?: snapshot.paused))
+        setPaused(!(pendingPaused ?: snapshot.paused))
     }
 
     private fun setPaused(paused: Boolean) {
-        commandPaused = paused
+        pendingPaused = paused
         repository.setPaused(paused)
+    }
+
+    private fun enqueueEffect(effect: BattlefieldEffect) {
+        val result = effectQueue.trySend(effect)
+        when {
+            result.isSuccess -> coalescedOverflowEffect = null
+            result.isClosed -> Unit
+            coalescedOverflowEffect != effect -> coalescedOverflowEffect = effect
+        }
+    }
+
+    private fun flushCoalescedOverflowEffect() {
+        val effect = coalescedOverflowEffect ?: return
+        val result = effectQueue.trySend(effect)
+        if (result.isSuccess || result.isClosed) {
+            coalescedOverflowEffect = null
+        }
     }
 
     private fun BattlefieldSnapshot.toLoadState(refreshing: Boolean): LoadState<BattlefieldSnapshot> =
@@ -181,6 +219,7 @@ class BattlefieldViewModel(
     }
 
     private companion object {
+        const val EFFECT_QUEUE_CAPACITY = 64
         const val REFRESH_INTERVAL_MS = 2_000L
     }
 }

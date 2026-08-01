@@ -98,3 +98,36 @@ BUILD SUCCESSFUL in 19s; 24 actionable tasks executed
 ```
 
 Concern: the effect stream intentionally has single-consumer semantics. Multiple simultaneous UI collectors would divide events rather than duplicate them; this matches the requirement that each queued effect be consumed once.
+
+## Final review fix
+
+Status: DONE
+
+- Replaced the unbounded, single-consumer public effect flow with a capacity-64 channel feeding a public `SharedFlow<BattlefieldEffect>` through `receiveAsFlow().shareIn(viewModelScope, SharingStarted.WhileSubscribed(0), replay = 0)`. Effects queued before the first collector are retained, active collectors receive the same broadcast, and consumed effects are not replayed.
+- Handled channel overflow explicitly: validation messages remain distinct while capacity is available, and an overflow message is coalesced and retried as the queue drains.
+- Coalesced identical refresh-failure messages until either a successful refresh or snapshot recovery. Persistent periodic failures therefore retain one message instead of growing the queue or flooding active collectors.
+- Changed pause/filter command mirrors into pending acknowledgements. Mismatching stale snapshots no longer overwrite an issued command; only a matching snapshot clears it, and a second rapid intent derives from the pending value.
+- Added delayed stale-emission/acknowledgement regressions for both pause and filter, plus SharedFlow broadcast, pre-collector queue, no-replay, and periodic-error coalescing coverage.
+- Routed every test through a `ViewModelStore`/`ViewModelProvider` helper and clear every created store in `@After`, preventing ViewModel-owned collectors from leaking between tests.
+
+Final review RED evidence:
+
+```text
+./gradlew :app:testDebugUnitTest --tests 'com.local.stzb.feature.battlefield.BattlefieldViewModelTest'
+compileDebugUnitTestKotlin failed: expected SharedFlow<BattlefieldEffect>, actual Flow<BattlefieldEffect>
+BUILD FAILED in 3s
+```
+
+Final review GREEN evidence:
+
+```text
+./gradlew :app:testDebugUnitTest --tests 'com.local.stzb.feature.battlefield.BattlefieldViewModelTest' --rerun-tasks
+15 tests, 0 failures/errors/skips
+BUILD SUCCESSFUL in 17s; 24 actionable tasks executed
+
+./gradlew :app:testDebugUnitTest --rerun-tasks
+37 tests, 0 failures/errors/skips
+BUILD SUCCESSFUL in 25s; 24 actionable tasks executed
+```
+
+Concern: bounded overflow necessarily coalesces validation messages after the capacity-64 queue is full; messages already accepted into the queue remain ordered and distinct.
