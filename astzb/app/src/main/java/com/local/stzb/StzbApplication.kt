@@ -20,6 +20,8 @@ import com.local.stzb.domain.rankings.RankingRepository
 import com.local.stzb.data.teams.LegacyTeamsRepository
 import com.local.stzb.domain.teams.TeamsRepository
 import hev.sockstun.Preferences
+import com.local.stzb.data.capture.AndroidCaptureConsoleController
+import com.local.stzb.feature.capture.CaptureConsoleController
 
 class StzbApplication : Application() {
     val battlefieldRepository: BattlefieldRepository by lazy {
@@ -30,6 +32,7 @@ class StzbApplication : Application() {
     val intelRepository: IntelRepository by lazy { LegacyIntelRepository() }
     val rankingRepository: RankingRepository by lazy { LegacyRankingRepository() }
     val teamsRepository: TeamsRepository by lazy { LegacyTeamsRepository() }
+    val captureConsoleController: CaptureConsoleController by lazy { AndroidCaptureConsoleController(this) }
 
     override fun onCreate() {
         super.onCreate()
