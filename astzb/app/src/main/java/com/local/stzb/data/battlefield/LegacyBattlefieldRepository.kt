@@ -37,7 +37,10 @@ interface LegacyBattlefieldSource {
     fun battles(): List<LocalFullBattle>
     fun sieges(): List<LocalBattleField>
 
-    /** Override when the backing store can provide a stronger atomic snapshot. */
+    /**
+     * Consistency boundary for one repository refresh. The default is best-effort for legacy
+     * sources; production sources should override it so each backing collection is fetched once.
+     */
     fun read(): LegacyBattlefieldData = LegacyBattlefieldData(
         captureRunning = captureRunning(),
         lastEventAt = lastEventAt(),
@@ -56,6 +59,7 @@ class LegacyBattlefieldRepository(
     private val refreshMutex = Mutex()
     private val visible = LinkedHashMap<String, BattlefieldEvent>()
     private val buffered = LinkedHashMap<String, BattlefieldEvent>()
+    private val seen = LinkedHashMap<String, BattlefieldEvent>()
     private var paused = false
     private var categories = EventCategory.entries.toSet()
     private var latestData = LegacyBattlefieldData(
@@ -70,7 +74,7 @@ class LegacyBattlefieldRepository(
     override fun observeSnapshot(): Flow<BattlefieldSnapshot> = state.asStateFlow()
 
     override suspend fun refresh() = refreshMutex.withLock {
-        val data = withContext(ioDispatcher) { source.read() }
+        val data = withContext(ioDispatcher) { source.read() }.normalizeTimestamps()
         val incoming = buildList {
             addAll(data.moves.map(BattlefieldEventMapper::fromMove))
             addAll(data.battles.map(BattlefieldEventMapper::fromBattle))
@@ -79,12 +83,28 @@ class LegacyBattlefieldRepository(
 
         synchronized(lock) {
             latestData = data
-            val unseen = incoming.filter { it.id !in visible && it.id !in buffered }
             if (paused) {
-                replaceWithNewest(buffered, buffered.values + unseen)
+                incoming.forEach { event ->
+                    val previous = seen[event.id]
+                    when {
+                        previous == null -> buffered[event.id] = event
+                        previous != event && (event.id in visible || event.id in buffered) -> buffered[event.id] = event
+                    }
+                    seen[event.id] = event
+                }
+                replaceWithNewest(buffered, buffered.values)
             } else {
-                replaceWithNewest(visible, visible.values + unseen)
+                incoming.forEach { event ->
+                    val previous = seen[event.id]
+                    when {
+                        event.id in visible -> visible[event.id] = event
+                        previous == null -> visible[event.id] = event
+                    }
+                    seen[event.id] = event
+                }
+                replaceWithNewest(visible, visible.values)
             }
+            replaceWithNewest(seen, seen.values, SEEN_LIMIT)
             state.value = buildSnapshot()
         }
     }
@@ -130,16 +150,26 @@ class LegacyBattlefieldRepository(
         target: LinkedHashMap<String, BattlefieldEvent>,
         events: Collection<BattlefieldEvent>,
     ) {
+        replaceWithNewest(target, events, EVENT_LIMIT)
+    }
+
+    private fun replaceWithNewest(
+        target: LinkedHashMap<String, BattlefieldEvent>,
+        events: Collection<BattlefieldEvent>,
+        limit: Int,
+    ) {
         val newest = events
-            .distinctBy(BattlefieldEvent::id)
+            .associateBy(BattlefieldEvent::id)
+            .values
             .sortedWith(EVENT_ORDER)
-            .take(EVENT_LIMIT)
+            .take(limit)
         target.clear()
         newest.forEach { target[it.id] = it }
     }
 
     private companion object {
         const val EVENT_LIMIT = 200
+        const val SEEN_LIMIT = 2_000
         const val ARRIVING_SOON_SECONDS = 300L
         val EVENT_ORDER = compareByDescending<BattlefieldEvent> { it.occurredAt }.thenBy { it.id }
     }
@@ -151,9 +181,9 @@ class AndroidLegacyBattlefieldSource(
     override fun captureRunning(): Boolean = preferences.enable || LocalSocksCaptureServer.isRunning()
 
     override fun lastEventAt(): Long? {
-        val captured = LocalBattleMonitorStore.history().take(HISTORY_LIMIT).maxOfOrNull { it.capturedAt / 1_000L }
-        val arrival = moves().maxOfOrNull(LocalTeamMove::arriveTime)
-        val battle = battles().maxOfOrNull(LocalFullBattle::time)
+        val captured = LocalBattleMonitorStore.history().take(HISTORY_LIMIT).maxOfOrNull { normalizeEpochSeconds(it.capturedAt) }
+        val arrival = moves().maxOfOrNull { normalizeEpochSeconds(it.arriveTime) }
+        val battle = battles().maxOfOrNull { normalizeEpochSeconds(it.time) }
         return listOfNotNull(captured, arrival, battle).maxOrNull()
     }
 
@@ -173,9 +203,9 @@ class AndroidLegacyBattlefieldSource(
         return LegacyBattlefieldData(
             captureRunning = captureRunning(),
             lastEventAt = listOfNotNull(
-                history.maxOfOrNull { it.capturedAt / 1_000L },
-                moves.maxOfOrNull(LocalTeamMove::arriveTime),
-                battles.maxOfOrNull(LocalFullBattle::time),
+                history.maxOfOrNull { normalizeEpochSeconds(it.capturedAt) },
+                moves.maxOfOrNull { normalizeEpochSeconds(it.arriveTime) },
+                battles.maxOfOrNull { normalizeEpochSeconds(it.time) },
             ).maxOrNull(),
             moves = moves,
             battles = battles,
@@ -189,3 +219,16 @@ class AndroidLegacyBattlefieldSource(
         const val SIEGE_LIMIT = 80
     }
 }
+
+private fun LegacyBattlefieldData.normalizeTimestamps(): LegacyBattlefieldData = copy(
+    lastEventAt = lastEventAt?.let(::normalizeEpochSeconds),
+    moves = moves.map { move ->
+        move.copy(
+            startTime = normalizeEpochSeconds(move.startTime),
+            arriveTime = normalizeEpochSeconds(move.arriveTime),
+        )
+    },
+    battles = battles.map { battle ->
+        battle.copy(time = normalizeEpochSeconds(battle.time))
+    },
+)

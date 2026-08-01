@@ -9,21 +9,24 @@ import com.local.stzb.domain.battlefield.EventPriority
 import com.local.stzb.domain.battlefield.EventTarget
 
 object BattlefieldEventMapper {
-    fun fromMove(move: LocalTeamMove): BattlefieldEvent = BattlefieldEvent(
-        id = "march:${move.teamId}:${move.arriveTime}",
-        occurredAt = maxOf(move.startTime, move.arriveTime),
-        category = EventCategory.MARCH,
-        priority = EventPriority.NORMAL,
-        title = listOf(move.ownerName.ifBlank { "未知玩家" }, move.ownerUnion)
-            .filter(String::isNotBlank)
-            .joinToString(" · "),
-        summary = "${location(move.fromXy, move.fromWid)} → ${location(move.toXy, move.toWid)}",
-        target = EventTarget.Team(move.teamId),
-    )
+    fun fromMove(move: LocalTeamMove): BattlefieldEvent {
+        val arriveAt = normalizeEpochSeconds(move.arriveTime)
+        return BattlefieldEvent(
+            id = "march:${move.teamId}:$arriveAt",
+            occurredAt = maxOf(normalizeEpochSeconds(move.startTime), arriveAt),
+            category = EventCategory.MARCH,
+            priority = EventPriority.NORMAL,
+            title = listOf(move.ownerName.ifBlank { "未知玩家" }, move.ownerUnion)
+                .filter(String::isNotBlank)
+                .joinToString(" · "),
+            summary = "${location(move.fromXy, move.fromWid)} → ${location(move.toXy, move.toWid)}",
+            target = EventTarget.Team(move.teamId),
+        )
+    }
 
     fun fromBattle(battle: LocalFullBattle): BattlefieldEvent = BattlefieldEvent(
         id = "battle:${battle.battleId}",
-        occurredAt = battle.time,
+        occurredAt = normalizeEpochSeconds(battle.time),
         category = EventCategory.BATTLE,
         priority = if (battle.garrison > 0 || battle.cityType > 0) {
             EventPriority.IMPORTANT
@@ -40,7 +43,7 @@ object BattlefieldEventMapper {
     )
 
     fun fromSiege(event: LocalBattleField): BattlefieldEvent = BattlefieldEvent(
-        id = "siege:${event.wid}:${event.sourceMsgId}",
+        id = "siege:${event.wid}:${event.attackerUid}",
         occurredAt = 0L,
         category = EventCategory.SIEGE,
         priority = if (event.nearbyCount > 0) EventPriority.IMPORTANT else EventPriority.NORMAL,
@@ -73,3 +76,8 @@ object BattlefieldEventMapper {
         else -> "战斗"
     }
 }
+
+internal fun normalizeEpochSeconds(timestamp: Long): Long =
+    if (timestamp >= MILLIS_TIMESTAMP_THRESHOLD) timestamp / 1_000L else timestamp
+
+private const val MILLIS_TIMESTAMP_THRESHOLD = 100_000_000_000L

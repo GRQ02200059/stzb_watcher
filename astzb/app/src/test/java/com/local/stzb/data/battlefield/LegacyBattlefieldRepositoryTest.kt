@@ -110,6 +110,86 @@ class LegacyBattlefieldRepositoryTest {
     }
 
     @Test
+    fun pausingDoesNotBufferUnchangedHistoryTrimmedFromTheVisibleWindow() = runBlocking {
+        val source = FakeBattlefieldSource().apply {
+            moves = (1..250).map { move(teamId = it, arriveTime = it.toLong()) }
+        }
+        val repository = LegacyBattlefieldRepository(source, Dispatchers.Unconfined) { 0 }
+        repository.refresh()
+
+        repository.setPaused(true)
+        repository.refresh()
+        val snapshot = repository.observeSnapshot().first()
+
+        assertEquals(200, snapshot.events.size)
+        assertEquals(0, snapshot.bufferedEventCount)
+    }
+
+    @Test
+    fun retainedEventPayloadUpdatesImmediatelyWhenRunning() = runBlocking {
+        val source = FakeBattlefieldSource().apply {
+            sieges = listOf(siege(wid = 100020, sourceId = "transport-1", nearbyCount = 2))
+        }
+        val repository = LegacyBattlefieldRepository(source, Dispatchers.Unconfined)
+        repository.refresh()
+        source.sieges = listOf(siege(wid = 100020, sourceId = "transport-2", nearbyCount = 5))
+
+        repository.refresh()
+        val snapshot = repository.observeSnapshot().first()
+
+        assertEquals(1, snapshot.events.size)
+        assertEquals("附近 5 人", snapshot.events.single().summary)
+    }
+
+    @Test
+    fun retainedEventPayloadStaysVisibleAndBuffersLatestUpdateWhilePaused() = runBlocking {
+        val source = FakeBattlefieldSource().apply {
+            sieges = listOf(siege(wid = 100020, sourceId = "transport-1", nearbyCount = 2))
+        }
+        val repository = LegacyBattlefieldRepository(source, Dispatchers.Unconfined)
+        repository.refresh()
+        repository.setPaused(true)
+        source.sieges = listOf(siege(wid = 100020, sourceId = "transport-2", nearbyCount = 5))
+        repository.refresh()
+        source.sieges = listOf(siege(wid = 100020, sourceId = "transport-3", nearbyCount = 9))
+        repository.refresh()
+
+        val paused = repository.observeSnapshot().first()
+        assertEquals("附近 2 人", paused.events.single().summary)
+        assertEquals(1, paused.bufferedEventCount)
+
+        repository.setPaused(false)
+        val resumed = repository.observeSnapshot().first()
+        assertEquals(1, resumed.events.size)
+        assertEquals("附近 9 人", resumed.events.single().summary)
+        assertEquals(0, resumed.bufferedEventCount)
+    }
+
+    @Test
+    fun captureLastEventTimestampIsNormalizedToEpochSeconds() = runBlocking {
+        val source = FakeBattlefieldSource().apply {
+            reportedLastEventAt = 1_700_000_000_123L
+        }
+        val repository = LegacyBattlefieldRepository(source, Dispatchers.Unconfined)
+
+        repository.refresh()
+
+        assertEquals(1_700_000_000L, repository.observeSnapshot().first().capture.lastEventAt)
+    }
+
+    @Test
+    fun arrivingSoonMetricAcceptsLegacyMillisecondTimestamps() = runBlocking {
+        val source = FakeBattlefieldSource().apply {
+            moves = listOf(move(teamId = 1, arriveTime = 1_700_000_100_000L))
+        }
+        val repository = LegacyBattlefieldRepository(source, Dispatchers.Unconfined) { 1_700_000_000L }
+
+        repository.refresh()
+
+        assertEquals(1, repository.observeSnapshot().first().metrics.arrivingSoon)
+    }
+
+    @Test
     fun concurrentRefreshesRemainDeduplicatedAndBounded() = runBlocking {
         val source = FakeBattlefieldSource().apply {
             moves = (1..250).map { move(teamId = it, arriveTime = it.toLong()) }
@@ -128,10 +208,11 @@ class LegacyBattlefieldRepositoryTest {
         var moves = emptyList<LocalTeamMove>()
         var battles = emptyList<LocalFullBattle>()
         var sieges = emptyList<LocalBattleField>()
+        var reportedLastEventAt: Long? = null
         val reads = AtomicInteger()
 
         override fun captureRunning() = true
-        override fun lastEventAt(): Long? = moves.maxOfOrNull { it.arriveTime }
+        override fun lastEventAt(): Long? = reportedLastEventAt ?: moves.maxOfOrNull { it.arriveTime }
         override fun moves() = moves
         override fun battles() = battles
         override fun sieges() = sieges
@@ -140,7 +221,7 @@ class LegacyBattlefieldRepositoryTest {
             reads.incrementAndGet()
             return LegacyBattlefieldData(
                 captureRunning = true,
-                lastEventAt = moves.maxOfOrNull { it.arriveTime },
+                lastEventAt = lastEventAt(),
                 moves = moves.toList(),
                 battles = battles.toList(),
                 sieges = sieges.toList(),
@@ -166,11 +247,11 @@ class LegacyBattlefieldRepositoryTest {
         speed = 100,
     )
 
-    private fun siege(wid: Int, sourceId: String) = LocalBattleField(
+    private fun siege(wid: Int, sourceId: String, nearbyCount: Int = 2) = LocalBattleField(
         wid = wid,
         attackerUid = 1,
         nearbyUids = "",
-        nearbyCount = 2,
+        nearbyCount = nearbyCount,
         sourceMsgId = sourceId,
     )
 }

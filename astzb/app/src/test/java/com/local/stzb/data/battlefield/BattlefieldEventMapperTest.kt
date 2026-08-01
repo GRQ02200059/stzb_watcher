@@ -53,6 +53,15 @@ class BattlefieldEventMapperTest {
     }
 
     @Test
+    fun battleTimestampIsNormalizedToEpochSeconds() {
+        val event = BattlefieldEventMapper.fromBattle(
+            fullBattle().copy(time = 1_700_000_000_123L),
+        )
+
+        assertEquals(1_700_000_000L, event.occurredAt)
+    }
+
+    @Test
     fun siegeWidBecomesCoordinatesWithoutExposingSourceId() {
         val event = BattlefieldEventMapper.fromSiege(
             LocalBattleField(
@@ -66,6 +75,8 @@ class BattlefieldEventMapperTest {
 
         assertEquals("攻城目标 10,20", event.title)
         assertEquals("附近 3 人", event.summary)
+        assertEquals("siege:100020:9988", event.id)
+        assertFalse(event.id.contains("raw-message-123"))
         assertFalse(event.title.contains("100020"))
         assertFalse(event.summary.contains("raw-message-123"))
         assertEquals(EventTarget.Cell(100020), event.target)
