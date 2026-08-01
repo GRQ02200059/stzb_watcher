@@ -22,6 +22,7 @@ class StzbAppActivity : ComponentActivity() {
             AstzbTheme {
                 StzbApp(
                     repository = repository,
+                    teamsRepository = (application as StzbApplication).teamsRepository,
                     battleRepository = (application as StzbApplication).battleRepository,
                     allianceRepository = (application as StzbApplication).allianceRepository,
                     intelRepository = (application as StzbApplication).intelRepository,

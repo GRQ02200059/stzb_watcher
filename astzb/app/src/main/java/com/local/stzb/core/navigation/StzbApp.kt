@@ -27,6 +27,7 @@ import com.local.stzb.domain.battles.BattleRepository
 import com.local.stzb.domain.alliance.AllianceRepository
 import com.local.stzb.domain.intel.IntelRepository
 import com.local.stzb.domain.rankings.RankingRepository
+import com.local.stzb.domain.teams.TeamsRepository
 import com.local.stzb.feature.battlefield.BattlefieldScreen
 import com.local.stzb.feature.battlefield.BattlefieldViewModel
 import com.local.stzb.feature.placeholder.PlaceholderScreen
@@ -41,10 +42,15 @@ import com.local.stzb.feature.intel.IntelScreen
 import com.local.stzb.feature.tools.LegacyToolsScreen
 import com.local.stzb.feature.rankings.RankingsScreen
 import com.local.stzb.feature.rankings.RankingsViewModel
+import com.local.stzb.feature.teams.TeamsScreen
+import com.local.stzb.feature.teams.TeamsViewModel
+import com.local.stzb.feature.teamreport.TeamReportScreen
+import com.local.stzb.feature.teamreport.TeamReportViewModel
 
 @Composable
 fun StzbApp(
     repository: BattlefieldRepository,
+    teamsRepository: TeamsRepository,
     battleRepository: BattleRepository,
     allianceRepository: AllianceRepository,
     intelRepository: IntelRepository,
@@ -66,6 +72,10 @@ fun StzbApp(
     val allianceState by allianceViewModel.state.collectAsStateWithLifecycle()
     val rankingsViewModel: RankingsViewModel = viewModel { RankingsViewModel(rankingRepository) }
     val rankingsState by rankingsViewModel.state.collectAsStateWithLifecycle()
+    val teamsViewModel: TeamsViewModel = viewModel { TeamsViewModel(teamsRepository) }
+    val teamsState by teamsViewModel.state.collectAsStateWithLifecycle()
+    val teamReportViewModel: TeamReportViewModel = viewModel { TeamReportViewModel(rankingRepository) }
+    val teamReportState by teamReportViewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier,
@@ -100,9 +110,11 @@ fun StzbApp(
                     onEventClick = {},
                 )
             }
-            composable(AppDestination.BATTLES.route) {
+            composable(AppDestination.TEAMS.route) { TeamsScreen(teamsState, teamsViewModel::onIntent) }
+            composable(AppDestination.TEAM_REPORT.route) { TeamReportScreen(teamReportState, teamReportViewModel) }
+            composable("battles") {
                 if (battlesState.selected == null) {
-                    BattlesScreen(battlesState, battlesViewModel::onIntent)
+                    BattlesScreen(battlesState, battlesViewModel::onIntent, { navController.popBackStack() })
                 } else {
                     BattleDetailScreen(
                         state = battlesState,
@@ -110,8 +122,8 @@ fun StzbApp(
                     )
                 }
             }
-            composable(AppDestination.ALLIANCE.route) {
-                AllianceScreen(allianceState, allianceViewModel)
+            composable("alliance") {
+                AllianceScreen(allianceState, allianceViewModel, { navController.popBackStack() })
             }
             composable(AppDestination.MORE.route) {
                 LegacyToolsScreen(
@@ -120,6 +132,8 @@ fun StzbApp(
                     openMap = { navController.navigate("map") },
                     openAnnouncements = { navController.navigate("announcements") },
                     openRankings = { navController.navigate("rankings") },
+                    openBattles = { navController.navigate("battles") },
+                    openAlliance = { navController.navigate("alliance") },
                 )
             }
             composable("map") {
@@ -138,7 +152,7 @@ fun StzbApp(
 private val AppDestination.icon: ImageVector
     get() = when (this) {
         AppDestination.BATTLEFIELD -> Icons.Outlined.Radar
-        AppDestination.BATTLES -> Icons.AutoMirrored.Outlined.ReceiptLong
-        AppDestination.ALLIANCE -> Icons.Outlined.Groups
+        AppDestination.TEAMS -> Icons.AutoMirrored.Outlined.ReceiptLong
+        AppDestination.TEAM_REPORT -> Icons.Outlined.Groups
         AppDestination.MORE -> Icons.Outlined.MoreHoriz
     }

@@ -17,6 +17,8 @@ import com.local.stzb.data.intel.LegacyIntelRepository
 import com.local.stzb.domain.intel.IntelRepository
 import com.local.stzb.data.rankings.LegacyRankingRepository
 import com.local.stzb.domain.rankings.RankingRepository
+import com.local.stzb.data.teams.LegacyTeamsRepository
+import com.local.stzb.domain.teams.TeamsRepository
 import hev.sockstun.Preferences
 
 class StzbApplication : Application() {
@@ -27,6 +29,7 @@ class StzbApplication : Application() {
     val allianceRepository: AllianceRepository by lazy { LegacyAllianceRepository() }
     val intelRepository: IntelRepository by lazy { LegacyIntelRepository() }
     val rankingRepository: RankingRepository by lazy { LegacyRankingRepository() }
+    val teamsRepository: TeamsRepository by lazy { LegacyTeamsRepository() }
 
     override fun onCreate() {
         super.onCreate()

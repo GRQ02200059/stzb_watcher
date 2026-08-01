@@ -12,6 +12,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Card
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -26,9 +30,12 @@ import com.local.stzb.core.ui.LoadingPanel
 import com.local.stzb.domain.alliance.AllianceMember
 
 @Composable
-fun AllianceScreen(state: AllianceUiState, viewModel: AllianceViewModel, modifier: Modifier = Modifier) {
+fun AllianceScreen(state: AllianceUiState, viewModel: AllianceViewModel, onBack: (() -> Unit)? = null, modifier: Modifier = Modifier) {
     Column(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("同盟中心", style = MaterialTheme.typography.headlineMedium)
+        Row(Modifier.fillMaxWidth()) {
+            if (onBack != null) IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "返回更多") }
+            Text("同盟中心", style = MaterialTheme.typography.headlineMedium)
+        }
         val snapshot = state.snapshot
         if (snapshot != null) Text("成员 ${snapshot.totalMembers} · 分组 ${snapshot.groups.size}")
         OutlinedTextField(state.query, viewModel::setQuery, label = { Text("搜索成员") }, singleLine = true, modifier = Modifier.fillMaxWidth())

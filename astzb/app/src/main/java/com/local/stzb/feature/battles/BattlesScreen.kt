@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -38,10 +39,13 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun BattlesScreen(state: BattlesUiState, onIntent: (BattlesIntent) -> Unit, modifier: Modifier = Modifier) {
+fun BattlesScreen(state: BattlesUiState, onIntent: (BattlesIntent) -> Unit, onBack: (() -> Unit)? = null, modifier: Modifier = Modifier) {
     Column(modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Column { Text("本机战报", style = MaterialTheme.typography.headlineMedium); Text("来自 battles_v2") }
+            Row {
+                if (onBack != null) IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "返回更多") }
+                Column { Text("本机战报", style = MaterialTheme.typography.headlineMedium); Text("来自 battles_v2") }
+            }
             IconButton(onClick = { onIntent(BattlesIntent.Refresh) }) { Icon(Icons.Outlined.Refresh, "刷新战报") }
         }
         OutlinedTextField(
