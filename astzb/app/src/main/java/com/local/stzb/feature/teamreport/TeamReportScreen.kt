@@ -7,6 +7,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -17,8 +22,23 @@ import com.local.stzb.domain.rankings.*
 
 @Composable
 fun TeamReportScreen(state: TeamReportUiState, viewModel: TeamReportViewModel, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val report = state.report
+    val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+        if (uri != null && report != null) {
+            context.contentResolver.openOutputStream(uri)?.bufferedWriter(Charsets.UTF_8)?.use {
+                it.write(TeamReportCsv.encode(report, state.dimension, state.period, state.group))
+            }
+        }
+    }
     Column(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("团队报表", style = MaterialTheme.typography.headlineMedium)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("团队报表", style = MaterialTheme.typography.headlineMedium)
+            OutlinedButton(
+                onClick = { exporter.launch("团队报表_${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"))}.csv") },
+                enabled = !report?.rows.isNullOrEmpty(),
+            ) { Text("导出 CSV") }
+        }
         ChipRow(ReportPeriod.entries, state.period, { it.label }, viewModel::setPeriod)
         ChipRow(ReportDimension.entries, state.dimension, { it.label }, viewModel::setDimension)
         if (state.dimension == ReportDimension.PLAYER) {
