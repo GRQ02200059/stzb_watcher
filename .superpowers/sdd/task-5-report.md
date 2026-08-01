@@ -60,3 +60,41 @@ Result: `BUILD SUCCESSFUL in 19s`; 24 actionable tasks executed. JUnit XML total
 - The brief cancelled and recreated the refresh job for every `SetActive(true)`. Repeated lifecycle callbacks could therefore restart polling and cause duplicate immediate refreshes. The implementation treats repeated active/inactive values idempotently.
 - The brief's `runCatching` pattern catches `CancellationException`; explicit `try/catch` preserves structured cancellation.
 - `MutableSharedFlow(extraBufferCapacity = 1)` remains non-replaying. With no active collector, transient UI messages are intentionally not queued for a future screen instance, preventing repeated navigation/event behavior.
+
+## Production review fix
+
+Status: DONE
+
+Resolved the review findings with one ViewModel-owned refresh coordinator and explicit state transitions:
+
+- manual, lifecycle, and polling refresh requests now coalesce into one in-flight repository call;
+- deactivation cancels both polling and a suspended manual refresh, while rapid stop/start waits for cancellation before starting the replacement call;
+- `Content.refreshing` preserves the current snapshot during work, content failures preserve content and enqueue a message, empty failures become `Error`, and retry returns to repository-derived content/empty state;
+- snapshot-flow failures become retryable `Error` state, and a successful refresh resubscribes to a newly created repository flow;
+- effects use an unlimited single-consumer channel, so messages survive collector gaps and bursts, preserve order, and are delivered only once;
+- pause/filter command mirrors remain correct even when repository snapshot acknowledgement is delayed;
+- the cleanup regression obtains the ViewModel through a real `ViewModelStore` and calls `store.clear()`, proving both refresh and snapshot collection are cancelled.
+
+Review RED evidence:
+
+```text
+./gradlew testDebugUnitTest --tests com.local.stzb.feature.battlefield.BattlefieldViewModelTest --stacktrace
+11 tests completed, 7 failed
+BUILD FAILED in 10s
+```
+
+The failures covered refresh progress, content/empty failure handling, snapshot retry, queued effects, inactive cancellation, and single-flight coalescing.
+
+Review GREEN evidence:
+
+```text
+./gradlew testDebugUnitTest --tests com.local.stzb.feature.battlefield.BattlefieldViewModelTest
+11 tests, 0 failures/errors/skips
+BUILD SUCCESSFUL in 22s; 24 actionable tasks executed
+
+./gradlew testDebugUnitTest --rerun-tasks
+33 tests, 0 failures/errors/skips
+BUILD SUCCESSFUL in 19s; 24 actionable tasks executed
+```
+
+Concern: the effect stream intentionally has single-consumer semantics. Multiple simultaneous UI collectors would divide events rather than duplicate them; this matches the requirement that each queued effect be consumed once.
