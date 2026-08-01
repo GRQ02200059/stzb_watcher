@@ -79,7 +79,7 @@ class LegacyBattlefieldRepository(
             addAll(data.moves.map(BattlefieldEventMapper::fromMove))
             addAll(data.battles.map(BattlefieldEventMapper::fromBattle))
             addAll(data.sieges.map(BattlefieldEventMapper::fromSiege))
-        }.sortedWith(EVENT_ORDER)
+        }.distinctBy(BattlefieldEvent::id).sortedWith(EVENT_ORDER)
 
         synchronized(lock) {
             latestData = data

@@ -182,6 +182,39 @@ class LegacyBattlefieldRepositoryTest {
     }
 
     @Test
+    fun duplicateMoveIdsKeepNewestSourceOccurrenceForPublishingAndChangeDetection() = runBlocking {
+        val newest = move(
+            teamId = 7,
+            arriveTime = 200,
+            ownerName = "新玩家",
+            fromXy = "20,20",
+            toXy = "30,30",
+        )
+        val older = move(
+            teamId = 7,
+            arriveTime = 200,
+            ownerName = "旧玩家",
+            fromXy = "10,10",
+            toXy = "15,15",
+        )
+        val source = FakeBattlefieldSource().apply {
+            moves = listOf(newest, older)
+        }
+        val repository = LegacyBattlefieldRepository(source, Dispatchers.Unconfined)
+
+        repository.refresh()
+        val published = repository.observeSnapshot().first().events.single()
+        assertEquals("新玩家 · 测试盟", published.title)
+        assertEquals("20,20 → 30,30", published.summary)
+
+        repository.setPaused(true)
+        source.moves = listOf(newest)
+        repository.refresh()
+
+        assertEquals(0, repository.observeSnapshot().first().bufferedEventCount)
+    }
+
+    @Test
     fun captureLastEventTimestampIsNormalizedToEpochSeconds() = runBlocking {
         val source = FakeBattlefieldSource().apply {
             reportedLastEventAt = 1_700_000_000_123L
@@ -245,18 +278,24 @@ class LegacyBattlefieldRepositoryTest {
         }
     }
 
-    private fun move(teamId: Int, arriveTime: Long) = LocalTeamMove(
+    private fun move(
+        teamId: Int,
+        arriveTime: Long,
+        ownerName: String = "玩家$teamId",
+        fromXy: String = "10,10",
+        toXy: String = "10,20",
+    ) = LocalTeamMove(
         teamId = teamId,
         moveType = 5,
         subjectId = teamId,
         ownerUid = teamId,
-        ownerName = "玩家$teamId",
+        ownerName = ownerName,
         ownerUnion = "测试盟",
         fromWid = 100010,
         toWid = 100020,
         currentWid = 100015,
-        fromXy = "10,10",
-        toXy = "10,20",
+        fromXy = fromXy,
+        toXy = toXy,
         currentXy = "10,15",
         startTime = arriveTime - 10,
         arriveTime = arriveTime,
