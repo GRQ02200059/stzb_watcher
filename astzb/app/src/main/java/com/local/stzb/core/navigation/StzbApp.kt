@@ -2,6 +2,8 @@ package com.local.stzb.core.navigation
 
 import android.app.Activity
 import android.net.VpnService
+import android.provider.Settings
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
@@ -56,6 +58,8 @@ import com.local.stzb.feature.teams.TeamsViewModel
 import com.local.stzb.feature.teamreport.TeamReportScreen
 import com.local.stzb.feature.teamreport.TeamReportViewModel
 import com.local.stzb.feature.capture.*
+import com.local.stzb.feature.overlay.BattlefieldOverlayService
+import com.local.stzb.feature.overlay.OverlayServiceState
 import kotlinx.coroutines.launch
 
 @Composable
@@ -90,6 +94,7 @@ fun StzbApp(
     val teamReportState by teamReportViewModel.state.collectAsStateWithLifecycle()
     val captureViewModel: CaptureConsoleViewModel = viewModel { CaptureConsoleViewModel(captureController) }
     val captureState by captureViewModel.state.collectAsStateWithLifecycle()
+    val overlayRunning by OverlayServiceState.running.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var pendingExport by remember { mutableStateOf<CaptureExport?>(null) }
@@ -108,6 +113,16 @@ fun StzbApp(
     val vpnLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) captureViewModel.onIntent(CaptureConsoleIntent.StartApproved)
         else captureViewModel.onIntent(CaptureConsoleIntent.Message("已取消 VPN 授权"))
+    }
+    val overlayPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (Settings.canDrawOverlays(context)) BattlefieldOverlayService.start(context)
+    }
+    fun toggleOverlay() {
+        if (overlayRunning) BattlefieldOverlayService.stop(context)
+        else if (Settings.canDrawOverlays(context)) BattlefieldOverlayService.start(context)
+        else overlayPermissionLauncher.launch(
+            android.content.Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}")),
+        )
     }
 
     Scaffold(
@@ -141,6 +156,8 @@ fun StzbApp(
                     state = battlefieldState,
                     onIntent = battlefieldViewModel::onIntent,
                     onEventClick = {},
+                    overlayRunning = overlayRunning,
+                    onToggleOverlay = ::toggleOverlay,
                 )
             }
             composable(AppDestination.TEAMS.route) { TeamsScreen(teamsState, teamsViewModel::onIntent) }

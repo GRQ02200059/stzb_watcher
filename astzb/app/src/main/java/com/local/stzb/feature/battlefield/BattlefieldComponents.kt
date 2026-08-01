@@ -32,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,6 +60,8 @@ fun BattlefieldHeader(
     capture: CaptureStatus,
     paused: Boolean,
     onIntent: (BattlefieldIntent) -> Unit,
+    overlayRunning: Boolean = false,
+    onToggleOverlay: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val statusText = if (capture.running) "抓包运行中" else "抓包未启动"
@@ -83,15 +86,20 @@ fun BattlefieldHeader(
                     Text(statusText, color = statusColor, style = MaterialTheme.typography.labelLarge)
                 }
             }
-            IconButton(
-                onClick = { onIntent(BattlefieldIntent.TogglePaused) },
-                modifier = Modifier.size(48.dp),
-                colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-            ) {
-                Icon(
-                    if (paused) Icons.Outlined.PlayArrow else Icons.Outlined.Pause,
-                    contentDescription = actionDescription,
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedButton(onClick = onToggleOverlay, modifier = Modifier.heightIn(min = 48.dp)) {
+                    Text(if (overlayRunning) "关闭悬浮" else "开启悬浮")
+                }
+                IconButton(
+                    onClick = { onIntent(BattlefieldIntent.TogglePaused) },
+                    modifier = Modifier.size(48.dp),
+                    colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                ) {
+                    Icon(
+                        if (paused) Icons.Outlined.PlayArrow else Icons.Outlined.Pause,
+                        contentDescription = actionDescription,
+                    )
+                }
             }
         }
         capture.warning?.let {

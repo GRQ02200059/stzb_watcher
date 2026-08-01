@@ -33,7 +33,7 @@ class BattlefieldScreenTest {
 
         rule.setContent {
             AstzbTheme {
-                BattlefieldScreen(BattlefieldUiState(LoadState.Content(snapshot)), {}, {})
+                BattlefieldScreen(BattlefieldUiState(LoadState.Content(snapshot)), {}, {}, false, {})
             }
         }
 
@@ -41,6 +41,7 @@ class BattlefieldScreenTest {
         rule.onNodeWithText("正在行军").assertIsDisplayed()
         rule.onNodeWithText("前锋 · 测试盟").assertIsDisplayed()
         rule.onNodeWithContentDescription("暂停实时刷新").assertIsDisplayed()
+        rule.onNodeWithText("开启悬浮").assertIsDisplayed()
     }
 
     @Test

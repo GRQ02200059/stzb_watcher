@@ -34,6 +34,8 @@ fun BattlefieldScreen(
     state: BattlefieldUiState,
     onIntent: (BattlefieldIntent) -> Unit,
     onEventClick: (BattlefieldEvent) -> Unit,
+    overlayRunning: Boolean = false,
+    onToggleOverlay: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     LifecycleStartEffect(Unit) {
@@ -66,6 +68,8 @@ fun BattlefieldScreen(
                 refreshing = loadState.refreshing,
                 onIntent = onIntent,
                 onEventClick = onEventClick,
+                overlayRunning = overlayRunning,
+                onToggleOverlay = onToggleOverlay,
             )
         }
     }
@@ -85,6 +89,8 @@ private fun BattlefieldContent(
     refreshing: Boolean,
     onIntent: (BattlefieldIntent) -> Unit,
     onEventClick: (BattlefieldEvent) -> Unit,
+    overlayRunning: Boolean,
+    onToggleOverlay: () -> Unit,
 ) {
     val listState = rememberLazyListState()
     Box(Modifier.fillMaxSize()) {
@@ -94,7 +100,7 @@ private fun BattlefieldContent(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            item("header") { BattlefieldHeader(snapshot.capture, snapshot.paused, onIntent) }
+            item("header") { BattlefieldHeader(snapshot.capture, snapshot.paused, onIntent, overlayRunning, onToggleOverlay) }
             item("metrics") { BattlefieldMetricsGrid(snapshot.metrics) }
             item("filters") { EventCategoryFilters(snapshot.selectedCategories, onIntent) }
             if (snapshot.bufferedEventCount > 0) {
