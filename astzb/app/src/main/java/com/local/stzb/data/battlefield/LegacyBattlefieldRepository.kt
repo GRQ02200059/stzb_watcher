@@ -161,7 +161,7 @@ class LegacyBattlefieldRepository(
     }
 
     private companion object {
-        const val EVENT_LIMIT = 200
+        const val EVENT_LIMIT = 100
         const val ARRIVING_SOON_SECONDS = 300L
         val EVENT_ORDER = compareByDescending<BattlefieldEvent> { it.occurredAt }.thenBy { it.id }
     }

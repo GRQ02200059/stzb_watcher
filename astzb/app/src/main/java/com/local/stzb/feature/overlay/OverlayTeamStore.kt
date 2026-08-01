@@ -28,6 +28,9 @@ class OverlayTeamStore {
                 updatedAt = event.occurredAt,
                 winRate = presentation?.winRate,
             )
+            while (teams.size > TEAM_LIMIT) {
+                teams.remove(teams.keys.first())
+            }
         }
         val next = OverlayMonitorState(teams.values.toList().asReversed(), snapshot.capture.running)
         mutableState.value = next
@@ -36,6 +39,10 @@ class OverlayTeamStore {
 
     fun reportError(message: String) {
         mutableState.value = mutableState.value.copy(error = message)
+    }
+
+    private companion object {
+        const val TEAM_LIMIT = 100
     }
 }
 

@@ -66,6 +66,18 @@ class OverlayTeamStoreTest {
         assertEquals(listOf("驻扎", "驻守"), store.state.value.teams.map { it.stateText })
     }
 
+    @Test fun retainsOnlyNewestOneHundredTeams() {
+        val store = OverlayTeamStore()
+
+        store.accept(snapshot(*Array(101) { index ->
+            event(index + 1, (index + 1).toLong(), "玩家${index + 1}", "行军")
+        }))
+
+        assertEquals(100, store.state.value.teams.size)
+        assertEquals(101, store.state.value.teams.first().teamId)
+        assertEquals(2, store.state.value.teams.last().teamId)
+    }
+
     private fun snapshot(vararg events: BattlefieldEvent) = BattlefieldSnapshot(
         CaptureStatus(true, "运行中", null), BattlefieldMetrics(0, 0, 0, 0), events.toList(), EventCategory.entries.toSet(), false, 0,
     )

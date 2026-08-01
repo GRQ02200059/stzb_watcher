@@ -153,7 +153,7 @@ class LegacyBattlefieldRepositoryTest {
     }
 
     @Test
-    fun visibleAndBufferedCollectionsAreIndependentlyCappedAtTwoHundredNewestEvents() = runBlocking {
+    fun visibleAndBufferedCollectionsAreIndependentlyCappedAtOneHundredNewestEvents() = runBlocking {
         val source = FakeBattlefieldSource().apply {
             moves = (1..250).map { move(teamId = it, arriveTime = it.toLong()) }
         }
@@ -161,22 +161,22 @@ class LegacyBattlefieldRepositoryTest {
 
         repository.refresh()
         var snapshot = repository.observeSnapshot().first()
-        assertEquals(200, snapshot.events.size)
+        assertEquals(100, snapshot.events.size)
         assertEquals(250L, snapshot.events.first().occurredAt)
-        assertEquals(51L, snapshot.events.last().occurredAt)
+        assertEquals(151L, snapshot.events.last().occurredAt)
 
         repository.setPaused(true)
         source.moves = (1..500).map { move(teamId = it, arriveTime = it.toLong()) }
         repository.refresh()
         snapshot = repository.observeSnapshot().first()
-        assertEquals(200, snapshot.events.size)
-        assertEquals(200, snapshot.bufferedEventCount)
+        assertEquals(100, snapshot.events.size)
+        assertEquals(100, snapshot.bufferedEventCount)
 
         repository.setPaused(false)
         snapshot = repository.observeSnapshot().first()
-        assertEquals(200, snapshot.events.size)
+        assertEquals(100, snapshot.events.size)
         assertEquals(500L, snapshot.events.first().occurredAt)
-        assertEquals(301L, snapshot.events.last().occurredAt)
+        assertEquals(401L, snapshot.events.last().occurredAt)
     }
 
     @Test
@@ -191,7 +191,7 @@ class LegacyBattlefieldRepositoryTest {
         repository.refresh()
         val snapshot = repository.observeSnapshot().first()
 
-        assertEquals(200, snapshot.events.size)
+        assertEquals(100, snapshot.events.size)
         assertEquals(0, snapshot.bufferedEventCount)
     }
 
@@ -207,7 +207,7 @@ class LegacyBattlefieldRepositoryTest {
         repository.refresh()
         val snapshot = repository.observeSnapshot().first()
 
-        assertEquals(200, snapshot.events.size)
+        assertEquals(100, snapshot.events.size)
         assertEquals(0, snapshot.bufferedEventCount)
     }
 
@@ -318,9 +318,9 @@ class LegacyBattlefieldRepositoryTest {
         (1..12).map { async(Dispatchers.Default) { repository.refresh() } }.awaitAll()
         val snapshot = repository.observeSnapshot().first()
 
-        assertEquals(200, snapshot.events.size)
-        assertEquals(200, snapshot.events.map { it.id }.distinct().size)
-        assertEquals((250L downTo 51L).toList(), snapshot.events.map { it.occurredAt })
+        assertEquals(100, snapshot.events.size)
+        assertEquals(100, snapshot.events.map { it.id }.distinct().size)
+        assertEquals((250L downTo 151L).toList(), snapshot.events.map { it.occurredAt })
     }
 
     private class FakeBattlefieldSource : LegacyBattlefieldSource {
