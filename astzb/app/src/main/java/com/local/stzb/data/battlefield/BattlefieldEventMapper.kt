@@ -8,6 +8,7 @@ import com.example.myapplication.HeroNameResolver
 import com.local.stzb.domain.battlefield.BattlefieldHero
 import com.local.stzb.domain.battlefield.BattlefieldSkill
 import com.local.stzb.domain.battlefield.BattlefieldTeamPresentation
+import com.local.stzb.domain.battlefield.BattlefieldTeamContext
 import com.local.stzb.domain.battlefield.BattlefieldEvent
 import com.local.stzb.domain.battlefield.EventCategory
 import com.local.stzb.domain.battlefield.EventPriority
@@ -51,6 +52,13 @@ object BattlefieldEventMapper {
                 if (move.battleEffect.isNotBlank()) add("战斗效果：${move.battleEffect}")
                 if (lineup.isEmpty()) add("武将与兵力：尚未匹配到已记录战报")
             },
+            teamContext = BattlefieldTeamContext(
+                ownerUid = move.ownerUid.takeIf { it > 0 } ?: move.subjectId,
+                armyHeroType = move.armyHeroType,
+                stateText = armyStateText(move.moveType),
+                destinationText = location(move.toXy, move.toWid),
+                arrivalAt = arriveAt,
+            ),
             teamPresentation = lineup.takeIf { it.isNotEmpty() }?.let { heroes ->
                 BattlefieldTeamPresentation(
                     teamId = move.teamId,

@@ -20,12 +20,21 @@ data class BattlefieldEvent(
     val title: String,
     val summary: String,
     val details: List<String> = emptyList(),
+    val teamContext: BattlefieldTeamContext? = null,
     val teamPresentation: BattlefieldTeamPresentation? = null,
     val target: EventTarget = EventTarget.None,
 ) {
     val isUrgent: Boolean
         get() = priority == EventPriority.CRITICAL || category == EventCategory.URGENT
 }
+
+data class BattlefieldTeamContext(
+    val ownerUid: Int,
+    val armyHeroType: String = "",
+    val stateText: String = "",
+    val destinationText: String = "",
+    val arrivalAt: Long? = null,
+)
 
 data class BattlefieldTeamPresentation(
     val teamId: Int,

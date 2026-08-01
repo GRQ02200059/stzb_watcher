@@ -74,7 +74,7 @@ fun BattlefieldOverlayContent(
             Text(team.stateText, color = Color(0xFFC4B5FD), style = MaterialTheme.typography.labelMedium)
             Text(team.winRate?.let { "胜率 ${"%.1f".format(Locale.US, it)}%" } ?: "胜率 --", color = Color(0xFFFBBF24), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
         }
-        Text(team.heroes.joinToString(" · ") { "${it.name} ${it.advance}红" }.ifBlank { "武将未记录" }, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
+        Text(team.heroes.joinToString(" · ") { "${it.name} ${it.advance}红" }.ifBlank { "武将未匹配" }, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
         val time = team.arrivalAt?.let { "到达 ${formatOverlayTime(it)}" } ?: "更新 ${formatOverlayTime(team.updatedAt)}"
         Text("目的地 ${team.destination.ifBlank { "--" }}　$time", color = Color(0xFFCBD5E1), style = MaterialTheme.typography.labelMedium, maxLines = 1)
     }
