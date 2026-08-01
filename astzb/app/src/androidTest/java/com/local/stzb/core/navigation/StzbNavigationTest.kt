@@ -52,6 +52,8 @@ class StzbNavigationTest {
         rule.onNodeWithText("全服玩家队伍").assertIsDisplayed()
         rule.onNodeWithText("团队").performClick()
         rule.onNodeWithText("团队报表").assertIsDisplayed()
+        rule.onNodeWithText("模拟").performClick()
+        rule.onNodeWithText("战斗模拟器").assertIsDisplayed()
         rule.onNodeWithText("更多").performClick()
         rule.onNodeWithText("抓包启动台").performClick()
         rule.onNodeWithText("启动抓包").assertIsDisplayed()

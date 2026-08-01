@@ -12,6 +12,7 @@ import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.Radar
+import androidx.compose.material.icons.outlined.Science
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -60,6 +61,10 @@ import com.local.stzb.feature.teamreport.TeamReportViewModel
 import com.local.stzb.feature.capture.*
 import com.local.stzb.feature.overlay.BattlefieldOverlayService
 import com.local.stzb.feature.overlay.OverlayServiceState
+import com.local.stzb.feature.simulator.BattleLogScreen
+import com.local.stzb.feature.simulator.BattleSimulatorScreen
+import com.local.stzb.feature.simulator.BattleSimulatorViewModel
+import com.local.stzb.feature.simulator.LocalBattleSimulatorEngine
 import kotlinx.coroutines.launch
 
 @Composable
@@ -94,6 +99,8 @@ fun StzbApp(
     val teamReportState by teamReportViewModel.state.collectAsStateWithLifecycle()
     val captureViewModel: CaptureConsoleViewModel = viewModel { CaptureConsoleViewModel(captureController) }
     val captureState by captureViewModel.state.collectAsStateWithLifecycle()
+    val simulatorViewModel: BattleSimulatorViewModel = viewModel { BattleSimulatorViewModel() }
+    val simulatorState by simulatorViewModel.state.collectAsStateWithLifecycle()
     val overlayRunning by OverlayServiceState.running.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -162,6 +169,19 @@ fun StzbApp(
             }
             composable(AppDestination.TEAMS.route) { TeamsScreen(teamsState, teamsViewModel::onIntent) }
             composable(AppDestination.TEAM_REPORT.route) { TeamReportScreen(teamReportState, teamReportViewModel) }
+            composable(AppDestination.SIMULATOR.route) {
+                BattleSimulatorScreen(
+                    state = simulatorState,
+                    onIntent = simulatorViewModel::onIntent,
+                    heroName = LocalBattleSimulatorEngine::heroName,
+                    heroIconId = LocalBattleSimulatorEngine::heroIconId,
+                    skillName = LocalBattleSimulatorEngine::skillName,
+                    onOpenLog = { navController.navigate("simulator-log") },
+                )
+            }
+            composable("simulator-log") {
+                BattleLogScreen(simulatorState.result?.firstRun) { navController.popBackStack() }
+            }
             composable("battles") {
                 if (battlesState.selected == null) {
                     BattlesScreen(battlesState, battlesViewModel::onIntent, { navController.popBackStack() })
@@ -225,5 +245,6 @@ private val AppDestination.icon: ImageVector
         AppDestination.BATTLEFIELD -> Icons.Outlined.Radar
         AppDestination.TEAMS -> Icons.AutoMirrored.Outlined.ReceiptLong
         AppDestination.TEAM_REPORT -> Icons.Outlined.Groups
+        AppDestination.SIMULATOR -> Icons.Outlined.Science
         AppDestination.MORE -> Icons.Outlined.MoreHoriz
     }
