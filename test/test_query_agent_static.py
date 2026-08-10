@@ -18,6 +18,11 @@ class QueryAgentStaticTest(unittest.TestCase):
         self.assertIn("function applyQueryAgentAction(action)", js)
         self.assertIn("/api/query-agent/messages", js)
 
+    def test_simulator_displays_engine_source(self):
+        js = (ROOT / "static" / "sim.js").read_text(encoding="utf-8")
+        self.assertIn("const engineLabel = r.engine", js)
+        self.assertIn("statusEl.textContent = (repeat===1 ? '战斗结束'", js)
+
 
 if __name__ == "__main__":
     unittest.main()

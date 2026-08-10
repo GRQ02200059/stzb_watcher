@@ -399,7 +399,8 @@ async function runSimulate(repeat) {
     statusEl.style.color='#e05050';
     return;
   }
-  statusEl.textContent = repeat===1 ? '战斗结束' : `完成${repeat}次`;
+  const engineLabel = r.engine ? ` · ${r.engine}` : '';
+  statusEl.textContent = (repeat===1 ? '战斗结束' : `完成${repeat}次`) + engineLabel;
   statusEl.style.color = '#46b06e';
   if (repeat===1) _renderSingleResult(r.result);
   else _renderMultiResult(r);
