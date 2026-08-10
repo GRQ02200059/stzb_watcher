@@ -49,6 +49,7 @@ function switchTab(i,el){
   else if(i===26 && typeof loadStateRegionStats==='function') loadStateRegionStats();
   else if(i===27 && typeof loadBattleMonitor==='function') loadBattleMonitor();
   else if(i===28 && typeof loadBattleMonitor13a2==='function') loadBattleMonitor13a2();
+  else if(i===30 && typeof loadWorldScene==='function') loadWorldScene();
 }
 
 // 页面加载时恢复上次的 tab

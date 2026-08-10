@@ -270,6 +270,11 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
 .query-agent-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .query-agent-answer{min-height:120px;max-height:360px;overflow:auto;background:#07111d;border:1px solid #162638;border-radius:8px;padding:10px;color:var(--text);font-size:.82rem;line-height:1.55;margin-bottom:10px}
 #query-agent-input{width:100%;box-sizing:border-box;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px}
+.ws-subtabs{display:inline-flex;gap:6px;background:#0a1220;border:1px solid var(--border);border-radius:8px;padding:4px}
+.ws-subtab{background:transparent;color:var(--text2);border:1px solid transparent;border-radius:6px;padding:6px 12px;font-size:.82rem;cursor:pointer;letter-spacing:.04em;font-family:var(--font-body)}
+.ws-subtab:hover{color:var(--text);background:#111c2a}
+.ws-subtab.active{color:var(--gold);border-color:#2a3e55;background:linear-gradient(135deg,var(--panel),var(--panel2))}
+.ws-empty{padding:26px;text-align:center;color:var(--text2);font-size:.82rem}
 #query-agent-fab{position:fixed;right:18px;bottom:18px;z-index:850}
 
 /* ===== PROGRESS BAR ===== */
@@ -320,6 +325,7 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
   <button onclick='switchTab(27,this)'>🛰 战场监控</button>
   <button onclick='switchTab(28,this)'>🧭 13A2 队伍索引</button>
   <button onclick='switchTab(29,this)'>🗺 古代中国地图</button>
+  <button onclick='switchTab(30,this)'>🌐 世界场景</button>
 </nav>
 <!-- TAB 0: 实时战报 -->
 <div class='page' id='tab0'>
@@ -1278,6 +1284,72 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
   </div>
 </div>
 
+<!-- TAB 30: 世界场景 (5026/5028 协议读模型) -->
+<div class='page' id='tab30'>
+  <div class='cards-row' id='ws-cards'></div>
+  <div class='filters' style='align-items:center;flex-wrap:wrap;gap:10px'>
+    <div class='ws-subtabs'>
+      <button class='ws-subtab active' data-ws='map' onclick='wsSwitch("map",this)'>🗺 地图视野</button>
+      <button class='ws-subtab' data-ws='march' onclick='wsSwitch("march",this)'>🧭 实时行军</button>
+      <button class='ws-subtab' data-ws='army' onclick='wsSwitch("army",this)'>🛰 战场监控</button>
+    </div>
+    <button class='btn btn-primary' onclick='loadWorldScene()'>🔄 刷新</button>
+    <span id='ws-updated' style='color:var(--text2);font-size:.72rem'></span>
+    <span id='ws-source' style='color:var(--text2);font-size:.72rem;margin-left:auto'>数据源 · /api/world/* · 5026/5028 协议读模型</span>
+  </div>
+
+  <!-- 地图视野 -->
+  <div id='ws-view-map'>
+    <div class='filters' style='gap:8px;flex-wrap:wrap'>
+      <span style='color:var(--text2);font-size:.74rem'>视窗范围 (row/col)</span>
+      <input id='ws-row-up' placeholder='rowUp' value='0' style='width:78px'/>
+      <span style='color:var(--text2)'>~</span>
+      <input id='ws-row-down' placeholder='rowDown' value='99999' style='width:78px'/>
+      <span style='color:var(--text2);margin-left:6px'>行</span>
+      <input id='ws-col-left' placeholder='colLeft' value='0' style='width:78px'/>
+      <span style='color:var(--text2)'>~</span>
+      <input id='ws-col-right' placeholder='colRight' value='99999' style='width:78px'/>
+      <span style='color:var(--text2);margin-left:6px'>列</span>
+      <button class='btn btn-primary' onclick='loadWorldScene()'>查询视窗</button>
+    </div>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>🗺 世界城池 · WORLD_CITY 投影</h3><span class='hdr-stat' id='ws-map-count'></span></div>
+      <div class='tbl-scroll'>
+        <table><thead><tr>
+          <th>WID</th><th>坐标(行,列)</th><th>类型</th><th>城池名</th><th>占领方UID</th><th>同盟</th><th>势力</th><th>保护到期</th><th>驻守到期</th><th>视野+</th><th>stateId</th>
+        </tr></thead>
+        <tbody id='ws-map-body'></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 实时行军 -->
+  <div id='ws-view-march' style='display:none'>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>🧭 realMarch · 行军路径 (slot[29])</h3><span class='hdr-stat' id='ws-march-count'></span></div>
+      <div class='tbl-scroll'>
+        <table><thead><tr>
+          <th>行军ID</th><th>上一格</th><th>当前格</th><th>下一格</th><th>出发</th><th>下一跳</th><th>抵达</th><th>路径ID</th><th>单格耗时</th><th>行军类型</th><th>归属</th>
+        </tr></thead>
+        <tbody id='ws-march-body'></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 战场监控 -->
+  <div id='ws-view-army' style='display:none'>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>🛰 MapArmyTuple · 活跃部队 (slot[6])</h3><span class='hdr-stat' id='ws-army-count'></span></div>
+      <div class='tbl-scroll'>
+        <table><thead><tr>
+          <th>部队ID</th><th>状态</th><th>玩家UID</th><th>出发</th><th>目标</th><th>目标类型</th><th>驻扎</th><th>停留</th><th>兵种</th><th>士气</th><th>行军ID</th><th>开始</th><th>结束</th><th>战报</th>
+        </tr></thead>
+        <tbody id='ws-army-body'></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
 <aside id="query-agent-panel" class="query-agent-panel" style="display:none">
   <div class="query-agent-head">
     <strong>战术检索</strong>
@@ -1289,7 +1361,7 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
 </aside>
 <button id="query-agent-fab" class="btn btn-primary" type="button" onclick="toggleQueryAgent(true)">战术检索</button>
 
-<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script><script src="/static/hero_data.js?v=20260423d"></script><script src="/static/herocfg.js?v=20260423d"></script><script src="/static/app1.js?v=20260423d"></script><script src="/static/app2.js?v=20260423d"></script><script src="/static/sim.js?v=20260423d"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script><script src="/static/hero_data.js?v=20260423d"></script><script src="/static/herocfg.js?v=20260423d"></script><script src="/static/app1.js?v=20260423d"></script><script src="/static/app2.js?v=20260423d"></script><script src="/static/sim.js?v=20260423d"></script><script src="/static/world_scene.js?v=20260810a"></script>
 <a class='github-banner' href='https://github.com/GRQ02200059/stzb_watcher' target='_blank' title='源码地址，欢迎 Star'>
   <svg width='15' height='15' viewBox='0 0 16 16' fill='currentColor'><path d='M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z'/></svg>
   源码开源 · GitHub
