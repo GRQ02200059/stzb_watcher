@@ -10,6 +10,8 @@ from realtime_writer import (start_writer_thread, event_queue, recent_events, _e
                              subscribe, unsubscribe, push_event,
                              parse_battle_monitor_13a4, build_battle_monitor_payload)
 import profile_manager
+from world_scene.api import register_world_scene_api
+from world_scene.store import WorldSceneStore
 
 import os, time, threading
 
@@ -430,6 +432,15 @@ def get_db():
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def _world_scene_connection():
+    conn = get_db()
+    WorldSceneStore(conn).ensure_schema()
+    return conn
+
+
+register_world_scene_api(app, _world_scene_connection)
 
 def get_bv2_cols(conn):
     """缓存 battles_v2 列信息，避免接口里频繁 PRAGMA table_info。"""
