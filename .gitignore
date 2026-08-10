@@ -22,6 +22,12 @@ __pycache__/
 *.pyd
 .Python
 
+# Gradle / build output
+.gradle/
+build/
+**/.gradle/
+**/build/
+
 # 虚拟环境
 venv/
 env/
