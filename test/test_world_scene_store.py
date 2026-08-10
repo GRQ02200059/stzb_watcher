@@ -110,6 +110,95 @@ class WorldSceneStoreTest(unittest.TestCase):
         self.assertEqual(store.active_armies()[0]["army_id"], 1001)
         self.assertEqual(store.active_marches()[0]["real_march_id"], 9001)
 
+    def test_backfills_legacy_map_cells_and_monitor_moves(self):
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        store = WorldSceneStore(conn)
+        store.ensure_schema()
+        packet = parse_world_scene_packet(
+            5026,
+            repr(
+                world_payload(
+                    armies={
+                        "1001": [
+                            1,
+                            42,
+                            10001,
+                            10004,
+                            1,
+                            9,
+                            0,
+                            0,
+                            0,
+                            0,
+                            10001,
+                            0,
+                            0,
+                            0,
+                            0,
+                            "",
+                            "1,2,3",
+                            "",
+                            "",
+                            None,
+                            None,
+                            0,
+                            0,
+                            0,
+                            0,
+                            0,
+                            0,
+                            100,
+                            9001,
+                            "",
+                            0,
+                            "",
+                            77,
+                        ]
+                    },
+                    chunks={
+                        "10004": {
+                            "0": [
+                                1,
+                                0,
+                                42,
+                                1005,
+                                0,
+                                "",
+                                "土地名",
+                                0,
+                                0,
+                                0,
+                                0,
+                                0,
+                                0,
+                                "",
+                                0,
+                                0,
+                                0,
+                                0,
+                                0,
+                                88,
+                                2,
+                            ]
+                        }
+                    },
+                )
+            ),
+            "fixture",
+            1000,
+        )
+        store.apply_packet(packet)
+        store.backfill_legacy_views()
+        map_row = conn.execute(
+            "SELECT city_name FROM map_cells WHERE wid=10004"
+        ).fetchone()
+        move_row = conn.execute(
+            "SELECT team_id FROM battle_monitor_moves WHERE team_id=1001"
+        ).fetchone()
+        self.assertEqual(map_row["city_name"], "土地名")
+        self.assertEqual(move_row["team_id"], 1001)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -345,3 +345,145 @@ class WorldSceneStore:
             "SELECT * FROM world_real_marches ORDER BY end_time, real_march_id"
         ).fetchall()
         return [dict(row) for row in rows]
+
+    def backfill_legacy_views(self) -> None:
+        self.conn.executescript(
+            """
+            CREATE TABLE IF NOT EXISTS map_cells (
+                wid INTEGER PRIMARY KEY,
+                x INTEGER DEFAULT 0,
+                y INTEGER DEFAULT 0,
+                cell_type INTEGER DEFAULT 0,
+                type_name TEXT,
+                building_id INTEGER DEFAULT 0,
+                owner_name TEXT,
+                city_name TEXT,
+                parent_wid INTEGER DEFAULT 0,
+                source_msg_id TEXT,
+                updated_at INTEGER NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS battle_monitor_moves (
+                team_id INTEGER PRIMARY KEY,
+                move_type INTEGER,
+                subject_id INTEGER,
+                owner_uid INTEGER,
+                owner_name TEXT,
+                owner_union TEXT,
+                from_wid INTEGER,
+                to_wid INTEGER,
+                current_wid INTEGER,
+                from_xy TEXT,
+                to_xy TEXT,
+                current_xy TEXT,
+                start_time INTEGER,
+                arrive_time INTEGER,
+                speed INTEGER,
+                target_type INTEGER DEFAULT 0,
+                reside_wid INTEGER DEFAULT 0,
+                stay_wid INTEGER DEFAULT 0,
+                army_hero_type TEXT,
+                morale INTEGER DEFAULT 0,
+                buff_ids TEXT,
+                battle_show TEXT,
+                state_id INTEGER,
+                marker INTEGER,
+                captured_at INTEGER NOT NULL
+            );
+            """
+        )
+        now = 0
+        for row in self.conn.execute("SELECT * FROM world_tiles"):
+            self.conn.execute(
+                """
+                INSERT INTO map_cells(
+                    wid, x, y, cell_type, type_name, building_id, owner_name,
+                    city_name, parent_wid, source_msg_id, updated_at
+                )
+                VALUES(?,?,?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(wid) DO UPDATE SET
+                    x=excluded.x,
+                    y=excluded.y,
+                    cell_type=excluded.cell_type,
+                    type_name=excluded.type_name,
+                    owner_name=excluded.owner_name,
+                    city_name=excluded.city_name,
+                    updated_at=excluded.updated_at
+                """,
+                (
+                    row["wid"],
+                    row["row"],
+                    row["col"],
+                    row["city_type"],
+                    f"type{row['city_type']}",
+                    row["city_param"],
+                    "",
+                    row["name"],
+                    row["belong_city"],
+                    "world_scene",
+                    now,
+                ),
+            )
+
+        for row in self.conn.execute(
+            "SELECT * FROM world_armies WHERE deleted_at_seq IS NULL"
+        ):
+            current = row["stay_wid"] or row["reside_wid"]
+            self.conn.execute(
+                """
+                INSERT INTO battle_monitor_moves(
+                    team_id, move_type, subject_id, owner_uid, owner_name,
+                    owner_union, from_wid, to_wid, current_wid, from_xy, to_xy,
+                    current_xy, start_time, arrive_time, speed, target_type,
+                    reside_wid, stay_wid, army_hero_type, morale, buff_ids,
+                    battle_show, state_id, marker, captured_at
+                )
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(team_id) DO UPDATE SET
+                    move_type=excluded.move_type,
+                    subject_id=excluded.subject_id,
+                    from_wid=excluded.from_wid,
+                    to_wid=excluded.to_wid,
+                    current_wid=excluded.current_wid,
+                    start_time=excluded.start_time,
+                    arrive_time=excluded.arrive_time,
+                    morale=excluded.morale,
+                    buff_ids=excluded.buff_ids,
+                    battle_show=excluded.battle_show,
+                    state_id=excluded.state_id,
+                    captured_at=excluded.captured_at
+                """,
+                (
+                    row["army_id"],
+                    row["state"],
+                    row["user_id"],
+                    row["user_id"],
+                    "",
+                    "",
+                    row["wid_from"],
+                    row["wid_to"],
+                    current,
+                    _wid_xy(row["wid_from"]),
+                    _wid_xy(row["wid_to"]),
+                    _wid_xy(current),
+                    row["begin_time"],
+                    row["end_time"],
+                    0,
+                    row["target_type"],
+                    row["reside_wid"],
+                    row["stay_wid"],
+                    row["army_hero_type"],
+                    row["morale"],
+                    row["buff_ids"],
+                    row["battle_show"],
+                    row["state_id"],
+                    0,
+                    now,
+                ),
+            )
+        self.conn.commit()
+
+
+def _wid_xy(wid: int) -> str:
+    if not wid:
+        return ""
+    return f"{wid // 10000},{wid % 10000}"
