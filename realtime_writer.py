@@ -7,6 +7,8 @@ realtime_writer.py
 import sqlite3, json, os, time, glob, threading, queue, sys
 from datetime import datetime
 from collections import deque
+from world_scene.parser import parse_world_scene_packet
+from world_scene.store import WorldSceneStore
 
 APP_DIR      = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
 RESOURCE_DIR = getattr(sys, '_MEIPASS', APP_DIR)
@@ -173,6 +175,28 @@ def push_event(evt_type, data):
         event_queue.put_nowait(evt)
     except queue.Full:
         pass
+
+
+def persist_world_scene_packet(conn, msg_type, data, fpath):
+    """Persist canonical 5026/5028 world-scene packets into normalized read tables."""
+    cmd_id = {
+        '000013a2': 5026,
+        '000013a4': 5028,
+        '5026': 5026,
+        '5028': 5028,
+    }.get(str(msg_type))
+    if cmd_id is None:
+        return None
+    text = data if isinstance(data, str) else json.dumps(data, ensure_ascii=False)
+    packet = parse_world_scene_packet(
+        cmd_id=cmd_id,
+        decoded_text=text,
+        source=os.path.basename(str(fpath or '')) or f'live:{msg_type}',
+        observed_at_ms=int(time.time() * 1000),
+    )
+    store = WorldSceneStore(conn)
+    store.ensure_schema()
+    return store.apply_packet(packet)
 
 
 def parse_battle_monitor_13a4(data):
@@ -2549,6 +2573,12 @@ class RealtimeWriter:
             conn.close()
 
     def _dispatch(self, conn, msg_type, data, fpath):
+        if msg_type in {'000013a2', '000013a4', '5026', '5028'}:
+            try:
+                persist_world_scene_packet(conn, msg_type, data, fpath)
+            except Exception as e:
+                print(f'[world_scene ERR] {msg_type}: {e}')
+
         if msg_type == '0000000a':
             battles = parse_battle_0a(data, fpath)
             for b in battles:
