@@ -9,6 +9,7 @@
 # 二进制/抓包文件
 *.pcap
 *.bin
+!battle-engine/src/main/resources/client-config/*.bin
 *.zip
 *.png
 *.jpg
