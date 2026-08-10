@@ -75,6 +75,68 @@ async function apiFetch(url,opts){
   }
 }
 
+function toggleQueryAgent(open){
+  const panel=document.getElementById('query-agent-panel');
+  if(panel) panel.style.display=open?'block':'none';
+}
+
+function currentQueryAgentContext(){
+  const active=document.querySelector('.page.active');
+  return {
+    page: active?.id||'',
+    query: document.querySelector('.page.active input')?.value || '',
+    filters: {}
+  };
+}
+
+function renderQueryAgentResponse(data){
+  const box=document.getElementById('query-agent-answer');
+  if(!box) return;
+  if(!data || !data.ok){
+    box.innerHTML=`<div style="color:var(--red)">查询失败：${esc(data?.error||'未知错误')}</div>`;
+    return;
+  }
+  const evidence=(data.evidence||[]).map(e=>`<li>${esc(e.label||e.source)} · ${esc(e.entityType||'')} ${esc(e.entityId||'')} · ${esc(e.freshness||'')}</li>`).join('');
+  const actions=(data.uiActions||[]).map((a,i)=>{
+    const encoded=JSON.stringify(a).replace(/'/g,'&#39;');
+    return `<button class="btn" onclick='applyQueryAgentAction(${encoded})'>执行动作 ${i+1}</button>`;
+  }).join(' ');
+  box.innerHTML=`<div>${esc(data.answer||'')}</div>${evidence?`<ul>${evidence}</ul>`:''}<div style="margin-top:8px">${actions}</div>`;
+}
+
+async function sendQueryAgentMessage(){
+  const input=document.getElementById('query-agent-input');
+  const message=(input?.value||'').trim();
+  if(!message){showToast('请输入查询内容','var(--gold)');return;}
+  const data=await apiFetch('/api/query-agent/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message,pageContext:currentQueryAgentContext()})
+  });
+  renderQueryAgentResponse(data);
+}
+
+function applyQueryAgentAction(action){
+  if(!action) return;
+  if(action.route==='map'){
+    const btn=[...document.querySelectorAll('nav button')].find(b=>String(b.onclick).includes('switchTab(12,'));
+    if(btn) switchTab(12,btn);
+    const input=document.getElementById('map-filter');
+    if(input && action.params?.wid){input.value=String(action.params.wid);filterMapCities();}
+  } else if(action.route==='battles'){
+    const btn=[...document.querySelectorAll('nav button')].find(b=>String(b.onclick).includes('switchTab(10,'));
+    if(btn) switchTab(10,btn);
+    const wid=document.getElementById('ba-wid');
+    if(wid && action.params?.wid){wid.value=String(action.params.wid);loadBattlesAll(1);}
+  } else if(action.route==='battlefield-monitor'){
+    const btn=[...document.querySelectorAll('nav button')].find(b=>String(b.onclick).includes('switchTab(27,'));
+    if(btn) switchTab(27,btn);
+  } else if(action.route==='alliance-members'){
+    const btn=[...document.querySelectorAll('nav button')].find(b=>String(b.onclick).includes('switchTab(14,'));
+    if(btn) switchTab(14,btn);
+  }
+}
+
 // ===== 战报详情弹窗 =====
 function openModal(){document.getElementById('modal-overlay').style.display='flex';}
 function closeModal(){document.getElementById('modal-overlay').style.display='none';}
@@ -372,4 +434,3 @@ function applyBattleSearch(){
     el.style.display=(!q||(el.dataset.name||'').includes(q))?'':'none';
   });
 }
-

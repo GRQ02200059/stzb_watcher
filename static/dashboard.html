@@ -266,6 +266,12 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
   border:1px solid var(--green);border-radius:5px;font-size:.8rem;color:var(--green);
   opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;max-width:300px;}
 
+.query-agent-panel{position:fixed;right:16px;top:72px;width:380px;max-width:calc(100vw - 32px);z-index:900;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:0 18px 60px #0008}
+.query-agent-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.query-agent-answer{min-height:120px;max-height:360px;overflow:auto;background:#07111d;border:1px solid #162638;border-radius:8px;padding:10px;color:var(--text);font-size:.82rem;line-height:1.55;margin-bottom:10px}
+#query-agent-input{width:100%;box-sizing:border-box;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px}
+#query-agent-fab{position:fixed;right:18px;bottom:18px;z-index:850}
+
 /* ===== PROGRESS BAR ===== */
 .prog{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:4px;}
 .prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;transition:width .5s;}
@@ -1271,6 +1277,17 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
     </div>
   </div>
 </div>
+
+<aside id="query-agent-panel" class="query-agent-panel" style="display:none">
+  <div class="query-agent-head">
+    <strong>战术检索</strong>
+    <button class="btn" type="button" onclick="toggleQueryAgent(false)">关闭</button>
+  </div>
+  <div id="query-agent-answer" class="query-agent-answer">输入 WID、队伍 ID、玩家或战报问题。</div>
+  <textarea id="query-agent-input" rows="3" placeholder="例如：查 10004 周围有什么行军"></textarea>
+  <button class="btn btn-primary" type="button" onclick="sendQueryAgentMessage()">查询</button>
+</aside>
+<button id="query-agent-fab" class="btn btn-primary" type="button" onclick="toggleQueryAgent(true)">战术检索</button>
 
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script><script src="/static/hero_data.js?v=20260423d"></script><script src="/static/herocfg.js?v=20260423d"></script><script src="/static/app1.js?v=20260423d"></script><script src="/static/app2.js?v=20260423d"></script><script src="/static/sim.js?v=20260423d"></script>
 <a class='github-banner' href='https://github.com/GRQ02200059/stzb_watcher' target='_blank' title='源码地址，欢迎 Star'>
