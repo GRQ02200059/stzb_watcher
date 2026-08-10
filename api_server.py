@@ -10,6 +10,7 @@ from realtime_writer import (start_writer_thread, event_queue, recent_events, _e
                              subscribe, unsubscribe, push_event,
                              parse_battle_monitor_13a4, build_battle_monitor_payload)
 import profile_manager
+from query_agent.api import register_query_agent_api
 from world_scene.api import register_world_scene_api
 from world_scene.store import WorldSceneStore
 
@@ -441,6 +442,7 @@ def _world_scene_connection():
 
 
 register_world_scene_api(app, _world_scene_connection)
+register_query_agent_api(app, get_db)
 
 def get_bv2_cols(conn):
     """缓存 battles_v2 列信息，避免接口里频繁 PRAGMA table_info。"""

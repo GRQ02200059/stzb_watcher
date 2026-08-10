@@ -1,1 +1,3 @@
-"""Read-only web query agent package."""
+from .service import QueryAgentService
+
+__all__ = ["QueryAgentService"]
