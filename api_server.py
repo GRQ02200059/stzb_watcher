@@ -10,6 +10,7 @@ from realtime_writer import (start_writer_thread, event_queue, recent_events, _e
                              subscribe, unsubscribe, push_event,
                              parse_battle_monitor_13a4, build_battle_monitor_payload)
 import profile_manager
+from battle_engine_adapter import BattleEngineAdapter
 from query_agent.api import register_query_agent_api
 from world_scene.api import register_world_scene_api
 from world_scene.store import WorldSceneStore
@@ -3874,44 +3875,57 @@ def api_simulate():
         "repeat": 1   // 1=单次详细, N>1=多次统计
     }
     """
+    data = None
     try:
-        import sys, importlib
-        sys.path.insert(0, BASE_DIR)
-        # 强制清除缓存，确保加载最新战法
-        for mod_name in list(sys.modules.keys()):
-            if mod_name.startswith('battle_sim'):
-                del sys.modules[mod_name]
-        from battle_sim import BattleManager
-        data   = request.get_json(force=True)
-        repeat = int(data.get('repeat', 1))
-        config = {'blue': data['blue'], 'red': data['red']}
-
-        if repeat == 1:
-            bm  = BattleManager(config)
-            res = bm.result()
-            return jsonify({'ok': True, 'result': res})
-        else:
-            blue_wins = red_wins = draws = 0
-            for _ in range(repeat):
-                bm  = BattleManager(config)
-                res = bm.result()
-                w   = res['winner']
-                if '攻方' in w:  blue_wins += 1
-                elif '守方' in w: red_wins  += 1
-                else:            draws     += 1
-            return jsonify({
-                'ok': True,
-                'repeat': repeat,
-                'blue_wins': blue_wins,
-                'red_wins':  red_wins,
-                'draws':     draws,
-                'blue_rate': round(blue_wins / repeat * 100, 1),
-                'red_rate':  round(red_wins  / repeat * 100, 1),
-                'draw_rate': round(draws      / repeat * 100, 1),
-            })
+        data = request.get_json(force=True)
+        result = BattleEngineAdapter().simulate(data)
+        return jsonify(result), (200 if result.get('ok') else 500)
     except Exception as e:
         import traceback
+        if data is not None:
+            try:
+                legacy = _api_simulate_legacy(data)
+                legacy['engine'] = 'legacy-fallback'
+                legacy['adapter_error'] = str(e)
+                return jsonify(legacy)
+            except Exception:
+                pass
         return jsonify({'ok': False, 'error': str(e), 'trace': traceback.format_exc()}), 500
+
+
+def _api_simulate_legacy(data):
+    import sys
+    sys.path.insert(0, BASE_DIR)
+    for mod_name in list(sys.modules.keys()):
+        if mod_name.startswith('battle_sim'):
+            del sys.modules[mod_name]
+    from battle_sim import BattleManager
+    repeat = int(data.get('repeat', 1))
+    config = {'blue': data['blue'], 'red': data['red']}
+    if repeat == 1:
+        bm = BattleManager(config)
+        return {'ok': True, 'result': bm.result()}
+    blue_wins = red_wins = draws = 0
+    for _ in range(repeat):
+        bm = BattleManager(config)
+        res = bm.result()
+        winner = res['winner']
+        if '攻方' in winner:
+            blue_wins += 1
+        elif '守方' in winner:
+            red_wins += 1
+        else:
+            draws += 1
+    return {
+        'ok': True,
+        'repeat': repeat,
+        'blue_wins': blue_wins,
+        'red_wins': red_wins,
+        'draws': draws,
+        'blue_rate': round(blue_wins / repeat * 100, 1),
+        'red_rate': round(red_wins / repeat * 100, 1),
+        'draw_rate': round(draws / repeat * 100, 1),
+    }
 
 
 @app.route('/api/simulate/heroes', methods=['GET'])
