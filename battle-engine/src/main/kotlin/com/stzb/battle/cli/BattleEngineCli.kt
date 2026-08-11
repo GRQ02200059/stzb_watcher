@@ -36,12 +36,17 @@ fun runBattleEngineCli(input: String): String {
             BattleOutcome.DRAW -> draws += 1
         }
         if (idx == 0) {
+            val roundsPlayed = result.events.count { it is com.stzb.battle.core.BattleEvent.RoundStart }
             firstRun = mapOf(
                 "outcome" to result.outcome.name,
                 "attackerRemain" to result.attacker.heroes.sumOf { it.troops },
                 "defenderRemain" to result.defender.heroes.sumOf { it.troops },
+                "roundsPlayed" to roundsPlayed,
+                "attackerHeroes" to heroSnapshots(result.attacker.heroes, result.entryAttacker?.heroes),
+                "defenderHeroes" to heroSnapshots(result.defender.heroes, result.entryDefender?.heroes),
                 "events" to result.events.map { it.toString() },
                 "textLog" to result.events.take(240).map { it.toString() },
+                "structuredLog" to structuredEvents(result.events),
             )
         }
     }
@@ -56,6 +61,79 @@ fun runBattleEngineCli(input: String): String {
             "firstRun" to firstRun,
         )
     )
+}
+
+private fun heroSnapshots(
+    finalHeroes: List<com.stzb.battle.core.BattleHero>,
+    entryHeroes: List<com.stzb.battle.core.BattleHero>?,
+): List<Map<String, Any?>> {
+    val initialByPosition = (entryHeroes ?: finalHeroes).associate { it.position to it.troops }
+    return finalHeroes
+        .sortedBy { it.position }
+        .map { hero ->
+            val initial = initialByPosition[hero.position] ?: hero.maxTroops
+            mapOf(
+                "heroId" to hero.id.value,
+                "position" to hero.position,
+                "troops" to hero.troops,
+                "initialTroops" to initial,
+                "hurt" to (initial - hero.troops).coerceAtLeast(0),
+                "alive" to (hero.troops > 0),
+            )
+        }
+}
+
+/**
+ * 把强类型 BattleEvent 抽成结构化字典，供 Python 适配层结合武将/战法名称
+ * 渲染成率土风格的中文战报（Kotlin 侧不持有名称表，故只输出 id + 关键数值）。
+ */
+private fun structuredEvents(events: List<com.stzb.battle.core.BattleEvent>): List<Map<String, Any?>> {
+    fun ref(r: com.stzb.battle.core.BattleHeroRef) = mapOf(
+        "side" to r.side.name,
+        "position" to r.position,
+        "heroId" to r.heroId.value,
+    )
+    val out = ArrayList<Map<String, Any?>>()
+    for (event in events) {
+        val record: Map<String, Any?>? = when (event) {
+            is com.stzb.battle.core.BattleEvent.RoundStart ->
+                mapOf("type" to "roundStart", "round" to event.round)
+            is com.stzb.battle.core.BattleEvent.SkillTriggered ->
+                mapOf("type" to "skill", "round" to event.round,
+                    "source" to ref(event.source), "skillId" to event.skillId,
+                    "trigger" to event.trigger.name)
+            is com.stzb.battle.core.BattleEvent.NormalAttack ->
+                mapOf("type" to "normalAttack", "round" to event.round,
+                    "source" to ref(event.source), "target" to ref(event.target),
+                    "damage" to event.damage, "targetTroopsAfter" to event.targetTroopsAfter)
+            is com.stzb.battle.core.BattleEvent.SkillDamage ->
+                mapOf("type" to "skillDamage", "round" to event.round,
+                    "source" to ref(event.source), "target" to ref(event.target),
+                    "skillId" to event.skillId, "damage" to event.damage,
+                    "targetTroopsAfter" to event.targetTroopsAfter)
+            is com.stzb.battle.core.BattleEvent.OngoingDamage ->
+                mapOf("type" to "ongoingDamage", "round" to event.round,
+                    "source" to ref(event.source), "target" to ref(event.target),
+                    "status" to event.status.name, "damage" to event.damage,
+                    "targetTroopsAfter" to event.targetTroopsAfter)
+            is com.stzb.battle.core.BattleEvent.Recovery ->
+                mapOf("type" to "recovery", "round" to event.round,
+                    "source" to ref(event.source), "target" to ref(event.target),
+                    "amount" to event.amount, "targetTroopsAfter" to event.targetTroopsAfter)
+            is com.stzb.battle.core.BattleEvent.StatusApplied ->
+                mapOf("type" to "status", "round" to event.round,
+                    "source" to ref(event.source), "target" to ref(event.target),
+                    "status" to event.status.name, "durationRounds" to event.durationRounds)
+            is com.stzb.battle.core.BattleEvent.Evaded ->
+                mapOf("type" to "evaded", "round" to event.round,
+                    "source" to ref(event.source), "target" to ref(event.target))
+            is com.stzb.battle.core.BattleEvent.BattleEnd ->
+                mapOf("type" to "battleEnd", "outcome" to event.outcome.name)
+            else -> null
+        }
+        if (record != null) out.add(record)
+    }
+    return out
 }
 
 private fun team(node: JsonNode): List<BattleHeroSpec> =

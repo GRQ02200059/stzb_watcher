@@ -34,6 +34,18 @@ class SimulateApiTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()["engine"], "stzb-kotlin")
 
+    def test_heroes_endpoint_serves_engine_csv_data(self):
+        client = api_server.app.test_client()
+        response = client.get("/api/simulate/heroes")
+        self.assertEqual(response.status_code, 200)
+        body = response.get_json()
+        self.assertTrue(body["ok"])
+        self.assertGreater(len(body["heroes"]), 500)
+        self.assertGreater(len(body["skills"]), 200)
+        by_id = {h["id"]: h for h in body["heroes"]}
+        self.assertIn(100027, by_id)
+        self.assertEqual(by_id[100027]["name"], "张辽")
+
 
 if __name__ == "__main__":
     unittest.main()

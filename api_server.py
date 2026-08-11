@@ -3882,86 +3882,23 @@ def api_simulate():
         return jsonify(result), (200 if result.get('ok') else 500)
     except Exception as e:
         import traceback
-        if data is not None:
-            try:
-                legacy = _api_simulate_legacy(data)
-                legacy['engine'] = 'legacy-fallback'
-                legacy['adapter_error'] = str(e)
-                return jsonify(legacy)
-            except Exception:
-                pass
         return jsonify({'ok': False, 'error': str(e), 'trace': traceback.format_exc()}), 500
-
-
-def _api_simulate_legacy(data):
-    import sys
-    sys.path.insert(0, BASE_DIR)
-    for mod_name in list(sys.modules.keys()):
-        if mod_name.startswith('battle_sim'):
-            del sys.modules[mod_name]
-    from battle_sim import BattleManager
-    repeat = int(data.get('repeat', 1))
-    config = {'blue': data['blue'], 'red': data['red']}
-    if repeat == 1:
-        bm = BattleManager(config)
-        return {'ok': True, 'result': bm.result()}
-    blue_wins = red_wins = draws = 0
-    for _ in range(repeat):
-        bm = BattleManager(config)
-        res = bm.result()
-        winner = res['winner']
-        if '攻方' in winner:
-            blue_wins += 1
-        elif '守方' in winner:
-            red_wins += 1
-        else:
-            draws += 1
-    return {
-        'ok': True,
-        'repeat': repeat,
-        'blue_wins': blue_wins,
-        'red_wins': red_wins,
-        'draws': draws,
-        'blue_rate': round(blue_wins / repeat * 100, 1),
-        'red_rate': round(red_wins / repeat * 100, 1),
-        'draw_rate': round(draws / repeat * 100, 1),
-    }
 
 
 @app.route('/api/simulate/heroes', methods=['GET'])
 def api_simulate_heroes():
-    """GET /api/simulate/heroes - 返回可用武将和战法列表"""
+    """GET /api/simulate/heroes - 返回可用武将和战法列表
+
+    数据源为 Kotlin battle-engine 的权威配置表 (hero_table.csv / skill_table.csv)，
+    与实际参战引擎的 hero id / skill id 口径完全一致。
+    """
     try:
-        import sys, importlib
-        sys.path.insert(0, BASE_DIR)
-        # 强制清除缓存，确保每次加载最新战法
-        for mod_name in list(sys.modules.keys()):
-            if mod_name.startswith('battle_sim'):
-                del sys.modules[mod_name]
-        from battle_sim.data import HEROS, SKILLS
-        heroes = [
-            {
-                'id':   h['id'],
-                'name': h['name'],
-                'camp': h['camp'],
-                'army': h['army'],
-                'limit': h['limit'],
-                'skill': h['skill'],
-            }
-            for h in HEROS.values()
-        ]
-        skills = [
-            {
-                'id':         sk.id,
-                'name':       sk.name,
-                'desc':       sk.desc,
-                'skill_type': sk.skill_type,
-                'rate':       sk.rate,
-                'study':      sk.study,
-            }
-            for sk in SKILLS.values()
-        ]
-        return jsonify({'ok': True, 'heroes': heroes, 'skills': skills})
+        import sim_data
+        return jsonify({
+            'ok': True,
+            'heroes': sim_data.load_heroes(),
+            'skills': sim_data.load_skills(),
+        })
     except Exception as e:
         import traceback
         return jsonify({'ok': False, 'error': str(e), 'trace': traceback.format_exc()}), 500
