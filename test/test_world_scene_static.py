@@ -28,6 +28,17 @@ class WorldSceneStaticTest(unittest.TestCase):
         # read-only: must not issue any write / action calls
         self.assertNotIn("method:'POST'", js.replace(" ", ""))
 
+    def test_world_scene_army_view_shows_enriched_fields(self):
+        html = (ROOT / "static" / "dashboard.html").read_text(encoding="utf-8")
+        js = (ROOT / "static" / "world_scene.js").read_text(encoding="utf-8")
+        self.assertIn("<th>玩家</th><th>同盟</th>", html)
+        self.assertIn("<th>目标名</th>", html)
+        self.assertIn("<th>Buff</th><th>障碍</th>", html)
+        self.assertIn("owner_name", js)
+        self.assertIn("owner_union_name", js)
+        self.assertIn("target_name", js)
+        self.assertIn("obstacle_wid", js)
+
 
 if __name__ == "__main__":
     unittest.main()

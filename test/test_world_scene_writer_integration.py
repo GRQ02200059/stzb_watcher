@@ -26,6 +26,31 @@ class WorldSceneWriterIntegrationTest(unittest.TestCase):
             finally:
                 conn.close()
 
+    def test_process_data_uses_world_scene_assembler_gate(self):
+        with tempfile.NamedTemporaryFile(suffix=".db") as tmp:
+            def connect():
+                conn = sqlite3.connect(tmp.name)
+                conn.row_factory = sqlite3.Row
+                return conn
+
+            with patch.object(realtime_writer, "get_db", side_effect=connect):
+                writer = realtime_writer.RealtimeWriter()
+                writer.process_data("5026", world_payload(marker=0), "mid")
+                writer.process_data("5026", world_payload(marker=8), "final")
+                writer.process_data("5028", world_payload(marker=7), "stale")
+
+            conn = connect()
+            try:
+                row = conn.execute("SELECT COUNT(*) AS c FROM world_scene_packets").fetchone()
+                self.assertEqual(row["c"], 1)
+                last = conn.execute(
+                    "SELECT source, server_order_id FROM world_scene_packets"
+                ).fetchone()
+                self.assertEqual(last["source"], "final")
+                self.assertEqual(last["server_order_id"], 8)
+            finally:
+                conn.close()
+
 
 if __name__ == "__main__":
     unittest.main()

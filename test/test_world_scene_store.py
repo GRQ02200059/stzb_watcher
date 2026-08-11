@@ -199,6 +199,50 @@ class WorldSceneStoreTest(unittest.TestCase):
         self.assertEqual(map_row["city_name"], "土地名")
         self.assertEqual(move_row["team_id"], 1001)
 
+    def test_applies_block_deletes_and_clear_chunks(self):
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        store = WorldSceneStore(conn)
+        store.ensure_schema()
+        first = parse_world_scene_packet(
+            5026,
+            repr(
+                world_payload(
+                    armies={
+                        "1001": [
+                            1, 42, 10001, 10004, 1, 9, 0, 0, 0, 0, 10001,
+                            0, 0, 0, 0, "", "1,2,3", "", "", None, None,
+                            0, 0, 0, 0, 0, 0, 100, 9001, "", 0, "", 77,
+                        ]
+                    },
+                    chunks={
+                        "10004": {
+                            "0": [
+                                1, 0, 42, 1005, 0, "", "土地名", 0, 0, 0,
+                                0, 0, 0, "", 0, 0, 0, 0, 0, 88, 2,
+                            ]
+                        }
+                    },
+                )
+            ),
+            "first",
+            1000,
+        )
+        store.apply_packet(first)
+        self.assertEqual(len(store.active_armies()), 1)
+        self.assertEqual(len(store.viewport(1, 2, 1, 10)["tiles"]), 1)
+
+        delta = parse_world_scene_packet(
+            5028,
+            repr(world_payload(marker=9, block_deleted=[1001], clear_chunks={"10004": ["0"]})),
+            "delta",
+            1001,
+        )
+        store.apply_packet(delta)
+
+        self.assertEqual(store.active_armies(), [])
+        self.assertEqual(store.viewport(1, 2, 1, 10)["tiles"], [])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -3,7 +3,15 @@ import unittest
 from world_scene.parser import WorldSceneAssembler, parse_world_scene_packet
 
 
-def world_payload(*, marker=1, armies=None, chunks=None, real_march=None):
+def world_payload(
+    *,
+    marker=1,
+    armies=None,
+    chunks=None,
+    real_march=None,
+    block_deleted=None,
+    clear_chunks=None,
+):
     slots = [{} for _ in range(31)]
     slots[1] = {
         "42": [
@@ -36,7 +44,7 @@ def world_payload(*, marker=1, armies=None, chunks=None, real_march=None):
     }
     slots[3] = {"1005": [1005, 0, "同盟"]}
     slots[6] = armies or {}
-    slots[7] = []
+    slots[7] = block_deleted or []
     slots[8] = {}
     slots[9] = []
     slots[10] = {}
@@ -44,7 +52,7 @@ def world_payload(*, marker=1, armies=None, chunks=None, real_march=None):
     slots[12] = {}
     slots[13] = {}
     slots[14] = chunks or {}
-    slots[15] = {}
+    slots[15] = clear_chunks or {}
     slots[16] = {}
     slots[17] = None
     slots[18] = marker
@@ -169,6 +177,25 @@ class WorldSceneParserTest(unittest.TestCase):
         self.assertFalse(assembler.apply(mid).snapshot_complete)
         self.assertTrue(assembler.apply(final).snapshot_complete)
         self.assertEqual(assembler.last_completed_server_order_id, 8)
+
+    def test_assembler_rejects_stale_5028_and_allows_special_bypass(self):
+        assembler = WorldSceneAssembler()
+        final = parse_world_scene_packet(
+            5026, repr(world_payload(marker=8)), "final", 1
+        )
+        assembler.apply(final)
+
+        stale = parse_world_scene_packet(
+            5028, repr(world_payload(marker=7)), "stale", 2
+        )
+        stale_result = assembler.apply(stale)
+        self.assertFalse(stale_result.accepted)
+        self.assertEqual(stale_result.reason, "STALE_5028")
+
+        bypass = parse_world_scene_packet(
+            5028, repr(world_payload(marker=-999999999)), "bypass", 3
+        )
+        self.assertTrue(assembler.apply(bypass).accepted)
 
 
 if __name__ == "__main__":

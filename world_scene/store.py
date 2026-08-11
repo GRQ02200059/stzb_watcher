@@ -167,6 +167,11 @@ class WorldSceneStore:
             )
 
     def _upsert_tiles(self, packet: WorldScenePacket, seq: int) -> None:
+        for wid, chunk_ids in packet.clear_chunks.items():
+            # 当前投影只承载 WORLD_CITY chunk("0")；5028 clearChunks 指定 "0"
+            # 时需要移除对应城市/地块投影，避免前端继续展示已清除的旧城池。
+            if "0" in chunk_ids:
+                self.conn.execute("DELETE FROM world_tiles WHERE wid=?", (wid,))
         for tile in packet.tiles.values():
             self.conn.execute(
                 """
@@ -217,7 +222,10 @@ class WorldSceneStore:
             )
 
     def _upsert_armies(self, packet: WorldScenePacket, seq: int) -> None:
-        for army_id in packet.direct_deleted_army_ids:
+        deleted_army_ids = set(packet.direct_deleted_army_ids) | set(
+            packet.block_deleted_army_ids
+        )
+        for army_id in deleted_army_ids:
             self.conn.execute(
                 "UPDATE world_armies SET deleted_at_seq=? WHERE army_id=?",
                 (seq, army_id),
@@ -333,9 +341,20 @@ class WorldSceneStore:
     def active_armies(self) -> List[Dict[str, Any]]:
         rows = self.conn.execute(
             """
-            SELECT * FROM world_armies
-            WHERE deleted_at_seq IS NULL
-            ORDER BY end_time, army_id
+            SELECT
+                a.*,
+                u.name AS owner_name,
+                u.union_id AS owner_union_id,
+                COALESCE(un.name, u.union_name) AS owner_union_name,
+                t.name AS target_name,
+                t.force AS target_force,
+                t.union_id AS target_union_id
+            FROM world_armies a
+            LEFT JOIN world_map_users u ON u.user_id = a.user_id
+            LEFT JOIN world_unions un ON un.union_id = u.union_id
+            LEFT JOIN world_tiles t ON t.wid = a.wid_to
+            WHERE a.deleted_at_seq IS NULL
+            ORDER BY a.end_time, a.army_id
             """
         ).fetchall()
         return [dict(row) for row in rows]

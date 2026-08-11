@@ -143,21 +143,27 @@ function renderWsArmy(armies){
   if(!body) return;
   if(cnt) cnt.textContent = `${armies.length} 支`;
   if(!armies.length){
-    body.innerHTML = `<tr><td colspan='14'><div class='ws-empty'>暂无活跃部队。MapArmyTuple (slot[6]) 会记录部队出发/目标/状态/士气与战报串。</div></td></tr>`;
+    body.innerHTML = `<tr><td colspan='18'><div class='ws-empty'>暂无活跃部队。MapArmyTuple (slot[6]) 会记录部队出发/目标/状态/士气与战报串。</div></td></tr>`;
     return;
   }
   body.innerHTML = armies.map(a=>{
+    const owner = a.owner_name ? `${a.owner_name} (${a.user_id})` : (a.user_id || '');
+    const target = a.target_name || '';
     return `<tr>
       <td style='font-family:var(--font-mono)'>${esc(a.army_id)}</td>
       <td>${esc(a.state)}</td>
-      <td>${a.user_id?esc(a.user_id):''}</td>
+      <td>${esc(owner)}</td>
+      <td>${esc(a.owner_union_name||'')}</td>
       <td>${esc(wsWid(a.wid_from))}</td>
       <td style='color:var(--gold)'>${esc(wsWid(a.wid_to))}</td>
+      <td>${esc(target)}</td>
       <td>${a.target_type?esc(a.target_type):''}</td>
       <td>${esc(wsWid(a.reside_wid))}</td>
       <td>${esc(wsWid(a.stay_wid))}</td>
       <td style='font-size:.78rem'>${esc(a.army_hero_type||'')}</td>
       <td>${a.morale?esc(a.morale):''}</td>
+      <td style='font-size:.78rem;color:var(--text2)'>${esc(a.buff_ids||'')}</td>
+      <td>${esc(wsWid(a.obstacle_wid))}</td>
       <td style='color:var(--text2)'>${a.real_march_id?esc(a.real_march_id):''}</td>
       <td style='font-size:.78rem'>${esc(wsTime(a.begin_time))}</td>
       <td style='font-size:.78rem'>${esc(wsTime(a.end_time))}</td>

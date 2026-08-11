@@ -103,7 +103,11 @@ class WorldSceneApiTest(unittest.TestCase):
     def test_armies_returns_active_rows(self):
         response = self.client.get("/api/world/armies")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.get_json()["armies"][0]["army_id"], 1001)
+        row = response.get_json()["armies"][0]
+        self.assertEqual(row["army_id"], 1001)
+        self.assertEqual(row["owner_name"], "主公")
+        self.assertEqual(row["owner_union_name"], "同盟")
+        self.assertEqual(row["target_name"], "土地名")
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ realtime_writer.py
 import sqlite3, json, os, time, glob, threading, queue, sys
 from datetime import datetime
 from collections import deque
-from world_scene.parser import parse_world_scene_packet
+from world_scene.parser import WorldSceneAssembler, parse_world_scene_packet
 from world_scene.store import WorldSceneStore
 
 APP_DIR      = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
@@ -22,6 +22,7 @@ _writer_db_lock = threading.Lock()
 _writer_db_path = DB_PATH
 _writer_cap_dir = CAP_DIR
 _cap_dir_changed = False  # 切换账号时置 True，让 writer 重置 seen_files
+_default_world_scene_assembler = WorldSceneAssembler()
 
 
 def _get_writer_db_path():
@@ -177,7 +178,7 @@ def push_event(evt_type, data):
         pass
 
 
-def persist_world_scene_packet(conn, msg_type, data, fpath):
+def persist_world_scene_packet(conn, msg_type, data, fpath, assembler=None):
     """Persist canonical 5026/5028 world-scene packets into normalized read tables."""
     cmd_id = {
         '000013a2': 5026,
@@ -194,6 +195,11 @@ def persist_world_scene_packet(conn, msg_type, data, fpath):
         source=os.path.basename(str(fpath or '')) or f'live:{msg_type}',
         observed_at_ms=int(time.time() * 1000),
     )
+    gate = (assembler or _default_world_scene_assembler).apply(packet)
+    if not gate.accepted:
+        return None
+    if packet.cmd_id == 5026 and not gate.snapshot_complete:
+        return None
     store = WorldSceneStore(conn)
     store.ensure_schema()
     return store.apply_packet(packet)
@@ -2244,6 +2250,7 @@ class RealtimeWriter:
     def __init__(self):
         self.seen_files = set()   # 已处理文件路径
         self.stats = {'battles': 0, 'db_sync': 0, 'notifications': 0, 'errors': 0}
+        self.world_scene_assembler = WorldSceneAssembler()
         _get_writer_db_path()  # 先更新 _writer_cap_dir 为当前账号目录
         self._load_seen_from_db()
 
@@ -2575,7 +2582,9 @@ class RealtimeWriter:
     def _dispatch(self, conn, msg_type, data, fpath):
         if msg_type in {'000013a2', '000013a4', '5026', '5028'}:
             try:
-                persist_world_scene_packet(conn, msg_type, data, fpath)
+                persist_world_scene_packet(
+                    conn, msg_type, data, fpath, self.world_scene_assembler
+                )
             except Exception as e:
                 print(f'[world_scene ERR] {msg_type}: {e}')
 
