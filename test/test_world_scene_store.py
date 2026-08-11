@@ -243,6 +243,47 @@ class WorldSceneStoreTest(unittest.TestCase):
         self.assertEqual(store.active_armies(), [])
         self.assertEqual(store.viewport(1, 2, 1, 10)["tiles"], [])
 
+    def test_persists_visual_field_and_protocol_entities(self):
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        store = WorldSceneStore(conn)
+        store.ensure_schema()
+        packet = parse_world_scene_packet(
+            5026,
+            repr(
+                world_payload(
+                    visual_field={"10004": 1},
+                    war_ships={"3001": [1, 42, 10001]},
+                    assist_armies={"4001": [2, 42, 10002]},
+                    army_groups={"5001": ["group", 42]},
+                    short_messages={"6001": ["msg", 10004]},
+                    block_ships={"7001": [3001]},
+                    block_assist_armies={"8001": [4001]},
+                )
+            ),
+            "fixture",
+            1000,
+        )
+        store.apply_packet(packet)
+
+        viewport = store.viewport(1, 2, 1, 10)
+        self.assertEqual(viewport["visualField"]["raw"], {"10004": 1})
+        entities = store.active_entities()
+        self.assertEqual(len(entities), 6)
+        categories = {row["category"] for row in entities}
+        self.assertEqual(
+            categories,
+            {
+                "war_ship",
+                "assist_army",
+                "army_group",
+                "short_message",
+                "block_ship",
+                "block_assist_army",
+            },
+        )
+        self.assertEqual(store.active_entities("war_ship")[0]["entity_id"], 3001)
+
 
 if __name__ == "__main__":
     unittest.main()

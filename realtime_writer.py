@@ -202,7 +202,24 @@ def persist_world_scene_packet(conn, msg_type, data, fpath, assembler=None):
         return None
     store = WorldSceneStore(conn)
     store.ensure_schema()
-    return store.apply_packet(packet)
+    seq = store.apply_packet(packet)
+    entity_count = sum(len(items) for items in packet.entities.values())
+    return {
+        'seq': seq,
+        'cmd_id': packet.cmd_id,
+        'server_order_id': packet.server_order_id,
+        'snapshot_complete': bool(gate.snapshot_complete),
+        'source': packet.source,
+        'counts': {
+            'tiles': len(packet.tiles),
+            'armies': len(packet.armies),
+            'deleted_armies': len(packet.direct_deleted_army_ids) + len(packet.block_deleted_army_ids),
+            'marches': len(packet.real_marches),
+            'visual_fields': 0 if packet.visual_field_raw in ({}, [], None, "") else 1,
+            'entities': entity_count,
+            'clear_chunks': len(packet.clear_chunks),
+        },
+    }
 
 
 def parse_battle_monitor_13a4(data):
@@ -2582,9 +2599,16 @@ class RealtimeWriter:
     def _dispatch(self, conn, msg_type, data, fpath):
         if msg_type in {'000013a2', '000013a4', '5026', '5028'}:
             try:
-                persist_world_scene_packet(
+                world_event = persist_world_scene_packet(
                     conn, msg_type, data, fpath, self.world_scene_assembler
                 )
+                if world_event:
+                    push_event(
+                        'world_snapshot_complete'
+                        if world_event.get('snapshot_complete')
+                        else 'world_scene_delta',
+                        world_event,
+                    )
             except Exception as e:
                 print(f'[world_scene ERR] {msg_type}: {e}')
 

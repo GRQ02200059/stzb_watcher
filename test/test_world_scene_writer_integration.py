@@ -26,6 +26,29 @@ class WorldSceneWriterIntegrationTest(unittest.TestCase):
             finally:
                 conn.close()
 
+    def test_process_data_pushes_world_scene_sse_event(self):
+        with tempfile.NamedTemporaryFile(suffix=".db") as tmp:
+            def connect():
+                conn = sqlite3.connect(tmp.name)
+                conn.row_factory = sqlite3.Row
+                return conn
+
+            events = []
+            with patch.object(realtime_writer, "get_db", side_effect=connect), patch.object(
+                realtime_writer, "push_event", side_effect=lambda t, d: events.append((t, d))
+            ):
+                writer = realtime_writer.RealtimeWriter()
+                writer.process_data(
+                    "5026",
+                    world_payload(marker=8, visual_field={"10004": 1}),
+                    "final",
+                )
+
+            self.assertEqual(len(events), 1)
+            self.assertEqual(events[0][0], "world_snapshot_complete")
+            self.assertEqual(events[0][1]["server_order_id"], 8)
+            self.assertEqual(events[0][1]["counts"]["visual_fields"], 1)
+
     def test_process_data_uses_world_scene_assembler_gate(self):
         with tempfile.NamedTemporaryFile(suffix=".db") as tmp:
             def connect():

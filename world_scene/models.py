@@ -71,13 +71,21 @@ class WorldRealMarch:
 
 
 @dataclass(frozen=True)
+class WorldSceneEntity:
+    category: str
+    entity_id: int
+    raw: Any
+    deleted: bool = False
+
+
+@dataclass(frozen=True)
 class WorldScenePacket:
     cmd_id: int
     source: str
     observed_at_ms: int
     server_order_id: int
     payload_len: int
-    visual_field_raw: Dict[str, Any]
+    visual_field_raw: Any
     users: Dict[int, WorldMapUser] = field(default_factory=dict)
     unions: Dict[int, Tuple[int, int, str]] = field(default_factory=dict)
     armies: Dict[int, WorldArmy] = field(default_factory=dict)
@@ -88,6 +96,7 @@ class WorldScenePacket:
     tiles: Dict[int, WorldTile] = field(default_factory=dict)
     clear_chunks: Dict[int, Tuple[str, ...]] = field(default_factory=dict)
     real_marches: Dict[int, WorldRealMarch] = field(default_factory=dict)
+    entities: Dict[str, Dict[int, WorldSceneEntity]] = field(default_factory=dict)
     raw_payload: str = ""
 
 

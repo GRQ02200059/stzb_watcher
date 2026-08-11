@@ -234,6 +234,24 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
   font-family:var(--font-body);
 }
 
+.ws-grid{
+  display:grid;gap:2px;padding:10px;background:#070b12;
+  border-bottom:1px solid var(--border);overflow:auto;max-height:520px;
+}
+.ws-cell{
+  min-width:34px;height:34px;border:1px solid #142033;border-radius:4px;
+  background:#090f18;color:var(--text2);font-size:.58rem;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  line-height:1.05;position:relative;overflow:hidden;
+}
+.ws-cell.fog{opacity:.35;background:#06080d;border-color:#101722;}
+.ws-cell.visible{box-shadow:inset 0 0 0 1px #3ab8c855;}
+.ws-cell.city{border-color:var(--gold);color:var(--gold);background:#161307;}
+.ws-cell.army::after{content:'';position:absolute;right:3px;top:3px;width:6px;height:6px;border-radius:50%;background:var(--cyan);}
+.ws-cell .name{font-size:.54rem;color:var(--text);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ws-entity-summary{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.ws-entity-pill{border:1px solid var(--border);background:var(--panel2);border-radius:999px;padding:4px 10px;font-size:.72rem;color:var(--text2);}
+
 /* ===== PROGRESS BAR ===== */
 .prog{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:4px;}
 .prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;transition:width .5s;}XiaoWei',serif;}
@@ -1292,6 +1310,7 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
       <button class='ws-subtab active' data-ws='map' onclick='wsSwitch("map",this)'>🗺 地图视野</button>
       <button class='ws-subtab' data-ws='march' onclick='wsSwitch("march",this)'>🧭 实时行军</button>
       <button class='ws-subtab' data-ws='army' onclick='wsSwitch("army",this)'>🛰 战场监控</button>
+      <button class='ws-subtab' data-ws='entity' onclick='wsSwitch("entity",this)'>📡 协议广度</button>
     </div>
     <button class='btn btn-primary' onclick='loadWorldScene()'>🔄 刷新</button>
     <span id='ws-updated' style='color:var(--text2);font-size:.72rem'></span>
@@ -1302,18 +1321,19 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
   <div id='ws-view-map'>
     <div class='filters' style='gap:8px;flex-wrap:wrap'>
       <span style='color:var(--text2);font-size:.74rem'>视窗范围 (row/col)</span>
-      <input id='ws-row-up' placeholder='rowUp' value='0' style='width:78px'/>
+      <input id='ws-row-up' placeholder='rowUp' value='1' style='width:78px'/>
       <span style='color:var(--text2)'>~</span>
-      <input id='ws-row-down' placeholder='rowDown' value='99999' style='width:78px'/>
+      <input id='ws-row-down' placeholder='rowDown' value='20' style='width:78px'/>
       <span style='color:var(--text2);margin-left:6px'>行</span>
-      <input id='ws-col-left' placeholder='colLeft' value='0' style='width:78px'/>
+      <input id='ws-col-left' placeholder='colLeft' value='1' style='width:78px'/>
       <span style='color:var(--text2)'>~</span>
-      <input id='ws-col-right' placeholder='colRight' value='99999' style='width:78px'/>
+      <input id='ws-col-right' placeholder='colRight' value='20' style='width:78px'/>
       <span style='color:var(--text2);margin-left:6px'>列</span>
       <button class='btn btn-primary' onclick='loadWorldScene()'>查询视窗</button>
     </div>
     <div class='tbl-wrap'>
-      <div class='tbl-head'><h3>🗺 世界城池 · WORLD_CITY 投影</h3><span class='hdr-stat' id='ws-map-count'></span></div>
+      <div class='tbl-head'><h3>🗺 世界地图网格 · WORLD_CITY / visualField</h3><span class='hdr-stat' id='ws-map-count'></span></div>
+      <div id='ws-grid' class='ws-grid'></div>
       <div class='tbl-scroll'>
         <table><thead><tr>
           <th>WID</th><th>坐标(行,列)</th><th>类型</th><th>城池名</th><th>占领方UID</th><th>同盟</th><th>势力</th><th>保护到期</th><th>驻守到期</th><th>视野+</th><th>stateId</th>
@@ -1345,6 +1365,22 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
           <th>部队ID</th><th>状态</th><th>玩家</th><th>同盟</th><th>出发</th><th>目标</th><th>目标名</th><th>目标类型</th><th>驻扎</th><th>停留</th><th>兵种</th><th>士气</th><th>Buff</th><th>障碍</th><th>行军ID</th><th>开始</th><th>结束</th><th>战报</th>
         </tr></thead>
         <tbody id='ws-army-body'></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 协议广度 -->
+  <div id='ws-view-entity' style='display:none'>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>📡 5026/5028 广度槽位 · warShips / assistArmies / armyGroups / shortMessages</h3><span class='hdr-stat' id='ws-entity-count'></span></div>
+      <div style='padding:10px 12px;border-bottom:1px solid var(--border)'>
+        <div class='ws-entity-summary' id='ws-entity-summary'></div>
+      </div>
+      <div class='tbl-scroll'>
+        <table><thead><tr>
+          <th>类别</th><th>ID</th><th>来源seq</th><th>原始内容</th>
+        </tr></thead>
+        <tbody id='ws-entity-body'></tbody></table>
       </div>
     </div>
   </div>

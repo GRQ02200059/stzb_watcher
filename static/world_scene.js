@@ -3,6 +3,8 @@
 // 三个子视图：地图视野 / 实时行军 / 战场监控。严格只读，不发包、不执行动作。
 
 let _wsView = 'map';
+let _wsStreamStarted = false;
+let _wsReloadTimer = null;
 
 // 城池类型映射（与旧地图页保持一致的着色/命名习惯）
 const WS_CITY_TYPE = {
@@ -42,9 +44,11 @@ function wsSwitch(view, el){
   document.getElementById('ws-view-map').style.display   = view==='map'   ? '' : 'none';
   document.getElementById('ws-view-march').style.display = view==='march' ? '' : 'none';
   document.getElementById('ws-view-army').style.display  = view==='army'  ? '' : 'none';
+  document.getElementById('ws-view-entity').style.display = view==='entity' ? '' : 'none';
 }
 
 async function loadWorldScene(){
+  initWorldSceneStream();
   const upd = document.getElementById('ws-updated');
   if(upd) upd.textContent = '加载中…';
 
@@ -53,36 +57,65 @@ async function loadWorldScene(){
   const colLeft  = parseInt(document.getElementById('ws-col-left').value)||0;
   const colRight = parseInt(document.getElementById('ws-col-right').value)||99999;
 
-  const [vp, armies, marches] = await Promise.all([
+  const [vp, armies, marches, entities] = await Promise.all([
     apiFetch(`/api/world/viewport?rowUp=${rowUp}&rowDown=${rowDown}&colLeft=${colLeft}&colRight=${colRight}`),
     apiFetch('/api/world/armies'),
-    apiFetch('/api/world/marches')
+    apiFetch('/api/world/marches'),
+    apiFetch('/api/world/entities')
   ]);
 
   const tiles     = (vp && vp.tiles)      || [];
   const armyRows  = (armies && armies.armies)   || [];
   const marchRows = (marches && marches.marches) || [];
+  const entityRows = (entities && entities.entities) || [];
 
-  renderWsCards(tiles, armyRows, marchRows);
-  renderWsMap(tiles);
+  renderWsCards(tiles, armyRows, marchRows, entityRows, vp && vp.visualField);
+  renderWsMap(tiles, armyRows, vp && vp.visualField, {rowUp,rowDown,colLeft,colRight});
   renderWsMarch(marchRows);
   renderWsArmy(armyRows);
+  renderWsEntities(entityRows);
 
   if(upd) upd.textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN',{hour12:false});
 }
 
-function renderWsCards(tiles, armies, marches){
+function initWorldSceneStream(){
+  if(_wsStreamStarted || typeof EventSource === 'undefined') return;
+  _wsStreamStarted = true;
+  try{
+    const es = new EventSource('/api/stream');
+    es.onmessage = ev => {
+      let msg = null;
+      try{ msg = JSON.parse(ev.data); }catch(_){ return; }
+      if(!msg || !['world_snapshot_complete','world_scene_delta'].includes(msg.type)) return;
+      const src = document.getElementById('ws-source');
+      if(src) src.textContent = `实时推送 · ${msg.type} · seq ${msg.data&&msg.data.seq || ''}`;
+      if(document.getElementById('tab30')?.classList.contains('active')){
+        clearTimeout(_wsReloadTimer);
+        _wsReloadTimer = setTimeout(loadWorldScene, 350);
+      }
+    };
+  }catch(e){
+    const src = document.getElementById('ws-source');
+    if(src) src.textContent = '实时推送不可用 · ' + e;
+  }
+}
+
+function renderWsCards(tiles, armies, marches, entities, visualField){
   const wrap = document.getElementById('ws-cards');
   if(!wrap) return;
   const cities = tiles.filter(t=>t.name).length;
+  const vf = visualField && visualField.raw ? 1 : 0;
   wrap.innerHTML =
     `<div class='stat-card'><div class='val'>${tiles.length}</div><div class='lbl'>视窗城池格</div></div>` +
     `<div class='stat-card'><div class='val' style='color:var(--gold)'>${cities}</div><div class='lbl'>具名城池</div></div>` +
     `<div class='stat-card'><div class='val' style='color:var(--cyan)'>${armies.length}</div><div class='lbl'>活跃部队</div></div>` +
-    `<div class='stat-card'><div class='val' style='color:var(--green)'>${marches.length}</div><div class='lbl'>实时行军</div></div>`;
+    `<div class='stat-card'><div class='val' style='color:var(--green)'>${marches.length}</div><div class='lbl'>实时行军</div></div>` +
+    `<div class='stat-card'><div class='val' style='color:var(--purple)'>${entities.length}</div><div class='lbl'>广度实体</div></div>` +
+    `<div class='stat-card'><div class='val' style='color:var(--text2)'>${vf}</div><div class='lbl'>visualField</div></div>`;
 }
 
-function renderWsMap(tiles){
+function renderWsMap(tiles, armies, visualField, bounds){
+  renderWsGrid(tiles, armies, visualField, bounds);
   const body = document.getElementById('ws-map-body');
   const cnt  = document.getElementById('ws-map-count');
   if(!body) return;
@@ -108,6 +141,61 @@ function renderWsMap(tiles){
       <td style='color:var(--text2)'>${t.state_id!=null?esc(t.state_id):''}</td>
     </tr>`;
   }).join('');
+}
+
+function visualWidSet(visualField){
+  const s = new Set();
+  const raw = visualField && visualField.raw;
+  if(!raw) return s;
+  if(Array.isArray(raw)){
+    raw.forEach(v=>{
+      const n = Number(v);
+      if(Number.isInteger(n) && n > 0 && n < 1000000000) s.add(n);
+    });
+    return s;
+  }
+  Object.keys(raw).forEach(k=>{
+    const n = Number(k);
+    if(Number.isInteger(n) && n > 0) s.add(n);
+  });
+  return s;
+}
+
+function renderWsGrid(tiles, armies, visualField, bounds){
+  const grid = document.getElementById('ws-grid');
+  if(!grid) return;
+  const rows = Math.max(0, bounds.rowDown - bounds.rowUp + 1);
+  const cols = Math.max(0, bounds.colRight - bounds.colLeft + 1);
+  if(rows <= 0 || cols <= 0 || rows * cols > 1600){
+    grid.style.display = '';
+    grid.style.gridTemplateColumns = '';
+    grid.innerHTML = `<div class='ws-empty'>视窗过大，网格渲染限制为 1600 格以内。请缩小 row/col 范围。</div>`;
+    return;
+  }
+  const byWid = new Map(tiles.map(t=>[Number(t.wid), t]));
+  const armyByWid = new Map();
+  (armies||[]).forEach(a=>{
+    const wid = Number(a.stay_wid || a.reside_wid || a.wid_to || 0);
+    if(wid) armyByWid.set(wid, (armyByWid.get(wid)||0)+1);
+  });
+  const visual = visualWidSet(visualField);
+  const cells = [];
+  for(let r=bounds.rowUp; r<=bounds.rowDown; r++){
+    for(let c=bounds.colLeft; c<=bounds.colRight; c++){
+      const wid = r*10000+c;
+      const t = byWid.get(wid);
+      const visible = !!t || visual.has(wid);
+      const city = !!(t && (t.name || t.city_type));
+      const army = armyByWid.has(wid);
+      const label = t && t.name ? t.name : `${r},${c}`;
+      const type = t ? (WS_CITY_TYPE[t.city_type] || ('type'+t.city_type)) : '';
+      cells.push(`<div class='ws-cell ${visible?'visible':'fog'} ${city?'city':''} ${army?'army':''}' title='WID ${wid} ${esc(type)} ${esc(t&&t.name||'')}'>
+        <span>${c}</span><span class='name'>${esc(label)}</span>
+      </div>`);
+    }
+  }
+  grid.style.gridTemplateColumns = `repeat(${cols}, minmax(34px, 1fr))`;
+  grid.innerHTML = cells.join('');
 }
 
 function renderWsMarch(marches){
@@ -170,4 +258,27 @@ function renderWsArmy(armies){
       <td style='font-size:.78rem;max-width:180px'>${esc(a.battle_show||'')}</td>
     </tr>`;
   }).join('');
+}
+
+function renderWsEntities(rows){
+  const body = document.getElementById('ws-entity-body');
+  const cnt = document.getElementById('ws-entity-count');
+  const summary = document.getElementById('ws-entity-summary');
+  if(!body) return;
+  if(cnt) cnt.textContent = `${rows.length} 条`;
+  const counts = {};
+  rows.forEach(r=>{ counts[r.category]=(counts[r.category]||0)+1; });
+  if(summary){
+    summary.innerHTML = Object.keys(counts).sort().map(k=>`<span class='ws-entity-pill'>${esc(k)} · ${counts[k]}</span>`).join('') || `<span class='ws-entity-pill'>暂无广度实体</span>`;
+  }
+  if(!rows.length){
+    body.innerHTML = `<tr><td colspan='4'><div class='ws-empty'>暂无 warShips / assistArmies / armyGroups / shortMessages 等广度槽位数据。</div></td></tr>`;
+    return;
+  }
+  body.innerHTML = rows.map(r=>`<tr>
+    <td>${esc(r.category)}</td>
+    <td style='font-family:var(--font-mono)'>${esc(r.entity_id)}</td>
+    <td>${esc(r.source_seq)}</td>
+    <td style='font-family:var(--font-mono);font-size:.72rem;max-width:720px'>${esc(JSON.stringify(r.raw))}</td>
+  </tr>`).join('');
 }

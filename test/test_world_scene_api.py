@@ -19,6 +19,7 @@ class WorldSceneApiTest(unittest.TestCase):
             5026,
             repr(
                 world_payload(
+                    visual_field={"10004": 1},
                     armies={
                         "1001": [
                             1,
@@ -83,6 +84,8 @@ class WorldSceneApiTest(unittest.TestCase):
                             ]
                         }
                     },
+                    war_ships={"3001": [1, 42, 10001]},
+                    short_messages={"6001": ["msg", 10004]},
                 )
             ),
             "fixture",
@@ -98,7 +101,9 @@ class WorldSceneApiTest(unittest.TestCase):
             "/api/world/viewport?rowUp=1&rowDown=2&colLeft=1&colRight=10"
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.get_json()["tiles"][0]["wid"], 10004)
+        payload = response.get_json()
+        self.assertEqual(payload["tiles"][0]["wid"], 10004)
+        self.assertEqual(payload["visualField"]["raw"], {"10004": 1})
 
     def test_armies_returns_active_rows(self):
         response = self.client.get("/api/world/armies")
@@ -108,6 +113,16 @@ class WorldSceneApiTest(unittest.TestCase):
         self.assertEqual(row["owner_name"], "主公")
         self.assertEqual(row["owner_union_name"], "同盟")
         self.assertEqual(row["target_name"], "土地名")
+
+    def test_entities_endpoint_returns_protocol_breadth_rows(self):
+        response = self.client.get("/api/world/entities")
+        self.assertEqual(response.status_code, 200)
+        rows = response.get_json()["entities"]
+        self.assertEqual({row["category"] for row in rows}, {"war_ship", "short_message"})
+
+        filtered = self.client.get("/api/world/entities?category=war_ship")
+        self.assertEqual(filtered.status_code, 200)
+        self.assertEqual(filtered.get_json()["entities"][0]["entity_id"], 3001)
 
 
 if __name__ == "__main__":

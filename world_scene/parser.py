@@ -7,6 +7,7 @@ from .models import (
     WorldArmy,
     WorldMapUser,
     WorldRealMarch,
+    WorldSceneEntity,
     WorldSceneApplyResult,
     WorldScenePacket,
     WorldTile,
@@ -46,6 +47,28 @@ def _entries(value: Any) -> Iterable[Tuple[int, Any]]:
 
 def _string(value: Any) -> str:
     return "" if value is None else str(value)
+
+
+def _visual_field(value: Any) -> Any:
+    if isinstance(value, (dict, list)):
+        return value
+    return {} if value in (None, "") else value
+
+
+def _generic_entities(category: str, value: Any) -> dict[int, WorldSceneEntity]:
+    entities = {}
+    if isinstance(value, dict):
+        for entity_id, raw in _entries(value):
+            deleted = isinstance(raw, list) and bool(raw) and _as_int(raw[0], -1) == 0
+            entities[entity_id] = WorldSceneEntity(category, entity_id, raw, deleted)
+    elif isinstance(value, list):
+        for idx, raw in enumerate(value):
+            if raw in ({}, [], None, ""):
+                continue
+            # list 型槽位没有稳定实体 id 时，用 1-based index 保留顺序。
+            entity_id = idx + 1
+            entities[entity_id] = WorldSceneEntity(category, entity_id, raw, False)
+    return entities
 
 
 def parse_world_scene_packet(
@@ -152,13 +175,22 @@ def parse_world_scene_packet(
     if isinstance(payload[20], list) and len(payload[20]) >= 2:
         block_info = (_as_int(payload[20][0]), _as_int(payload[20][1]))
 
+    entities = {
+        "war_ship": _generic_entities("war_ship", payload[8]),
+        "assist_army": _generic_entities("assist_army", payload[10]),
+        "army_group": _generic_entities("army_group", payload[12]),
+        "short_message": _generic_entities("short_message", payload[13]),
+        "block_ship": _generic_entities("block_ship", payload[22]),
+        "block_assist_army": _generic_entities("block_assist_army", payload[23]),
+    }
+
     return WorldScenePacket(
         cmd_id=cmd_id,
         source=source,
         observed_at_ms=observed_at_ms,
         server_order_id=_as_int(payload[18]),
         payload_len=len(payload),
-        visual_field_raw=payload[0] if isinstance(payload[0], dict) else {},
+        visual_field_raw=_visual_field(payload[0]),
         users=users,
         unions=unions,
         armies=armies,
@@ -181,6 +213,7 @@ def parse_world_scene_packet(
             if isinstance(values, list)
         },
         real_marches=real_marches,
+        entities=entities,
         raw_payload=decoded_text,
     )
 

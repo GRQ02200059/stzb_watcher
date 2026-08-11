@@ -22,6 +22,20 @@ class WorldSceneStore:
                 payload_len INTEGER NOT NULL,
                 raw_payload TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS world_visual_fields (
+                source_seq INTEGER PRIMARY KEY,
+                cmd_id INTEGER NOT NULL,
+                server_order_id INTEGER NOT NULL,
+                raw_json TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS world_scene_entities (
+                category TEXT NOT NULL,
+                entity_id INTEGER NOT NULL,
+                raw_json TEXT NOT NULL,
+                source_seq INTEGER NOT NULL,
+                deleted_at_seq INTEGER,
+                PRIMARY KEY(category, entity_id)
+            );
             CREATE TABLE IF NOT EXISTS world_map_users (
                 user_id INTEGER PRIMARY KEY,
                 name TEXT,
@@ -95,6 +109,7 @@ class WorldSceneStore:
             );
             CREATE INDEX IF NOT EXISTS idx_world_tiles_row_col ON world_tiles(row, col);
             CREATE INDEX IF NOT EXISTS idx_world_armies_user ON world_armies(user_id);
+            CREATE INDEX IF NOT EXISTS idx_world_scene_entities_category ON world_scene_entities(category);
             """
         )
         self.conn.commit()
@@ -117,13 +132,31 @@ class WorldSceneStore:
             ),
         )
         seq = int(cur.lastrowid)
+        self._insert_visual_field(packet, seq)
         self._upsert_users(packet, seq)
         self._upsert_unions(packet, seq)
         self._upsert_tiles(packet, seq)
         self._upsert_armies(packet, seq)
         self._upsert_real_marches(packet, seq)
+        self._upsert_entities(packet, seq)
         self.conn.commit()
         return seq
+
+    def _insert_visual_field(self, packet: WorldScenePacket, seq: int) -> None:
+        if packet.visual_field_raw in ({}, [], None, ""):
+            return
+        self.conn.execute(
+            """
+            INSERT INTO world_visual_fields(source_seq, cmd_id, server_order_id, raw_json)
+            VALUES(?,?,?,?)
+            """,
+            (
+                seq,
+                packet.cmd_id,
+                packet.server_order_id,
+                json.dumps(packet.visual_field_raw, ensure_ascii=False),
+            ),
+        )
 
     def _upsert_users(self, packet: WorldScenePacket, seq: int) -> None:
         for user in packet.users.values():
@@ -325,6 +358,38 @@ class WorldSceneStore:
                 ),
             )
 
+    def _upsert_entities(self, packet: WorldScenePacket, seq: int) -> None:
+        for entities in packet.entities.values():
+            for entity in entities.values():
+                if entity.deleted:
+                    self.conn.execute(
+                        """
+                        UPDATE world_scene_entities
+                        SET deleted_at_seq=?
+                        WHERE category=? AND entity_id=?
+                        """,
+                        (seq, entity.category, entity.entity_id),
+                    )
+                    continue
+                self.conn.execute(
+                    """
+                    INSERT INTO world_scene_entities(
+                        category, entity_id, raw_json, source_seq, deleted_at_seq
+                    )
+                    VALUES(?,?,?,?,NULL)
+                    ON CONFLICT(category, entity_id) DO UPDATE SET
+                        raw_json=excluded.raw_json,
+                        source_seq=excluded.source_seq,
+                        deleted_at_seq=NULL
+                    """,
+                    (
+                        entity.category,
+                        entity.entity_id,
+                        json.dumps(entity.raw, ensure_ascii=False),
+                        seq,
+                    ),
+                )
+
     def viewport(
         self, row_up: int, row_down: int, col_left: int, col_right: int
     ) -> Dict[str, List[Dict[str, Any]]]:
@@ -336,7 +401,22 @@ class WorldSceneStore:
             """,
             (row_up, row_down, col_left, col_right),
         ).fetchall()
-        return {"tiles": [dict(row) for row in rows]}
+        visual = self.conn.execute(
+            """
+            SELECT source_seq, cmd_id, server_order_id, raw_json
+            FROM world_visual_fields
+            ORDER BY source_seq DESC
+            LIMIT 1
+            """
+        ).fetchone()
+        visual_payload = None
+        if visual:
+            visual_payload = dict(visual)
+            try:
+                visual_payload["raw"] = json.loads(visual_payload.pop("raw_json") or "null")
+            except Exception:
+                visual_payload["raw"] = visual_payload.pop("raw_json")
+        return {"tiles": [dict(row) for row in rows], "visualField": visual_payload}
 
     def active_armies(self) -> List[Dict[str, Any]]:
         rows = self.conn.execute(
@@ -364,6 +444,36 @@ class WorldSceneStore:
             "SELECT * FROM world_real_marches ORDER BY end_time, real_march_id"
         ).fetchall()
         return [dict(row) for row in rows]
+
+    def active_entities(self, category: str | None = None) -> List[Dict[str, Any]]:
+        if category:
+            rows = self.conn.execute(
+                """
+                SELECT category, entity_id, raw_json, source_seq
+                FROM world_scene_entities
+                WHERE deleted_at_seq IS NULL AND category=?
+                ORDER BY category, entity_id
+                """,
+                (category,),
+            ).fetchall()
+        else:
+            rows = self.conn.execute(
+                """
+                SELECT category, entity_id, raw_json, source_seq
+                FROM world_scene_entities
+                WHERE deleted_at_seq IS NULL
+                ORDER BY category, entity_id
+                """
+            ).fetchall()
+        out = []
+        for row in rows:
+            item = dict(row)
+            try:
+                item["raw"] = json.loads(item.pop("raw_json") or "null")
+            except Exception:
+                item["raw"] = item.pop("raw_json")
+            out.append(item)
+        return out
 
     def backfill_legacy_views(self) -> None:
         self.conn.executescript(

@@ -42,3 +42,9 @@ def register_world_scene_api(app, get_connection):
     def api_world_marches():
         store = WorldSceneStore(get_connection())
         return jsonify({"ok": True, "marches": store.active_marches()})
+
+    @app.route("/api/world/entities")
+    def api_world_entities():
+        category = request.args.get("category") or None
+        store = WorldSceneStore(get_connection())
+        return jsonify({"ok": True, "entities": store.active_entities(category)})
