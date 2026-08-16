@@ -271,8 +271,11 @@ class DashboardCssStructureTest(unittest.TestCase):
         self.assertTrue(declarations)
         self.assertEqual(set(declarations), {"opacity", "transform"})
 
-    def test_readme_documents_hud_runtime_contract(self):
-        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    def test_hud_runtime_contract_lives_in_design_documentation(self):
+        design = (
+            ROOT
+            / "docs/superpowers/specs/2026-08-15-modular-immersive-hud-system-design.md"
+        ).read_text(encoding="utf-8")
         for token in (
             "模块化沉浸 HUD",
             "intelligence",
@@ -280,61 +283,54 @@ class DashboardCssStructureTest(unittest.TestCase):
             "organization",
             "analysis",
             "system",
-            "full",
-            "standard",
-            "reduced",
-            "/api/hud/health",
             "data-visual-domain",
             "prefers-reduced-motion",
             "208px",
         ):
-            self.assertIn(token, readme)
+            self.assertIn(token, design)
 
-    def test_readme_documents_global_modern_polish_contract(self):
+    def test_product_readme_documents_dual_platform_and_screenshot_contract(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
-        compact_readme = re.sub(r"\s+", "", readme)
+        visible_readme = re.sub(r"<!--.*?-->", "", readme, flags=re.DOTALL)
+        screenshot_names = (
+            "overview-intelligence.webp",
+            "gallery-live-army.webp",
+            "gallery-simulator.webp",
+            "gallery-research.webp",
+            "gallery-score.webp",
+            "gallery-attendance.webp",
+            "gallery-player-teams.webp",
+            "android-battlefield.webp",
+            "android-teams.webp",
+            "android-simulator.webp",
+        )
         for token in (
-            "--surface-canvas",
-            "--surface-panel",
-            "--surface-raised",
-            "--surface-overlay",
-            "--surface-modal",
-            "window.HudSystem.emit()",
-            "intelligence:risk-detected",
-            "battle:report-arrived",
-            "simulation:completed",
-            "score:recalculated",
-            "connection:restored",
-            "data:stale",
-            "operation:stage-changed",
-            "loading",
-            "refreshing",
-            "empty",
-            "stale",
-            "warning",
-            "error",
-            "Full",
-            "Standard",
-            "Reduced",
-            "4 个",
-            "6 个",
-            "35 KB",
-            "真实业务变化",
-            "实体表面",
+            "Web + Android 双端战场数据平台",
+            "核心数据模型、业务口径、阵容语义与模拟结果",
+            "| 战场 | 战场情报、地图格子、行军、实时部队、世界事件 | 支持 | 支持 |",
+            "| 模拟 | 双方配置、批量推演、结果与事件回放 | 支持 | 支持 |",
+            "http://127.0.0.1:8080",
+            "astzb/app/build/outputs/apk/debug/app-debug.apk",
+            "docs/assets/screenshots/README.md",
         ):
             with self.subTest(token=token):
                 self.assertIn(token, readme)
-
-        self.assertIn(
-            "只允许Header、Nav、Modalshell和Toast四个批准的全局空间层声明",
-            compact_readme,
+        for screenshot_name in screenshot_names:
+            with self.subTest(screenshot=screenshot_name):
+                self.assertIn(screenshot_name, readme)
+                self.assertIsNotNone(
+                    re.search(
+                        rf"<!--.*?<img[^>]+{re.escape(screenshot_name)}[^>]*>.*?-->",
+                        readme,
+                        flags=re.DOTALL,
+                    )
+                )
+        self.assertNotRegex(
+            visible_readme,
+            r"<img\b[^>]*docs/assets/screenshots/",
         )
-        self.assertIn(
-            "业务Surface全部使用实体表面，业务CSS不声明"
-            "`backdrop-filter`或`filter:blur(...)`",
-            compact_readme,
-        )
-        self.assertNotIn("少数域/业务 CSS", readme)
+        for deprecated_positioning in ("PoC", "精简版", "部分迁移", "附属端"):
+            self.assertNotIn(deprecated_positioning, readme)
 
 
 if __name__ == "__main__":
