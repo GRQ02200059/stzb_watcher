@@ -4,6 +4,68 @@ from unittest.mock import Mock
 from battle_engine_adapter import BattleEngineAdapter, _INSTALL_CLI
 
 
+LEGACY_REQUEST = {
+    "repeat": 1,
+    "blue": {
+        "morale": 100,
+        "heros": [{"id": 100027, "position": 0}],
+    },
+    "red": {
+        "morale": 100,
+        "heros": [{"id": 100013, "position": 0}],
+    },
+}
+
+REPLAY_FIXTURE = {
+    "entrySnapshots": [{"round": 0, "heroId": 100027}],
+    "roundSnapshots": [{"round": 1, "heroId": 100027}],
+    "finalSnapshots": [{"round": 1, "heroId": 100027}],
+    "events": [{"eventSeq": 0, "type": "BattleStart"}],
+    "replayActions": [{"actionSeq": 0, "actionId": 654, "encoded": "i6"}],
+    "replayText": "i6#ht",
+    "diagnostics": {
+        "semanticEventCount": 1,
+        "replayActionCount": 1,
+    },
+}
+
+CLI_FIXTURE = {
+    "ok": True,
+    "repeat": 1,
+    "attackerWins": 1,
+    "defenderWins": 0,
+    "draws": 0,
+    "firstRun": {
+        "outcome": "ATTACKER_WIN",
+        "attackerRemain": 123,
+        "defenderRemain": 0,
+        "roundsPlayed": 1,
+        "attackerHeroes": [
+            {
+                "heroId": 100027,
+                "position": 0,
+                "troops": 123,
+                "initialTroops": 9000,
+                "hurt": 8877,
+                "alive": True,
+            },
+        ],
+        "defenderHeroes": [
+            {
+                "heroId": 100013,
+                "position": 0,
+                "troops": 0,
+                "initialTroops": 9000,
+                "hurt": 9000,
+                "alive": False,
+            },
+        ],
+        "textLog": ["BattleStart"],
+        **REPLAY_FIXTURE,
+    },
+}
+
+
 class BattleEngineAdapterTest(unittest.TestCase):
     def test_converts_legacy_request_to_cli_input(self):
         adapter = BattleEngineAdapter(run_cli=Mock())
@@ -137,6 +199,71 @@ class BattleEngineAdapterTest(unittest.TestCase):
         self.assertIn("张辽", text)
         self.assertIn("发动", text)
         self.assertIn("500", text)
+
+    def test_single_result_preserves_complete_replay_contract(self):
+        adapter = BattleEngineAdapter(run_cli=Mock(return_value=CLI_FIXTURE))
+
+        result = adapter.simulate(LEGACY_REQUEST)
+        replay = result["result"]["replay"]
+
+        for key, value in REPLAY_FIXTURE.items():
+            self.assertEqual(value, replay[key])
+
+    def test_multi_result_preserves_first_run_replay(self):
+        output = {
+            **CLI_FIXTURE,
+            "repeat": 100,
+            "attackerWins": 60,
+            "defenderWins": 30,
+            "draws": 10,
+        }
+        adapter = BattleEngineAdapter(run_cli=Mock(return_value=output))
+
+        result = adapter.simulate({**LEGACY_REQUEST, "repeat": 100})
+
+        self.assertEqual(output["firstRun"], result["firstRun"])
+
+    def test_invalid_repeat_is_rejected_before_cli(self):
+        run_cli = Mock()
+        adapter = BattleEngineAdapter(run_cli=run_cli)
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "repeat must be one of 1, 100, 1000",
+        ):
+            adapter.simulate({**LEGACY_REQUEST, "repeat": 99})
+
+        run_cli.assert_not_called()
+
+    def test_team_positions_must_be_unique(self):
+        run_cli = Mock()
+        adapter = BattleEngineAdapter(run_cli=run_cli)
+        payload = {
+            **LEGACY_REQUEST,
+            "blue": {
+                "heros": [
+                    {"id": 100027, "position": 0},
+                    {"id": 100016, "position": 0},
+                ],
+            },
+        }
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "blue hero positions must be unique",
+        ):
+            adapter.simulate(payload)
+
+        run_cli.assert_not_called()
+
+    def test_engine_metadata_describes_source_mirror(self):
+        metadata = BattleEngineAdapter(run_cli=Mock()).engine_metadata()
+
+        self.assertEqual("stzb-kotlin", metadata["name"])
+        self.assertRegex(metadata["sourceCommit"], r"^[0-9a-f]{40}$")
+        self.assertEqual([1, 100, 1000], metadata["repeatOptions"])
+        self.assertEqual(1000, metadata["maxRepeat"])
+        self.assertTrue(metadata["supportsDetailedReplay"])
 
 
 class BattleEngineAdapterIntegrationTest(unittest.TestCase):

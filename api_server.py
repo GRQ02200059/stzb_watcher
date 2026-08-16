@@ -5,13 +5,23 @@
 """
 from flask import Flask, jsonify, request, Response, stream_with_context
 from flask_cors import CORS
-import sqlite3, json, os, time, threading, ast, sys
+import sqlite3, json, os, time, threading, ast, sys, hmac
+from datetime import datetime
+from pathlib import Path
 from realtime_writer import (start_writer_thread, event_queue, recent_events, _event_lock,
                              subscribe, unsubscribe, push_event,
                              parse_battle_monitor_13a4, build_battle_monitor_payload)
 import profile_manager
 from battle_engine_adapter import BattleEngineAdapter
+from intelligence.config_api import register_intelligence_config_api
+from intelligence.config_repository import IntelligenceConfigRepository
+from intelligence.live_army_api import register_live_army_api
+from intelligence.lineup_api import register_intelligence_lineup_api
+from intelligence.research_api import register_intelligence_research_api
+from intelligence.world_api import register_world_intelligence_api
 from query_agent.api import register_query_agent_api
+from score_center.api import register_score_center_api
+from score_center.repository import ScoreRepository
 from world_scene.api import register_world_scene_api
 from world_scene.store import WorldSceneStore
 
@@ -27,6 +37,23 @@ REGION_NAMES = {
     1: '司隶', 2: '雍州', 3: '兖州', 4: '豫州', 5: '冀州', 6: '青州',
     7: '徐州', 8: '凉州', 9: '并州', 10: '扬州', 11: '益州', 12: '幽州', 13: '荆州'
 }
+
+
+def _local_now():
+    return datetime.now()
+
+
+def _local_day_start_timestamp(value=None):
+    current = value or _local_now()
+    return int(current.replace(hour=0, minute=0, second=0, microsecond=0).timestamp())
+
+
+def _asset_version(asset_name):
+    path = os.path.join(RESOURCE_DIR, 'static', asset_name)
+    try:
+        return str(int(os.path.getmtime(path)))
+    except OSError:
+        return '0'
 
 _current_db_path = DEFAULT_DB
 _db_lock         = threading.Lock()
@@ -248,17 +275,60 @@ def _profile_watcher():
         time.sleep(2)
 
 
-# 启动 profile 监控线程
-_watcher_thread = threading.Thread(target=_profile_watcher, daemon=True, name='profile-watcher')
-_watcher_thread.start()
-
 # 初始化当前 DB
 _current_db_path = _load_profile()
 app = Flask(__name__, static_folder=os.path.join(RESOURCE_DIR, 'static'), static_url_path='/static')
 CORS(app)
 
-# 启动实时写库线程
-_writer = start_writer_thread()
+_PROTECTED_WRITE_ENDPOINTS = {
+    'api_switch_profile',
+    'api_refresh',
+    'api_profile_switch',
+    'api_schedule_generate',
+    'score_center_create_rule',
+    'score_center_activate_rule',
+    'score_center_add_adjustment',
+    'score_center_delete_adjustment',
+    'score_center_recalc',
+    'api_task_create',
+    'api_task_delete',
+    'api_task_statistics',
+    'api_task_clear_reports',
+}
+
+
+@app.before_request
+def require_optional_api_token():
+    expected = os.environ.get('STZB_API_TOKEN', '')
+    if not expected or request.endpoint not in _PROTECTED_WRITE_ENDPOINTS:
+        return None
+    supplied = request.headers.get('X-STZB-Token', '')
+    authorization = request.headers.get('Authorization', '')
+    if not supplied and authorization.lower().startswith('bearer '):
+        supplied = authorization[7:].strip()
+    if supplied and hmac.compare_digest(supplied, expected):
+        return None
+    return jsonify({
+        'ok': False,
+        'error': 'unauthorized',
+        'message': '写操作需要有效的 STZB API Token',
+    }), 401
+
+
+class _IdleWriter:
+    def __init__(self):
+        self.stats = {
+            'battles': 0,
+            'db_sync': 0,
+            'notifications': 0,
+            'errors': 0,
+        }
+
+
+_writer = _IdleWriter()
+_watcher_thread = None
+_runtime_started = False
+_runtime_start_lock = threading.Lock()
 
 def _sync_schema_from_reference(db_path, ref_db_path):
     """把 db_path 的表结构补齐到 ref_db_path（只补表/补列，不删不改已有列）"""
@@ -410,16 +480,37 @@ def ensure_all_tables(db_path):
         _ensure_task_tables(conn)
     except Exception as e:
         print(f'[init] ensure task tables: {e}')
+    try:
+        # 10. 可配置赛季积分中心
+        ScoreRepository(conn).ensure_schema()
+    except Exception as e:
+        print(f'[init] ensure score center schema: {e}')
     _table_info_cache.pop(abs_db_path, None)
     conn.close()
     print(f'[init] 全部表初始化完成: {db_path}')
 
 
-try:
-    ensure_all_tables(_current_db_path)
-    _initialized_dbs.add(os.path.abspath(_current_db_path))
-except Exception as e:
-    print(f'[init] startup ensure_all_tables failed: {e}')
+def start_runtime_services(start_writer=True):
+    """显式启动建表、档案监控和实时入库；模块导入阶段不产生后台副作用。"""
+    global _runtime_started, _watcher_thread, _writer
+    with _runtime_start_lock:
+        if _runtime_started:
+            return
+        try:
+            ensure_all_tables(_current_db_path)
+            _initialized_dbs.add(os.path.abspath(_current_db_path))
+        except Exception as e:
+            print(f'[init] startup ensure_all_tables failed: {e}')
+
+        _watcher_thread = threading.Thread(
+            target=_profile_watcher,
+            daemon=True,
+            name='profile-watcher',
+        )
+        _watcher_thread.start()
+        if start_writer:
+            _writer = start_writer_thread()
+        _runtime_started = True
 
 
 def get_db():
@@ -443,7 +534,39 @@ def _world_scene_connection():
 
 
 register_world_scene_api(app, _world_scene_connection)
-register_query_agent_api(app, get_db)
+register_world_intelligence_api(app, _world_scene_connection)
+register_live_army_api(app, _world_scene_connection)
+_intelligence_snapshot_root = os.path.join(
+    BASE_DIR, 'data', 'intelligence', 'client-9.2.2'
+)
+_intelligence_config_repository = IntelligenceConfigRepository(
+    _intelligence_snapshot_root
+)
+register_intelligence_config_api(
+    app,
+    _intelligence_snapshot_root,
+    repository=_intelligence_config_repository,
+)
+_intelligence_research_root = os.path.join(
+    _intelligence_snapshot_root, 'research'
+)
+_intelligence_research_repository = register_intelligence_research_api(
+    app,
+    _intelligence_research_root,
+    config_repository=_intelligence_config_repository,
+)
+register_intelligence_lineup_api(
+    app,
+    get_db,
+    _intelligence_config_repository,
+)
+register_query_agent_api(
+    app,
+    get_db,
+    intelligence_root=_intelligence_snapshot_root,
+    research_repository=_intelligence_research_repository,
+)
+register_score_center_api(app, get_db)
 
 def get_bv2_cols(conn):
     """缓存 battles_v2 列信息，避免接口里频繁 PRAGMA table_info。"""
@@ -1212,6 +1335,177 @@ def api_status():
     conn.close()
     return jsonify({'ok': True, 'db': _current_db_path, 'stats': stats})
 
+
+def _cc_scalar(conn, sql, args=(), default=0):
+    """Command Center 聚合查询：可选表缺失时返回稳定默认值。"""
+    try:
+        row = conn.execute(sql, args).fetchone()
+        if row is None or row[0] is None:
+            return default
+        return row[0]
+    except sqlite3.Error:
+        return default
+
+
+def _cc_rows(conn, sql, args=()):
+    try:
+        return rows_to_list(conn.execute(sql, args).fetchall())
+    except sqlite3.Error:
+        return []
+
+
+def _command_center_alerts(armies, writer_stats=None, latest_battle_time=0, now=None):
+    alerts = []
+    now = int(time.time()) if now is None else int(now)
+    writer_stats = writer_stats or {}
+    writer_errors = _safe_int(writer_stats.get('errors'))
+    if writer_errors:
+        alerts.append({
+            'id': f'writer_error:{writer_errors}',
+            'kind': 'writer_error',
+            'level': 'danger',
+            'title': '实时入库出现异常',
+            'message': f'Writer 已累计记录 {writer_errors} 次错误，请检查抓包与数据库链路',
+            'entityType': 'system',
+            'entityId': 'writer',
+            'count': writer_errors,
+        })
+    if latest_battle_time and now - latest_battle_time > 86400:
+        alerts.append({
+            'id': f'stale_data:{latest_battle_time}',
+            'kind': 'stale_data',
+            'level': 'warning',
+            'title': '战报数据长时间未更新',
+            'message': '最近一条战报已超过 24 小时，请确认抓包目标、账号档案和网络链路',
+            'entityType': 'system',
+            'entityId': 'capture',
+            'lastUpdatedAt': latest_battle_time,
+        })
+    by_target = {}
+    for army in armies:
+        target = _safe_int(army.get('wid_to'))
+        if target:
+            by_target.setdefault(target, []).append(army)
+    for target, target_armies in by_target.items():
+        if len(target_armies) < 2:
+            continue
+        target_name = next(
+            (row.get('target_name') for row in target_armies if row.get('target_name')),
+            '',
+        )
+        alerts.append({
+            'id': f'convergence:{target}',
+            'kind': 'convergence',
+            'level': 'warning',
+            'title': '多支队伍正在集结',
+            'message': f'{len(target_armies)} 支队伍正在前往 {target_name or target}',
+            'entityType': 'wid',
+            'entityId': str(target),
+            'count': len(target_armies),
+        })
+    for army in armies:
+        end_time = _safe_int(army.get('end_time'))
+        if not end_time or end_time <= now or end_time - now > 300:
+            continue
+        army_id = _safe_int(army.get('army_id'))
+        alerts.append({
+            'id': f'arrival:{army_id}',
+            'kind': 'arrival',
+            'level': 'danger',
+            'title': '队伍即将到达',
+            'message': (
+                f'{army.get("owner_name") or "未知队伍"} 将在 '
+                f'{max(1, (end_time - now + 59) // 60)} 分钟内到达 '
+                f'{army.get("target_name") or army.get("wid_to") or "目标"}'
+            ),
+            'entityType': 'army',
+            'entityId': str(army_id),
+            'arriveAt': end_time,
+        })
+    return alerts[:20]
+
+
+@app.route('/api/command-center/overview')
+def api_command_center_overview():
+    """桌面指挥中心的只读聚合数据；任一可选表缺失都不影响其他模块。"""
+    conn = get_db()
+    now = int(time.time())
+    today_start = _local_day_start_timestamp()
+    try:
+        metrics = {
+            'battlesTotal': _cc_scalar(
+                conn, 'SELECT COUNT(*) FROM battles_v2'
+            ),
+            'battlesToday': _cc_scalar(
+                conn, 'SELECT COUNT(*) FROM battles_v2 WHERE time>=?',
+                (today_start,),
+            ),
+            'allianceMembers': _cc_scalar(
+                conn, 'SELECT COUNT(*) FROM team_users'
+            ),
+            'activeArmies': _cc_scalar(
+                conn,
+                'SELECT COUNT(*) FROM world_armies WHERE deleted_at_seq IS NULL',
+            ),
+            'knownTiles': _cc_scalar(
+                conn, 'SELECT COUNT(*) FROM world_tiles'
+            ),
+        }
+        battles = _cc_rows(
+            conn,
+            '''
+            SELECT battle_id,time,time_str,result,result_desc,atk_name,atk_union,
+                   def_name,def_union,wid,atk_gongxun
+            FROM battles_v2
+            ORDER BY time DESC
+            LIMIT 12
+            ''',
+        )
+        armies = _cc_rows(
+            conn,
+            '''
+            SELECT army_id,owner_name,owner_union_name,wid_from,wid_to,
+                   target_name,end_time
+            FROM world_armies
+            WHERE deleted_at_seq IS NULL
+            ORDER BY end_time,army_id
+            LIMIT 30
+            ''',
+        )
+        profile = profile_manager.load_current_profile() or {}
+        latest_battle_time = _safe_int(battles[0].get('time')) if battles else 0
+        latest_army_time = max(
+            (_safe_int(row.get('end_time')) for row in armies),
+            default=0,
+        )
+        writer_stats = dict(getattr(_writer, 'stats', {}) or {})
+        return jsonify({
+            'ok': True,
+            'profile': {
+                'profileId': profile.get('profile_id', ''),
+                'roleName': profile.get('role_name', ''),
+                'serverName': profile.get('server_name', ''),
+                'serverIp': profile.get('server_ip', ''),
+            },
+            'metrics': metrics,
+            'battles': battles,
+            'armies': armies,
+            'alerts': _command_center_alerts(
+                armies,
+                writer_stats=writer_stats,
+                latest_battle_time=latest_battle_time,
+                now=now,
+            ),
+            'freshness': {
+                'generatedAt': now,
+                'latestBattleAt': latest_battle_time,
+                'latestArmyArrivalAt': latest_army_time,
+                'writer': writer_stats,
+            },
+        })
+    finally:
+        conn.close()
+
 # ===== 排行榜 v2（玩家/盟/州 × 武勋/出战/势力）=====
 @app.route('/api/ranking_v2')
 def api_ranking_v2():
@@ -1614,57 +1908,6 @@ def api_schedule_generate():
     return jsonify({'ok': True, 'session_id': session_id, 'slots': inserted})
 
 
-# ===== 自定义积分 =====
-@app.route('/api/custom_scores')
-def api_custom_scores():
-    season = request.args.get('season', 'current')
-    union  = request.args.get('union', '')
-    conn = get_db()
-    where = [f"season_id='{season}'"]
-    if union: where.append(f"union_name LIKE '%{union}%'")
-    w = 'WHERE ' + ' AND '.join(where)
-    rows = conn.execute(f'SELECT * FROM custom_scores {w} ORDER BY score DESC').fetchall()
-    conn.close()
-    return jsonify([dict(r) for r in rows])
-
-
-@app.route('/api/custom_scores/recalc', methods=['POST'])
-def api_custom_scores_recalc():
-    """重新计算自定义积分（出战1分+武勋权重）"""
-    import time as _time
-    season = (request.json or {}).get('season', 'current')
-    conn = get_db()
-    # 从 battles_v2 聚合
-    rows = conn.execute('''
-        SELECT atk_name, atk_uid, def_union as union_name,
-               COUNT(*) as battles,
-               SUM(CASE WHEN result IN (1,11) THEN 1 ELSE 0 END) as wins,
-               SUM(atk_gongxun) as gongxun_total,
-               MAX(atk_power) as power_total,
-               SUM(CASE WHEN fight_type IN (80,33) THEN 1 ELSE 0 END) as main_city_cnt
-        FROM battles_v2 WHERE atk_name != ''
-        GROUP BY atk_name
-    ''').fetchall()
-    now_str = __import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    for r in rows:
-        # 积分公式：出战*1 + 武勋/1000 + 胜率加成
-        score = r[1] + r[5]/1000.0 + r[2]*0.5  # battles + wx_bonus + win_bonus
-        conn.execute('''
-            INSERT INTO custom_scores
-                (season_id, player_name, player_uid, union_name, battles, wins,
-                 gongxun_total, power_total, main_city_cnt, score, updated_at)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?)
-            ON CONFLICT(season_id, player_name) DO UPDATE SET
-                battles=excluded.battles, wins=excluded.wins,
-                gongxun_total=excluded.gongxun_total, power_total=excluded.power_total,
-                main_city_cnt=excluded.main_city_cnt, score=excluded.score,
-                updated_at=excluded.updated_at
-        ''', (season, r[0], r[1], r[2], r[3], r[4], r[5] or 0, r[6] or 0, r[7], score, now_str))
-    conn.commit()
-    conn.close()
-    return jsonify({'ok': True, 'updated': len(rows)})
-
-
 # ===== 同盟成员 =====
 @app.route('/api/team_users')
 def api_team_users():
@@ -1846,13 +2089,8 @@ def api_battles_all():
         members = request.args.get('members', '')
     offset = (page - 1) * size
     conn = get_db()
-    bv_cols = get_bv2_cols(conn)
 
-    where = ['result <= 6', 'result != 6', "COALESCE(result_desc,'') NOT LIKE '%NPC%'"]; params = []
-    if 'is_npc' in bv_cols:
-        where.append('COALESCE(is_npc, 0) = 0')
-    if 'isnpc' in bv_cols:
-        where.append('COALESCE(isnpc, 0) = 0')
+    where = ['result <= 6', 'result != 6']; params = []
     if player:
         where.append('(atk_name LIKE ? OR def_name LIKE ?)')
         params += [f'%{player}%', f'%{player}%']
@@ -2752,6 +2990,63 @@ def api_writer_stats():
     return jsonify(_writer.stats)
 
 
+def _health_component(status, label, detail='', **extra):
+    return {
+        'status': status,
+        'label': label,
+        'detail': detail,
+        **extra,
+    }
+
+
+@app.route('/api/hud/health', methods=['GET'])
+def api_hud_health():
+    writer_stats = dict(getattr(_writer, 'stats', {}) or {})
+    writer_errors = int(writer_stats.get('errors') or 0)
+    engine_path = (
+        Path(BASE_DIR)
+        / 'battle-engine/build/install/stzb-battle-engine/bin/stzb-battle-engine'
+    )
+    portrait_manifest = os.path.join(
+        RESOURCE_DIR,
+        'static',
+        'hero-portraits',
+        'manifest.json',
+    )
+    components = {
+        'backend': _health_component('live', '后端', 'Flask API 可用'),
+        'writer': _health_component(
+            'degraded' if writer_errors else 'live',
+            '实时入库',
+            f'errors={writer_errors}',
+            stats=writer_stats,
+        ),
+        'battleEngine': _health_component(
+            'live' if engine_path.is_file() else 'unknown',
+            'Kotlin 引擎',
+            str(engine_path),
+        ),
+        'portraits': _health_component(
+            'live' if os.path.isfile(portrait_manifest) else 'unknown',
+            '画像资源',
+            portrait_manifest,
+        ),
+    }
+    statuses = {component['status'] for component in components.values()}
+    overall = (
+        'degraded'
+        if 'degraded' in statuses
+        else 'live'
+        if statuses == {'live'}
+        else 'unknown'
+    )
+    return jsonify({
+        'ok': True,
+        'overall': overall,
+        'components': components,
+    })
+
+
 
 # ===== 分组武勋统计 (照搬 stzbHelper GetGroupWu) =====
 @app.route('/api/group_wu')
@@ -2779,8 +3074,6 @@ def _init_task_tables():
     conn = get_db()
     _ensure_task_tables(conn)
     conn.close()
-
-_init_task_tables()
 
 @app.route('/api/tasks')
 def api_task_list():
@@ -3312,6 +3605,8 @@ def api_announcements():
         ''').fetchall()
         return jsonify([dict(r) for r in rows])
     except Exception as e:
+        if 'no such table: announcements' in str(e):
+            return jsonify([])
         return jsonify({'error': str(e), 'data': []})
     finally:
         conn.close()
@@ -3424,7 +3719,18 @@ def add_no_cache_headers(resp):
 # ===== 静态文件 =====
 @app.route('/')
 def index():
-    return app.send_static_file('dashboard.html')
+    dashboard_path = os.path.join(RESOURCE_DIR, 'static', 'dashboard.html')
+    try:
+        with open(dashboard_path, 'r', encoding='utf-8') as dashboard_file:
+            html = dashboard_file.read()
+        html = __import__('re').sub(
+            r'(/static/([^?"\']+\.(?:mjs|js|css)))(?:\?v=[^"\']*)?',
+            lambda match: f'{match.group(1)}?v={_asset_version(match.group(2))}',
+            html,
+        )
+        return Response(html, mimetype='text/html')
+    except OSError:
+        return app.send_static_file('dashboard.html')
 
 
 # ===== 州郡 / 团统计（基于个人势力排行 + 名字前缀分组） =====
@@ -3880,9 +4186,34 @@ def api_simulate():
         data = request.get_json(force=True)
         result = BattleEngineAdapter().simulate(data)
         return jsonify(result), (200 if result.get('ok') else 500)
+    except ValueError as e:
+        return jsonify({
+            'ok': False,
+            'engine': 'stzb-kotlin',
+            'error': str(e),
+        }), 400
     except Exception as e:
-        import traceback
-        return jsonify({'ok': False, 'error': str(e), 'trace': traceback.format_exc()}), 500
+        return jsonify({
+            'ok': False,
+            'engine': 'stzb-kotlin',
+            'error': str(e),
+        }), 500
+
+
+@app.route('/api/simulate/engine', methods=['GET'])
+def api_simulate_engine():
+    """GET /api/simulate/engine - 返回 Kotlin 引擎来源与能力。"""
+    try:
+        return jsonify({
+            'ok': True,
+            **BattleEngineAdapter().engine_metadata(),
+        })
+    except Exception as e:
+        return jsonify({
+            'ok': False,
+            'engine': 'stzb-kotlin',
+            'error': str(e),
+        }), 500
 
 
 @app.route('/api/simulate/heroes', methods=['GET'])
@@ -3907,6 +4238,7 @@ def api_simulate_heroes():
 def run_app(open_browser=True, start_sniffer=True, host='127.0.0.1', port=8765):
     """给打包版和开发版共用的正式启动入口。"""
     print(f'启动 API 服务器: http://{host}:{port}')
+    start_runtime_services(start_writer=True)
 
     try:
         os.makedirs(os.path.join(BASE_DIR, 'capture_new'), exist_ok=True)

@@ -59,15 +59,39 @@ class WorldRealMarch:
     real_march_id: int
     last_wid: int
     current_wid: int
+    current_arrive_time: int
     next_wid: int
-    start_time: int
-    next_time: int
-    end_time: int
+    next_begin_time: int
+    next_need_time: int
+    next_spend_time: int
     path_id: int
     unit_time_cost: int
     march_type: int
     belong_id: int
+    morale: int
+    morale_stay_last_calc_time: int
+    morale_hungry_last_calc_time: int
     raw: List[Any]
+
+    @property
+    def start_time(self) -> int:
+        return self.next_begin_time
+
+    @property
+    def next_time(self) -> int:
+        return self.next_begin_time + self.next_need_time
+
+    @property
+    def end_time(self) -> int:
+        return self.next_begin_time + self.next_spend_time
+
+
+@dataclass(frozen=True)
+class ObservedArea:
+    row_up: int
+    row_down: int
+    col_left: int
+    col_right: int
 
 
 @dataclass(frozen=True)
@@ -91,12 +115,18 @@ class WorldScenePacket:
     armies: Dict[int, WorldArmy] = field(default_factory=dict)
     direct_deleted_army_ids: Tuple[int, ...] = ()
     block_deleted_army_ids: Tuple[int, ...] = ()
+    deleted_ship_ids: Tuple[int, ...] = ()
+    deleted_assist_army_ids: Tuple[int, ...] = ()
     block_info: Optional[Tuple[int, int]] = None
     block_armies: Dict[int, Tuple[int, ...]] = field(default_factory=dict)
+    block_ships: Dict[int, Tuple[int, ...]] = field(default_factory=dict)
+    block_assist_armies: Dict[int, Tuple[int, ...]] = field(default_factory=dict)
+    tile_chunks: Dict[int, Dict[str, Any]] = field(default_factory=dict)
     tiles: Dict[int, WorldTile] = field(default_factory=dict)
     clear_chunks: Dict[int, Tuple[str, ...]] = field(default_factory=dict)
     real_marches: Dict[int, WorldRealMarch] = field(default_factory=dict)
     entities: Dict[str, Dict[int, WorldSceneEntity]] = field(default_factory=dict)
+    observed_area: Optional[ObservedArea] = None
     raw_payload: str = ""
 
 

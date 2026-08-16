@@ -1,0 +1,4 @@
+data/intelligence/**/*.csv whitespace=-blank-at-eol,-blank-at-eof
+battle-engine/src/test/resources/assent/**/*.json whitespace=-blank-at-eol,-blank-at-eof
+static/vendor/** whitespace=-blank-at-eol,-blank-at-eof
+gradlew.bat text eol=crlf whitespace=-blank-at-eol

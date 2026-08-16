@@ -1,0 +1,2905 @@
+{
+  "allowlist": [
+    "Tb_army",
+    "Tb_army_alert",
+    "Tb_battle_report_attack",
+    "Tb_battle_report_defend",
+    "Tb_fight_area",
+    "Tb_force_info",
+    "Tb_hero",
+    "Tb_union_army_group",
+    "Tb_union_assembly",
+    "Tb_user_union_attr",
+    "Tb_war_ship",
+    "Tb_world_city"
+  ],
+  "datasetVersion": "client-9.2.2-schema",
+  "evidenceClass": "SCHEMA_FACT",
+  "tables": {
+    "Tb_army": {
+      "fieldCount": 144,
+      "fields": [
+        {
+          "index": 0,
+          "name": "armyid",
+          "type": "int"
+        },
+        {
+          "index": 1,
+          "name": "userid",
+          "type": "int"
+        },
+        {
+          "index": 2,
+          "name": "reside_wid",
+          "type": "int"
+        },
+        {
+          "index": 3,
+          "name": "war_ship_id",
+          "type": "int"
+        },
+        {
+          "index": 4,
+          "name": "last_reside_wid",
+          "type": "int"
+        },
+        {
+          "index": 5,
+          "name": "front_heroid_u",
+          "type": "int"
+        },
+        {
+          "index": 6,
+          "name": "middle_heroid_u",
+          "type": "int"
+        },
+        {
+          "index": 7,
+          "name": "base_heroid_u",
+          "type": "int"
+        },
+        {
+          "index": 8,
+          "name": "counsellor_heroid_u",
+          "type": "int"
+        },
+        {
+          "index": 9,
+          "name": "army_formation_id",
+          "type": "int"
+        },
+        {
+          "index": 10,
+          "name": "army_formation_effect",
+          "type": "string"
+        },
+        {
+          "index": 11,
+          "name": "state",
+          "type": "int"
+        },
+        {
+          "index": 12,
+          "name": "wait_count",
+          "type": "int"
+        },
+        {
+          "index": 13,
+          "name": "target_wid",
+          "type": "int"
+        },
+        {
+          "index": 14,
+          "name": "stay_wid",
+          "type": "int"
+        },
+        {
+          "index": 15,
+          "name": "reside_time",
+          "type": "int"
+        },
+        {
+          "index": 16,
+          "name": "begin_time",
+          "type": "int"
+        },
+        {
+          "index": 17,
+          "name": "end_time",
+          "type": "int"
+        },
+        {
+          "index": 18,
+          "name": "speed",
+          "type": "int"
+        },
+        {
+          "index": 19,
+          "name": "join_id",
+          "type": "int"
+        },
+        {
+          "index": 20,
+          "name": "target_type",
+          "type": "int"
+        },
+        {
+          "index": 21,
+          "name": "yi_ling_press_attack",
+          "type": "int"
+        },
+        {
+          "index": 22,
+          "name": "army_group_id",
+          "type": "int"
+        },
+        {
+          "index": 23,
+          "name": "fort_army_group",
+          "type": "int"
+        },
+        {
+          "index": 24,
+          "name": "center_wid",
+          "type": "int"
+        },
+        {
+          "index": 25,
+          "name": "final_wid",
+          "type": "int"
+        },
+        {
+          "index": 26,
+          "name": "army_group_state",
+          "type": "int"
+        },
+        {
+          "index": 27,
+          "name": "training_completed",
+          "type": "int"
+        },
+        {
+          "index": 28,
+          "name": "training_count",
+          "type": "int"
+        },
+        {
+          "index": 29,
+          "name": "redif_count",
+          "type": "int"
+        },
+        {
+          "index": 30,
+          "name": "policy_battle_redif_count",
+          "type": "int"
+        },
+        {
+          "index": 31,
+          "name": "redif_res",
+          "type": "string"
+        },
+        {
+          "index": 32,
+          "name": "transfer_path",
+          "type": "string"
+        },
+        {
+          "index": 33,
+          "name": "transfer_start_time",
+          "type": "int"
+        },
+        {
+          "index": 34,
+          "name": "kill_count",
+          "type": "int"
+        },
+        {
+          "index": 35,
+          "name": "bandit_redif_count",
+          "type": "int"
+        },
+        {
+          "index": 36,
+          "name": "battle_lost_tips",
+          "type": "string"
+        },
+        {
+          "index": 37,
+          "name": "training_redif_completed",
+          "type": "int"
+        },
+        {
+          "index": 38,
+          "name": "training_redif_count",
+          "type": "int"
+        },
+        {
+          "index": 39,
+          "name": "training_redif_cost",
+          "type": "int"
+        },
+        {
+          "index": 40,
+          "name": "training_redif_add",
+          "type": "int"
+        },
+        {
+          "index": 41,
+          "name": "training_redif_plan_state",
+          "type": "int"
+        },
+        {
+          "index": 42,
+          "name": "training_balance_time",
+          "type": "int"
+        },
+        {
+          "index": 43,
+          "name": "training_redif_time",
+          "type": "int"
+        },
+        {
+          "index": 44,
+          "name": "transport_redif_count",
+          "type": "int"
+        },
+        {
+          "index": 45,
+          "name": "ai_army_need_recover",
+          "type": "int"
+        },
+        {
+          "index": 46,
+          "name": "is_stay",
+          "type": "int"
+        },
+        {
+          "index": 47,
+          "name": "bingli_debuff",
+          "type": "int"
+        },
+        {
+          "index": 48,
+          "name": "stay_fight_count",
+          "type": "int"
+        },
+        {
+          "index": 49,
+          "name": "fight_count",
+          "type": "int"
+        },
+        {
+          "index": 50,
+          "name": "world_build_id",
+          "type": "int"
+        },
+        {
+          "index": 51,
+          "name": "world_build_name",
+          "type": "string"
+        },
+        {
+          "index": 52,
+          "name": "reside_when_finish",
+          "type": "int"
+        },
+        {
+          "index": 53,
+          "name": "last_begin_time",
+          "type": "int"
+        },
+        {
+          "index": 54,
+          "name": "stay_count",
+          "type": "int"
+        },
+        {
+          "index": 55,
+          "name": "build_speed_add",
+          "type": "int"
+        },
+        {
+          "index": 56,
+          "name": "title_speed_add",
+          "type": "int"
+        },
+        {
+          "index": 57,
+          "name": "auto_callback_time",
+          "type": "int"
+        },
+        {
+          "index": 58,
+          "name": "army_hero_type",
+          "type": "string"
+        },
+        {
+          "index": 59,
+          "name": "rest_end_time",
+          "type": "int"
+        },
+        {
+          "index": 60,
+          "name": "is_sweep_land",
+          "type": "int"
+        },
+        {
+          "index": 61,
+          "name": "facade_ids",
+          "type": "string"
+        },
+        {
+          "index": 62,
+          "name": "wuxun_get",
+          "type": "int"
+        },
+        {
+          "index": 63,
+          "name": "gongxun_get",
+          "type": "int"
+        },
+        {
+          "index": 64,
+          "name": "max_single_fight_kill_count",
+          "type": "int"
+        },
+        {
+          "index": 65,
+          "name": "max_single_fight_kill_wid",
+          "type": "int"
+        },
+        {
+          "index": 66,
+          "name": "up_gift_res",
+          "type": "string"
+        },
+        {
+          "index": 67,
+          "name": "shiqi_change",
+          "type": "int"
+        },
+        {
+          "index": 68,
+          "name": "tech_quan_xiang_value",
+          "type": "int"
+        },
+        {
+          "index": 69,
+          "name": "tech_jianjun_value",
+          "type": "int"
+        },
+        {
+          "index": 70,
+          "name": "shop_auto_back",
+          "type": "int"
+        },
+        {
+          "index": 71,
+          "name": "emotion",
+          "type": "string"
+        },
+        {
+          "index": 72,
+          "name": "builld_fort_on_conquer",
+          "type": "string"
+        },
+        {
+          "index": 73,
+          "name": "fight_pvp_count",
+          "type": "int"
+        },
+        {
+          "index": 74,
+          "name": "fight_pve_count",
+          "type": "int"
+        },
+        {
+          "index": 75,
+          "name": "fight_ai_count",
+          "type": "int"
+        },
+        {
+          "index": 76,
+          "name": "fight_event_facade",
+          "type": "int"
+        },
+        {
+          "index": 77,
+          "name": "army_event",
+          "type": "string"
+        },
+        {
+          "index": 78,
+          "name": "military_shiqi_add",
+          "type": "int"
+        },
+        {
+          "index": 79,
+          "name": "first_enter_fort_time",
+          "type": "int"
+        },
+        {
+          "index": 80,
+          "name": "board_ship_param",
+          "type": "string"
+        },
+        {
+          "index": 81,
+          "name": "huo_gong_ji_value",
+          "type": "int"
+        },
+        {
+          "index": 82,
+          "name": "reside_city_type",
+          "type": "int"
+        },
+        {
+          "index": 83,
+          "name": "plan_setting",
+          "type": "string"
+        },
+        {
+          "index": 84,
+          "name": "plan_wid",
+          "type": "string"
+        },
+        {
+          "index": 85,
+          "name": "plan_begin_time",
+          "type": "int"
+        },
+        {
+          "index": 86,
+          "name": "hurt_time",
+          "type": "int"
+        },
+        {
+          "index": 87,
+          "name": "yi_ling_huo_gong_value",
+          "type": "int"
+        },
+        {
+          "index": 88,
+          "name": "on_fire_damage_value",
+          "type": "int"
+        },
+        {
+          "index": 89,
+          "name": "on_fire_begin_time",
+          "type": "int"
+        },
+        {
+          "index": 90,
+          "name": "on_fire_end_time",
+          "type": "int"
+        },
+        {
+          "index": 91,
+          "name": "draw_npc_army",
+          "type": "int"
+        },
+        {
+          "index": 92,
+          "name": "reach_time",
+          "type": "int"
+        },
+        {
+          "index": 93,
+          "name": "draw_npc_recover",
+          "type": "int"
+        },
+        {
+          "index": 94,
+          "name": "last_duct_training_decree",
+          "type": "int"
+        },
+        {
+          "index": 95,
+          "name": "last_duct_quick_move_decree",
+          "type": "int"
+        },
+        {
+          "index": 96,
+          "name": "first_training_per_day",
+          "type": "int"
+        },
+        {
+          "index": 97,
+          "name": "fight_event_wu_xun_count",
+          "type": "int"
+        },
+        {
+          "index": 98,
+          "name": "behavior",
+          "type": "int"
+        },
+        {
+          "index": 99,
+          "name": "reclaim_not_link",
+          "type": "int"
+        },
+        {
+          "index": 100,
+          "name": "quick_move",
+          "type": "int"
+        },
+        {
+          "index": 101,
+          "name": "cancel_recruit_time",
+          "type": "string"
+        },
+        {
+          "index": 102,
+          "name": "siege_camp_next_attack_time",
+          "type": "int"
+        },
+        {
+          "index": 103,
+          "name": "tech_attack_heart_value",
+          "type": "int"
+        },
+        {
+          "index": 104,
+          "name": "attack_heart_shiqi_down",
+          "type": "int"
+        },
+        {
+          "index": 105,
+          "name": "army_nameplate",
+          "type": "int"
+        },
+        {
+          "index": 106,
+          "name": "is_army_borrow",
+          "type": "int"
+        },
+        {
+          "index": 107,
+          "name": "support_user_name",
+          "type": "string"
+        },
+        {
+          "index": 108,
+          "name": "support_user_role_id",
+          "type": "string"
+        },
+        {
+          "index": 109,
+          "name": "rent_user_name",
+          "type": "string"
+        },
+        {
+          "index": 110,
+          "name": "rent_user_role_id",
+          "type": "string"
+        },
+        {
+          "index": 111,
+          "name": "borrow_register_end_time",
+          "type": "int"
+        },
+        {
+          "index": 112,
+          "name": "borrow_end_time",
+          "type": "int"
+        },
+        {
+          "index": 113,
+          "name": "borrow_order_id",
+          "type": "int"
+        },
+        {
+          "index": 114,
+          "name": "sunquan_policy_decree_money",
+          "type": "int"
+        },
+        {
+          "index": 115,
+          "name": "sunquan_policy_decree_count",
+          "type": "int"
+        },
+        {
+          "index": 116,
+          "name": "shiqi",
+          "type": "int"
+        },
+        {
+          "index": 117,
+          "name": "shiqi_update_time",
+          "type": "int"
+        },
+        {
+          "index": 118,
+          "name": "real_march_id",
+          "type": "int"
+        },
+        {
+          "index": 119,
+          "name": "path_id",
+          "type": "int"
+        },
+        {
+          "index": 120,
+          "name": "is_real_march_end",
+          "type": "int"
+        },
+        {
+          "index": 121,
+          "name": "shiqi_buff",
+          "type": "string"
+        },
+        {
+          "index": 122,
+          "name": "wait_next_pre_state",
+          "type": "int"
+        },
+        {
+          "index": 123,
+          "name": "lu_jiao_wid",
+          "type": "int"
+        },
+        {
+          "index": 124,
+          "name": "medium_block_key",
+          "type": "string"
+        },
+        {
+          "index": 125,
+          "name": "medium_block_id",
+          "type": "string"
+        },
+        {
+          "index": 126,
+          "name": "find_new_stay_wid_path_id",
+          "type": "int"
+        },
+        {
+          "index": 127,
+          "name": "win_headicon_list",
+          "type": "string"
+        },
+        {
+          "index": 128,
+          "name": "wu_xun_list",
+          "type": "string"
+        },
+        {
+          "index": 129,
+          "name": "auto_asm_num",
+          "type": "int"
+        },
+        {
+          "index": 130,
+          "name": "auto_asm_state",
+          "type": "int"
+        },
+        {
+          "index": 131,
+          "name": "auto_asm_log",
+          "type": "int"
+        },
+        {
+          "index": 132,
+          "name": "reside_share_fort_kick",
+          "type": "int"
+        },
+        {
+          "index": 133,
+          "name": "march_show_speed",
+          "type": "int"
+        },
+        {
+          "index": 134,
+          "name": "land_fail_rollback",
+          "type": "string"
+        },
+        {
+          "index": 135,
+          "name": "battle_show",
+          "type": "string"
+        },
+        {
+          "index": 136,
+          "name": "battle_show_joinid",
+          "type": "int"
+        },
+        {
+          "index": 137,
+          "name": "battle_show_wid",
+          "type": "int"
+        },
+        {
+          "index": 138,
+          "name": "thief_camp_level",
+          "type": "int"
+        },
+        {
+          "index": 139,
+          "name": "action_after_recruit",
+          "type": "string"
+        },
+        {
+          "index": 140,
+          "name": "siege_redif_count",
+          "type": "int"
+        },
+        {
+          "index": 141,
+          "name": "expedition_fight_count",
+          "type": "int"
+        },
+        {
+          "index": 142,
+          "name": "cur_expedition_win_count",
+          "type": "int"
+        },
+        {
+          "index": 143,
+          "name": "expedition_has_battle",
+          "type": "int"
+        }
+      ]
+    },
+    "Tb_army_alert": {
+      "fieldCount": 16,
+      "fields": [
+        {
+          "index": 0,
+          "name": "id",
+          "type": "int"
+        },
+        {
+          "index": 1,
+          "name": "armyid",
+          "type": "int"
+        },
+        {
+          "index": 2,
+          "name": "userid_alert",
+          "type": "int"
+        },
+        {
+          "index": 3,
+          "name": "base_heroid",
+          "type": "int"
+        },
+        {
+          "index": 4,
+          "name": "user_name",
+          "type": "string"
+        },
+        {
+          "index": 5,
+          "name": "union_name",
+          "type": "string"
+        },
+        {
+          "index": 6,
+          "name": "union_id",
+          "type": "int"
+        },
+        {
+          "index": 7,
+          "name": "union_relationship",
+          "type": "int"
+        },
+        {
+          "index": 8,
+          "name": "state",
+          "type": "int"
+        },
+        {
+          "index": 9,
+          "name": "from_wid",
+          "type": "int"
+        },
+        {
+          "index": 10,
+          "name": "to_wid",
+          "type": "int"
+        },
+        {
+          "index": 11,
+          "name": "begin_time",
+          "type": "int"
+        },
+        {
+          "index": 12,
+          "name": "end_time",
+          "type": "int"
+        },
+        {
+          "index": 13,
+          "name": "army_group_id",
+          "type": "int"
+        },
+        {
+          "index": 14,
+          "name": "force",
+          "type": "int"
+        },
+        {
+          "index": 15,
+          "name": "user_id",
+          "type": "int"
+        }
+      ]
+    },
+    "Tb_battle_report_attack": {
+      "fieldCount": 15,
+      "fields": [
+        {
+          "index": 0,
+          "name": "battle_id",
+          "type": "int"
+        },
+        {
+          "index": 1,
+          "name": "userid",
+          "type": "int"
+        },
+        {
+          "index": 2,
+          "name": "read",
+          "type": "int"
+        },
+        {
+          "index": 3,
+          "name": "armyid",
+          "type": "int"
+        },
+        {
+          "index": 4,
+          "name": "join_id",
+          "type": "int"
+        },
+        {
+          "index": 5,
+          "name": "is_pvp",
+          "type": "int"
+        },
+        {
+          "index": 6,
+          "name": "result",
+          "type": "int"
+        },
+        {
+          "index": 7,
+          "name": "wid",
+          "type": "int"
+        },
+        {
+          "index": 8,
+          "name": "event_id",
+          "type": "int"
+        },
+        {
+          "index": 9,
+          "name": "other_event_id",
+          "type": "int"
+        },
+        {
+          "index": 10,
+          "name": "all_heroid",
+          "type": "string"
+        },
+        {
+          "index": 11,
+          "name": "complete_title",
+          "type": "string"
+        },
+        {
+          "index": 12,
+          "name": "red_dot_read",
+          "type": "int"
+        },
+        {
+          "index": 13,
+          "name": "public_share_count",
+          "type": "int"
+        },
+        {
+          "index": 14,
+          "name": "garrison",
+          "type": "string"
+        }
+      ]
+    },
+    "Tb_battle_report_defend": {
+      "fieldCount": 14,
+      "fields": [
+        {
+          "index": 0,
+          "name": "battle_id",
+          "type": "int"
+        },
+        {
+          "index": 1,
+          "name": "userid",
+          "type": "int"
+        },
+        {
+          "index": 2,
+          "name": "read",
+          "type": "int"
+        },
+        {
+          "index": 3,
+          "name": "armyid",
+          "type": "int"
+        },
+        {
+          "index": 4,
+          "name": "join_id",
+          "type": "int"
+        },
+        {
+          "index": 5,
+          "name": "is_pvp",
+          "type": "int"
+        },
+        {
+          "index": 6,
+          "name": "result",
+          "type": "int"
+        },
+        {
+          "index": 7,
+          "name": "wid",
+          "type": "int"
+        },
+        {
+          "index": 8,
+          "name": "other_event_id",
+          "type": "int"
+        },
+        {
+          "index": 9,
+          "name": "all_heroid",
+          "type": "string"
+        },
+        {
+          "index": 10,
+          "name": "complete_title",
+          "type": "string"
+        },
+        {
+          "index": 11,
+          "name": "red_dot_read",
+          "type": "int"
+        },
+        {
+          "index": 12,
+          "name": "public_share_count",
+          "type": "int"
+        },
+        {
+          "index": 13,
+          "name": "garrison",
+          "type": "string"
+        }
+      ]
+    },
+    "Tb_fight_area": {
+      "fieldCount": 17,
+      "fields": [
+        {
+          "index": 0,
+          "name": "block_id",
+          "type": "int"
+        },
+        {
+          "index": 1,
+          "name": "belong_block_ids",
+          "type": "string"
+        },
+        {
+          "index": 2,
+          "name": "union_ids",
+          "type": "string"
+        },
+        {
+          "index": 3,
+          "name": "clan_ids",
+          "type": "string"
+        },
+        {
+          "index": 4,
+          "name": "fight_type",
+          "type": "int"
+        },
+        {
+          "index": 5,
+          "name": "time",
+          "type": "int"
+        },
+        {
+          "index": 6,
+          "name": "total_hp",
+          "type": "int"
+        },
+        {
+          "index": 7,
+          "name": "total_kill",
+          "type": "int"
+        },
+        {
+          "index": 8,
+          "name": "fierce_begin_time",
+          "type": "int"
+        },
+        {
+          "index": 9,
+          "name": "fierce_end_time",
+          "type": "int"
+        },
+        {
+          "index": 10,
+          "name": "wuxun",
+          "type": "int"
+        },
+        {
+          "index": 11,
+          "name": "skill_scroll_discount",
+          "type": "int"
+        },
+        {
+          "index": 12,
+          "name": "bandit",
+          "type": "int"
+        },
+        {
+          "index": 13,
+          "name": "block_wuxun_detail",
+          "type": "string"
+        },
+        {
+          "index": 14,
+          "name": "union_current_get_land",
+          "type": "string"
+        },
+        {
+          "index": 15,
+          "name": "clan_current_get_land",
+          "type": "string"
+        },
+        {
+          "index": 16,
+          "name": "server_id",
+          "type": "int"
+        }
+      ]
+    },
+    "Tb_force_info": {
+      "fieldCount": 32,
+      "fields": [
+        {
+          "index": 0,
+          "name": "force_type",
+          "type": "int"
+        },
+        {
+          "index": 1,
+          "name": "member_count",
+          "type": "int"
+        },
+        {
+          "index": 2,
+          "name": "member_max",
+          "type": "int"
+        },
+        {
+          "index": 3,
+          "name": "occupation_value",
+          "type": "int"
+        },
+        {
+          "index": 4,
+          "name": "occupation_update_time",
+          "type": "int"
+        },
+        {
+          "index": 5,
+          "name": "jun_fu_count",
+          "type": "int"
+        },
+        {
+          "index": 6,
+          "name": "zhou_fu_count",
+          "type": "int"
+        },
+        {
+          "index": 7,
+          "name": "zhou_fu_count_update_time",
+          "type": "int"
+        },
+        {
+          "index": 8,
+          "name": "shou_fu_count",
+          "type": "int"
+        },
+        {
+          "index": 9,
+          "name": "destroy_zhou_fu_count",
+          "type": "int"
+        },
+        {
+          "index": 10,
+          "name": "not_ruins_born_zhou_fu_count",
+          "type": "int"
+        },
+        {
+          "index": 11,
+          "name": "convene_count",
+          "type": "int"
+        },
+        {
+          "index": 12,
+          "name": "convene_status",
+          "type": "int"
+        },
+        {
+          "index": 13,
+          "name": "convene_end_time",
+          "type": "int"
+        },
+        {
+          "index": 14,
+          "name": "convene_confirm_end_time",
+          "type": "int"
+        },
+        {
+          "index": 15,
+          "name": "convene_region",
+          "type": "string"
+        },
+        {
+          "index": 16,
+          "name": "important_city_count",
+          "type": "int"
+        },
+        {
+          "index": 17,
+          "name": "junxian_spread",
+          "type": "string"
+        },
+        {
+          "index": 18,
+          "name": "junxian_spread_count",
+          "type": "int"
+        },
+        {
+          "index": 19,
+          "name": "gang_kou_info",
+          "type": "string"
+        },
+        {
+          "index": 20,
+          "name": "hans_member_count",
+          "type": "int"
+        },
+        {
+          "index": 21,
+          "name": "hant_member_count",
+          "type": "int"
+        },
+        {
+          "index": 22,
+          "name": "vi_member_count",
+          "type": "int"
+        },
+        {
+          "index": 23,
+          "name": "th_member_count",
+          "type": "int"
+        },
+        {
+          "index": 24,
+          "name": "ko_member_count",
+          "type": "int"
+        },
+        {
+          "index": 25,
+          "name": "ja_member_count",
+          "type": "int"
+        },
+        {
+          "index": 26,
+          "name": "en_member_count",
+          "type": "int"
+        },
+        {
+          "index": 27,
+          "name": "important_city_count_product_area",
+          "type": "int"
+        },
+        {
+          "index": 28,
+          "name": "zhou_fu_count_product_area",
+          "type": "int"
+        },
+        {
+          "index": 29,
+          "name": "jun_fu_count_product_area",
+          "type": "int"
+        },
+        {
+          "index": 30,
+          "name": "city_list_5022",
+          "type": "string"
+        },
+        {
+          "index": 31,
+          "name": "bazhentu_occupy_time",
+          "type": "int"
+        }
+      ]
+    },
+    "Tb_hero": {
+      "fieldCount": 93,
+      "fields": [
+        {
+          "index": 0,
+          "name": "heroid_u",
+          "type": "int"
+        },
+        {
+          "index": 1,
+          "name": "heroid",
+          "type": "int"
+        },
+        {
+          "index": 2,
+          "name": "userid",
+          "type": "int"
+        },
+        {
+          "index": 3,
+          "name": "armyid",
+          "type": "int"
+        },
+        {
+          "index": 4,
+          "name": "hurt_end_time",
+          "type": "int"
+        },
+        {
+          "index": 5,
+          "name": "state",
+          "type": "int"
+        },
+        {
+          "index": 6,
+          "name": "level",
+          "type": "int"
+        },
+        {
+          "index": 7,
+          "name": "energy",
+          "type": "int"
+        },
+        {
+          "index": 8,
+          "name": "energy_add",
+          "type": "int"
+        },
+        {
+          "index": 9,
+          "name": "energy_time",
+          "type": "int"
+        },
+        {
+          "index": 10,
+          "name": "exp",
+          "type": "int"
+        },
+        {
+          "index": 11,
+          "name": "hp",
+          "type": "int"
+        },
+        {
+          "index": 12,
+          "name": "hp_adding",
+          "type": "int"
+        },
+        {
+          "index": 13,
+          "name": "hp_end_time",
+          "type": "int"
+        },
+        {
+          "index": 14,
+          "name": "hp_balance_time",
+          "type": "int"
+        },
+        {
+          "index": 15,
+          "name": "point_left",
+          "type": "int"
+        },
+        {
+          "index": 16,
+          "name": "clean_point_time",
+          "type": "int"
+        },
+        {
+          "index": 17,
+          "name": "attack_add",
+          "type": "int"
+        },
+        {
+          "index": 18,
+          "name": "defence_add",
+          "type": "int"
+        },
+        {
+          "index": 19,
+          "name": "intel_add",
+          "type": "int"
+        },
+        {
+          "index": 20,
+          "name": "speed_add",
+          "type": "int"
+        },
+        {
+          "index": 21,
+          "name": "destroy_add",
+          "type": "int"
+        },
+        {
+          "index": 22,
+          "name": "skill",
+          "type": "string"
+        },
+        {
+          "index": 23,
+          "name": "gearid_u",
+          "type": "int"
+        },
+        {
+          "index": 24,
+          "name": "awake_state",
+          "type": "int"
+        },
+        {
+          "index": 25,
+          "name": "lock_state",
+          "type": "int"
+        },
+        {
+          "index": 26,
+          "name": "wounded_soldier",
+          "type": "int"
+        },
+        {
+          "index": 27,
+          "name": "dead_soldier",
+          "type": "int"
+        },
+        {
+          "index": 28,
+          "name": "hide_hp",
+          "type": "int"
+        },
+        {
+          "index": 29,
+          "name": "advance_num",
+          "type": "int"
+        },
+        {
+          "index": 30,
+          "name": "second_skill_effect",
+          "type": "int"
+        },
+        {
+          "index": 31,
+          "name": "hero_type_effect",
+          "type": "int"
+        },
+        {
+          "index": 32,
+          "name": "hero_type",
+          "type": "int"
+        },
+        {
+          "index": 33,
+          "name": "hero_type_ext",
+          "type": "string"
+        },
+        {
+          "index": 34,
+          "name": "hero_type_availible",
+          "type": "string"
+        },
+        {
+          "index": 35,
+          "name": "hero_type_feature",
+          "type": "string"
+        },
+        {
+          "index": 36,
+          "name": "hero_type_advance",
+          "type": "int"
+        },
+        {
+          "index": 37,
+          "name": "hero_features",
+          "type": "string"
+        },
+        {
+          "index": 38,
+          "name": "hero_features_hidden_count",
+          "type": "int"
+        },
+        {
+          "index": 39,
+          "name": "hero_features_total_count",
+          "type": "int"
+        },
+        {
+          "index": 40,
+          "name": "hero_features_time",
+          "type": "int"
+        },
+        {
+          "index": 41,
+          "name": "recruit_time",
+          "type": "int"
+        },
+        {
+          "index": 42,
+          "name": "card_border",
+          "type": "int"
+        },
+        {
+          "index": 43,
+          "name": "dynamic_icon",
+          "type": "int"
+        },
+        {
+          "index": 44,
+          "name": "surface_tips",
+          "type": "int"
+        },
+        {
+          "index": 45,
+          "name": "unfreeze_time",
+          "type": "int"
+        },
+        {
+          "index": 46,
+          "name": "wu_xun",
+          "type": "int"
+        },
+        {
+          "index": 47,
+          "name": "hp_max",
+          "type": "int"
+        },
+        {
+          "index": 48,
+          "name": "wu_lue_develop_num",
+          "type": "int"
+        },
+        {
+          "index": 49,
+          "name": "wu_lue_type",
+          "type": "int"
+        },
+        {
+          "index": 50,
+          "name": "wu_lue_add_num",
+          "type": "int"
+        },
+        {
+          "index": 51,
+          "name": "extra_wu_lue_type",
+          "type": "int"
+        },
+        {
+          "index": 52,
+          "name": "extra_wu_lue_add_num",
+          "type": "int"
+        },
+        {
+          "index": 53,
+          "name": "trans_type",
+          "type": "int"
+        },
+        {
+          "index": 54,
+          "name": "trans_type_valid_time",
+          "type": "int"
+        },
+        {
+          "index": 55,
+          "name": "season_awake_state",
+          "type": "int"
+        },
+        {
+          "index": 56,
+          "name": "affair_id",
+          "type": "int"
+        },
+        {
+          "index": 57,
+          "name": "affair_state",
+          "type": "int"
+        },
+        {
+          "index": 58,
+          "name": "affair_end_time",
+          "type": "int"
+        },
+        {
+          "index": 59,
+          "name": "is_captive",
+          "type": "int"
+        },
+        {
+          "index": 60,
+          "name": "season_hero",
+          "type": "int"
+        },
+        {
+          "index": 61,
+          "name": "policy_awake_state",
+          "type": "int"
+        },
+        {
+          "index": 62,
+          "name": "policy_season_awake_state",
+          "type": "int"
+        },
+        {
+          "index": 63,
+          "name": "policy_state",
+          "type": "int"
+        },
+        {
+          "index": 64,
+          "name": "policy_time",
+          "type": "int"
+        },
+        {
+          "index": 65,
+          "name": "policy_level",
+          "type": "int"
+        },
+        {
+          "index": 66,
+          "name": "policy_wid",
+          "type": "int"
+        },
+        {
+          "index": 67,
+          "name": "policy_feature",
+          "type": "int"
+        },
+        {
+          "index": 68,
+          "name": "policy_next_appoint_time",
+          "type": "int"
+        },
+        {
+          "index": 69,
+          "name": "recurit_unit_res_cost",
+          "type": "string"
+        },
+        {
+          "index": 70,
+          "name": "read_time",
+          "type": "int"
+        },
+        {
+          "index": 71,
+          "name": "get_time",
+          "type": "int"
+        },
+        {
+          "index": 72,
+          "name": "army_facade_card_id",
+          "type": "int"
+        },
+        {
+          "index": 73,
+          "name": "is_rent",
+          "type": "int"
+        },
+        {
+          "index": 74,
+          "name": "support_user_name",
+          "type": "string"
+        },
+        {
+          "index": 75,
+          "name": "support_user_role_id",
+          "type": "string"
+        },
+        {
+          "index": 76,
+          "name": "rent_user_name",
+          "type": "string"
+        },
+        {
+          "index": 77,
+          "name": "rent_user_role_id",
+          "type": "string"
+        },
+        {
+          "index": 78,
+          "name": "family_support_id",
+          "type": "int"
+        },
+        {
+          "index": 79,
+          "name": "operate_user_id",
+          "type": "int"
+        },
+        {
+          "index": 80,
+          "name": "get_red_dot",
+          "type": "int"
+        },
+        {
+          "index": 81,
+          "name": "life_end_time",
+          "type": "int"
+        },
+        {
+          "index": 82,
+          "name": "career_wounded_soldier_add",
+          "type": "int"
+        },
+        {
+          "index": 83,
+          "name": "career_wounded_soldier_refresh_time",
+          "type": "int"
+        },
+        {
+          "index": 84,
+          "name": "is_army_borrow",
+          "type": "int"
+        },
+        {
+          "index": 85,
+          "name": "temp_store_activity",
+          "type": "int"
+        },
+        {
+          "index": 86,
+          "name": "army_facade_bind_wid",
+          "type": "int"
+        },
+        {
+          "index": 87,
+          "name": "army_facade_bind_wid_pos",
+          "type": "int"
+        },
+        {
+          "index": 88,
+          "name": "army_facade_bind_main_city",
+          "type": "int"
+        },
+        {
+          "index": 89,
+          "name": "recruit_after_pause",
+          "type": "int"
+        },
+        {
+          "index": 90,
+          "name": "last_learn_skill",
+          "type": "string"
+        },
+        {
+          "index": 91,
+          "name": "last_equip_gear",
+          "type": "string"
+        },
+        {
+          "index": 92,
+          "name": "feature_flag",
+          "type": "int"
+        }
+      ]
+    },
+    "Tb_union_army_group": {
+      "fieldCount": 53,
+      "fields": [
+        {
+          "index": 0,
+          "name": "army_group_id",
+          "type": "int"
+        },
+        {
+          "index": 1,
+          "name": "user_id",
+          "type": "int"
+        },
+        {
+          "index": 2,
+          "name": "union_id",
+          "type": "int"
+        },
+        {
+          "index": 3,
+          "name": "clan_id",
+          "type": "int"
+        },
+        {
+          "index": 4,
+          "name": "army_id",
+          "type": "string"
+        },
+        {
+          "index": 5,
+          "name": "final_wid",
+          "type": "string"
+        },
+        {
+          "index": 6,
+          "name": "state",
+          "type": "int"
+        },
+        {
+          "index": 7,
+          "name": "reside_wid",
+          "type": "int"
+        },
+        {
+          "index": 8,
+          "name": "target_wid",
+          "type": "int"
+        },
+        {
+          "index": 9,
+          "name": "begin_time",
+          "type": "int"
+        },
+        {
+          "index": 10,
+          "name": "end_time",
+          "type": "int"
+        },
+        {
+          "index": 11,
+          "name": "speed",
+          "type": "int"
+        },
+        {
+          "index": 12,
+          "name": "warship_speed",
+          "type": "int"
+        },
+        {
+          "index": 13,
+          "name": "hp",
+          "type": "int"
+        },
+        {
+          "index": 14,
+          "name": "destory",
+          "type": "int"
+        },
+        {
+          "index": 15,
+          "name": "transfer_path",
+          "type": "string"
+        },
+        {
+          "index": 16,
+          "name": "transfer_start_time",
+          "type": "int"
+        },
+        {
+          "index": 17,
+          "name": "is_stay",
+          "type": "int"
+        },
+        {
+          "index": 18,
+          "name": "stay_wid",
+          "type": "int"
+        },
+        {
+          "index": 19,
+          "name": "use_lv_gong_che",
+          "type": "int"
+        },
+        {
+          "index": 20,
+          "name": "emotion",
+          "type": "string"
+        },
+        {
+          "index": 21,
+          "name": "first_enter_fort_time",
+          "type": "int"
+        },
+        {
+          "index": 22,
+          "name": "ship_type",
+          "type": "int"
+        },
+        {
+          "index": 23,
+          "name": "leader_ship_id",
+          "type": "int"
+        },
+        {
+          "index": 24,
+          "name": "warship_state",
+          "type": "int"
+        },
+        {
+          "index": 25,
+          "name": "begin_wid",
+          "type": "int"
+        },
+        {
+          "index": 26,
+          "name": "warship_target_wid",
+          "type": "int"
+        },
+        {
+          "index": 27,
+          "name": "move_begin_time",
+          "type": "int"
+        },
+        {
+          "index": 28,
+          "name": "last_wid",
+          "type": "int"
+        },
+        {
+          "index": 29,
+          "name": "cur_wid",
+          "type": "int"
+        },
+        {
+          "index": 30,
+          "name": "cur_wid_arrive_time",
+          "type": "int"
+        },
+        {
+          "index": 31,
+          "name": "next_index",
+          "type": "int"
+        },
+        {
+          "index": 32,
+          "name": "next_wid",
+          "type": "int"
+        },
+        {
+          "index": 33,
+          "name": "next_distance",
+          "type": "int"
+        },
+        {
+          "index": 34,
+          "name": "next_time",
+          "type": "int"
+        },
+        {
+          "index": 35,
+          "name": "next_spend_time",
+          "type": "int"
+        },
+        {
+          "index": 36,
+          "name": "next_begin_time",
+          "type": "int"
+        },
+        {
+          "index": 37,
+          "name": "next_end_time",
+          "type": "int"
+        },
+        {
+          "index": 38,
+          "name": "compress_path",
+          "type": "string"
+        },
+        {
+          "index": 39,
+          "name": "link_wid",
+          "type": "int"
+        },
+        {
+          "index": 40,
+          "name": "link_time",
+          "type": "int"
+        },
+        {
+          "index": 41,
+          "name": "link_end_time",
+          "type": "int"
+        },
+        {
+          "index": 42,
+          "name": "None",
+          "type": "int"
+        },
+        {
+          "index": 43,
+          "name": "target_type",
+          "type": "int"
+        },
+        {
+          "index": 44,
+          "name": "career_strategy_id_u",
+          "type": "int"
+        },
+        {
+          "index": 45,
+          "name": "plan_setting",
+          "type": "string"
+        },
+        {
+          "index": 46,
+          "name": "is_real_march_end",
+          "type": "int"
+        },
+        {
+          "index": 47,
+          "name": "real_march_id",
+          "type": "int"
+        },
+        {
+          "index": 48,
+          "name": "path_id",
+          "type": "int"
+        },
+        {
+          "index": 49,
+          "name": "lu_jiao_wid",
+          "type": "int"
+        },
+        {
+          "index": 50,
+          "name": "find_new_stay_wid_path_id",
+          "type": "int"
+        },
+        {
+          "index": 51,
+          "name": "wait_next_pre_state",
+          "type": "int"
+        },
+        {
+          "index": 52,
+          "name": "reside_share_fort_kick",
+          "type": "int"
+        }
+      ]
+    },
+    "Tb_union_assembly": {
+      "fieldCount": 9,
+      "fields": [
+        {
+          "index": 0,
+          "name": "id",
+          "type": "int"
+        },
+        {
+          "index": 1,
+          "name": "wid",
+          "type": "int"
+        },
+        {
+          "index": 2,
+          "name": "union_id",
+          "type": "int"
+        },
+        {
+          "index": 3,
+          "name": "time",
+          "type": "int"
+        },
+        {
+          "index": 4,
+          "name": "end_time",
+          "type": "int"
+        },
+        {
+          "index": 5,
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "index": 6,
+          "name": "content",
+          "type": "string"
+        },
+        {
+          "index": 7,
+          "name": "user_name",
+          "type": "string"
+        },
+        {
+          "index": 8,
+          "name": "user_id",
+          "type": "int"
+        }
+      ]
+    },
+    "Tb_user_union_attr": {
+      "fieldCount": 68,
+      "fields": [
+        {
+          "index": 0,
+          "name": "user_id",
+          "type": "int"
+        },
+        {
+          "index": 1,
+          "name": "join_time",
+          "type": "int"
+        },
+        {
+          "index": 2,
+          "name": "donate",
+          "type": "int"
+        },
+        {
+          "index": 3,
+          "name": "contribution_cur",
+          "type": "int"
+        },
+        {
+          "index": 4,
+          "name": "contribution_week",
+          "type": "int"
+        },
+        {
+          "index": 5,
+          "name": "next_contribution_week_time",
+          "type": "int"
+        },
+        {
+          "index": 6,
+          "name": "wuxun_week",
+          "type": "int"
+        },
+        {
+          "index": 7,
+          "name": "next_wuxun_week_time",
+          "type": "int"
+        },
+        {
+          "index": 8,
+          "name": "official_id",
+          "type": "int"
+        },
+        {
+          "index": 9,
+          "name": "official_sequence",
+          "type": "int"
+        },
+        {
+          "index": 10,
+          "name": "gong_attack_add",
+          "type": "int"
+        },
+        {
+          "index": 11,
+          "name": "gong_defend_add",
+          "type": "int"
+        },
+        {
+          "index": 12,
+          "name": "gong_intel_add",
+          "type": "int"
+        },
+        {
+          "index": 13,
+          "name": "qiang_attack_add",
+          "type": "int"
+        },
+        {
+          "index": 14,
+          "name": "qiang_defend_add",
+          "type": "int"
+        },
+        {
+          "index": 15,
+          "name": "qiang_intel_add",
+          "type": "int"
+        },
+        {
+          "index": 16,
+          "name": "qi_attack_add",
+          "type": "int"
+        },
+        {
+          "index": 17,
+          "name": "qi_defend_add",
+          "type": "int"
+        },
+        {
+          "index": 18,
+          "name": "qi_intel_add",
+          "type": "int"
+        },
+        {
+          "index": 19,
+          "name": "npc_city_wid",
+          "type": "int"
+        },
+        {
+          "index": 20,
+          "name": "next_union_mark_time",
+          "type": "int"
+        },
+        {
+          "index": 21,
+          "name": "new_union_mark",
+          "type": "int"
+        },
+        {
+          "index": 22,
+          "name": "new_nation_mark",
+          "type": "int"
+        },
+        {
+          "index": 23,
+          "name": "attack_ally_time",
+          "type": "string"
+        },
+        {
+          "index": 24,
+          "name": "main_city_attacked_time",
+          "type": "int"
+        },
+        {
+          "index": 25,
+          "name": "member_group_id",
+          "type": "int"
+        },
+        {
+          "index": 26,
+          "name": "member_group_leader",
+          "type": "int"
+        },
+        {
+          "index": 27,
+          "name": "group_name",
+          "type": "string"
+        },
+        {
+          "index": 28,
+          "name": "occupy_harbor",
+          "type": "string"
+        },
+        {
+          "index": 29,
+          "name": "fertile_build",
+          "type": "string"
+        },
+        {
+          "index": 30,
+          "name": "union_level",
+          "type": "int"
+        },
+        {
+          "index": 31,
+          "name": "lv_gong_che_count",
+          "type": "int"
+        },
+        {
+          "index": 32,
+          "name": "use_lv_gong_che_info",
+          "type": "string"
+        },
+        {
+          "index": 33,
+          "name": "union_notice_records",
+          "type": "string"
+        },
+        {
+          "index": 34,
+          "name": "union_notice_edit_record",
+          "type": "string"
+        },
+        {
+          "index": 35,
+          "name": "cur_leader_group",
+          "type": "int"
+        },
+        {
+          "index": 36,
+          "name": "notify_leader_group_time",
+          "type": "int"
+        },
+        {
+          "index": 37,
+          "name": "general_title",
+          "type": "int"
+        },
+        {
+          "index": 38,
+          "name": "mu_niu_liu_ma_state",
+          "type": "int"
+        },
+        {
+          "index": 39,
+          "name": "mu_niu_liu_ma_wid",
+          "type": "string"
+        },
+        {
+          "index": 40,
+          "name": "military_strategy_time",
+          "type": "string"
+        },
+        {
+          "index": 41,
+          "name": "military_strategy_end",
+          "type": "string"
+        },
+        {
+          "index": 42,
+          "name": "military_strategy_appoint_time",
+          "type": "int"
+        },
+        {
+          "index": 43,
+          "name": "official_appoint_time",
+          "type": "int"
+        },
+        {
+          "index": 44,
+          "name": "official_appointer_name",
+          "type": "string"
+        },
+        {
+          "index": 45,
+          "name": "official_appoint_need_popup",
+          "type": "int"
+        },
+        {
+          "index": 46,
+          "name": "city_chief_appoint_time",
+          "type": "int"
+        },
+        {
+          "index": 47,
+          "name": "city_chief_appointer_name",
+          "type": "string"
+        },
+        {
+          "index": 48,
+          "name": "city_chief_appoint_need_popup",
+          "type": "int"
+        },
+        {
+          "index": 49,
+          "name": "count_change_time",
+          "type": "int"
+        },
+        {
+          "index": 50,
+          "name": "career_support_data",
+          "type": "string"
+        },
+        {
+          "index": 51,
+          "name": "career_rank_forbid",
+          "type": "string"
+        },
+        {
+          "index": 52,
+          "name": "next_union_command_line_time",
+          "type": "int"
+        },
+        {
+          "index": 53,
+          "name": "zhou_fu_count",
+          "type": "int"
+        },
+        {
+          "index": 54,
+          "name": "bandit_free_denunciation_send_count",
+          "type": "int"
+        },
+        {
+          "index": 55,
+          "name": "wait_change_name_end_time",
+          "type": "int"
+        },
+        {
+          "index": 56,
+          "name": "last_regroup_all_member_time",
+          "type": "int"
+        },
+        {
+          "index": 57,
+          "name": "group_desc",
+          "type": "string"
+        },
+        {
+          "index": 58,
+          "name": "mu_niu_liu_ma_time",
+          "type": "int"
+        },
+        {
+          "index": 59,
+          "name": "mu_niu_liu_ma_my_wid",
+          "type": "int"
+        },
+        {
+          "index": 60,
+          "name": "mu_niu_liu_ma_donation",
+          "type": "int"
+        },
+        {
+          "index": 61,
+          "name": "celebration_end_time",
+          "type": "int"
+        },
+        {
+          "index": 62,
+          "name": "celebration_id",
+          "type": "int"
+        },
+        {
+          "index": 63,
+          "name": "celebration_task_id",
+          "type": "int"
+        },
+        {
+          "index": 64,
+          "name": "zan_gratulate_ids",
+          "type": "string"
+        },
+        {
+          "index": 65,
+          "name": "new_contribution_cur",
+          "type": "int"
+        },
+        {
+          "index": 66,
+          "name": "new_contribution_week",
+          "type": "int"
+        },
+        {
+          "index": 67,
+          "name": "new_contribution_week_time",
+          "type": "int"
+        }
+      ]
+    },
+    "Tb_war_ship": {
+      "fieldCount": 56,
+      "fields": [
+        {
+          "index": 0,
+          "name": "id",
+          "type": "int"
+        },
+        {
+          "index": 1,
+          "name": "war_ship_type",
+          "type": "int"
+        },
+        {
+          "index": 2,
+          "name": "state",
+          "type": "int"
+        },
+        {
+          "index": 3,
+          "name": "target_type",
+          "type": "int"
+        },
+        {
+          "index": 4,
+          "name": "fire_prepare",
+          "type": "int"
+        },
+        {
+          "index": 5,
+          "name": "userid",
+          "type": "int"
+        },
+        {
+          "index": 6,
+          "name": "army_id",
+          "type": "int"
+        },
+        {
+          "index": 7,
+          "name": "begin_wid",
+          "type": "int"
+        },
+        {
+          "index": 8,
+          "name": "move_begin_time",
+          "type": "int"
+        },
+        {
+          "index": 9,
+          "name": "quick_move",
+          "type": "int"
+        },
+        {
+          "index": 10,
+          "name": "target_wid",
+          "type": "int"
+        },
+        {
+          "index": 11,
+          "name": "wait_count",
+          "type": "int"
+        },
+        {
+          "index": 12,
+          "name": "battle_time",
+          "type": "int"
+        },
+        {
+          "index": 13,
+          "name": "army_group_id",
+          "type": "int"
+        },
+        {
+          "index": 14,
+          "name": "army_group_state",
+          "type": "int"
+        },
+        {
+          "index": 15,
+          "name": "cur_state_time",
+          "type": "int"
+        },
+        {
+          "index": 16,
+          "name": "durability_cur",
+          "type": "int"
+        },
+        {
+          "index": 17,
+          "name": "durability_time",
+          "type": "int"
+        },
+        {
+          "index": 18,
+          "name": "durability_add_ratio",
+          "type": "int"
+        },
+        {
+          "index": 19,
+          "name": "link_wid",
+          "type": "int"
+        },
+        {
+          "index": 20,
+          "name": "link_time",
+          "type": "int"
+        },
+        {
+          "index": 21,
+          "name": "link_end_time",
+          "type": "int"
+        },
+        {
+          "index": 22,
+          "name": "cancel_and_del",
+          "type": "int"
+        },
+        {
+          "index": 23,
+          "name": "None",
+          "type": "int"
+        },
+        {
+          "index": 24,
+          "name": "burn_start_time",
+          "type": "int"
+        },
+        {
+          "index": 25,
+          "name": "is_burning",
+          "type": "int"
+        },
+        {
+          "index": 26,
+          "name": "virtual_battle_id",
+          "type": "string"
+        },
+        {
+          "index": 27,
+          "name": "army_hero_type",
+          "type": "string"
+        },
+        {
+          "index": 28,
+          "name": "facade_ids",
+          "type": "string"
+        },
+        {
+          "index": 29,
+          "name": "emotion",
+          "type": "string"
+        },
+        {
+          "index": 30,
+          "name": "army_event",
+          "type": "string"
+        },
+        {
+          "index": 31,
+          "name": "hurt_time",
+          "type": "int"
+        },
+        {
+          "index": 32,
+          "name": "shiqi",
+          "type": "int"
+        },
+        {
+          "index": 33,
+          "name": "shiqi_update_time",
+          "type": "int"
+        },
+        {
+          "index": 34,
+          "name": "last_wid",
+          "type": "int"
+        },
+        {
+          "index": 35,
+          "name": "cur_wid",
+          "type": "int"
+        },
+        {
+          "index": 36,
+          "name": "cur_wid_arrive_time",
+          "type": "int"
+        },
+        {
+          "index": 37,
+          "name": "next_index",
+          "type": "int"
+        },
+        {
+          "index": 38,
+          "name": "next_wid",
+          "type": "int"
+        },
+        {
+          "index": 39,
+          "name": "next_distance",
+          "type": "int"
+        },
+        {
+          "index": 40,
+          "name": "next_time",
+          "type": "int"
+        },
+        {
+          "index": 41,
+          "name": "next_spend_time",
+          "type": "int"
+        },
+        {
+          "index": 42,
+          "name": "next_begin_time",
+          "type": "int"
+        },
+        {
+          "index": 43,
+          "name": "next_end_time",
+          "type": "int"
+        },
+        {
+          "index": 44,
+          "name": "path_id",
+          "type": "int"
+        },
+        {
+          "index": 45,
+          "name": "compress_path",
+          "type": "string"
+        },
+        {
+          "index": 46,
+          "name": "moved_distance",
+          "type": "int"
+        },
+        {
+          "index": 47,
+          "name": "recovery_shiqi_time",
+          "type": "int"
+        },
+        {
+          "index": 48,
+          "name": "shiqi_add_radio",
+          "type": "int"
+        },
+        {
+          "index": 49,
+          "name": "cur_path_distance",
+          "type": "int"
+        },
+        {
+          "index": 50,
+          "name": "cur_path_total_distance",
+          "type": "int"
+        },
+        {
+          "index": 51,
+          "name": "end_time",
+          "type": "int"
+        },
+        {
+          "index": 52,
+          "name": "army_group_leader",
+          "type": "int"
+        },
+        {
+          "index": 53,
+          "name": "speed",
+          "type": "int"
+        },
+        {
+          "index": 54,
+          "name": "heroid_u_hurt_when_reside",
+          "type": "string"
+        },
+        {
+          "index": 55,
+          "name": "shiqi_policy_reduce_ratio",
+          "type": "int"
+        }
+      ]
+    },
+    "Tb_world_city": {
+      "fieldCount": 48,
+      "fields": [
+        {
+          "index": 0,
+          "name": "wid",
+          "type": "int"
+        },
+        {
+          "index": 1,
+          "name": "city_type",
+          "type": "int"
+        },
+        {
+          "index": 2,
+          "name": "param",
+          "type": "int"
+        },
+        {
+          "index": 3,
+          "name": "facade",
+          "type": "string"
+        },
+        {
+          "index": 4,
+          "name": "facade3d",
+          "type": "string"
+        },
+        {
+          "index": 5,
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "index": 6,
+          "name": "userid",
+          "type": "int"
+        },
+        {
+          "index": 7,
+          "name": "farmer_userid",
+          "type": "int"
+        },
+        {
+          "index": 8,
+          "name": "union_id",
+          "type": "int"
+        },
+        {
+          "index": 9,
+          "name": "clan_id",
+          "type": "int"
+        },
+        {
+          "index": 10,
+          "name": "op_userid",
+          "type": "int"
+        },
+        {
+          "index": 11,
+          "name": "force_type",
+          "type": "int"
+        },
+        {
+          "index": 12,
+          "name": "durability_cur",
+          "type": "int"
+        },
+        {
+          "index": 13,
+          "name": "durability_max",
+          "type": "int"
+        },
+        {
+          "index": 14,
+          "name": "durability_time",
+          "type": "int"
+        },
+        {
+          "index": 15,
+          "name": "durability_add_ratio",
+          "type": "int"
+        },
+        {
+          "index": 16,
+          "name": "protect_end_time",
+          "type": "int"
+        },
+        {
+          "index": 17,
+          "name": "flied_protect_end_time",
+          "type": "int"
+        },
+        {
+          "index": 18,
+          "name": "begin_time",
+          "type": "int"
+        },
+        {
+          "index": 19,
+          "name": "end_time",
+          "type": "int"
+        },
+        {
+          "index": 20,
+          "name": "first_end_time",
+          "type": "int"
+        },
+        {
+          "index": 21,
+          "name": "belong_city",
+          "type": "int"
+        },
+        {
+          "index": 22,
+          "name": "state",
+          "type": "int"
+        },
+        {
+          "index": 23,
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "index": 24,
+          "name": "guard_end_time",
+          "type": "int"
+        },
+        {
+          "index": 25,
+          "name": "borrow_land_union_id",
+          "type": "int"
+        },
+        {
+          "index": 26,
+          "name": "reduced_build_time",
+          "type": "int"
+        },
+        {
+          "index": 27,
+          "name": "desert_reason",
+          "type": "int"
+        },
+        {
+          "index": 28,
+          "name": "farmer_land_begin_time",
+          "type": "int"
+        },
+        {
+          "index": 29,
+          "name": "farmer_land_state",
+          "type": "int"
+        },
+        {
+          "index": 30,
+          "name": "farmer_land_end_time",
+          "type": "int"
+        },
+        {
+          "index": 31,
+          "name": "farmer_durability_cur",
+          "type": "int"
+        },
+        {
+          "index": 32,
+          "name": "farmer_durability_max",
+          "type": "int"
+        },
+        {
+          "index": 33,
+          "name": "farmer_durability_time",
+          "type": "int"
+        },
+        {
+          "index": 34,
+          "name": "farmer_durability_add_ratio",
+          "type": "int"
+        },
+        {
+          "index": 35,
+          "name": "farmer_protect_end_time",
+          "type": "int"
+        },
+        {
+          "index": 36,
+          "name": "reclamation_state",
+          "type": "int"
+        },
+        {
+          "index": 37,
+          "name": "ai_buildable_time",
+          "type": "int"
+        },
+        {
+          "index": 38,
+          "name": "jishou_buff_time",
+          "type": "int"
+        },
+        {
+          "index": 39,
+          "name": "fort_share",
+          "type": "int"
+        },
+        {
+          "index": 40,
+          "name": "link_bonfire_wid",
+          "type": "int"
+        },
+        {
+          "index": 41,
+          "name": "occupy_count",
+          "type": "int"
+        },
+        {
+          "index": 42,
+          "name": "link_city_wid",
+          "type": "int"
+        },
+        {
+          "index": 43,
+          "name": "link_city_state",
+          "type": "int"
+        },
+        {
+          "index": 44,
+          "name": "supply_range",
+          "type": "int"
+        },
+        {
+          "index": 45,
+          "name": "desert_after_build",
+          "type": "int"
+        },
+        {
+          "index": 46,
+          "name": "well_range",
+          "type": "int"
+        },
+        {
+          "index": 47,
+          "name": "occupy_time",
+          "type": "int"
+        }
+      ]
+    }
+  }
+}

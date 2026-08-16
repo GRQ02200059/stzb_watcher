@@ -2,9 +2,20 @@
 *.db
 *.sqlite
 *.sqlite3
+*.db-shm
+*.db-wal
 
 # 日志文件
 *.log
+
+# 本机与编辑器状态
+.DS_Store
+local.properties
+/.aiden/
+/.claude/
+/.idea/
+/.vscode/
+/.superpowers/brainstorm/
 
 # 二进制/抓包文件
 *.pcap
@@ -46,6 +57,12 @@ decompressed_data/
 decompressed_data_report/
 downloaded_images/
 hero_image/
+
+# 战斗模拟器本地优化画像包（由 sync_hero_portraits.py 生成）
+!static/hero-portraits/
+!static/hero-portraits/**/*.webp
+!static/hero-portraits/**/*.svg
+!static/hero-portraits/**/*.json
 
 # frp 二进制
 frp/

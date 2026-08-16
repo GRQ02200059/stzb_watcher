@@ -5,13 +5,30 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>率土战场指挥台</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 :root{
-  --bg:#06090f;--panel:#0b1019;--panel2:#0f1620;--border:#1c2a3a;
-  --gold:#c8a044;--gold2:#e8c86a;--red:#e05050;--green:#46b06e;
+  /* ── surfaces (dark data console) ── */
+  --bg:#020617;--panel:#0b1019;--panel2:#0e1223;--panel3:#141b2b;
+  --border:#233043;--border2:#334155;
+  /* ── brand + data series ── */
+  --gold:#c8a044;--gold2:#e8c86a;
   --blue:#4a8fe0;--cyan:#3ab8c8;--purple:#9060d0;--orange:#d07030;
-  --text:#d4cfc0;--text2:#7a8a9a;--muted:#3a4a5a;
-  --glow:0 0 24px #c8a04450;
+  /* ── status (monitoring) ── */
+  --green:#22c55e;--amber:#f0a935;--red:#ef4444;
+  --status-live:var(--green);--status-warn:var(--amber);--status-crit:var(--red);--status-idle:var(--text2);
+  /* ── text ── */
+  --text:#e6ebf2;--text2:#94a3b8;--muted:#5b6b7d;--on-accent:#0b0f18;
+  /* ── spacing (density 8) ── */
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:20px;--sp-6:24px;--sp-8:32px;
+  /* ── radius ── */
+  --r-sm:4px;--r-md:8px;--r-lg:12px;
+  /* ── elevation + glow ── */
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+  --shadow-md:0 4px 14px rgba(0,0,0,.5);
+  --shadow-lg:0 12px 32px rgba(0,0,0,.6);
+  --glow:0 0 24px #c8a04450;--glow-gold:0 0 18px #c8a04440;--glow-green:0 0 10px #22c55e80;
+  /* ── motion ── */
+  --ease:cubic-bezier(.22,.61,.36,1);--dur:200ms;--dur-in:380ms;
+  /* ── type ── */
   --font-body:'SimSun','宋体','STSong',serif;
   --font-mono:'Share Tech Mono',monospace;
 }
@@ -51,7 +68,7 @@ header h1{
   color:var(--text2);text-decoration:none;
   border:1px solid var(--muted);border-radius:4px;
   padding:4px 10px;
-  transition:all .18s;
+  transition:color .18s,border-color .18s,text-shadow .18s,box-shadow .18s;
   white-space:nowrap;
 }
 .github-link:hover{
@@ -65,14 +82,14 @@ header h1{
   position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
   z-index:9999;
   display:flex;align-items:center;gap:8px;
-  background:rgba(11,16,25,0.92);backdrop-filter:blur(8px);
+  background:rgb(11,16,25);
   border:1px solid var(--gold);border-radius:24px;
   padding:7px 22px;
   box-shadow:0 0 24px #c8a04430,0 2px 16px #00000080;
   font-family:var(--font-mono);font-size:.78rem;
   color:var(--text2);
   text-decoration:none;
-  transition:all .2s;
+  transition:color .2s,border-color .2s,box-shadow .2s,transform .2s;
   animation:banner-in .5s ease;
 }
 .github-banner:hover{
@@ -108,7 +125,9 @@ nav button{
   background:none;border:none;border-bottom:2px solid transparent;
   color:var(--text2);cursor:pointer;
   font-family:var(--font-body);font-size:.88rem;
-  letter-spacing:.06em;transition:all .18s;white-space:nowrap;
+  letter-spacing:.06em;
+  transition:color .18s,background-color .18s,border-color .18s,text-shadow .18s;
+  white-space:nowrap;
 }
 @media(max-width:1280px){
   nav button{padding:10px 14px;font-size:.84rem;letter-spacing:.04em;}
@@ -129,24 +148,28 @@ nav button.active{
 @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 
 /* ===== GRID CARDS ===== */
-.cards-row{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+.cards-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--sp-3);margin-bottom:var(--sp-5);}
 .stat-card{
-  flex:1;min-width:120px;
+  position:relative;
   background:linear-gradient(135deg,var(--panel),var(--panel2));
-  border:1px solid var(--border);border-radius:8px;
-  padding:16px 20px;text-align:center;
-  box-shadow:0 2px 8px #00000040;
-  transition:border-color .2s,box-shadow .2s;
+  border:1px solid var(--border);border-radius:var(--r-md);
+  padding:var(--sp-4) var(--sp-5);text-align:center;overflow:hidden;
+  box-shadow:var(--shadow-sm);
+  transition:border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease);
 }
-.stat-card:hover{border-color:#2a3e55;box-shadow:0 4px 16px #00000060;}
-.stat-card .val{font-family:var(--font-mono);font-size:2rem;color:var(--gold);line-height:1.1;}
-.stat-card .lbl{font-size:.72rem;color:var(--text2);margin-top:6px;letter-spacing:.12em;}
+.stat-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--border2);}
+.stat-card.is-live::before{background:var(--status-live);}
+.stat-card.is-warn::before{background:var(--status-warn);}
+.stat-card.is-crit::before{background:var(--status-crit);}
+.stat-card:hover{border-color:var(--border2);box-shadow:var(--shadow-md);}
+.stat-card .val{font-family:var(--font-mono);font-size:2rem;color:var(--gold2);line-height:1.1;}
+.stat-card .lbl{font-size:.72rem;color:var(--text2);margin-top:6px;letter-spacing:.12em;text-transform:uppercase;}
 
 /* ===== TABLES ===== */
 .tbl-wrap{
   background:var(--panel);border:1px solid var(--border);
-  border-radius:8px;overflow:hidden;
-  box-shadow:0 2px 12px #00000050;
+  border-radius:var(--r-md);overflow:hidden;
+  box-shadow:var(--shadow-sm);
 }
 .tbl-head{
   display:flex;align-items:center;justify-content:space-between;
@@ -161,14 +184,16 @@ nav button.active{
 .tbl-scroll{max-height:calc(100vh - 160px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 table{width:100%;border-collapse:collapse;font-size:1rem;font-family:var(--font-body);}
 thead th{
-  padding:9px 12px;background:#090f1c;color:var(--text2);text-align:left;
+  padding:9px 12px;background:var(--panel);color:var(--text2);text-align:left;
   font-weight:600;letter-spacing:.08em;font-size:.82rem;
-  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1;
+  border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:2;
   font-family:var(--font-body);
 }
-tbody tr{border-bottom:1px solid #111c28;transition:background .1s;}
-tbody tr:hover{background:#0f1a28;}
-tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+tbody tr{border-bottom:1px solid #111c28;transition:background .15s var(--ease);}
+tbody tr:nth-child(even){background:#0c1220;}
+tbody tr:hover{background:var(--panel3);}
+tbody td{padding:8px 12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+td.num,th.num{text-align:right;font-family:var(--font-mono);}
 .rank-1{color:var(--gold2);font-weight:700;}
 .rank-2{color:#b8b8c8;}
 .rank-3{color:#c07840;}
@@ -188,19 +213,34 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
 /* ===== FILTERS ===== */
 .filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
 .filters select,.filters input{
-  background:var(--panel2);border:1px solid var(--border);
-  border-radius:5px;color:var(--text);padding:6px 11px;font-size:.88rem;outline:none;
-  font-family:var(--font-body);transition:border-color .15s;
+  background:var(--panel2);border:1px solid var(--border2);
+  border-radius:var(--r-sm);color:var(--text);padding:7px 12px;font-size:.88rem;outline:none;
+  font-family:var(--font-body);transition:border-color var(--dur),box-shadow var(--dur);
+  min-height:34px;
 }
-.filters select:focus,.filters input:focus{border-color:var(--gold);box-shadow:0 0 0 2px #c8a04420;}
+.filters select:focus,.filters input:focus{border-color:var(--gold);box-shadow:0 0 0 3px #c8a04430;}
+.filters select:focus-visible,.filters input:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 .btn{
-  padding:6px 16px;background:var(--panel2);border:1px solid var(--border);
-  border-radius:5px;color:var(--text2);cursor:pointer;font-size:.88rem;
-  transition:all .18s;font-family:var(--font-body);
+  padding:7px 16px;background:var(--panel2);border:1px solid var(--border2);
+  border-radius:var(--r-sm);color:var(--text);cursor:pointer;font-size:.88rem;
+  transition:color var(--dur) var(--ease),background-color var(--dur) var(--ease),border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease);
+  font-family:var(--font-body);min-height:34px;
 }
-.btn:hover{border-color:var(--gold);color:var(--gold);background:#141e2c;}
-.btn-primary{background:#162416;border-color:var(--green);color:var(--green);}
-.btn-primary:hover{background:#1e3020;}
+.btn:hover{border-color:var(--gold);color:var(--gold2);box-shadow:var(--glow-gold);}
+.btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.btn-primary{background:var(--gold);border-color:var(--gold);color:var(--on-accent);font-weight:600;}
+.btn-primary:hover{background:var(--gold2);border-color:var(--gold2);color:var(--on-accent);}
+.btn-ghost{background:transparent;border-color:var(--border);color:var(--text2);}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold2);}
+
+/* ===== STATUS PILL ===== */
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);
+  font-size:.72rem;padding:2px 10px;border-radius:999px;border:1px solid var(--border);color:var(--text2);}
+.pill.live{color:var(--green);border-color:#22c55e55;}
+.pill.live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green);
+  box-shadow:var(--glow-green);animation:pulse 2s infinite;}
+.pill.warn{color:var(--amber);border-color:#f0a93555;}
+.pill.crit{color:var(--red);border-color:#ef444455;}
 
 /* ===== SPLIT LAYOUT ===== */
 .split2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
@@ -210,9 +250,13 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
 /* ===== REALTIME FEED ===== */
 .feed{max-height:320px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 .feed-item{
-  padding:8px 16px;border-bottom:1px solid #0e1820;font-size:.88rem;
-  display:flex;gap:10px;align-items:baseline;animation:slideIn .25s ease;
+  padding:8px 16px;border-bottom:1px solid #0e1820;border-left:2px solid transparent;font-size:.88rem;
+  display:flex;gap:10px;align-items:baseline;animation:slideIn var(--dur) var(--ease);
 }
+.feed-item:hover{background:var(--panel3);}
+.feed-item.live{border-left-color:var(--green);}
+.feed-item.warn{border-left-color:var(--amber);}
+.feed-item.crit{border-left-color:var(--red);}
 @keyframes slideIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
 .feed-time{font-family:var(--font-mono);font-size:.67rem;color:var(--muted);flex-shrink:0;}
 .feed-body{flex:1;line-height:1.5;}
@@ -220,8 +264,8 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
 /* ===== BAR CHART ===== */
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:.82rem;}
 .bar-label{width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);text-align:right;}
-.bar-track{flex:1;height:14px;background:#090f1c;border-radius:4px;overflow:hidden;border:1px solid var(--border);}
-.bar-fill{height:100%;border-radius:3px;transition:width .6s ease;}
+.bar-track{flex:1;height:14px;background:#090f1c;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--border);}
+.bar-fill{height:100%;border-radius:3px;transition:width .6s var(--ease);background:linear-gradient(90deg,var(--gold),var(--gold2));}
 .bar-val{width:60px;font-family:var(--font-mono);font-size:.72rem;color:var(--text2);}
 
 /* ===== TOAST ===== */
@@ -254,97 +298,893 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
 
 /* ===== PROGRESS BAR ===== */
 .prog{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:4px;}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;transition:width .5s;}XiaoWei',serif;}
-.btn:hover{border-color:var(--gold);color:var(--gold);}
-.btn-primary{background:#1a2a18;border-color:var(--green);color:var(--green);}
-.btn-primary:hover{background:#223020;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;transition:width .5s var(--ease);}
 
-/* ===== SPLIT LAYOUT ===== */
-.split2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.split3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
-@media(max-width:900px){.split2,.split3{grid-template-columns:1fr;}}
-
-/* ===== REALTIME FEED ===== */
-.feed{max-height:320px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
-.feed-item{padding:7px 14px;border-bottom:1px solid #101820;font-size:.78rem;
-  display:flex;gap:10px;align-items:baseline;animation:slideIn .3s ease;}
-@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
-.feed-time{font-family:'Share Tech Mono',monospace;font-size:.67rem;color:var(--muted);flex-shrink:0;}
-.feed-body{flex:1;line-height:1.4;}
-
-/* ===== BAR CHART ===== */
-.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:5px;font-size:.76rem;}
-.bar-label{width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);text-align:right;}
-.bar-track{flex:1;height:16px;background:#0d1520;border-radius:3px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:3px;transition:width .6s ease;}
-.bar-val{width:60px;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--text2);}
-
-/* ===== TOAST ===== */
-#toast{position:fixed;bottom:20px;right:20px;padding:9px 16px;background:#162016;
-  border:1px solid var(--green);border-radius:5px;font-size:.8rem;color:var(--green);
-  opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;max-width:300px;}
-
-.query-agent-panel{position:fixed;right:16px;top:72px;width:380px;max-width:calc(100vw - 32px);z-index:900;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:0 18px 60px #0008}
+/* ===== QUERY AGENT + WORLD SCENE SUBTABS ===== */
+.query-agent-panel{position:fixed;right:16px;top:72px;width:380px;max-width:calc(100vw - 32px);z-index:900;background:var(--panel);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;box-shadow:var(--shadow-lg)}
 .query-agent-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.query-agent-answer{min-height:120px;max-height:360px;overflow:auto;background:#07111d;border:1px solid #162638;border-radius:8px;padding:10px;color:var(--text);font-size:.82rem;line-height:1.55;margin-bottom:10px}
-#query-agent-input{width:100%;box-sizing:border-box;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px}
-.ws-subtabs{display:inline-flex;gap:6px;background:#0a1220;border:1px solid var(--border);border-radius:8px;padding:4px}
-.ws-subtab{background:transparent;color:var(--text2);border:1px solid transparent;border-radius:6px;padding:6px 12px;font-size:.82rem;cursor:pointer;letter-spacing:.04em;font-family:var(--font-body)}
-.ws-subtab:hover{color:var(--text);background:#111c2a}
-.ws-subtab.active{color:var(--gold);border-color:#2a3e55;background:linear-gradient(135deg,var(--panel),var(--panel2))}
+.query-agent-answer{min-height:120px;max-height:360px;overflow:auto;background:#07111d;border:1px solid var(--border);border-radius:var(--r-md);padding:10px;color:var(--text);font-size:.82rem;line-height:1.55;margin-bottom:10px}
+#query-agent-input{width:100%;box-sizing:border-box;background:var(--panel2);color:var(--text);border:1px solid var(--border2);border-radius:var(--r-md);padding:8px}
+.ws-subtabs{display:inline-flex;gap:6px;background:#0a1220;border:1px solid var(--border);border-radius:var(--r-md);padding:4px}
+.ws-subtab{background:transparent;color:var(--text2);border:1px solid transparent;border-radius:6px;padding:6px 12px;font-size:.82rem;cursor:pointer;letter-spacing:.04em;font-family:var(--font-body);transition:color var(--dur) var(--ease),background-color var(--dur) var(--ease),border-color var(--dur) var(--ease)}
+.ws-subtab:hover{color:var(--text);background:var(--panel3)}
+.ws-subtab.active{color:var(--gold2);border-color:var(--border2);background:linear-gradient(135deg,var(--panel),var(--panel2))}
 .ws-empty{padding:26px;text-align:center;color:var(--text2);font-size:.82rem}
 #query-agent-fab{position:fixed;right:18px;bottom:18px;z-index:850}
 
-/* ===== PROGRESS BAR ===== */
-.prog{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:4px;}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;transition:width .5s;}
+/* ===== A11Y: reduced motion ===== */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important;}
+}
+
+/* ===== MODERN CONSOLE OVERRIDES =====
+   Disabled: the maintained implementation lives in dashboard-design-system.css.
+   Keeping this historical block isolated during the staged legacy CSS migration. */
+@media not all {
+:root{
+  --console-header-height:68px;
+  --console-nav-height:48px;
+  --focus-ring:0 0 0 3px rgba(200,160,68,.24);
+}
+html{background:var(--bg);scroll-behavior:smooth;}
+body{
+  min-width:320px;
+  overflow-x:hidden;
+  background:
+    linear-gradient(180deg,rgba(16,31,51,.24),transparent 220px),
+    var(--bg);
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+  opacity:.18;
+  background-image:linear-gradient(rgba(148,163,184,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.035) 1px,transparent 1px);
+  background-size:32px 32px;
+  mask-image:linear-gradient(to bottom,black,transparent 76%);
+}
+::selection{background:rgba(200,160,68,.32);color:var(--text);}
+button,input,select,textarea{font:inherit;}
+button{appearance:none;}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--gold2);
+  outline-offset:2px;
+  box-shadow:var(--focus-ring);
+}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:var(--panel);}
+::-webkit-scrollbar-thumb{background:var(--border2);border:2px solid var(--panel);border-radius:999px;}
+::-webkit-scrollbar-thumb:hover{background:var(--gold);}
+
+header{
+  position:sticky;
+  top:0;
+  z-index:700;
+  min-height:var(--console-header-height);
+  padding:12px clamp(16px,3vw,40px);
+  background:rgba(5,10,19,.88);
+  border-bottom:1px solid rgba(51,65,85,.72);
+  box-shadow:0 10px 28px rgba(0,0,0,.24);
+}
+header h1{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:clamp(1.05rem,1.7vw,1.35rem);
+  letter-spacing:.18em;
+  line-height:1.2;
+  text-shadow:0 0 22px rgba(200,160,68,.22);
+}
+header h1::before{
+  content:"";
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 12px rgba(34,197,94,.7);
+  animation:pulse 2s infinite;
+}
+.hdr-right{gap:10px 16px;flex-wrap:wrap;}
+.hdr-stat{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  min-height:30px;
+  padding:4px 9px;
+  border:1px solid rgba(51,65,85,.72);
+  border-radius:var(--r-sm);
+  background:rgba(14,18,35,.62);
+  color:var(--text2);
+  font-size:.72rem;
+}
+.hdr-stat span{color:var(--gold2);}
+.hdr-stat #cstat{color:var(--text2);}
+.hdr-stat:has(#profile-select){padding:2px 5px;}
+#profile-select{
+  min-height:30px;
+  border:0!important;
+  background:transparent!important;
+  color:var(--text)!important;
+  padding:4px 8px!important;
+  font-family:var(--font-body);
+}
+.github-link{border-color:var(--border2);border-radius:var(--r-sm);}
+
+nav{
+  position:sticky;
+  top:var(--console-header-height);
+  z-index:600;
+  min-height:var(--console-nav-height);
+  padding:0 clamp(8px,2vw,28px);
+  background:rgba(11,16,25,.94);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 8px 18px rgba(0,0,0,.16);
+}
+nav::before{
+  content:"WORKSPACE";
+  display:flex;
+  align-items:center;
+  margin-right:12px;
+  color:var(--muted);
+  font-family:var(--font-mono);
+  font-size:.62rem;
+  letter-spacing:.16em;
+}
+nav button{
+  position:relative;
+  min-height:var(--console-nav-height);
+  padding:10px 14px;
+  border-bottom:2px solid transparent;
+  color:var(--text2);
+  font-size:.82rem;
+  letter-spacing:.03em;
+}
+nav button::after{
+  content:"";
+  position:absolute;
+  left:14px;
+  right:14px;
+  bottom:-1px;
+  height:2px;
+  background:var(--gold);
+  transform:scaleX(0);
+  transition:transform var(--dur) var(--ease);
+}
+nav button:hover{background:rgba(20,27,43,.72);color:var(--text);}
+nav button.active{
+  background:rgba(20,27,43,.82);
+  color:var(--gold2);
+  border-bottom-color:transparent;
+  text-shadow:none;
+}
+nav button.active::after{transform:scaleX(1);}
+
+.page{
+  width:min(100%,1680px);
+  margin:0 auto;
+  padding:clamp(16px,2.4vw,32px) clamp(14px,2.6vw,40px) 96px;
+  animation:fadeIn .22s var(--ease);
+}
+.page > :first-child{margin-top:0;}
+.page h2,.page h3,.page h4{color:var(--text);}
+.page h2{font-size:1.25rem;letter-spacing:.04em;}
+.cards-row{gap:10px;margin-bottom:18px;}
+.stat-card{
+  min-height:94px;
+  padding:16px 18px;
+  text-align:left;
+  background:linear-gradient(145deg,rgba(14,18,35,.96),rgba(11,16,25,.96));
+}
+.stat-card .val{font-size:1.75rem;}
+.stat-card .lbl{margin-top:10px;font-size:.68rem;letter-spacing:.08em;}
+.stat-card:hover{border-color:rgba(200,160,68,.6);box-shadow:0 8px 22px rgba(0,0,0,.28),0 0 0 1px rgba(200,160,68,.1);}
+
+.tbl-wrap{
+  border-radius:var(--r-md);
+  border-color:rgba(51,65,85,.8);
+  box-shadow:0 8px 24px rgba(0,0,0,.16);
+}
+.tbl-head{
+  min-height:48px;
+  padding:10px 14px;
+  background:linear-gradient(90deg,rgba(14,18,35,.98),rgba(11,16,25,.98));
+}
+.tbl-head h3{font-size:.82rem;letter-spacing:.09em;}
+.tbl-controls{gap:6px;}
+.tbl-scroll{max-height:calc(100vh - 184px);overscroll-behavior:contain;}
+table{font-size:.9rem;}
+thead th{
+  padding:10px 12px;
+  background:rgba(11,16,25,.98);
+  color:#aab7c8;
+  font-size:.72rem;
+  letter-spacing:.06em;
+}
+tbody td{padding:9px 12px;}
+tbody tr{border-bottom-color:rgba(35,48,67,.72);}
+tbody tr:nth-child(even){background:rgba(12,18,32,.72);}
+tbody tr:hover{background:rgba(31,43,61,.78);}
+
+.filters{
+  padding:10px;
+  margin-bottom:14px;
+  border:1px solid rgba(51,65,85,.72);
+  border-radius:var(--r-md);
+  background:rgba(11,16,25,.7);
+}
+.filters select,.filters input,.input,.select{
+  min-height:36px;
+  background:rgba(14,18,35,.92);
+  border-color:var(--border2);
+  border-radius:var(--r-sm);
+}
+.filters select:hover,.filters input:hover,.input:hover,.select:hover{border-color:#5b6b7d;}
+.filters select:focus,.filters input:focus,.input:focus,.select:focus{
+  border-color:var(--gold);
+  box-shadow:var(--focus-ring);
+}
+.btn{
+  min-height:36px;
+  padding:8px 14px;
+  border-radius:var(--r-sm);
+  border-color:var(--border2);
+  background:rgba(14,18,35,.92);
+  font-size:.8rem;
+  letter-spacing:.02em;
+}
+.btn-primary{background:var(--gold);border-color:var(--gold);color:var(--on-accent);}
+.btn-ghost{background:transparent;}
+.btn:active{transform:translateY(1px);}
+
+.split2,.split3{gap:12px;}
+.feed{max-height:360px;}
+.feed-item{padding:10px 14px;font-size:.84rem;}
+.ws-grid{padding:12px;background:rgba(7,11,18,.8);}
+.ws-cell{min-width:36px;height:36px;}
+.ws-subtabs{background:rgba(10,18,32,.82);}
+.ws-subtab{min-height:34px;}
+.query-agent-panel{
+  top:calc(var(--console-header-height) + var(--console-nav-height) + 12px);
+  right:clamp(12px,2vw,28px);
+  width:min(410px,calc(100vw - 24px));
+  border-color:rgba(200,160,68,.5);
+  background:rgba(11,16,25,.95);
+}
+#query-agent-input{min-height:78px;border-radius:var(--r-sm);}
+#query-agent-fab{right:clamp(12px,2vw,28px);bottom:64px;z-index:960;box-shadow:0 8px 24px rgba(0,0,0,.35);}
+.github-banner{bottom:18px;left:18px;transform:none;border-radius:var(--r-sm);padding:7px 12px;font-size:.72rem;}
+.github-banner:hover{transform:translateY(-2px);}
+
+@media(max-width:760px){
+  :root{--console-header-height:112px;--console-nav-height:48px;}
+  header{align-items:flex-start;padding:12px 14px;}
+  header h1{width:100%;font-size:1rem;letter-spacing:.1em;}
+  .hdr-right{width:100%;gap:6px;}
+  .hdr-stat{font-size:.65rem;min-height:28px;padding:3px 7px;}
+  .hdr-stat:nth-child(3){display:none;}
+  nav{top:var(--console-header-height);padding:0 8px;}
+  nav::before{display:none;}
+  nav button{min-height:var(--console-nav-height);padding:10px 12px;font-size:.78rem;}
+  nav button::after{left:12px;right:12px;}
+  .page{padding:14px 10px 84px;}
+  .cards-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  .stat-card{min-height:82px;padding:12px;}
+  .stat-card .val{font-size:1.45rem;}
+  .stat-card .lbl{font-size:.62rem;margin-top:7px;}
+  .filters{align-items:stretch;}
+  .filters select,.filters input,.filters .btn{flex:1 1 140px;}
+  .tbl-head{align-items:flex-start;gap:8px;flex-wrap:wrap;}
+  .tbl-controls{width:100%;}
+  .tbl-controls input{width:100%!important;}
+  .tbl-scroll{max-height:none;}
+  table{min-width:680px;}
+  .split2,.split3{grid-template-columns:1fr;}
+  .github-banner{left:auto;right:12px;bottom:12px;}
+  #query-agent-fab{bottom:56px;right:12px;z-index:960;}
+  .github-banner + *{margin-bottom:0;}
+}
+
+/* ===== DESIGN SYSTEM FINAL TOKENS ===== */
+:root{
+  --bg-canvas:#080d22;
+  --bg-sidebar:#0a1028;
+  --surface-1:#0c1430;
+  --surface-2:#121d3f;
+  --surface-3:#19284f;
+  --surface-4:#243967;
+  --border-subtle:#24365f;
+  --border-strong:#365080;
+  --text-primary:#f4f7ff;
+  --text-secondary:#9aabca;
+  --text-tertiary:#7183a7;
+  --text-inverse:#061127;
+  --primary:#38bdf8;
+  --primary-strong:#2f80ff;
+  --success:#34d399;
+  --warning:#f5b84b;
+  --danger:#f05267;
+  --protected:#8b6cff;
+  --info:#54a6ff;
+  --gradient-primary:linear-gradient(90deg,#2f80ff 0%,#38bdf8 55%,#34d399 100%);
+  --gradient-intensity:linear-gradient(90deg,#38bdf8 0%,#8b6cff 48%,#f5b84b 100%);
+  --shadow-panel:0 10px 28px rgba(0,5,22,.28);
+  --shadow-focus:0 0 0 3px rgba(56,189,248,.24);
+  --shadow-primary:0 8px 24px rgba(47,128,255,.24);
+  --space-1:4px;
+  --space-2:8px;
+  --space-3:12px;
+  --space-4:16px;
+  --space-5:20px;
+  --space-6:24px;
+  --space-8:32px;
+  --radius-xs:4px;
+  --radius-sm:6px;
+  --radius-md:8px;
+  --radius-lg:10px;
+  --radius-pill:999px;
+  --font-sans:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+
+  /* Legacy aliases keep existing business styles and JS-compatible selectors stable. */
+  --bg:var(--bg-canvas);
+  --panel:var(--surface-1);
+  --panel2:var(--surface-2);
+  --panel3:var(--surface-3);
+  --border:var(--border-subtle);
+  --border2:var(--border-strong);
+  --text:var(--text-primary);
+  --text2:var(--text-secondary);
+  --muted:var(--text-tertiary);
+  --on-accent:var(--text-inverse);
+  --gold:var(--primary);
+  --gold2:#7dd3fc;
+  --green:var(--success);
+  --amber:var(--warning);
+  --red:var(--danger);
+  --blue:var(--info);
+  --cyan:var(--primary);
+  --purple:var(--protected);
+  --r-sm:var(--radius-sm);
+  --r-md:var(--radius-md);
+  --r-lg:var(--radius-lg);
+  --sp-1:var(--space-1);
+  --sp-2:var(--space-2);
+  --sp-3:var(--space-3);
+  --sp-4:var(--space-4);
+  --sp-5:var(--space-5);
+  --sp-6:var(--space-6);
+  --sp-8:var(--space-8);
+  --shadow-sm:var(--shadow-panel);
+  --shadow-md:var(--shadow-panel);
+  --shadow-lg:0 16px 40px rgba(0,5,22,.4);
+  --glow-gold:0 0 18px rgba(56,189,248,.24);
+  --glow-green:0 0 10px rgba(52,211,153,.42);
+  --focus-ring:var(--shadow-focus);
+}
+
+html,body{font-family:var(--font-sans);}
+body{
+  background:
+    radial-gradient(circle at 80% 0%,rgba(47,128,255,.12),transparent 34rem),
+    radial-gradient(circle at 42% 85%,rgba(139,108,255,.08),transparent 34rem),
+    var(--bg-canvas);
+  color:var(--text-primary);
+  font-size:14px;
+  line-height:1.55;
+}
+body::before{
+  opacity:.08;
+  background-image:linear-gradient(rgba(154,171,202,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(154,171,202,.05) 1px,transparent 1px);
+}
+header{
+  background:rgba(8,13,34,.94);
+  border-bottom-color:var(--border-subtle);
+  box-shadow:none;
+}
+header h1{
+  color:var(--text-primary);
+  text-shadow:none;
+  font-family:var(--font-sans);
+  font-weight:700;
+}
+header h1::after{color:var(--text-secondary);}
+.hdr-stat{
+  border-color:var(--border-subtle);
+  background:var(--surface-1);
+  color:var(--text-secondary);
+}
+.hdr-stat span{color:var(--primary);}
+.hdr-stat #cstat{color:var(--text-secondary);}
+nav{
+  background:var(--bg-sidebar);
+  border-color:var(--border-subtle);
+}
+nav button{
+  font-family:var(--font-sans);
+  color:var(--text-secondary);
+}
+nav button:hover{background:var(--surface-2);color:var(--text-primary);}
+nav button.active{
+  color:var(--text-primary);
+  background:rgba(56,189,248,.1);
+  border-color:rgba(56,189,248,.24);
+  text-shadow:none;
+}
+nav button.active::after{background:var(--primary);}
+.page{font-family:var(--font-sans);}
+.stat-card,.tbl-wrap,.filters{
+  background:var(--surface-1);
+  border-color:var(--border-subtle);
+  box-shadow:var(--shadow-panel);
+}
+.stat-card::before{background:var(--primary);}
+.stat-card.is-live::before{background:var(--success);}
+.stat-card.is-warn::before{background:var(--warning);}
+.stat-card.is-crit::before{background:var(--danger);}
+.stat-card .val{color:var(--text-primary);font-family:var(--font-mono);font-size:28px;font-weight:700;}
+.stat-card .lbl{color:var(--text-secondary);font-family:var(--font-sans);font-size:12px;letter-spacing:.03em;text-transform:none;}
+.stat-card:hover{border-color:var(--border-strong);box-shadow:var(--shadow-panel);}
+.tbl-head{background:var(--surface-2);border-bottom-color:var(--border-subtle);}
+.tbl-head h3{color:var(--text-primary);font-family:var(--font-sans);font-size:16px;letter-spacing:0;font-weight:600;}
+table{font-family:var(--font-sans);font-size:14px;}
+thead th{background:var(--surface-1);color:var(--text-secondary);font-family:var(--font-sans);font-size:13px;letter-spacing:0;}
+tbody tr{border-bottom-color:var(--border-subtle);}
+tbody tr:nth-child(even){background:rgba(18,29,63,.52);}
+tbody tr:hover{background:var(--surface-3);}
+tbody td{color:var(--text-primary);}
+td.num,th.num{font-family:var(--font-mono);}
+.filters{
+  padding:12px;
+  gap:8px;
+}
+.filters select,.filters input,.input,.select{
+  min-height:40px;
+  background:var(--surface-2);
+  border-color:var(--border-strong);
+  color:var(--text-primary);
+  border-radius:var(--radius-sm);
+  font-family:var(--font-sans);
+  font-size:14px;
+}
+.filters select:focus,.filters input:focus,.input:focus,.select:focus{
+  border-color:var(--primary);
+  box-shadow:var(--shadow-focus);
+}
+.btn{
+  min-height:40px;
+  padding:8px 16px;
+  background:var(--surface-2);
+  border-color:var(--border-strong);
+  color:var(--text-primary);
+  border-radius:var(--radius-md);
+  font-family:var(--font-sans);
+  font-size:14px;
+}
+.btn:hover{border-color:var(--primary);color:var(--text-primary);box-shadow:var(--shadow-focus);}
+.btn-primary{
+  background:var(--gradient-primary);
+  border-color:transparent;
+  color:var(--text-inverse);
+  box-shadow:var(--shadow-primary);
+}
+.btn-primary:hover{background:var(--gradient-primary);border-color:transparent;color:var(--text-inverse);box-shadow:var(--shadow-primary);}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--text-secondary);}
+.pill{border-radius:var(--radius-pill);font-family:var(--font-sans);}
+.pill.live{color:var(--success);border-color:rgba(52,211,153,.45);}
+.pill.warn{color:var(--warning);border-color:rgba(245,184,75,.45);}
+.pill.crit{color:var(--danger);border-color:rgba(240,82,103,.45);}
+.feed-item{border-bottom-color:var(--border-subtle);font-family:var(--font-sans);}
+.feed-time{font-family:var(--font-mono);color:var(--text-secondary);}
+.bar-track{background:var(--surface-3);border-color:var(--border-subtle);}
+.bar-fill{background:var(--gradient-intensity);}
+.prog{background:var(--surface-3);}
+.prog-fill{background:var(--gradient-primary);}
+.ws-subtabs{background:var(--surface-2);border-color:var(--border-subtle);}
+.ws-subtab{font-family:var(--font-sans);}
+.ws-subtab.active{color:var(--primary);border-color:var(--primary);background:rgba(56,189,248,.08);}
+.query-agent-panel{background:var(--surface-1);border-color:var(--border-strong);}
+#query-agent-input{background:var(--surface-2);border-color:var(--border-strong);font-family:var(--font-sans);}
+#query-agent-fab{background:var(--gradient-primary);}
+@media (prefers-reduced-motion:reduce){
+  body::before,body::after{display:none;}
+}
+
+/* ===== REFERENCE WORKSPACE SHELL ===== */
+@media(min-width:761px){
+  :root{
+    --workspace-sidebar:196px;
+    --workspace-gutter:28px;
+  }
+  body{
+    background:
+      radial-gradient(circle at 78% 0%,rgba(77,48,150,.2),transparent 31rem),
+      radial-gradient(circle at 42% 85%,rgba(24,64,126,.13),transparent 34rem),
+      linear-gradient(135deg,#090b22 0%,#100d2d 48%,#080b1b 100%);
+  }
+  body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:-1;
+    opacity:.45;
+    background:
+      radial-gradient(circle at 82% 10%,rgba(232,234,255,.15) 0 1px,transparent 2px),
+      radial-gradient(circle at 88% 19%,rgba(255,255,255,.14) 0 1px,transparent 2px),
+      radial-gradient(circle at 62% 7%,rgba(255,255,255,.16) 0 1px,transparent 2px),
+      radial-gradient(circle at 25% 32%,rgba(255,255,255,.1) 0 1px,transparent 2px);
+    background-size:170px 140px,230px 190px,290px 220px,360px 260px;
+  }
+  header{
+    margin-left:var(--workspace-sidebar);
+    min-height:76px;
+    padding:16px var(--workspace-gutter) 13px;
+    background:linear-gradient(180deg,rgba(8,8,28,.86),rgba(10,9,31,.52));
+    border-bottom-color:rgba(120,105,203,.2);
+    box-shadow:none;
+  }
+  header h1{
+    font-size:1.42rem;
+    letter-spacing:.08em;
+  }
+  header h1::before{display:none;}
+  header h1::after{
+    content:"实时战场数据台";
+    display:block;
+    margin-top:5px;
+    color:#9ca4c5;
+    font-family:var(--font-body);
+    font-size:.68rem;
+    font-weight:400;
+    letter-spacing:.08em;
+  }
+  .hdr-right{gap:8px;}
+  .hdr-stat{
+    border-color:rgba(122,111,190,.26);
+    background:rgba(25,22,68,.42);
+    border-radius:8px;
+  }
+  nav{
+    position:fixed;
+    inset:0 auto 0 0;
+    z-index:800;
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:4px;
+    width:var(--workspace-sidebar);
+    min-height:100vh;
+    padding:18px 12px 20px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    background:
+      linear-gradient(180deg,rgba(14,14,45,.98),rgba(8,10,28,.98)),
+      var(--panel);
+    border-right:1px solid rgba(114,103,183,.24);
+    border-bottom:0;
+    box-shadow:14px 0 40px rgba(0,0,0,.22);
+  }
+  nav::before{
+    content:"STZB\A WATCHER";
+    display:block;
+    height:64px;
+    margin:0 8px 12px;
+    padding:4px 0 0 36px;
+    white-space:pre;
+    color:#f2f1ff;
+    font-family:var(--font-mono);
+    font-size:.9rem;
+    font-weight:700;
+    letter-spacing:.08em;
+    line-height:1.6;
+    background:
+      radial-gradient(circle at 12px 14px,var(--gold2) 0 5px,transparent 6px),
+      radial-gradient(circle at 12px 28px,var(--cyan) 0 4px,transparent 5px);
+  }
+  nav::after{
+    content:"本机安全\A 只读数据 · 不执行游戏动作\A 实时连接已启用";
+    display:block;
+    order:99;
+    margin:16px 0 0;
+    padding:12px 10px;
+    white-space:pre;
+    border:1px solid rgba(94,106,173,.26);
+    border-radius:8px;
+    color:#9ba4c9;
+    font-size:.64rem;
+    line-height:1.8;
+    background:rgba(25,25,70,.5);
+  }
+  nav button{
+    display:block!important;
+    flex:0 0 auto;
+    width:100%;
+    min-height:38px;
+    padding:9px 12px 9px 14px;
+    border:1px solid transparent;
+    border-radius:8px;
+    text-align:left;
+    color:#a6a9c8;
+    font-size:.78rem;
+    letter-spacing:.02em;
+  }
+  nav button[style*="display:none"]{display:none!important;}
+  nav button::after{
+    left:4px;
+    right:auto;
+    top:8px;
+    bottom:8px;
+    width:3px;
+    height:auto;
+    border-radius:4px;
+    transform:scaleY(0);
+  }
+  nav button:hover{
+    color:#f0efff;
+    background:rgba(91,77,180,.2);
+    border-color:rgba(127,114,216,.2);
+  }
+  nav button.active{
+    color:#f5f0ff;
+    background:linear-gradient(90deg,rgba(79,69,162,.46),rgba(64,54,137,.18));
+    border-color:rgba(132,119,221,.25);
+    box-shadow:inset 0 0 24px rgba(111,94,219,.1);
+  }
+  nav button.active::after{transform:scaleY(1);}
+  .page{
+    width:auto;
+    max-width:none;
+    margin-left:var(--workspace-sidebar);
+    padding:24px var(--workspace-gutter) 100px;
+  }
+  .tbl-wrap,.stat-card,.filters{
+    border-color:rgba(117,105,192,.24);
+    background:linear-gradient(145deg,rgba(34,29,83,.76),rgba(20,19,58,.76));
+    box-shadow:0 14px 42px rgba(2,2,18,.24),inset 0 1px 0 rgba(255,255,255,.03);
+  }
+  .tbl-head{
+    background:linear-gradient(90deg,rgba(44,37,103,.65),rgba(28,25,74,.48));
+    border-bottom-color:rgba(117,105,192,.2);
+  }
+  thead th{background:rgba(22,20,59,.9);}
+  tbody tr:nth-child(even){background:rgba(42,36,93,.22);}
+  tbody tr:hover{background:rgba(88,76,166,.24);}
+  .stat-card{
+    background:linear-gradient(145deg,rgba(51,44,117,.62),rgba(25,25,72,.76));
+  }
+  .stat-card::before{background:linear-gradient(180deg,var(--cyan),var(--purple));}
+  .stat-card .val{color:#dfe2ff;}
+  .stat-card:hover{border-color:rgba(153,139,241,.58);box-shadow:0 14px 32px rgba(4,3,26,.35),0 0 24px rgba(103,83,214,.12);}
+  .filters select,.filters input,.input,.select,.btn{
+    background:rgba(20,19,58,.82);
+    border-color:rgba(125,113,196,.32);
+  }
+  .btn-primary{
+    background:linear-gradient(100deg,#5f9feb,#69d0b1);
+    border-color:transparent;
+    color:#11162b;
+    box-shadow:0 8px 18px rgba(63,140,210,.18);
+  }
+  .btn-primary:hover{color:#11162b;background:linear-gradient(100deg,#76b4ff,#7ee0c1);}
+  .query-agent-panel{
+    background:rgba(25,22,68,.94);
+    border-color:rgba(137,122,226,.5);
+  }
+  .github-banner{left:auto;right:28px;background:rgba(25,22,68,.82);border-color:rgba(137,122,226,.36);}
+}
+
+@media(max-width:760px){
+  body{
+    background:
+      radial-gradient(circle at 80% 0%,rgba(77,48,150,.16),transparent 24rem),
+      linear-gradient(135deg,#090b22 0%,#100d2d 48%,#080b1b 100%);
+  }
+  header{background:rgba(10,9,31,.9);border-bottom-color:rgba(120,105,203,.24);}
+  nav{background:rgba(14,14,45,.94);border-bottom-color:rgba(114,103,183,.24);}
+  nav button.active{background:rgba(79,69,162,.38);}
+  .tbl-wrap,.stat-card,.filters{background:linear-gradient(145deg,rgba(34,29,83,.78),rgba(20,19,58,.82));border-color:rgba(117,105,192,.3);}
+  .tbl-head{background:rgba(44,37,103,.48);}
+  .btn-primary{background:linear-gradient(100deg,#5f9feb,#69d0b1);border-color:transparent;color:#11162b;}
+}
+
+/* ===== SPEC COMPLIANCE OVERRIDES ===== */
+@media(min-width:761px){
+  :root{--workspace-sidebar:208px;}
+  header{
+    background:var(--bg-canvas);
+    border-bottom-color:var(--border-subtle);
+  }
+  nav{
+    background:var(--bg-sidebar);
+    border-right-color:var(--border-subtle);
+    box-shadow:var(--shadow-panel);
+  }
+  nav::before{
+    color:var(--text-primary);
+    background:
+      radial-gradient(circle at 12px 14px,var(--primary) 0 5px,transparent 6px),
+      radial-gradient(circle at 12px 28px,var(--success) 0 4px,transparent 5px);
+  }
+  nav::after{
+    border-color:var(--border-subtle);
+    color:var(--text-secondary);
+    background:var(--surface-1);
+  }
+  nav button{
+    color:var(--text-secondary);
+    font-size:13px;
+  }
+  nav button:hover{
+    background:var(--surface-2);
+    border-color:var(--border-subtle);
+  }
+  nav button.active{
+    background:rgba(56,189,248,.1);
+    border-color:rgba(56,189,248,.3);
+    box-shadow:none;
+  }
+  nav button.active::after{
+    left:auto;
+    right:4px;
+    width:3px;
+    background:var(--primary);
+  }
+  .tbl-wrap,.stat-card,.filters{
+    background:var(--surface-1);
+    border-color:var(--border-subtle);
+    box-shadow:var(--shadow-panel);
+  }
+  .tbl-head{background:var(--surface-2);border-bottom-color:var(--border-subtle);}
+  thead th{background:var(--surface-1);}
+  tbody tr:nth-child(even){background:rgba(18,29,63,.52);}
+  tbody tr:hover{background:var(--surface-3);}
+  .stat-card{background:var(--surface-2);}
+  .stat-card .val{color:var(--text-primary);}
+  .filters select,.filters input,.input,.select,.btn{
+    background:var(--surface-2);
+    border-color:var(--border-strong);
+  }
+  .btn-primary,.btn-primary:hover{
+    background:var(--gradient-primary);
+    border-color:transparent;
+    color:var(--text-inverse);
+    box-shadow:var(--shadow-primary);
+  }
+  .query-agent-panel{
+    background:var(--surface-1);
+    border-color:var(--border-strong);
+  }
+}
+@media(max-width:760px){
+  .btn-primary,.btn-primary:hover{
+    background:var(--gradient-primary);
+    border-color:transparent;
+    color:var(--text-inverse);
+  }
+  .tbl-wrap,.stat-card,.filters{
+    background:var(--surface-1);
+    border-color:var(--border-subtle);
+  }
+}
+}
 </style>
+<link rel="stylesheet" href="/static/dashboard-design-system.css">
+<link rel="stylesheet" href="/static/intelligence-center.css">
+<link rel="stylesheet" href="/static/intelligence-research.css">
+<link rel="stylesheet" href="/static/score-center.css">
+<link rel="stylesheet" href="/static/simulator-workbench.css">
+<link rel="stylesheet" href="/static/operations-hud.css">
+<link rel="stylesheet" href="/static/organization-hud.css">
+<link rel="stylesheet" href="/static/analysis-hud.css">
+<link rel="stylesheet" href="/static/live-army-command.css">
+<link rel="modulepreload" href="/static/live-army-map.mjs">
+<link rel="modulepreload" href="/static/simulator-analysis.mjs">
 </head>
-<body>
-<header>
-  <h1>⚔ 率土战场指挥台</h1>
+<body class="stzb-console">
+<header aria-label="全局状态栏">
+  <h1>率土战场指挥台</h1>
   <div class='hdr-right'>
-    <span class='hdr-stat'><span class='conn-dot' id='cdot'></span><span id='cstat'>连接中</span></span>
+    <span class='hdr-stat' aria-live="polite"><span class='conn-dot' id='cdot'></span><span id='cstat'>连接中</span></span>
     <span class='hdr-stat'>战报 <span id='hc-battles'>0</span></span>
     <span class='hdr-stat'>武勋 <span id='hc-wx'>0</span></span>
     <span class='hdr-stat'>在线 <span id='hc-time'>--:--:--</span></span>
     <span class='hdr-stat' style='margin-left:12px'>
-      <select id='profile-select' onchange='if(this.value)switchProfile(this.value)' style='background:var(--bg2);color:var(--fg);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:0.85rem;cursor:pointer'>
+      <select id='profile-select' onchange='if(this.value)switchProfile(this.value)' style='background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:0.85rem;cursor:pointer'>
         <option value=''>-- 账号 --</option>
       </select>
     </span>
   </div>
 </header>
-<nav>
-  <button style='display:none' onclick='switchTab(0,this)'>📡 实时战报</button>
-  <button onclick='switchTab(1,this)' style='display:none'>🏆 排行榜</button>
-  <button onclick='switchTab(2,this)' style='display:none'>⚔ 武勋统计</button>
-  <button onclick='switchTab(3,this)' style='display:none'>💎 势力值</button>
-  <button onclick='switchTab(4,this)' style='display:none'>🏯 打城考勤</button>
-  <button onclick='switchTab(5,this)' style='display:none'>📋 打城排表</button>
-  <button onclick='switchTab(7,this)'>🧑‍🤝‍🧑 玩家队伍</button>
-  <button onclick='switchTab(8,this)' style='display:none'>🎯 自定义积分</button>
-  <button onclick='switchTab(9,this)' style='display:none'>🗄 数据同步</button>
-  <button class='active' onclick='switchTab(10,this)'>📜 全部战报</button>
-  <button onclick='switchTab(11,this)' style='display:none'>👥 队伍统计</button>
-  <button onclick='switchTab(12,this)' style='display:none'>🗺 城池地图</button>
-  <button onclick='switchTab(13,this)' style='display:none'>📋 玩家战绩</button>
-  <button onclick='switchTab(14,this)'>🏰 同盟成员</button>
-  <button onclick='switchTab(15,this)'>⚔ 分组武勋</button>
-  <button onclick='switchTab(16,this)'>📋 攻城考勤</button>
-  <button onclick='switchTab(17,this)'>🧩 同盟成员队伍</button>
-  <button onclick='switchTab(20,this)' style='display:none'>📣 游戏公告</button>
-  <button onclick='switchTab(21,this)' style='display:none'>🌏 战区玩家</button>
-  <button onclick='switchTab(22,this)'>💬 战场消息</button>
-  <button onclick='switchTab(23,this)'>⚔ 武将阵容</button>
-  <button onclick='switchTab(24,this)'>📊 团数据</button>
-  <button onclick='switchTab(25,this)'>⚔ 战斗模拟</button>
-  <button onclick='switchTab(26,this)'>🗺 州郡分布</button>
-  <button onclick='switchTab(27,this)'>🛰 战场监控</button>
-  <button onclick='switchTab(28,this)'>🧭 13A2 队伍索引</button>
-  <button onclick='switchTab(29,this)'>🗺 古代中国地图</button>
-  <button onclick='switchTab(30,this)'>🌐 世界场景</button>
+<nav aria-label="主导航">
+  <button onclick='switchTab(7,this)'>玩家队伍</button>
+  <button onclick='switchTab(8,this)'>自定义积分</button>
+  <button onclick='switchTab(16,this)'>打城考勤</button>
+  <button onclick='switchTab(17,this)'>同盟成员队伍</button>
+  <button onclick='switchTab(23,this)'>武将阵容</button>
+  <button onclick='switchTab(24,this)'>团数据</button>
+  <button onclick='switchTab(25,this)'>战斗模拟</button>
+  <button onclick='switchTab(26,this)'>州郡分布</button>
+  <button onclick='switchTab(32,this)'>设置中心</button>
+  <button class='active' onclick='switchTab(33,this)'>战场情报</button>
+  <button onclick='switchTab(35,this)'>实时部队</button>
+  <button onclick='switchTab(34,this)'>阵容战法研究</button>
 </nav>
+<main id="dashboard-main" tabindex="-1">
+<!-- TAB 31: 战场总览 -->
+<div class='page' id='tab31'>
+  <section class="cc-hero" aria-labelledby="cc-hero-title">
+    <div>
+      <div class="cc-eyebrow">LIVE BATTLE COMMAND</div>
+      <h2 id="cc-hero-title">战场态势，一屏掌控</h2>
+      <p id="cc-profile-summary">正在连接本机战场数据链路…</p>
+    </div>
+    <div class="cc-hero-actions">
+      <button class="btn btn-primary" type="button" onclick="loadCommandCenterOverview(true)">刷新态势</button>
+      <button class="btn" type="button" onclick="CommandCenter.openPalette()">⌘K 命令</button>
+    </div>
+  </section>
+  <div class="cc-kpi-grid" id="cc-kpi-grid" aria-live="polite">
+    <div class="cc-skeleton"></div><div class="cc-skeleton"></div>
+    <div class="cc-skeleton"></div><div class="cc-skeleton"></div>
+    <div class="cc-skeleton"></div>
+  </div>
+  <div class="cc-overview-grid">
+    <section class="panel cc-battles-panel">
+      <div class="cc-panel-head">
+        <div><span class="cc-panel-kicker">BATTLE FEED</span><h3>最新战报</h3></div>
+        <button class="btn" type="button" data-cc-tab="10">查看全部</button>
+      </div>
+      <div id="cc-battle-list" class="cc-battle-list"><div class="cc-empty">正在加载战报…</div></div>
+    </section>
+    <aside class="panel cc-intel-panel" id="cc-intel-panel">
+      <div class="cc-panel-head">
+        <div><span class="cc-panel-kicker">TACTICAL ALERTS</span><h3>战术预警</h3></div>
+        <span id="cc-alert-count" class="cc-count">0</span>
+      </div>
+      <div id="cc-alert-list" class="cc-alert-list"><div class="cc-empty">暂无预警</div></div>
+    </aside>
+    <section class="panel cc-armies-panel">
+      <div class="cc-panel-head">
+        <div><span class="cc-panel-kicker">LIVE MARCH</span><h3>活跃行军</h3></div>
+        <button class="btn" type="button" data-cc-tab="33">打开战场情报</button>
+      </div>
+      <div id="cc-army-list" class="cc-army-list"><div class="cc-empty">正在加载行军…</div></div>
+    </section>
+    <section class="panel cc-timeline-panel">
+      <div class="cc-panel-head">
+        <div><span class="cc-panel-kicker">EVENT STREAM</span><h3>实时事件时间线</h3></div>
+        <div class="cc-panel-actions">
+          <select id="cc-timeline-filter" aria-label="时间线类型">
+            <option value="all">全部事件</option><option value="battle">战报</option>
+            <option value="world">世界场景</option><option value="monitor">监控</option>
+          </select>
+          <button class="btn" id="cc-timeline-pause" type="button" onclick="CommandCenter.toggleTimelinePause()">暂停</button>
+        </div>
+      </div>
+      <div id="cc-timeline-buffer" class="cc-buffer" hidden>
+        <button type="button" onclick="CommandCenter.flushTimeline()">有新事件，查看最新</button>
+      </div>
+      <div id="cc-timeline-list" class="cc-timeline" aria-live="polite"></div>
+    </section>
+    <section class="panel cc-favorites-panel">
+      <div class="cc-panel-head">
+        <div><span class="cc-panel-kicker">WATCH LIST</span><h3>我的关注</h3></div>
+        <button class="btn" type="button" onclick="CommandCenter.promptFavorite()">+ 添加</button>
+      </div>
+      <div id="cc-favorites-list" class="cc-favorites"><div class="cc-empty">收藏 WID、队伍、玩家或战报，快速追踪关键对象。</div></div>
+    </section>
+    <section class="panel cc-shortcuts-panel">
+      <div class="cc-panel-head"><div><span class="cc-panel-kicker">QUICK ACCESS</span><h3>快捷指挥</h3></div></div>
+      <div class="cc-shortcuts">
+        <button type="button" data-cc-tab="27"><strong>战场监控</strong><span>追踪 5028 动态</span></button>
+        <button type="button" data-cc-tab="24"><strong>团数据</strong><span>成员与分组洞察</span></button>
+        <button type="button" data-cc-tab="25"><strong>战斗模拟</strong><span>Kotlin 引擎推演</span></button>
+      </div>
+    </section>
+  </div>
+</div>
 <!-- TAB 0: 实时战报 -->
 <div class='page' id='tab0'>
   <div class='cards-row'>
@@ -515,29 +1355,37 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
   </div>
 </div>
 <!-- TAB 7: 玩家队伍 -->
-<div class='page' id='tab7'>
-  <!-- 玩家队伍统计面板 -->
-  <div class='tbl-wrap'>
-    <div class='tbl-head'>
-      <h3>👤 玩家队伍一览</h3>
-      <div class='tbl-controls' style='display:flex;gap:8px;align-items:center'>
-        <input id='pbt-player' placeholder='玩家名过滤...' style='width:130px'/>
-        <input id='pbt-union' list='union-filter-list' placeholder='同盟过滤...' style='width:130px'/>
-        <select id='pbt-side'>
-          <option value=''>攻守全部</option>
-          <option value='atk'>攻方</option>
-          <option value='def'>守方</option>
-        </select>
-        <button class='btn btn-primary' onclick='loadPlayerBattleTeams()'>查询</button>
-        <span id='pbt-count' style='color:var(--text2);font-size:.72rem'></span>
-        <span id='pbt-hint' style='color:var(--text2);font-size:.72rem'></span>
-      </div>
+<div class='page hud-page' id='tab7' data-visual-domain='organization'>
+  <header class="hud-page-head">
+    <div>
+      <span class="hud-page-kicker">PLAYER TEAMS / ORGANIZATION</span>
+      <h2 class="hud-page-title">玩家队伍</h2>
+      <p class="hud-page-summary">按玩家、同盟和攻守侧查看常用阵容、战法与实战表现。</p>
     </div>
-    <div class='tbl-scroll'>
+    <div class="hud-page-actions">
+      <span class="hud-status-chip" id="hud-player-team-status">READY</span>
+      <button class="btn btn-primary" type="button" onclick="loadPlayerBattleTeams()">刷新队伍</button>
+    </div>
+  </header>
+  <div class="hud-toolbar organization-toolbar">
+    <input id='pbt-player' placeholder='玩家名过滤...'/>
+    <input id='pbt-union' list='union-filter-list' placeholder='同盟过滤...'/>
+    <select id='pbt-side'>
+      <option value=''>攻守全部</option>
+      <option value='atk'>攻方</option>
+      <option value='def'>守方</option>
+    </select>
+    <button class='btn btn-primary' onclick='loadPlayerBattleTeams()'>查询</button>
+    <span id='pbt-count'></span>
+    <span id='pbt-hint'></span>
+  </div>
+  <section class='hud-panel hud-table-shell organization-table-panel'>
+    <div class='hud-panel-head'><h3>玩家队伍一览</h3></div>
+    <div class='hud-table-scroll'>
       <table><thead><tr>
         <th>#</th>
         <th>玩家名</th>
-        <th style='color:var(--text2);font-size:.72rem'>同盟·团名</th>
+        <th>同盟 · 团名</th>
         <th>武将 · 进阶★ · 技能</th>
         <th>总战数</th>
         <th>胜场</th>
@@ -546,19 +1394,48 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
       </tr></thead>
       <tbody id='pbt-body'></tbody></table>
     </div>
-  </div>
+  </section>
 </div>
 <!-- TAB 8: 自定义积分 -->
-<div class='page' id='tab8'>
-  <div class='filters'>
-    <input id='cs-union' placeholder='联盟过滤...' style='width:140px'/>
-    <button class='btn btn-primary' onclick='recalcScores()'>⚡ 重新计算积分</button>
-    <button class='btn' onclick='loadScores()'>刷新</button>
-  </div>
-  <div class='tbl-wrap'>
-    <div class='tbl-head'><h3>🎯 自定义积分榜</h3></div>
-    <div class='tbl-scroll'><table><thead><tr><th>#</th><th>玩家</th><th>联盟</th><th>积分</th><th>出战</th><th>胜场</th><th>武勋</th><th>打城</th></tr></thead>
-    <tbody id='cs-body'></tbody></table></div>
+<div class='page hud-page' id='tab8' data-visual-domain='analysis'>
+  <div class="score-console">
+    <header class="score-hero hud-page-head">
+      <div>
+        <span class="hud-page-kicker">SCORING ENGINE / EXPLAINABLE ANALYSIS</span>
+        <h2 class="hud-page-title">赛季贡献积分中心</h2>
+        <p class="hud-page-summary">战斗、打城、出勤与手动奖惩统一计算，每一分都能解释。</p>
+      </div>
+      <div class="score-hero-actions">
+        <span id="score-rule-version" class="score-rule-chip analysis-evidence" data-kind="config">规则未加载</span>
+        <button class="btn" type="button" onclick="ScoreCenter.openRuleEditor()">规则控制台</button>
+        <button class="btn btn-primary" id="score-preview-open" type="button" onclick="ScoreCenter.preview()">预览重算</button>
+      </div>
+    </header>
+    <section class="score-toolbar hud-toolbar">
+      <label>赛季<input id="score-season" value="current"></label>
+      <label>开始日期<input id="score-start-date" type="date"></label>
+      <label>结束日期<input id="score-end-date" type="date"></label>
+      <label>快捷范围<select id="score-date-preset"><option value="">自定义 / 全部</option><option value="today">今天</option><option value="7d">近 7 天</option><option value="month">本月</option><option value="all">全部</option></select></label>
+      <label>同盟<input id="score-union" placeholder="全部同盟"></label>
+      <label>分组<input id="score-group" placeholder="全部分组"></label>
+      <button class="btn" type="button" onclick="ScoreCenter.load()">刷新</button>
+    </section>
+    <section id="score-kpis" class="score-kpis"></section>
+    <section class="score-board hud-panel analysis-evidence" id="score-board" data-kind="history">
+      <div id="score-board-status" class="hud-state-host" aria-live="polite"></div>
+      <div class="score-board-tabs" role="tablist">
+        <button class="active" role="tab" data-score-board="overall">综合榜</button>
+        <button role="tab" data-score-board="battle">战斗榜</button>
+        <button role="tab" data-score-board="siege">攻城榜</button>
+      </div>
+      <div class="score-board-meta" id="score-board-meta"></div>
+      <div class="score-table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>玩家</th><th>同盟 / 分组</th><th>综合</th><th>战斗</th><th>攻城</th><th>调整</th><th>数据状态</th></tr></thead>
+          <tbody id="score-board-body"></tbody>
+        </table>
+      </div>
+    </section>
   </div>
 </div>
 <!-- TAB 9: 数据同步 -->
@@ -576,7 +1453,7 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
   </div>
 </div>
 <!-- TAB 10: 全部战报 -->
-<div class='page active' id='tab10'>
+<div class='page' id='tab10'>
   <div class='filters'>
     <input id='ba-player' placeholder='玩家名...' style='width:120px'/>
     <input id='ba-union' placeholder='联盟名...' style='width:120px'/>
@@ -727,47 +1604,58 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
 </div>
 
 <!-- TAB 16: 攻城考勤 -->
-<div class='page' id='tab16'>
-  <div class='cards-row' id='task-cards'></div>
-  <div style='display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:14px'>
+<div class='page hud-page' id='tab16' data-visual-domain='operations'>
+  <header class="hud-page-head">
+    <div>
+      <span class="hud-page-kicker">SIEGE OPERATION / ATTENDANCE</span>
+      <h2 class="hud-page-title">打城考勤</h2>
+      <p class="hud-page-summary">管理攻城任务、集结成员、执行战报与出勤结果。</p>
+    </div>
+    <div class="hud-page-actions">
+      <button class="btn btn-primary" type="button" onclick="showCreateTask()">新建任务</button>
+      <button class="btn" type="button" onclick="loadTasks()">刷新</button>
+    </div>
+  </header>
+  <div class='hud-kpi-grid operations-kpis' id='task-cards'></div>
+  <div class='operations-task-grid'>
     <!-- 左上：任务列表 -->
-    <div class='tbl-wrap' style='grid-column:1;grid-row:1'>
-      <div class='tbl-head'><h3>📋 攻城任务列表</h3>
+    <section class='hud-panel hud-table-shell operation-task-list'>
+      <div class='hud-panel-head'><h3>攻城任务列表</h3>
         <div class='tbl-controls'>
           <button class='btn btn-primary' onclick='loadTasks()'>刷新</button>
-          <button class='btn' onclick='showCreateTask()' style='border-color:var(--green);color:var(--green)'>+ 新建任务</button>
-          <span id='task-count' style='color:var(--text2);font-size:.72rem'></span>
+          <button class='btn operation-create-button' onclick='showCreateTask()'>新建任务</button>
+          <span id='task-count'></span>
         </div>
       </div>
-      <div class='tbl-scroll'>
+      <div class='hud-table-scroll'>
         <table><thead><tr>
           <th>任务名</th><th>坐标</th><th>时间</th><th>目标组</th><th>目标</th><th>实到</th><th>操作</th>
         </tr></thead>
         <tbody id='task-body'></tbody></table>
       </div>
-    </div>
+    </section>
     <!-- 右：考勤详情（独占两行）-->
-    <div class='tbl-wrap' id='task-detail-panel' style='display:none;grid-column:2;grid-row:1/3'>
-      <div class='tbl-head'><h3 id='task-detail-title'>考勤详情</h3>
+    <aside class='hud-panel hud-table-shell operation-detail is-hidden' id='task-detail-panel'>
+      <div class='hud-panel-head'><h3 id='task-detail-title'>考勤详情</h3>
         <div class='tbl-controls'>
-          <button class='btn' onclick='loadTaskBattles()' style='border-color:var(--cyan);color:var(--cyan)'>⚔️ 该城战报</button>
-          <button class='btn' onclick='exportTaskExcel()' style='border-color:var(--gold);color:var(--gold)'>导出CSV</button>
-          <button class='btn' onclick='closeTaskDetail()' style='border-color:var(--text2);color:var(--text2)'>关闭</button>
+          <button class='btn' onclick='loadTaskBattles()'>该城战报</button>
+          <button class='btn' onclick='exportTaskExcel()'>导出 CSV</button>
+          <button class='btn' onclick='closeTaskDetail()'>关闭</button>
         </div>
       </div>
-      <div class='tbl-scroll'>
+      <div class='hud-table-scroll'>
         <table><thead><tr><th>名字</th><th>分组</th><th>主力次</th><th>拆迁次</th><th>主力队</th><th>拆迁队</th><th>状态</th></tr></thead>
         <tbody id='task-detail-body'></tbody></table>
       </div>
-    </div>
+    </aside>
     <!-- 左下：该城战报 -->
-    <div class='tbl-wrap' id='task-battles-wrap' style='display:none;grid-column:1;grid-row:2'>
-      <div class='tbl-head'><h3>⚔️ 该城战报（任务成员）</h3><span class='hdr-stat' id='task-battles-count'></span></div>
-      <div class='tbl-scroll'>
+    <section class='hud-panel hud-table-shell operation-battle-feed is-hidden' id='task-battles-wrap'>
+      <div class='hud-panel-head'><h3>该城战报（任务成员）</h3><span class='hdr-stat' id='task-battles-count'></span></div>
+      <div class='hud-table-scroll'>
         <table><thead><tr><th>时间</th><th>攻方</th><th>类型</th><th>结果</th><th>武将</th></tr></thead>
         <tbody id='task-battles-body'></tbody></table>
       </div>
-    </div>
+    </section>
   </div>
 </div>
 
@@ -835,26 +1723,35 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
 </div>
 
 <!-- TAB 17: 同盟成员队伍 -->
-<div class='page' id='tab17'>
-  <div class='tbl-wrap'>
-    <div class='tbl-head'>
-      <h3>🧩 同盟成员队伍一览</h3>
-      <div class='tbl-controls' style='display:flex;gap:8px;align-items:center;flex-wrap:wrap'>
-        <input id='agt-player' placeholder='成员名过滤...' style='width:130px'/>
-        <select id='agt-side'>
-          <option value=''>攻守全部</option>
-          <option value='atk'>攻方</option>
-          <option value='def'>守方</option>
-        </select>
-        <select id='agt-group'>
-          <option value=''>全部分组</option>
-        </select>
-        <button class='btn btn-primary' onclick='loadAllianceGroupTeams()'>查询</button>
-        <span id='agt-count' style='color:var(--text2);font-size:.72rem'></span>
-        <span id='agt-hint' style='color:var(--text2);font-size:.72rem'></span>
-      </div>
+<div class='page hud-page' id='tab17' data-visual-domain='organization'>
+  <header class="hud-page-head">
+    <div>
+      <span class="hud-page-kicker">ALLIANCE LINEUPS / ORGANIZATION</span>
+      <h2 class="hud-page-title">同盟成员队伍</h2>
+      <p class="hud-page-summary">按分组展开成员常用主力、完整阵容和胜率表现。</p>
     </div>
-    <div class='tbl-scroll'>
+    <div class="hud-page-actions">
+      <span class="hud-status-chip" id="hud-alliance-team-status">READY</span>
+      <button class="btn btn-primary" type="button" onclick="loadAllianceGroupTeams()">刷新成员</button>
+    </div>
+  </header>
+  <div class="hud-toolbar organization-toolbar">
+    <input id='agt-player' placeholder='成员名过滤...'/>
+    <select id='agt-side'>
+      <option value=''>攻守全部</option>
+      <option value='atk'>攻方</option>
+      <option value='def'>守方</option>
+    </select>
+    <select id='agt-group'>
+      <option value=''>全部分组</option>
+    </select>
+    <button class='btn btn-primary' onclick='loadAllianceGroupTeams()'>查询</button>
+    <span id='agt-count'></span>
+    <span id='agt-hint'></span>
+  </div>
+  <section class='hud-panel hud-table-shell organization-table-panel'>
+    <div class='hud-panel-head'><h3>同盟成员队伍一览</h3></div>
+    <div class='hud-table-scroll'>
       <table><thead><tr>
         <th>#</th>
         <th>成员名</th>
@@ -866,6 +1763,34 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
         <th>胜率</th>
       </tr></thead>
       <tbody id='agt-body'></tbody></table>
+    </div>
+  </section>
+</div>
+
+<!-- TAB 18: 同盟势力中心 -->
+<div class='page' id='tab18'>
+  <div class='cards-row' id='ul-cards'></div>
+  <div class='split2'>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>同盟势力排行</h3><span class='hdr-stat'>联盟总体态势</span></div>
+      <div style='padding:12px' id='ul-bars'></div>
+      <div class='tbl-scroll'>
+        <table><thead><tr>
+          <th>#</th><th>同盟</th><th>等级</th><th>势力</th><th>人数</th>
+          <th>城池价值</th><th>NPC城</th><th>州</th><th>更新时间</th>
+        </tr></thead><tbody id='ul-body'></tbody></table>
+      </div>
+    </div>
+    <div class='tbl-wrap'>
+      <div class='tbl-head'><h3>个人势力排行</h3><span class='hdr-stat' id='upr-count'></span></div>
+      <div class='cards-row' id='upr-cards' style='padding:12px'></div>
+      <div style='padding:12px' id='upr-bars'></div>
+      <div class='tbl-scroll'>
+        <table><thead><tr>
+          <th>#</th><th>玩家</th><th>势力</th><th>领地</th><th>要塞</th>
+          <th>分城</th><th>州</th><th>更新时间</th>
+        </tr></thead><tbody id='upr-body'></tbody></table>
+      </div>
     </div>
   </div>
 </div>
@@ -935,63 +1860,82 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
 <datalist id='union-filter-list'></datalist>
 
 <!-- TAB 24: 团数据 -->
-<div class='page' id='tab24'>
-  <!-- 时间筛选栏 -->
-  <div style='display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap'>
+<div class='page hud-page' id='tab24' data-visual-domain='organization'>
+  <header class="hud-page-head">
+    <div>
+      <span class="hud-page-kicker">GROUP PERFORMANCE / ORGANIZATION</span>
+      <h2 class="hud-page-title">团数据</h2>
+      <p class="hud-page-summary">汇总分组与成员的战斗、攻城、功勋和组织活跃度。</p>
+    </div>
+    <div class="hud-page-actions">
+      <span class="hud-status-chip" id="hud-team-report-status">WAITING</span>
+      <button class="btn btn-primary" type="button" onclick="loadTeamReport(_trPeriod||'all')">刷新报表</button>
+    </div>
+  </header>
+  <div class='hud-toolbar organization-toolbar'>
     <button class='btn btn-primary' onclick='loadTeamReport("today")'   id='tr-btn-today'   >今日</button>
     <button class='btn'            onclick='loadTeamReport("yesterday")' id='tr-btn-yesterday'>昨日</button>
     <button class='btn'            onclick='loadTeamReport("week")'    id='tr-btn-week'    >本周</button>
     <button class='btn'            onclick='loadTeamReport("lastweek")' id='tr-btn-lastweek'>上周</button>
     <button class='btn'            onclick='loadTeamReport("all")'     id='tr-btn-all'     >全部</button>
-    <span style='color:var(--border)'>|</span>
-    <select id='tr-dim' onchange='_trPeriod&&loadTeamReport(_trPeriod)' style='background:var(--panel2);color:var(--text);border:1px solid var(--border);padding:4px 8px;border-radius:4px'>
+    <span class="organization-toolbar-divider"></span>
+    <select id='tr-dim' onchange='_trPeriod&&loadTeamReport(_trPeriod)'>
       <option value='group'>按分组</option>
       <option value='player'>按成员</option>
     </select>
-    <select id='tr-group' onchange='_trPeriod&&loadTeamReport(_trPeriod)' style='background:var(--panel2);color:var(--text);border:1px solid var(--border);padding:4px 8px;border-radius:4px'>
+    <select id='tr-group' onchange='_trPeriod&&loadTeamReport(_trPeriod)'>
       <option value=''>全部分组</option>
     </select>
-    <span id='tr-update-time' style='color:var(--text2);font-size:.72rem;margin-left:auto'></span>
+    <span id='tr-update-time'></span>
   </div>
-  <!-- 汇总卡片 -->
-  <div class='cards-row' id='tr-cards'></div>
-  <!-- 数据表 -->
-  <div class='tbl-wrap'>
-    <div class='tbl-head'>
-      <h3 id='tr-table-title'>📊 分组战斗数据</h3>
+  <div class='hud-kpi-grid organization-kpis' id='tr-cards'></div>
+  <section class='hud-panel hud-table-shell organization-table-panel'>
+    <div class='hud-panel-head'>
+      <h3 id='tr-table-title'>分组战斗数据</h3>
       <div class='tbl-controls'>
-        <button class='btn' onclick='exportTeamReportPDF()'>📄 导出PDF</button>
-        <button class='btn' onclick='exportTeamReportLongImage()'>🖼️ 导出长图</button>
+        <button class='btn' onclick='exportTeamReportPDF()'>导出 PDF</button>
+        <button class='btn' onclick='exportTeamReportLongImage()'>导出长图</button>
       </div>
     </div>
-    <div class='tbl-scroll'>
+    <div class='hud-table-scroll'>
       <table>
         <thead id='tr-thead'></thead>
         <tbody id='tr-body'></tbody>
       </table>
     </div>
-  </div>
+  </section>
 </div>
 
 <!-- TAB 23: 武将阵容胜率 -->
-<div class='page' id='tab23'>
-  <div class='cards-row' id='combo-cards'></div>
-  <div style='display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap'>
-    <label style='color:var(--text2);font-size:.8rem'>最少出战次数：</label>
-    <input id='combo-min' type='number' min='1' value='3' style='background:var(--panel2);color:var(--text);border:1px solid var(--border);padding:4px 8px;border-radius:4px;width:70px;text-align:center'>
-    <button class='btn btn-primary' onclick='loadHeroCombo()'>🔍 统计</button>
-    <span style='color:var(--text2);font-size:.72rem'>基于战报武将出战记录实时计算</span>
-    <span id='combo-hint' style='color:var(--text2);font-size:.72rem'>胜率口径：胜=1，平=0.5，负=0</span>
+<div class='page hud-page' id='tab23' data-visual-domain='analysis'>
+  <header class="hud-page-head">
+    <div>
+      <span class="hud-page-kicker">LINEUP RANKING / BATTLE EVIDENCE</span>
+      <h2 class="hud-page-title">武将阵容</h2>
+      <p class="hud-page-summary">基于历史战报样本对三人组合进行胜平负与胜率分析。</p>
+    </div>
+    <div class="hud-page-actions">
+      <span class="hud-status-chip analysis-evidence" data-kind="history">BATTLE STAT</span>
+      <button class="btn btn-primary" type="button" onclick="loadHeroCombo()">重新统计</button>
+    </div>
+  </header>
+  <div class='hud-toolbar analysis-toolbar'>
+    <label>最少出战次数 <input id='combo-min' type='number' min='1' value='3'></label>
+    <button class='btn btn-primary' onclick='loadHeroCombo()'>统计</button>
+    <span>基于战报武将出战记录实时计算</span>
+    <span id='combo-hint'>胜率口径：胜=1，平=0.5，负=0</span>
   </div>
-  <div class='tbl-wrap'>
-    <div class='tbl-head'><h3>⚔ 三人组合胜率排行</h3></div>
-    <div class='tbl-scroll'>
+  <div class='hud-kpi-grid analysis-kpis' id='combo-cards'></div>
+  <section class="analysis-lineup-grid" id="combo-top-lineups" aria-label="前三阵容"></section>
+  <section class='hud-panel hud-table-shell analysis-evidence' data-kind='history'>
+    <div class='hud-panel-head'><h3>三人组合胜率排行</h3></div>
+    <div class='hud-table-scroll'>
       <table><thead><tr>
         <th>#</th><th>武将组合</th><th>出战</th><th>胜</th><th>败</th><th>平</th><th>胜率</th><th>胜率条</th>
       </tr></thead>
       <tbody id='combo-body'></tbody></table>
     </div>
-  </div>
+  </section>
 </div>
 
 <!-- 战报详情弹窗 -->
@@ -1003,196 +1947,98 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
   </div>
 </div>
 <!-- TAB 25: 战斗模拟 -->
-<div class='page' id='tab25'>
-
-<!-- ===== 游戏风格战斗模拟器 ===== -->
-<div id="stzb-sim" style="
-  width:100%;min-height:60vh;
-  background:linear-gradient(160deg,#08080e 0%,#0e1018 40%,#0a1210 100%);
-  position:relative;overflow:hidden;
-  font-family:'SimSun','宋体',serif;
-">
-
-<!-- 背景纹理 -->
-<div style="position:absolute;inset:0;pointer-events:none;
-  background-image:radial-gradient(ellipse 80% 60% at 50% 0%,#1a2a1a22 0%,transparent 70%),
-  repeating-linear-gradient(0deg,transparent,transparent 39px,#ffffff05 39px,#ffffff05 40px),
-  repeating-linear-gradient(90deg,transparent,transparent 39px,#ffffff05 39px,#ffffff05 40px);"></div>
-
-<!-- 顶部血条 header -->
-<div style="position:relative;display:flex;align-items:stretch;justify-content:space-between;
-  padding:10px 18px 0;gap:10px;">
-
-  <!-- 攻方 -->
-  <div style="flex:1;display:flex;flex-direction:column;gap:4px">
-    <div style="color:#e4dd9e;font-size:.78rem;letter-spacing:.1em">攻方队伍</div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <div style="flex:1;height:8px;background:#000;border-radius:2px;overflow:hidden;position:relative">
-        <div id="sim-blue-hpbar-hurt" style="position:absolute;height:100%;width:100%;background:#598ed770;transition:width .6s"></div>
-        <div id="sim-blue-hpbar" style="position:absolute;height:100%;width:100%;
-          background:linear-gradient(90deg,#3a6eb0,#5aaaf0);transition:width .6s"></div>
+<div class="page hud-page" id="tab25" data-visual-domain="operations">
+  <section id="sim-workbench" class="sim-workbench hud-panel" aria-label="战斗模拟工作台">
+    <header class="sim-header hud-page-head">
+      <div>
+        <span class="sim-kicker">KOTLIN BATTLE LAB</span>
+        <h2>战斗模拟工作台</h2>
+        <p>配置双方阵容后，由 stzb/server 原生战斗引擎执行。批量模拟保留第一场完整事件，可进入 Server 级战术复盘。</p>
       </div>
-      <span id="sim-blue-hp-text" style="font-size:.68rem;color:#aac8f0;white-space:nowrap;font-family:monospace"></span>
-    </div>
-    <div style="color:#fff;font-size:.7rem;opacity:.6">攻方 | 战斗模拟</div>
-  </div>
-
-  <!-- 中间VS -->
-  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 14px;gap:3px">
-    <div style="color:#e4dd9e;font-size:1.1rem;font-weight:700;letter-spacing:.2em;text-shadow:0 0 12px #c8a04460">VS</div>
-    <div style="display:flex;gap:6px;margin-top:4px">
-      <button onclick="runSimulate(1)" id="sim-btn-single"
-        style="background:linear-gradient(135deg,#c8a044,#a07830);border:none;color:#1a1200;font-weight:700;
-               font-size:.75rem;padding:5px 14px;border-radius:4px;cursor:pointer;font-family:inherit;
-               letter-spacing:.1em;box-shadow:0 2px 8px #c8a04440">
-        开始战斗
-      </button>
-      <button onclick="runSimulate(100)" id="sim-btn-100"
-        style="background:#1a2030;border:1px solid #4a6090;color:#8ab0d0;
-               font-size:.72rem;padding:5px 10px;border-radius:4px;cursor:pointer;font-family:inherit">
-        x100
-      </button>
-      <button onclick="runSimulate(1000)" id="sim-btn-1000"
-        style="background:#1a2030;border:1px solid #4a6090;color:#8ab0d0;
-               font-size:.72rem;padding:5px 10px;border-radius:4px;cursor:pointer;font-family:inherit">
-        x1000
-      </button>
-    </div>
-    <span id="sim-status" style="font-size:.65rem;color:#46b06e;margin-top:2px"></span>
-  </div>
-
-  <!-- 守方 -->
-  <div style="flex:1;display:flex;flex-direction:column;gap:4px;align-items:flex-end">
-    <div style="color:#e4dd9e;font-size:.78rem;letter-spacing:.1em">守方队伍</div>
-    <div style="display:flex;align-items:center;gap:8px;width:100%">
-      <span id="sim-red-hp-text" style="font-size:.68rem;color:#f0a0a0;white-space:nowrap;font-family:monospace"></span>
-      <div style="flex:1;height:8px;background:#000;border-radius:2px;overflow:hidden;position:relative">
-        <div id="sim-red-hpbar-hurt" style="position:absolute;height:100%;right:0;width:100%;background:#d04040a0;transition:width .6s"></div>
-        <div id="sim-red-hpbar" style="position:absolute;height:100%;right:0;width:100%;
-          background:linear-gradient(270deg,#b03030,#e05050);transition:width .6s"></div>
+      <div id="sim-engine-badge" class="sim-engine-badge" aria-live="polite">
+        <strong>引擎连接中</strong>
+        <span>正在读取源提交与回放能力</span>
       </div>
+    </header>
+    <div class="sim-duel">
+      <section id="sim-attacker-team" class="sim-team sim-team--attacker" aria-label="攻方阵容"></section>
+      <section id="sim-run-controls" class="sim-run-controls" aria-label="模拟控制"></section>
+      <section id="sim-defender-team" class="sim-team sim-team--defender" aria-label="守方阵容"></section>
     </div>
-    <div style="color:#fff;font-size:.7rem;opacity:.6">守方 | 战斗模拟</div>
-  </div>
-
-</div>
-
-<!-- 士气行 -->
-<div style="display:flex;justify-content:space-between;padding:6px 18px;">
-  <div style="display:flex;align-items:center;gap:6px">
-    <span style="font-size:.65rem;color:#8ab0d0">士气</span>
-    <input id="sim-blue-morale" type="number" value="100" min="0" max="200"
-      style="width:52px;font-size:.72rem;background:#0d1520;border:1px solid #2a4060;
-             color:#aac8f0;padding:2px 6px;border-radius:3px;text-align:center">
-    <button onclick="simAddHero('blue')"
-      style="background:none;border:1px solid #4a8fe0;color:#4a8fe0;font-size:.65rem;
-             padding:2px 8px;border-radius:3px;cursor:pointer;font-family:inherit">+ 武将</button>
-  </div>
-  <div style="display:flex;align-items:center;gap:6px">
-    <button onclick="simAddHero('red')"
-      style="background:none;border:1px solid #e05050;color:#e05050;font-size:.65rem;
-             padding:2px 8px;border-radius:3px;cursor:pointer;font-family:inherit">+ 武将</button>
-    <span style="font-size:.65rem;color:#f0a0a0">士气</span>
-    <input id="sim-red-morale" type="number" value="100" min="0" max="200"
-      style="width:52px;font-size:.72rem;background:#200d0d;border:1px solid #602a2a;
-             color:#f0a0a0;padding:2px 6px;border-radius:3px;text-align:center">
-  </div>
-</div>
-
-<!-- 卡牌区 -->
-<div style="display:flex;justify-content:space-between;padding:0 12px 12px;gap:10px">
-
-  <!-- 攻方卡牌 -->
-  <div id="sim-blue-heroes" style="flex:1;display:flex;gap:8px;justify-content:flex-end"></div>
-
-  <!-- 中间间距 -->
-  <div style="width:80px;flex-shrink:0"></div>
-
-  <!-- 守方卡牌 -->
-  <div id="sim-red-heroes" style="flex:1;display:flex;gap:8px;justify-content:flex-start"></div>
-
-</div>
-
-<!-- 结果区 -->
-<div id="sim-stat-box" style="display:none;margin:0 12px 12px;
-  background:#00000040;border:1px solid #2a3a2a;border-radius:6px;padding:12px">
-  <div class="cards-row" id="sim-stat-cards"></div>
-</div>
-
-<!-- 战斗日志 -->
-<div id="sim-log-box" style="display:none;margin:0 12px 12px">
-  <div style="display:flex;align-items:center;justify-content:space-between;
-    padding:6px 12px;background:#00000060;border-top:1px solid #e4dd9e30;">
-    <span style="color:#e4dd9e;font-size:.78rem;letter-spacing:.1em">战斗记录</span>
-    <button onclick="simToggleLog()" id="sim-log-toggle"
-      style="background:none;border:1px solid #3a4a5a;color:#7a8a9a;
-             font-size:.68rem;padding:2px 10px;border-radius:3px;cursor:pointer">收起</button>
-  </div>
-  <div id="sim-log-content"
-    style="padding:8px 14px;font-family:monospace;font-size:.7rem;line-height:2;
-           max-height:420px;overflow-y:auto;background:#06080c;
-           scrollbar-width:thin;scrollbar-color:#2a3a4a transparent"></div>
-</div>
-
-</div><!-- /stzb-sim -->
-
-</div>
+    <div id="sim-loader-state" class="hud-state-host" aria-live="polite"></div>
+    <section id="sim-result-summary" class="sim-result-summary" aria-live="polite" hidden></section>
+    <section id="sim-replay-view" class="sim-replay" aria-label="战术复盘" hidden>
+      <aside id="sim-replay-phases" class="sim-replay-phases" aria-label="准备阶段与回合"></aside>
+      <section id="sim-replay-stream" class="sim-replay-stream" aria-label="事件时间线"></section>
+      <aside id="sim-replay-detail" class="sim-replay-detail" aria-label="事件详情"></aside>
+    </section>
+    <dialog id="sim-library-dialog" class="sim-library-dialog" aria-labelledby="sim-library-title"></dialog>
+    <dialog id="sim-template-dialog" class="sim-template-dialog" aria-labelledby="sim-template-title"></dialog>
+  </section>
 </div>
 
 <!-- TAB 26: 州郡分布 -->
-<div class='page' id='tab26'>
-  <div style='display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap'>
-    <select id='sr-scope' onchange='loadStateRegionStats()' style='background:var(--panel2);color:var(--text);border:1px solid var(--border);padding:4px 8px;border-radius:4px'>
+<div class='page hud-page' id='tab26' data-visual-domain='intelligence'>
+  <header class="hud-page-head">
+    <div>
+      <span class="hud-page-kicker">REGIONAL DISTRIBUTION / INTELLIGENCE</span>
+      <h2 class="hud-page-title">州郡分布</h2>
+      <p class="hud-page-summary">观察州级人数、势力、同盟和分组分布。</p>
+    </div>
+    <div class="hud-page-actions">
+      <span class="hud-status-chip" id="hud-region-updated">WAITING</span>
+      <button class="btn btn-primary" type="button" onclick="loadStateRegionStats()">刷新</button>
+    </div>
+  </header>
+  <div class='hud-toolbar sr-toolbar'>
+    <select id='sr-scope' onchange='loadStateRegionStats()'>
       <option value='all'>全部成员</option>
       <option value='group'>仅指定团</option>
     </select>
-    <select id='sr-group' onchange='loadStateRegionStats()' style='background:var(--panel2);color:var(--text);border:1px solid var(--border);padding:4px 8px;border-radius:4px;min-width:140px'>
+    <select id='sr-group' onchange='loadStateRegionStats()'>
       <option value=''>全部团</option>
     </select>
     <button class='btn btn-primary' onclick='loadStateRegionStats()'>刷新</button>
-    <span id='sr-update-time' style='color:var(--text2);font-size:.72rem;margin-left:auto'></span>
+    <span id='sr-update-time'></span>
   </div>
 
-  <div class='cards-row' id='sr-cards'></div>
-  <div id='sr-note' style='display:none;margin:10px 0 16px;padding:10px 12px;border:1px solid #5f4a1c;border-radius:8px;background:linear-gradient(180deg,#22180b 0%, #15110b 100%);color:#e6c98d;font-size:.78rem;line-height:1.65'></div>
+  <div class='hud-kpi-grid sr-kpi-grid' id='sr-cards'></div>
+  <div id='sr-note' class="hud-status-note" hidden></div>
 
-  <div class='tbl-wrap' style='margin-bottom:16px'>
-    <div class='tbl-head'>
-      <h3>🗺 州地图</h3>
+  <div class='hud-panel sr-map-panel'>
+    <div class='hud-panel-head'>
+      <h3>州地图</h3>
       <div class='tbl-controls'>
-        <span style='color:var(--text2);font-size:.72rem'>着色维度</span>
-        <select id='sr-map-metric' onchange='renderStateMap((_srData&&_srData.state_rows)||[])' style='background:var(--panel2);color:var(--text);border:1px solid var(--border);padding:4px 8px;border-radius:4px'>
+        <span>着色维度</span>
+        <select id='sr-map-metric' onchange='renderStateMap((_srData&&_srData.state_rows)||[])'>
           <option value='player_count'>人数</option>
           <option value='total_power'>势力值</option>
         </select>
       </div>
     </div>
-    <div style='padding:14px 16px 18px'>
-      <div id='sr-map-wrap' style='position:relative;border:1px solid var(--border);border-radius:10px;background:
-        radial-gradient(circle at 50% 20%, #13233d 0%, transparent 45%),
-        linear-gradient(180deg,#0a1220 0%,#09111c 100%);
-        min-height:420px;overflow:hidden;box-shadow:inset 0 0 40px #00000055'>
-        <svg id='sr-map-svg' viewBox='0 0 980 480' style='width:100%;height:420px;display:block'></svg>
-        <div style='position:absolute;right:18px;top:18px;display:flex;align-items:center;gap:10px;background:#0a1220cc;border:1px solid var(--border);padding:8px 12px;border-radius:8px'>
-          <div style='font-size:.72rem;color:var(--text2);display:flex;flex-direction:column;gap:4px'>
+    <div class="sr-map-stage">
+      <div id='sr-map-wrap' class="hud-map-shell sr-map-wrap">
+        <svg id='sr-map-svg' viewBox='0 0 980 480'></svg>
+        <div class="sr-map-legend">
+          <div>
             <span id='sr-map-legend-high'>少</span>
             <span id='sr-map-legend-low'>多</span>
           </div>
-          <div id='sr-map-legend-bar' style='width:14px;height:98px;border-radius:999px;background:linear-gradient(180deg,#9bc8ff 0%, #377dff 55%, #182338 100%);border:1px solid #46628f'></div>
+          <div id='sr-map-legend-bar'></div>
         </div>
       </div>
     </div>
   </div>
 
   <div class='split2'>
-    <div class='tbl-wrap'>
-      <div class='tbl-head'>
-        <h3>🗺 各州人数 / 势力值</h3>
+    <div class='hud-panel hud-table-shell'>
+      <div class='hud-panel-head'>
+        <h3>各州人数 / 势力值</h3>
         <div class='tbl-controls'>
-          <span id='sr-count' style='color:var(--text2);font-size:.72rem'></span>
+          <span id='sr-count'></span>
         </div>
       </div>
-      <div class='tbl-scroll'>
+      <div class='hud-table-scroll'>
         <table>
           <thead><tr>
             <th>#</th><th>州</th><th>人数</th><th>总势力值</th><th>平均势力值</th><th>最高势力值</th>
@@ -1201,16 +2047,16 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
         </table>
       </div>
     </div>
-    <div class='tbl-wrap'>
-      <div class='tbl-head'><h3>📊 州势力 Top</h3></div>
-      <div style='padding:12px' id='sr-state-bars'></div>
+    <div class='hud-panel'>
+      <div class='hud-panel-head'><h3>州势力 Top</h3></div>
+      <div class="sr-chart-body" id='sr-state-bars'></div>
     </div>
   </div>
 
-  <div class='split2' style='margin-top:16px'>
-    <div class='tbl-wrap'>
-      <div class='tbl-head'><h3>👥 同盟 / 分组统计</h3></div>
-      <div class='tbl-scroll'>
+  <div class='split2 sr-secondary-grid'>
+    <div class='hud-panel hud-table-shell'>
+      <div class='hud-panel-head'><h3>同盟 / 分组统计</h3></div>
+      <div class='hud-table-scroll'>
         <table>
           <thead><tr>
             <th>#</th><th>同盟</th><th>分组</th><th>人数</th><th>势力</th><th>州分布</th>
@@ -1219,9 +2065,9 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
         </table>
       </div>
     </div>
-    <div class='tbl-wrap'>
-      <div class='tbl-head'><h3>🏷 同盟 / 分组人数 Top</h3></div>
-      <div style='padding:12px' id='sr-group-bars'></div>
+    <div class='hud-panel'>
+      <div class='hud-panel-head'><h3>同盟 / 分组人数 Top</h3></div>
+      <div class="sr-chart-body" id='sr-group-bars'></div>
     </div>
   </div>
 </div>
@@ -1288,7 +2134,7 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
           <div style='margin-top:6px;font-size:.74rem;color:#b49a66;letter-spacing:.18em'>山川形胜 · 九州烟云 · 仅作展示草图</div>
         </div>
         <svg id='ancient-map-svg' viewBox='0 0 1200 760' style='width:100%;height:720px;display:block'></svg>
-        <div style='position:absolute;right:24px;top:24px;z-index:2;width:200px;padding:14px 14px 12px;border:1px solid rgba(232,200,106,.18);border-radius:12px;background:rgba(20,14,10,.74);backdrop-filter:blur(2px)'>
+        <div style='position:absolute;right:24px;top:24px;z-index:2;width:200px;padding:14px 14px 12px;border:1px solid rgba(232,200,106,.18);border-radius:12px;background:var(--surface-raised);box-shadow:var(--shadow-raised)'>
           <div style='color:#e6d1a0;font-size:.82rem;letter-spacing:.16em;margin-bottom:10px'>图例</div>
           <div style='display:grid;gap:8px;font-size:.74rem;color:#c9b78d'>
             <div style='display:flex;align-items:center;gap:8px'><span style='width:18px;height:10px;border-radius:999px;background:#b68a3a;display:inline-block'></span><span>州界墨金描边</span></div>
@@ -1302,89 +2148,351 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
   </div>
 </div>
 
-<!-- TAB 30: 世界场景 (5026/5028 协议读模型) -->
-<div class='page' id='tab30'>
-  <div class='cards-row' id='ws-cards'></div>
-  <div class='filters' style='align-items:center;flex-wrap:wrap;gap:10px'>
-    <div class='ws-subtabs'>
-      <button class='ws-subtab active' data-ws='map' onclick='wsSwitch("map",this)'>🗺 地图视野</button>
-      <button class='ws-subtab' data-ws='march' onclick='wsSwitch("march",this)'>🧭 实时行军</button>
-      <button class='ws-subtab' data-ws='army' onclick='wsSwitch("army",this)'>🛰 战场监控</button>
-      <button class='ws-subtab' data-ws='entity' onclick='wsSwitch("entity",this)'>📡 协议广度</button>
-    </div>
-    <button class='btn btn-primary' onclick='loadWorldScene()'>🔄 刷新</button>
-    <span id='ws-updated' style='color:var(--text2);font-size:.72rem'></span>
-    <span id='ws-source' style='color:var(--text2);font-size:.72rem;margin-left:auto'>数据源 · /api/world/* · 5026/5028 协议读模型</span>
-  </div>
+<!-- TAB 30: legacy compatibility shell; switchTab(30) redirects to tab33 -->
+<div class='page' id='tab30' hidden aria-hidden='true'></div>
 
-  <!-- 地图视野 -->
-  <div id='ws-view-map'>
-    <div class='filters' style='gap:8px;flex-wrap:wrap'>
-      <span style='color:var(--text2);font-size:.74rem'>视窗范围 (row/col)</span>
-      <input id='ws-row-up' placeholder='rowUp' value='1' style='width:78px'/>
-      <span style='color:var(--text2)'>~</span>
-      <input id='ws-row-down' placeholder='rowDown' value='20' style='width:78px'/>
-      <span style='color:var(--text2);margin-left:6px'>行</span>
-      <input id='ws-col-left' placeholder='colLeft' value='1' style='width:78px'/>
-      <span style='color:var(--text2)'>~</span>
-      <input id='ws-col-right' placeholder='colRight' value='20' style='width:78px'/>
-      <span style='color:var(--text2);margin-left:6px'>列</span>
-      <button class='btn btn-primary' onclick='loadWorldScene()'>查询视窗</button>
+<!-- TAB 32: 设置中心 -->
+<div class='page hud-page' id='tab32' data-visual-domain="system">
+  <header class="hud-page-head">
+    <div>
+      <span class="hud-page-kicker">SYSTEM CONTROL / LOCAL PREFERENCES</span>
+      <h2 class="hud-page-title">设置中心</h2>
+      <p class="hud-page-summary">管理刷新、密度、三级动效、提醒偏好与运行链路状态。</p>
     </div>
-    <div class='tbl-wrap'>
-      <div class='tbl-head'><h3>🗺 世界地图网格 · WORLD_CITY / visualField</h3><span class='hdr-stat' id='ws-map-count'></span></div>
-      <div id='ws-grid' class='ws-grid'></div>
-      <div class='tbl-scroll'>
-        <table><thead><tr>
-          <th>WID</th><th>坐标(行,列)</th><th>类型</th><th>城池名</th><th>占领方UID</th><th>同盟</th><th>势力</th><th>保护到期</th><th>驻守到期</th><th>视野+</th><th>stateId</th>
-        </tr></thead>
-        <tbody id='ws-map-body'></tbody></table>
+    <div class="hud-page-actions">
+      <span class="hud-status-chip">LOCAL ONLY</span>
+      <button class="btn" id="cc-settings-reset" type="button">重置本地偏好</button>
+    </div>
+  </header>
+  <div class="cc-settings-intro hud-panel">
+    <div><span class="cc-panel-kicker">LOCAL PREFERENCES</span><h3>浏览器偏好</h3>
+      <p>所有偏好仅保存在当前浏览器，不会修改游戏或数据库。</p></div>
+  </div>
+  <div class="cc-settings-grid">
+    <label class="cc-setting"><span><strong>自动刷新</strong><small>控制总览和实时模块刷新节奏</small></span>
+      <select id="cc-setting-refresh"><option value="0">关闭</option><option value="5000">5 秒</option><option value="10000">10 秒</option><option value="30000">30 秒</option></select></label>
+    <label class="cc-setting"><span><strong>信息密度</strong><small>紧凑模式适合大屏与高密度数据</small></span>
+      <select id="cc-setting-density"><option value="comfortable">舒适</option><option value="compact">紧凑</option></select></label>
+    <label class="cc-setting"><span><strong>界面动效</strong><small>系统减少动态效果设置始终优先</small></span>
+      <select id="cc-setting-motion"><option value="full">完整</option><option value="standard">标准</option><option value="reduced">精简</option></select></label>
+    <label class="cc-setting"><span><strong>声音提醒</strong><small>仅用于浏览器内战术预警</small></span>
+      <select id="cc-setting-sound"><option value="off">关闭</option><option value="danger">仅危险</option><option value="all">全部</option></select></label>
+    <label class="cc-setting cc-setting-toggle"><span><strong>右侧情报栏</strong><small>在总览中显示战术预警</small></span>
+      <input id="cc-setting-intel" type="checkbox" checked></label>
+    <label class="cc-setting"><span><strong>写操作 Token</strong><small>仅保存在当前浏览器会话，服务端设置 STZB_API_TOKEN 后使用</small></span>
+      <input id="cc-setting-api-token" type="password" autocomplete="off" placeholder="未配置"></label>
+  </div>
+  <section class="hud-panel hud-health-panel">
+    <div class="hud-panel-head">
+      <div>
+        <span class="hud-page-kicker">RUNTIME HEALTH</span>
+        <h3 class="hud-panel-title">运行链路</h3>
       </div>
+      <button class="btn" id="hud-health-refresh" type="button">刷新</button>
     </div>
-  </div>
+    <div id="hud-health-grid" class="hud-health-grid hud-surface-panel">
+      <div class="hud-state hud-state-loading">正在检查链路…</div>
+    </div>
+  </section>
+</div>
 
-  <!-- 实时行军 -->
-  <div id='ws-view-march' style='display:none'>
-    <div class='tbl-wrap'>
-      <div class='tbl-head'><h3>🧭 realMarch · 行军路径 (slot[29])</h3><span class='hdr-stat' id='ws-march-count'></span></div>
-      <div class='tbl-scroll'>
-        <table><thead><tr>
+<!-- TAB 33: 战场情报中心 -->
+<div class='page hud-page active' id='tab33' data-visual-domain='intelligence'>
+  <header class="hud-page-head">
+    <div>
+      <span class="hud-page-kicker">WORLD INTELLIGENCE / LIVE TACTICAL LAYER</span>
+      <h2 class="hud-page-title">战场情报 · 全域态势</h2>
+      <p class="hud-page-summary">统一 WorldState、热区、真实格子、行军、部队与证据时间线。</p>
+    </div>
+    <div class="hud-page-actions">
+      <span class="hud-status-chip" id="hud-world-freshness">STATE UNKNOWN</span>
+      <button class="btn btn-primary" type="button" onclick="loadIntelligenceCenter(true)">刷新情报</button>
+    </div>
+  </header>
+  <div class="intel-center">
+    <div class="intel-primary-tabs hud-panel" role="tablist" aria-label="战场情报工作区">
+      <button class="active" type="button" role="tab" aria-selected="true" data-intel-view="map">态势地图</button>
+      <button type="button" role="tab" aria-selected="false" data-intel-view="march">实时行军</button>
+      <button type="button" role="tab" aria-selected="false" data-intel-view="army">活跃部队</button>
+      <button type="button" role="tab" aria-selected="false" data-intel-view="entity">协议实体</button>
+    </div>
+    <section id="intel-view-map" class="intel-primary-view active" role="tabpanel">
+    <div id="intel-loader-state" class="hud-state-host intel-loader-state" aria-live="polite"></div>
+    <div class="intel-toolbar hud-toolbar">
+      <button class="intel-layer active" data-layer="all">综合态势</button>
+      <button class="intel-layer active" data-layer="ownership">势力归属</button>
+      <button class="intel-layer active" data-layer="armies">行军威胁</button>
+      <button class="intel-layer active" data-layer="freshness">情报新鲜度</button>
+      <button class="intel-layer active" data-layer="paths">路径</button>
+      <div class="intel-locator">
+        <input id="intel-wid-input" inputmode="numeric" placeholder="输入 WID 定位" aria-label="输入 WID 定位">
+        <button class="btn" type="button" onclick="IntelligenceCenter.locateWid()">定位</button>
+      </div>
+      <span class="intel-map-mode" id="intel-map-mode">战术镜头</span>
+      <span class="intel-state-meta" id="intel-state-meta">WorldState 未初始化</span>
+      <button class="btn btn-primary" onclick="loadIntelligenceCenter()">刷新情报</button>
+    </div>
+    <div class="intel-workspace hud-panel">
+      <section class="intel-map-wrap intel-map-shell hud-map-shell">
+        <canvas id="intel-map-canvas" aria-label="战场情报风险地图"></canvas>
+        <div id="intel-risk-lock" class="intel-risk-lock-overlay" aria-hidden="true" hidden></div>
+        <div class="intel-map-status" id="intel-map-status">正在加载统一世界状态…</div>
+        <div class="intel-radar" id="intel-radar">
+          <button id="intel-radar-toggle" type="button" aria-label="折叠或展开全局雷达">全域雷达</button>
+          <canvas id="intel-radar-canvas" aria-label="全局雷达"></canvas>
+        </div>
+        <div class="intel-map-navigation" aria-label="地图导航">
+          <button id="intel-map-back" type="button" aria-label="返回上一视窗" onclick="IntelligenceCenter.goBack()">←</button>
+          <button id="intel-map-home" type="button" aria-label="回到推荐视窗" onclick="IntelligenceCenter.goHome()">⌂</button>
+          <button id="intel-map-forward" type="button" aria-label="前往下一视窗" onclick="IntelligenceCenter.goForward()">→</button>
+          <button type="button" aria-label="缩小地图" onclick="IntelligenceCenter.zoomOut()">−</button>
+          <button type="button" aria-label="放大地图" onclick="IntelligenceCenter.zoomIn()">+</button>
+        </div>
+        <div class="intel-legend" aria-label="土地等级图例">
+          <i style="background:#263746"></i><i style="background:#24536a"></i>
+          <i style="background:#167a78"></i><i style="background:#199f69"></i>
+          <i style="background:#75b83b"></i><i style="background:#d1b52c"></i>
+          <i style="background:#e87e25"></i><i style="background:#ed4936"></i>
+          <i style="background:#ff174f"></i>
+        </div>
+      </section>
+      <aside class="intel-detail intel-detail-panel hud-panel" id="intel-detail-panel">
+        <div id="intel-detail-status" class="hud-state-host" aria-live="polite"></div>
+        <div class="intel-detail-head">
+          <div class="cc-panel-kicker">SELECTED TILE</div>
+          <h3 id="intel-detail-title">未选择地块</h3>
+          <span class="intel-risk-pill" id="intel-risk-pill">风险 --</span>
+        </div>
+        <div class="intel-detail-tabs" role="tablist">
+          <button class="active" data-intel-tab="risk" role="tab">风险</button>
+          <button data-intel-tab="armies" role="tab">行军</button>
+          <button data-intel-tab="battles" role="tab">战报</button>
+          <button data-intel-tab="evidence" role="tab">证据</button>
+        </div>
+        <div class="intel-detail-body" id="intel-detail-body">
+          <div class="intel-empty">点击地图地块查看情报</div>
+        </div>
+      </aside>
+    </div>
+    </section>
+    <section id="intel-view-march" class="intel-primary-view" role="tabpanel" hidden>
+      <div id="intel-scene-march-status" class="hud-state-host intel-loader-state" aria-live="polite"></div>
+      <div class="intel-scene-head">
+        <div><span class="cc-panel-kicker">REAL MARCH</span><h3>实时行军</h3></div>
+        <div><span id='ws-updated'></span><button class="btn" type="button" onclick="loadIntelligenceCenter(true)">刷新</button></div>
+      </div>
+      <div class='hud-panel hud-table-shell intel-scene-table'>
+        <div class='tbl-head'><h3>realMarch · 行军路径 (slot[29])</h3><span class='hdr-stat' id='ws-march-count'></span></div>
+        <div class='hud-table-scroll'><table><thead><tr>
           <th>行军ID</th><th>上一格</th><th>当前格</th><th>下一格</th><th>出发</th><th>下一跳</th><th>抵达</th><th>路径ID</th><th>单格耗时</th><th>行军类型</th><th>归属</th>
-        </tr></thead>
-        <tbody id='ws-march-body'></tbody></table>
+        </tr></thead><tbody id='ws-march-body'></tbody></table></div>
       </div>
-    </div>
-  </div>
-
-  <!-- 战场监控 -->
-  <div id='ws-view-army' style='display:none'>
-    <div class='tbl-wrap'>
-      <div class='tbl-head'><h3>🛰 MapArmyTuple · 活跃部队 (slot[6])</h3><span class='hdr-stat' id='ws-army-count'></span></div>
-      <div class='tbl-scroll'>
-        <table><thead><tr>
+    </section>
+    <section id="intel-view-army" class="intel-primary-view" role="tabpanel" hidden>
+      <div id="intel-scene-army-status" class="hud-state-host intel-loader-state" aria-live="polite"></div>
+      <div class="intel-scene-head">
+        <div><span class="cc-panel-kicker">ACTIVE ARMIES</span><h3>活跃部队</h3></div>
+        <button class="btn" type="button" onclick="loadIntelligenceCenter(true)">刷新</button>
+      </div>
+      <div class='hud-panel hud-table-shell intel-scene-table'>
+        <div class='tbl-head'><h3>MapArmyTuple · 活跃部队 (slot[6])</h3><span class='hdr-stat' id='ws-army-count'></span></div>
+        <div class='hud-table-scroll'><table><thead><tr>
           <th>部队ID</th><th>状态</th><th>玩家</th><th>同盟</th><th>出发</th><th>目标</th><th>目标名</th><th>目标类型</th><th>驻扎</th><th>停留</th><th>兵种</th><th>士气</th><th>Buff</th><th>障碍</th><th>行军ID</th><th>开始</th><th>结束</th><th>战报</th>
-        </tr></thead>
-        <tbody id='ws-army-body'></tbody></table>
+        </tr></thead><tbody id='ws-army-body'></tbody></table></div>
       </div>
-    </div>
-  </div>
-
-  <!-- 协议广度 -->
-  <div id='ws-view-entity' style='display:none'>
-    <div class='tbl-wrap'>
-      <div class='tbl-head'><h3>📡 5026/5028 广度槽位 · warShips / assistArmies / armyGroups / shortMessages</h3><span class='hdr-stat' id='ws-entity-count'></span></div>
-      <div style='padding:10px 12px;border-bottom:1px solid var(--border)'>
+    </section>
+    <section id="intel-view-entity" class="intel-primary-view" role="tabpanel" hidden>
+      <div id="intel-scene-entity-status" class="hud-state-host intel-loader-state" aria-live="polite"></div>
+      <div class="intel-scene-head">
+        <div><span class="cc-panel-kicker">PROTOCOL ENTITIES</span><h3>协议实体</h3></div>
+        <button class="btn" type="button" onclick="loadIntelligenceCenter(true)">刷新</button>
+      </div>
+      <div class='hud-panel hud-table-shell intel-scene-table'>
+        <div class='tbl-head'><h3>📡 协议广度 · warShips / assistArmies / armyGroups / shortMessages</h3><span class='hdr-stat' id='ws-entity-count'></span></div>
         <div class='ws-entity-summary' id='ws-entity-summary'></div>
+        <div class='hud-table-scroll'><table><thead><tr>
+          <th>类别</th><th>ID</th><th>来源 seq</th><th>原始内容</th>
+        </tr></thead><tbody id='ws-entity-body'></tbody></table></div>
       </div>
-      <div class='tbl-scroll'>
-        <table><thead><tr>
-          <th>类别</th><th>ID</th><th>来源seq</th><th>原始内容</th>
-        </tr></thead>
-        <tbody id='ws-entity-body'></tbody></table>
-      </div>
+    </section>
+    <div class="intel-timeline hud-panel" id="intel-timeline">
+      <div class="intel-empty">暂无 WorldState 变化事件</div>
     </div>
   </div>
 </div>
+
+<!-- TAB 35: 实时部队三栏指挥台 -->
+<div class='page hud-page' id='tab35' data-visual-domain='intelligence'>
+  <header class="hud-page-head">
+    <div>
+      <span class="hud-page-kicker">LIVE ARMIES / STRICT LINEUP EVIDENCE</span>
+      <h2 class="hud-page-title">实时部队 · 三栏指挥台</h2>
+      <p class="hud-page-summary">统一 5026/5028 当前部队、逐跳行军与同部队 ID 的精确战报阵容。</p>
+    </div>
+    <div class="hud-page-actions">
+      <div class="live-army-world-time">
+        <span class="hud-status-chip" id="live-army-freshness">STATE UNKNOWN</span>
+        <span id="live-army-observed-at">数据时间 --</span>
+      </div>
+      <button class="btn btn-primary" type="button" onclick="LiveArmyCommand.load(true)">刷新部队</button>
+    </div>
+  </header>
+  <section id="live-army-summary" class="hud-kpi-grid live-army-summary" aria-live="polite">
+    <div class="hud-state hud-state-loading">正在聚合实时部队…</div>
+  </section>
+  <div class="live-army-shell">
+    <section id="live-army-index" class="hud-panel live-army-index" aria-label="部队索引">
+      <div class="hud-panel-head">
+        <div>
+          <span class="hud-page-kicker">ARMY INDEX</span>
+          <h3 class="hud-panel-title">全部状态</h3>
+        </div>
+        <div class="live-army-index-actions">
+          <span class="hud-status-chip" id="live-army-index-count">0</span>
+          <button
+            class="btn live-army-index-toggle"
+            id="live-army-index-toggle"
+            type="button"
+            aria-expanded="true"
+            aria-controls="live-army-list-shell"
+          >收起索引</button>
+        </div>
+      </div>
+      <div class="hud-toolbar live-army-toolbar">
+        <input id="live-army-search" type="search" placeholder="搜索部队 ID / 玩家 / 武将 / WID" aria-label="搜索实时部队">
+        <select id="live-army-status-filter" aria-label="筛选部队状态">
+          <option value="all">全部状态</option>
+          <option value="expedition">出征中</option>
+          <option value="reside-going">驻守前往</option>
+          <option value="reinforce-going">增援前往</option>
+          <option value="returning">返回中</option>
+          <option value="reside">驻守</option>
+          <option value="reinforce">增援</option>
+          <option value="stay">停留</option>
+          <option value="normal">待命</option>
+          <option value="unknown">未知状态</option>
+        </select>
+        <select id="live-army-time-filter" aria-label="按最后观测时间筛选部队">
+          <option value="2">2 分钟内</option>
+          <option value="10" selected>10 分钟内</option>
+          <option value="30">30 分钟内</option>
+          <option value="60">1 小时内</option>
+          <option value="all">全部时间</option>
+        </select>
+      </div>
+      <div id="live-army-list-shell" class="live-army-list-shell">
+        <div class="live-army-section-head">
+          <span>当前部队</span>
+          <span id="live-army-current-count">0</span>
+        </div>
+        <div id="live-army-current-list" class="live-army-list">
+          <div class="hud-state hud-state-loading">正在加载…</div>
+        </div>
+        <div class="live-army-section-head live-army-offline-head">
+          <span>最近离线 10 分钟</span>
+          <span id="live-army-offline-count">0</span>
+        </div>
+        <div id="live-army-offline-list" class="live-army-list live-army-offline-list">
+          <div class="hud-state hud-state-empty">暂无最近离线部队</div>
+        </div>
+      </div>
+    </section>
+    <section class="hud-panel live-army-map-panel" aria-label="实时部队战术地图">
+      <div class="hud-panel-head">
+        <div>
+          <span class="hud-page-kicker">TACTICAL MAP</span>
+          <h3 class="hud-panel-title">部队空间态势</h3>
+        </div>
+        <div class="live-army-map-actions">
+          <button class="btn" id="live-army-map-home" type="button">全域</button>
+          <button class="btn" id="live-army-map-selected" type="button">选中部队</button>
+        </div>
+      </div>
+      <div class="live-army-map-wrap">
+        <canvas id="live-army-map-canvas" aria-label="实时部队位置、方向和目标地图"></canvas>
+        <div id="live-army-map-status" class="live-army-map-status">等待部队数据</div>
+        <div class="live-army-map-legend" aria-label="部队状态图例">
+          <span><i data-shape="arrow"></i>移动</span>
+          <span><i data-shape="shield"></i>驻守 / 增援</span>
+          <span><i data-shape="circle"></i>待命 / 停留</span>
+          <span><i data-shape="diamond"></i>未知 / 离线</span>
+        </div>
+      </div>
+    </section>
+    <aside class="hud-panel live-army-detail-panel" aria-label="部队身份与阵容证据">
+      <div class="hud-panel-head">
+        <div>
+          <span class="hud-page-kicker">ARMY IDENTITY</span>
+          <h3 class="hud-panel-title">部队身份与阵容证据</h3>
+        </div>
+        <button class="btn" id="live-army-open-intelligence" type="button">在战场情报中定位</button>
+      </div>
+      <div id="live-army-detail" class="live-army-detail">
+        <div class="hud-state hud-state-empty">选择左侧卡片或地图标记查看部队</div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- TAB 34: 阵容战法研究 -->
+<div class='page hud-page' id='tab34' data-visual-domain='analysis'>
+  <header class="hud-page-head">
+    <div>
+      <span class="hud-page-kicker">CONFIGURATION RESEARCH / EVIDENCE LAYERS</span>
+      <h2 class="hud-page-title">阵容战法研究</h2>
+      <p class="hud-page-summary">区分配置事实、历史统计与模拟验证，保持每条结论可追溯。</p>
+    </div>
+    <div class="hud-page-actions">
+      <span class="hud-status-chip analysis-evidence" data-kind="config">CONFIG FACT</span>
+      <span class="hud-status-chip analysis-evidence" data-kind="history">BATTLE STAT</span>
+      <span class="hud-status-chip analysis-evidence" data-kind="simulation">SIMULATION</span>
+    </div>
+  </header>
+  <div class="research-mode-tabs" id="research-mode-tabs" role="tablist" aria-label="阵容研究模式">
+    <button class="active" type="button" role="tab" aria-selected="true" data-research-mode="lab">阵容实验室</button>
+    <button type="button" role="tab" aria-selected="false" data-research-mode="matchup">对阵分析</button>
+    <button type="button" role="tab" aria-selected="false" data-research-mode="chain">战法执行链</button>
+  </div>
+  <div class="research-workbench-shell">
+    <aside class="research-library hud-panel" aria-label="研究目录">
+      <div class="research-library-kind" id="research-library-kind" role="tablist" aria-label="目录类型">
+        <button class="active" type="button" role="tab" data-kind="hero">武将</button>
+        <button type="button" role="tab" data-kind="skill">战法</button>
+        <button type="button" role="tab" data-kind="card-pack">卡包</button>
+      </div>
+      <div class="research-controls hud-toolbar">
+        <input id="research-search" type="search" placeholder="搜索名称或 ID…" aria-label="搜索武将、战法或卡包">
+      </div>
+      <div class="research-library-filters" id="research-library-filters" aria-label="研究目录筛选"></div>
+      <div class="research-results" id="research-results" aria-live="polite">
+        <div class="intel-empty">正在加载客户端配置真值…</div>
+      </div>
+    </aside>
+    <section class="research-stage hud-panel" id="research-stage" aria-live="polite">
+      <div id="research-lineup-status" class="hud-state-host research-request-status" aria-live="polite"></div>
+      <div id="research-matchup-status" class="hud-state-host research-request-status" aria-live="polite"></div>
+      <div id="research-chain-status" class="hud-state-host research-request-status" aria-live="polite"></div>
+      <div id="research-stage-content">
+        <div class="research-empty">正在初始化阵容实验室…</div>
+      </div>
+    </section>
+    <aside id="research-evidence-panel" class="research-evidence-panel hud-panel" aria-label="证据面板">
+      <div class="research-evidence-tabs" id="research-evidence-tabs" role="tablist" aria-label="证据类型">
+        <button type="button" role="tab" aria-selected="false" data-evidence="config">配置事实</button>
+        <button class="active" type="button" role="tab" aria-selected="true" data-evidence="history">历史统计</button>
+        <button type="button" role="tab" aria-selected="false" data-evidence="simulation">模拟验证</button>
+      </div>
+      <div id="research-detail-status" class="hud-state-host research-request-status" aria-live="polite"></div>
+      <div class="research-evidence-body" id="research-evidence-body">
+        <div class="research-detail" id="research-detail">
+          <div class="research-empty-inline">选择目录或历史阵容查看证据</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+  <div class="research-workbench-error" id="research-workbench-error" role="alert" hidden></div>
+</div>
+</main>
 
 <aside id="query-agent-panel" class="query-agent-panel" style="display:none">
   <div class="query-agent-head">
@@ -1397,7 +2505,57 @@ tbody td{padding:9px 12px;color:var(--text);overflow:hidden;text-overflow:ellips
 </aside>
 <button id="query-agent-fab" class="btn btn-primary" type="button" onclick="toggleQueryAgent(true)">战术检索</button>
 
-<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script><script src="/static/hero_data.js?v=20260423d"></script><script src="/static/herocfg.js?v=20260423d"></script><script src="/static/app1.js?v=20260423d"></script><script src="/static/app2.js?v=20260423d"></script><script src="/static/sim.js?v=20260423d"></script><script src="/static/world_scene.js?v=20260810a"></script>
+<dialog id="cc-command-dialog" class="cc-command-dialog" aria-labelledby="cc-command-title">
+  <div class="cc-command-shell hud-surface-modal">
+    <div class="cc-command-search">
+      <span aria-hidden="true">⌘</span>
+      <input id="cc-command-input" type="search" autocomplete="off" placeholder="搜索页面、WID、队伍或玩家…" aria-label="搜索命令">
+      <kbd>ESC</kbd>
+    </div>
+    <div class="cc-command-meta"><strong id="cc-command-title">战场命令</strong><span>↑↓ 选择 · Enter 执行</span></div>
+    <div id="cc-command-results" class="cc-command-results" role="listbox"></div>
+  </div>
+</dialog>
+
+<dialog id="score-player-dialog" class="score-dialog">
+  <div id="score-player-surface" class="score-dialog-shell"><button class="score-dialog-close" onclick="this.closest('dialog').close()">×</button><div id="score-player-status" class="hud-state-host" aria-live="polite"></div><div id="score-player-content"></div></div>
+</dialog>
+<dialog id="score-rule-dialog" class="score-dialog">
+  <form id="score-rule-surface" class="score-dialog-shell score-rule-editor" onsubmit="event.preventDefault();ScoreCenter.saveRule()">
+    <button type="button" class="score-dialog-close" id="score-rule-close" onclick="this.closest('dialog').close()">×</button>
+    <span class="cc-panel-kicker">RULE ENGINE</span><h2>积分规则控制台</h2>
+    <div id="score-rule-status" class="hud-state-host" aria-live="polite"></div>
+    <label>规则名称<input id="score-rule-name" value="同盟综合贡献"></label>
+    <label>预设<select id="score-rule-preset"></select></label>
+    <div id="score-rule-fields" class="score-rule-fields"></div>
+    <div id="score-formula-preview" class="score-formula-preview"></div>
+    <button class="btn btn-primary" id="score-rule-save" type="submit">保存为新版本</button>
+  </form>
+</dialog>
+<dialog id="score-preview-dialog" class="score-dialog">
+  <div id="score-preview-surface" class="score-dialog-shell score-preview-shell"><button class="score-dialog-close" onclick="this.closest('dialog').close()">×</button><span class="cc-panel-kicker">DRY RUN</span><h2>积分重算预览</h2><div id="score-preview-status" class="hud-state-host" aria-live="polite"></div><div id="score-preview-summary"></div><div id="score-preview-rows"></div><button class="btn btn-primary" id="score-preview-confirm" onclick="ScoreCenter.confirmRecalculation()">确认写入</button></div>
+</dialog>
+<dialog id="score-adjustment-dialog" class="score-dialog">
+  <form id="score-adjustment-surface" class="score-dialog-shell" onsubmit="event.preventDefault();ScoreCenter.addAdjustment()"><button type="button" class="score-dialog-close" onclick="this.closest('dialog').close()">×</button><span class="cc-panel-kicker">MANUAL ADJUSTMENT</span><h2>手动奖惩</h2><div id="score-adjustment-status" class="hud-state-host" aria-live="polite"></div><input id="score-adjustment-player" type="hidden"><label>分值<input id="score-adjustment-points" type="number" step="0.1" required></label><label>原因<textarea id="score-adjustment-reason" required></textarea></label><button class="btn btn-primary" id="score-adjustment-save" type="submit">保存调整</button></form>
+</dialog>
+<dialog id="research-template-dialog" class="research-template-dialog">
+  <form method="dialog" class="research-template-dialog-shell">
+    <button class="research-template-close" type="submit" aria-label="关闭">×</button>
+    <span class="cc-panel-kicker">LINEUP TEMPLATE</span>
+    <h2>阵容模板</h2>
+    <div id="research-template-list"></div>
+  </form>
+</dialog>
+
+<section
+  id="hud-toast-region"
+  class="hud-toast-region"
+  role="region"
+  aria-label="系统通知"
+  aria-relevant="additions text"
+></section>
+
+<script src="/static/vendor/exceljs-4.4.0.min.js"></script><script src="/static/vendor/jspdf-2.5.1.umd.min.js"></script><script src="/static/vendor/jspdf-autotable-3.8.2.min.js"></script><script type="module" src="/static/dashboard-hud.mjs"></script><script type="module" src="/static/dashboard-runtime.mjs"></script><script type="module" src="/static/intelligence-loader.mjs"></script><script type="module" src="/static/intelligence-map.mjs"></script><script type="module" src="/static/intelligence-map-overview.mjs"></script><script type="module" src="/static/intelligence-map-navigation.mjs"></script><script type="module" src="/static/live-army-command.mjs"></script><script type="module" src="/static/simulator-workbench.js"></script><script type="module" src="/static/research-workbench.mjs"></script><script type="module" src="/static/research-skill-chain.mjs"></script><script type="module" src="/static/research-templates.mjs"></script><script src="/static/dashboard-meta.js"></script><script src="/static/hero_data.js"></script><script src="/static/herocfg.js"></script><script src="/static/app1.js"></script><script src="/static/app2.js"></script><script src="/static/sim.js"></script><script src="/static/world_scene.js"></script><script src="/static/dashboard-design-system.js"></script><script src="/static/dashboard-command-center.js"></script><script src="/static/intelligence-center.js"></script><script type="module" src="/static/intelligence-research.js"></script><script src="/static/intelligence-research-catalog.js"></script><script src="/static/score-center.js"></script>
 <a class='github-banner' href='https://github.com/GRQ02200059/stzb_watcher' target='_blank' title='源码地址，欢迎 Star'>
   <svg width='15' height='15' viewBox='0 0 16 16' fill='currentColor'><path d='M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z'/></svg>
   源码开源 · GitHub

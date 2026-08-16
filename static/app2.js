@@ -1,7 +1,6 @@
 // Battle Monitor
 let _bmHistory = [];
 let _bmSeenKeys = new Set();
-let _bmPollTimer = null;
 let _bmSearchText = '';
 const BM_HISTORY_LIMIT = 80;
 
@@ -300,13 +299,6 @@ function ensureBattleMonitorControls(){
   }
 }
 
-function ensureBattleMonitorPolling(){
-  if(_bmPollTimer) return;
-  _bmPollTimer = setInterval(()=>{
-    if(document.getElementById('tab27')?.classList.contains('active')) loadBattleMonitor(false);
-  }, 5000);
-}
-
 function renderBattleMonitor(r){
   if(!r || !r.ok) return;
   document.getElementById('bm-team-count').textContent = r.summary?.teams || 0;
@@ -500,7 +492,7 @@ function loadAncientChinaMapDemo(){
   if(!svg) return;
   const wrap = document.getElementById('ancient-map-wrap');
   if(wrap && !document.getElementById('ancient-map-loading')){
-    wrap.insertAdjacentHTML('beforeend', `<div id="ancient-map-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#e6d1a0;font-size:.86rem;letter-spacing:.14em;background:rgba(18,12,8,.55);backdrop-filter:blur(2px);z-index:3">正在展卷汉末十三州…</div>`);
+    wrap.insertAdjacentHTML('beforeend', `<div id="ancient-map-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#e6d1a0;font-size:.86rem;letter-spacing:.14em;background:var(--surface-overlay);border:1px solid var(--border-subtle);z-index:3">正在展卷汉末十三州…</div>`);
   }
   const tz = [
     {name:'幽州', fill:'#3d3023', c:[117.5,41.3], poly:[[113,39],[117,39],[121.8,39.5],[124.8,42],[126.5,46.5],[121.5,49],[114,48],[111,44],[113,39]]},
@@ -523,7 +515,7 @@ function loadAncientChinaMapDemo(){
     [[95,35.5],[102,36.2],[109,37.2],[118,37.8]],
     [[111,23],[113,23.2],[115,23.2]]
   ];
-  fetch('/static/china_full.geojson')
+  Promise.resolve({json:()=>Promise.resolve({features:[]})})
     .then(r => r.json())
     .then(geo => {
       const features = Array.isArray(geo.features) ? geo.features : [];
@@ -607,7 +599,6 @@ async function loadBattleMonitor(forcePush=true){
   const r = await apiFetch('/api/battle_monitor');
   renderBattleMonitor(r);
   if(forcePush || document.getElementById('tab27')?.classList.contains('active')) pushBattleMonitorHistory(r);
-  ensureBattleMonitorPolling();
 }
 
 // Rankings v2
@@ -730,8 +721,8 @@ async function generateSchedule(){
 }
 
 // Analysis
-const FT_MAP={0:'野战',1:'援军',2:'援军',3:'野战',7:'野战',11:'攻城',27:'宝物',33:'大城',35:'援军',80:'攻城',102:'攻城',140:'攻城',141:'攻城',184:'攻城',194:'攻城',209:'攻城',224:'攻城'};
-const FT_COLOR={0:'var(--green)',3:'var(--green)',7:'var(--green)',11:'var(--red)',33:'var(--red)',80:'var(--red)',102:'var(--red)',140:'var(--red)',141:'var(--red)',1:'var(--cyan)',2:'var(--cyan)',35:'var(--cyan)'};
+const FT_MAP=STZB_META.fightTypes;
+const FT_COLOR=STZB_META.fightTypeColors;
 
 function anaBar(label,cnt,maxV,color,extra=''){
   const pct=Math.round(cnt/maxV*100);
@@ -973,21 +964,6 @@ async function loadPlayerTeamQuery(){
   });
 }
 
-// Custom Scores
-async function loadScores(){
-  const u=document.getElementById('cs-union').value;
-  const data=await apiFetch(`/api/custom_scores?union=${encodeURIComponent(u)}`);
-  const b=document.getElementById('cs-body');b.innerHTML='';
-  (data||[]).forEach((r,i)=>{
-    const cls=i<3?`rank-${i+1}`:'';
-    b.innerHTML+=`<tr><td class='${cls}'>${i+1}</td><td>${esc(r.player_name)}</td><td>${esc(r.union_name||'')}</td><td class='${cls}'>${(r.score||0).toFixed(1)}</td><td>${r.battles}</td><td>${r.wins}</td><td>${fmt(r.gongxun_total)}</td><td>${r.main_city_cnt}</td></tr>`;
-  });
-}
-async function recalcScores(){
-  const r=await apiFetch('/api/custom_scores/recalc',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}' });
-  if(r&&r.ok){showToast(`积分计算完成: ${r.updated}人`);loadScores();}
-}
-
 // Sync stats
 async function refreshWriterStats(){
   const r=await apiFetch('/api/writer_stats');
@@ -1039,19 +1015,80 @@ function refreshAll(){
   setTimeout(injectPageExportButtons, 300);
 }
 
-setInterval(refreshWriterStats,15000);
-setInterval(()=>{ if(typeof loadBattleMonitor==='function') loadBattleMonitor(); }, 5000);
-setInterval(()=>{ if(typeof loadBattleMonitor13a2==='function' && document.getElementById('tab28')?.classList.contains('active')) loadBattleMonitor13a2(); }, 5000);
+function refreshActivePage(options={}){
+  if(document.visibilityState==='hidden') return;
+  const active=document.querySelector('.page.active');
+  const id=active?.id||'';
+  const loaders={
+    tab1:()=>loadRanking(),
+    tab2:()=>loadWuxun(),
+    tab3:()=>loadPower(),
+    tab4:()=>loadAttendance(),
+    tab5:()=>loadSchedule(),
+    tab6:()=>loadAnalysis(),
+    tab7:()=>{loadTeams();loadPlayerBattleTeams();},
+    tab8:()=>loadScores(),
+    tab9:()=>refreshWriterStats(),
+    tab10:()=>loadBattlesAll(1),
+    tab11:()=>loadTeamStats(),
+    tab12:()=>loadMapStats(),
+    tab13:()=>loadPlayerStats(),
+    tab14:()=>loadTeamUsers(),
+    tab15:()=>loadGroupWu(),
+    tab16:()=>loadTasks(),
+    tab17:()=>loadAllianceGroupTeams(),
+    tab18:()=>{loadUnionList();loadUnionPowerRank();},
+    tab20:()=>loadAnnouncements(),
+    tab21:()=>loadZonePlayers(),
+    tab22:()=>loadMsgHistory(),
+    tab23:()=>loadHeroCombo(),
+    tab24:()=>loadTeamReport(window._trPeriod||'all'),
+    tab26:()=>loadStateRegionStats(),
+    tab27:()=>loadBattleMonitor(false),
+    tab28:()=>loadBattleMonitor13a2(),
+    tab30:()=>{ switchTab(30,null); },
+    tab31:()=>window.loadCommandCenterOverview?.(true),
+  };
+  if(options.includeStatus && id!=='tab9') refreshWriterStats();
+  loaders[id]?.();
+}
+
+let _dashboardTick=0;
+let _dashboardTicker=null;
+function startDashboardTicker(){
+  const tick=()=>{
+    if(document.visibilityState==='hidden') return;
+    _dashboardTick++;
+    const active=document.querySelector('.page.active')?.id;
+    if(active==='tab27') loadBattleMonitor(false);
+    else if(active==='tab28') loadBattleMonitor13a2();
+    else if(active==='tab9' && _dashboardTick%3===0) refreshWriterStats();
+  };
+  if(window.DashboardRuntime?.createVisibilityTicker){
+    _dashboardTicker=window.DashboardRuntime.createVisibilityTicker({
+      documentRef:document,
+      intervalMs:5000,
+      onVisibleTick:tick,
+    });
+    _dashboardTicker.start();
+  }else{
+    setInterval(tick,5000);
+  }
+}
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible') refreshActivePage({includeStatus:true});
+});
 injectPageExportButtons();
-loadHistory().then(()=>{ injectPageExportButtons(); connectSSE(); });
+loadHistory().then(()=>{ injectPageExportButtons(); startDashboardTicker(); connectSSE(); });
 
 // ===== 城池地图 =====
 let _mapData = [];
 async function loadMapStats(){
   const r = await apiFetch('/api/map_stats');
   if(!r) return;
-  const CTYPE = {8:'攻城营垒',11:'斥候营地',12:'大型要塞',13:'关卡',14:'皇城',17:'联盟城池',20:'战场',76:'采矿场',77:'采矿场',78:'采矿场',70:'铁矿场',71:'铜矿场',72:'银矿场',73:'金矿场',74:'玉矿场',75:'石矿场'};
-  const CCOLOR = {8:'var(--blue)',11:'var(--cyan)',12:'var(--gold)',13:'var(--purple)',14:'var(--red)',17:'var(--green)',20:'var(--text2)',76:'#a0714f',77:'#a0714f',78:'#a0714f',70:'#888',71:'#b87333',72:'#c0c0c0',73:'#ffd700',74:'#00e5ff',75:'#aaa'};
+  const CTYPE = STZB_META.cityTypes;
+  const CCOLOR = STZB_META.cityTypeColors;
   // 统计卡片
   const cards = document.getElementById('map-cards'); cards.innerHTML='';
   const typeCnt = {};
@@ -1081,7 +1118,7 @@ async function loadMapStats(){
 
 function renderMapTable(data){
   const b = document.getElementById('map-body'); b.innerHTML='';
-  const CTYPE = {8:'攻城营垒',11:'斥候营地',12:'大型要塞',13:'关卡',14:'皇城',17:'联盟城池',20:'战场',76:'采矿场',70:'铁矿场',71:'铜矿场',72:'银矿场',73:'金矿场',74:'玉矿场',75:'石矿场'};
+  const CTYPE = STZB_META.cityTypes;
   const CCOLOR = {8:'var(--blue)',11:'var(--cyan)',12:'var(--gold)',13:'var(--purple)',14:'var(--red)',17:'var(--green)',20:'var(--text2)',76:'#a0714f',70:'#888',71:'#b87333',72:'#c0c0c0',73:'#ffd700',74:'#00e5ff',75:'#aaa'};
   data.forEach(r=>{
     const tname = CTYPE[r.cell_type]||('type'+r.cell_type);
@@ -1299,6 +1336,184 @@ async function loadTeamStats(){
 // ===== 玩家队伍一览 =====
 let _pbtCurrentRows = [];
 let _pbtExpandedPlayers = new Set();
+let _pbtActionModels = [];
+
+const _organizationRequestRevisions = new Map();
+
+function beginOrganizationRequest(key, panel){
+  const revision = (_organizationRequestRevisions.get(key)||0) + 1;
+  _organizationRequestRevisions.set(key, revision);
+  panel?.classList.add('hud-refresh-line');
+  panel?.setAttribute('aria-busy', 'true');
+  return {key, revision, panel};
+}
+
+function isOrganizationRequestCurrent(request){
+  return Boolean(
+    request
+    && _organizationRequestRevisions.get(request.key)===request.revision
+  );
+}
+
+function finishOrganizationRequest(request){
+  if(!isOrganizationRequestCurrent(request)) return false;
+  request.panel?.classList.remove('hud-refresh-line');
+  request.panel?.removeAttribute('aria-busy');
+  return true;
+}
+
+function bindOrganizationActions(root, actionModels=[]){
+  if(!root?.addEventListener) return;
+  root._organizationActionModels = actionModels;
+  if(root._organizationActionsBound) return;
+  root._organizationActionsBound = true;
+  root.addEventListener('error', event=>{
+    const image = event.target?.closest?.('[data-organization-image]');
+    if(image && (!root.contains || root.contains(image))){
+      image.hidden = true;
+    }
+  }, true);
+  root.addEventListener('click', event=>{
+    const trigger = event.target?.closest?.('[data-organization-action]');
+    if(!trigger || (root.contains && !root.contains(trigger))) return;
+    const action = trigger.dataset.organizationAction;
+    const index = Number(trigger.dataset.organizationIndex);
+    const model = Number.isInteger(index)
+      ? root._organizationActionModels?.[index]
+      : null;
+    if(action==='toggle-player' && model){
+      event.preventDefault?.();
+      togglePlayerBattleTeams(model.key);
+    }else if(action==='expand-player'){
+      event.preventDefault?.();
+      expandAllPlayerBattleTeams();
+    }else if(action==='collapse-player'){
+      event.preventDefault?.();
+      collapseAllPlayerBattleTeams();
+    }else if(action==='toggle-alliance' && model){
+      event.preventDefault?.();
+      toggleAlliancePlayerTeams(model.key);
+    }else if(action==='expand-alliance'){
+      event.preventDefault?.();
+      expandAllAlliancePlayerTeams();
+    }else if(action==='collapse-alliance'){
+      event.preventDefault?.();
+      collapseAllAlliancePlayerTeams();
+    }
+  });
+}
+
+function organizationIdentityMarkup(name, meta){
+  const displayName = String(name||'未知');
+  const initial = displayName.trim().slice(0,1) || '?';
+  return `<span class='organization-identity'>
+    <span class='organization-avatar'>${esc(initial)}</span>
+    <span><strong>${esc(displayName)}</strong><small>${esc(meta||'组织成员')}</small></span>
+  </span>`;
+}
+
+function organizationGroupChip(value){
+  return `<span class='organization-group-chip'>${esc(value||'未分组')}</span>`;
+}
+
+function organizationActivityPercent(value, maximum){
+  return Math.max(
+    0,
+    Math.min(
+      100,
+      Math.round(Number(value||0)/Math.max(1,Number(maximum||0))*100),
+    ),
+  );
+}
+
+function organizationActivityMarkup(value, maximum, label){
+  const percent = organizationActivityPercent(value, maximum);
+  return `<span class='organization-activity'><span>${esc(label||'活跃')} ${Number(value||0)}</span>
+    <span class='organization-activity-track' style='--organization-activity:${percent}%'><i></i></span>
+  </span>`;
+}
+
+function syncOrganizationRowState(row, selected, rowData={}){
+  if(typeof applyOrganizationRowState==='function'){
+    return applyOrganizationRowState(row, selected, rowData);
+  }
+  if(!row) return row;
+  row.dataset.selected = String(selected);
+  row.dataset.state = rowData.isStale ? "stale" : "current";
+  return row;
+}
+
+function syncOrganizationRows(container, rowStates=[]){
+  if(!container) return;
+  container.querySelectorAll('.organization-row').forEach((row,index)=>{
+    const rowState = rowStates[index] || {};
+    syncOrganizationRowState(row, Boolean(rowState.selected), rowState);
+  });
+}
+
+function organizationLineupCard(content, emptyMessage='暂无阵容'){
+  const body = content
+    ? `<div class='organization-lineup'>${content}</div>`
+    : `<div class='hud-state hud-state-empty'>${esc(emptyMessage)}</div>`;
+  return `<div class='organization-lineup-card'>${body}</div>`;
+}
+
+function renderOrganizationStateHost(stateHost, state){
+  if(!stateHost) return null;
+  stateHost.hidden = false;
+  const rendered = window.HudSystem?.renderState(stateHost, {
+    ...state,
+    replace: true,
+  });
+  if(!rendered){
+    stateHost.className = `organization-status-host hud-state hud-state-${state.kind||'empty'}`;
+    stateHost.textContent = state.message || (state.kind==='error' ? '加载失败' : '暂无数据');
+  }
+  return rendered;
+}
+
+function ensureOrganizationStatusHost(panel){
+  if(!panel) return null;
+  let stateHost = panel.querySelector?.('.organization-status-host');
+  if(stateHost) return stateHost;
+  stateHost = document.createElement('div');
+  stateHost.className = 'organization-status-host';
+  stateHost.hidden = true;
+  if(panel.insertBefore) panel.insertBefore(stateHost, panel.firstChild||null);
+  else panel.appendChild?.(stateHost);
+  return stateHost;
+}
+
+function clearOrganizationStatusHost(stateHost){
+  if(!stateHost) return;
+  stateHost.hidden = true;
+  stateHost.className = 'organization-status-host';
+  stateHost.replaceChildren?.();
+  stateHost.textContent = '';
+}
+
+function renderOrganizationTableState(tbody, state, colspan=8){
+  if(!tbody) return;
+  const row = document.createElement('tr');
+  const cell = document.createElement('td');
+  const stateHost = document.createElement('div');
+  row.className = 'organization-state-row';
+  cell.colSpan = colspan;
+  cell.appendChild(stateHost);
+  row.appendChild(cell);
+  tbody.replaceChildren(row);
+  renderOrganizationStateHost(stateHost, state);
+}
+
+function renderOrganizationLoadError(tbody, stateHost, state, colspan=8){
+  if(tbody && (tbody.childElementCount>0 || tbody.querySelector?.('.organization-row'))){
+    renderOrganizationStateHost(stateHost, state);
+    return 'nonblocking';
+  }
+  clearOrganizationStatusHost(stateHost);
+  renderOrganizationTableState(tbody, state, colspan);
+  return 'blocking';
+}
 
 function expandAllPlayerBattleTeams(){
   _pbtExpandedPlayers = new Set((_pbtCurrentRows||[]).map(r=>`${r.player_name||''}__${r.union||r.union_name||''}`).filter(Boolean));
@@ -1324,15 +1539,20 @@ function renderPlayerBattleTeams(rows){
   b.innerHTML='';
   if(!_pbtCurrentRows.length){
     countEl.textContent='0条';
-    b.innerHTML=`<tr><td colspan=8 style='color:var(--text2);text-align:center;padding:20px'>暂无数据</td></tr>`;
+    renderOrganizationTableState(b, {
+      kind:'empty',
+      message:'暂无符合条件的玩家队伍',
+      replace:true,
+    });
     return;
   }
 
   const getPlayerKey = r => `${r.player_name||''}__${r.union||r.union_name||''}`;
   const validKeys = new Set(_pbtCurrentRows.map(getPlayerKey).filter(Boolean));
   _pbtExpandedPlayers = new Set([..._pbtExpandedPlayers].filter(k=>validKeys.has(k)));
-  const actionHtml = validKeys.size ? `<span style='margin-left:10px;display:inline-flex;gap:6px'><button class='btn' style='font-size:.68rem;padding:2px 8px' onclick='event.stopPropagation();expandAllPlayerBattleTeams()'>全部展开</button><button class='btn' style='font-size:.68rem;padding:2px 8px' onclick='event.stopPropagation();collapseAllPlayerBattleTeams()'>全部收起</button></span>` : '';
+  const actionHtml = validKeys.size ? `<span style='margin-left:10px;display:inline-flex;gap:6px'><button class='btn' type='button' data-organization-action='expand-player' style='font-size:.68rem;padding:2px 8px'>全部展开</button><button class='btn' type='button' data-organization-action='collapse-player' style='font-size:.68rem;padding:2px 8px'>全部收起</button></span>` : '';
   countEl.innerHTML = `共${_pbtCurrentRows.length}条 · ${validKeys.size}名玩家${actionHtml}`;
+  bindOrganizationActions(countEl);
 
   const grouped = [];
   let currentPlayerKey = null;
@@ -1353,6 +1573,7 @@ function renderPlayerBattleTeams(rows){
         mainTeamText: r._player_main_team_text||'—',
         mainTeamCount: r._player_main_team_count||0,
         mainTeamHeroes: r._player_main_team_heroes||[],
+        isStale: Boolean(r.isStale),
       });
       currentPlayerKey = playerKey;
     }
@@ -1360,6 +1581,14 @@ function renderPlayerBattleTeams(rows){
   });
 
   let rank = 0;
+  const rowStates = [];
+  const actionModels = [];
+  const activityMaximum = Math.max(
+    1,
+    ...grouped
+      .filter(item=>item.type==='player')
+      .map(item=>Number(item.totalBattles)||0),
+  );
   const html = grouped.map(item=>{
     if(item.type==='player'){
       const expanded = _pbtExpandedPlayers.has(item.key);
@@ -1367,26 +1596,31 @@ function renderPlayerBattleTeams(rows){
       const wrColor = item.winRate>=60?'var(--green)':item.winRate>=40?'var(--gold)':'var(--red)';
       const loseCount = Math.max(0, item.totalBattles - item.totalWins - item.totalDraws);
       const mainTeamAvatarHtml = (item.mainTeamHeroes||[]).slice(0,3).map(buildAllianceHeroMiniCard).join('');
-      return `<tr onclick='togglePlayerBattleTeams(${JSON.stringify(item.key)})' style='cursor:pointer;background:${expanded ? '#101925' : '#0d1420'}'>
+      const actionIndex = actionModels.push({key:item.key}) - 1;
+      rowStates.push({
+        selected:expanded,
+        isStale:Boolean(item.isStale),
+      });
+      return `<tr class='organization-row' data-selected='${expanded?'true':'false'}' data-state='${item.isStale?'stale':'current'}' data-organization-action='toggle-player' data-organization-index='${actionIndex}' style='cursor:pointer'>
         <td style='color:var(--gold);font-family:Share Tech Mono,monospace'>${arrow}</td>
-        <td><b>${esc(item.playerName)}</b><div style='font-size:.65rem;color:var(--text2);margin-top:2px'>${expanded?'点击收起':'点击展开'} · ${item.teamCount}支队伍</div></td>
+        <td>${organizationIdentityMarkup(item.playerName, `${expanded?'点击收起':'点击展开'} · ${item.teamCount}支队伍`)}</td>
         <td>
-          <div style='display:flex;flex-wrap:wrap;gap:4px'>
-            ${item.unionName?`<span class='badge' style='background:#172232;color:var(--text)'>${esc(item.unionName)}</span>`:''}
-            ${item.clanName?`<span class='badge' style='background:#102430;color:var(--cyan)'>${esc(item.clanName)}</span>`:''}
+          <div class='organization-lineup'>
+            ${item.unionName?organizationGroupChip(item.unionName):''}
+            ${item.clanName?organizationGroupChip(item.clanName):''}
           </div>
         </td>
         <td>
           <div style='color:var(--text2);font-size:.72rem'>总队伍：${item.teamCount}</div>
           <div style='display:flex;align-items:flex-start;gap:8px;margin-top:5px'>
-            <div style='display:flex;gap:4px;min-width:88px'>${mainTeamAvatarHtml||`<span style='color:var(--text2);font-size:.68rem'>—</span>`}</div>
+            ${organizationLineupCard(mainTeamAvatarHtml)}
             <div style='min-width:0'>
               <div style='color:var(--gold);font-size:.7rem'>常用主力队</div>
               <div style='color:var(--text2);font-size:.66rem;line-height:1.35;margin-top:2px'>${esc(item.mainTeamText)}<span style='color:var(--text2)'> × ${item.mainTeamCount}</span></div>
             </div>
           </div>
         </td>
-        <td style='font-family:Share Tech Mono,monospace'>${item.totalBattles}</td>
+        <td>${organizationActivityMarkup(item.totalBattles, activityMaximum, '战数')}</td>
         <td style='color:var(--green)'>${item.totalWins}</td>
         <td style='color:var(--text2)'>${item.totalDraws}</td>
         <td style='color:${wrColor}'>${item.winRate}%<span style='color:var(--text2);font-size:.72rem'>（${item.totalWins}胜 / ${item.totalDraws}平 / ${loseCount}负）</span></td>
@@ -1417,13 +1651,17 @@ function renderPlayerBattleTeams(rows){
         if(typeof SKILL_CFG!=='undefined'&&SKILL_CFG[sid])sname=SKILL_CFG[sid].name||sid;
         return `<span style='font-size:.58rem;color:var(--cyan);background:#0d1820;border-radius:2px;padding:0 3px;margin:1px 1px 0 0;white-space:nowrap'>${esc(sname)}</span>`;
       }).join('');
-      return `<span style='display:inline-flex;flex-direction:column;align-items:flex-start;background:var(--panel2);border:1px solid ${countryColor};border-radius:4px;padding:3px 7px 4px 7px;margin-right:5px;margin-bottom:2px;min-width:64px'><span style='display:flex;align-items:center;color:${countryColor};font-size:.70rem;font-weight:bold;white-space:nowrap'>${esc(name)}${starStr}${lvStr}</span><span style='display:flex;flex-wrap:wrap;margin-top:2px'>${skillsHtml}</span></span>`;
+      return `<span class='organization-hero-mini' style='border-color:${countryColor}'><strong style='color:${countryColor}'>${esc(name)}${starStr}${lvStr}</strong><span>${skillsHtml}</span></span>`;
     }).join('');
-    return `<tr style='background:var(--panel2)'>
+    rowStates.push({
+      selected:false,
+      isStale:Boolean(item.isStale),
+    });
+    return `<tr class='organization-row' data-selected='false' data-state='${item.isStale?'stale':'current'}'>
       <td style='color:var(--text2);font-size:.72rem;padding-left:22px'>${rank}</td>
       <td style='color:var(--text2);font-size:.72rem'>└ 队伍</td>
-      <td style='font-size:.68rem;color:var(--text2)'><span class='badge' style='background:#111a28;color:var(--text2)'>明细</span></td>
-      <td style='max-width:480px'>${heroHtml}</td>
+      <td><span class='hud-status-chip'>明细</span></td>
+      <td style='max-width:480px'>${organizationLineupCard(heroHtml)}</td>
       <td style='font-family:Share Tech Mono,monospace'>${item.cnt}</td>
       <td style='color:var(--green)'>${item.wins}</td>
       <td style='color:var(--text2)'>${item.draws||0}</td>
@@ -1431,6 +1669,9 @@ function renderPlayerBattleTeams(rows){
     </tr>`;
   }).join('');
   b.innerHTML = html;
+  _pbtActionModels = actionModels;
+  bindOrganizationActions(b, _pbtActionModels);
+  syncOrganizationRows(b, rowStates);
 }
 
 async function loadPlayerBattleTeams(){
@@ -1440,12 +1681,21 @@ async function loadPlayerBattleTeams(){
   const url=`/api/player_battle_teams?player=${encodeURIComponent(player)}&union=${encodeURIComponent(union)}&side=${encodeURIComponent(side)}&_t=${Date.now()}`;
   const b=document.getElementById('pbt-body');
   const countEl=document.getElementById('pbt-count');
-  b.innerHTML=`<tr><td colspan=8 style='color:var(--cyan);text-align:center;padding:20px'>⏳ 加载中...</td></tr>`;
-  countEl.textContent='';
+  const panel=b?.closest('.organization-table-panel');
+  const request=beginOrganizationRequest('player-teams',panel);
+  let statusHost=null;
+  try{
+  statusHost=ensureOrganizationStatusHost(panel);
   const hint=document.getElementById('pbt-hint');
   if(hint) hint.textContent='';
   const data=await apiFetch(url);
-  if(!data){b.innerHTML=`<tr><td colspan=8 style='color:var(--red);text-align:center;padding:20px'>请求失败</td></tr>`;return;}
+  if(!isOrganizationRequestCurrent(request)) return;
+  if(!data){
+    throw new Error('玩家队伍请求失败');
+  }
+  if(data.error) throw new Error(String(data.error));
+  if(!Array.isArray(data)) throw new Error('玩家队伍数据格式异常');
+  clearOrganizationStatusHost(statusHost);
 
   const filtered = dedupeBattleTeamsByHeroNames((data||[]).filter(r=>{
     const rowUnion = String(r.union||r.union_name||'').trim();
@@ -1465,7 +1715,11 @@ async function loadPlayerBattleTeams(){
     _pbtCurrentRows = [];
     _pbtExpandedPlayers = new Set();
     countEl.textContent='0条';
-    b.innerHTML=`<tr><td colspan=8 style='color:var(--text2);text-align:center;padding:20px'>暂无符合条件的数据</td></tr>`;
+    renderOrganizationTableState(b, {
+      kind:'empty',
+      message:'暂无符合条件的玩家队伍',
+      replace:true,
+    });
     return;
   }
 
@@ -1526,6 +1780,17 @@ async function loadPlayerBattleTeams(){
   });
 
   renderPlayerBattleTeams(filtered);
+  }catch(error){
+    if(isOrganizationRequestCurrent(request)){
+      renderOrganizationLoadError(b, statusHost, {
+        kind:'error',
+        message:error?.message || '玩家队伍加载失败',
+        replace:true,
+      });
+    }
+  }finally{
+    finishOrganizationRequest(request);
+  }
 }
 
 // ===== 分组武勋 (Tab 15) =====
@@ -1564,42 +1829,303 @@ async function loadGroupWu(){
 }
 
 // ===== 攻城考勤 (Tab 16) =====
+const _legacyLoaderRequestOwners = new Map();
+
+function beginLegacyLoaderRequest(key, panel, hasSnapshot=false){
+  const revision = (_legacyLoaderRequestOwners.get(key)?.revision||0) + 1;
+  const request = {
+    key,
+    revision,
+    panel,
+    hasSnapshot:Boolean(hasSnapshot),
+    controller:null,
+  };
+  _legacyLoaderRequestOwners.set(key, request);
+  panel?.classList.add('hud-refresh-line');
+  panel?.setAttribute('aria-busy','true');
+  return request;
+}
+
+function isLegacyLoaderRequestCurrent(request){
+  return Boolean(
+    request
+    && _legacyLoaderRequestOwners.get(request.key)===request
+  );
+}
+
+function finishLegacyLoaderRequest(request){
+  if(!isLegacyLoaderRequestCurrent(request)) return false;
+  request.panel?.classList.remove('hud-refresh-line');
+  request.panel?.removeAttribute('aria-busy');
+  return true;
+}
+
+function ensureLegacyLoaderStatusHost(panel, className='legacy-loader-status'){
+  if(!panel) return null;
+  let host = panel._legacyLoaderStatusHost
+    || panel.querySelector?.(`.${className}`);
+  if(host) return host;
+  host = document.createElement('div');
+  host.className = className;
+  host.hidden = true;
+  panel._legacyLoaderStatusHost = host;
+  if(panel.insertBefore) panel.insertBefore(host,panel.firstChild||null);
+  else panel.appendChild?.(host);
+  return host;
+}
+
+function clearLegacyLoaderStatus(host){
+  if(!host) return;
+  host.hidden = true;
+  host.removeAttribute?.('aria-busy');
+  host.className = host.dataset.baseClass || 'legacy-loader-status';
+  host.replaceChildren?.();
+  host.textContent = '';
+}
+
+function renderLegacyLoaderStatus(host, kind, message){
+  if(!host) return;
+  host.hidden = false;
+  host.dataset.baseClass ||= host.className || 'legacy-loader-status';
+  const rendered = window.HudSystem?.renderState(host,{
+    kind,
+    message,
+    replace:true,
+  });
+  if(!rendered){
+    host.className = `${host.dataset.baseClass} hud-state hud-state-${kind}`;
+    host.textContent = message;
+  }
+}
+
+function legacyLoaderSurface(body, fallbackPanelId){
+  return body?.closest?.('.hud-panel,.hud-page')
+    || document.getElementById(fallbackPanelId);
+}
+
 let _currentTaskDetail = null;
+let _taskModels = [];
+let previousTaskStages = new Map();
+let hasRenderedTaskStages = false;
+let hasTaskSnapshot = false;
+const OPERATION_STAGES = [
+  {key:'preparing', label:'任务准备'},
+  {key:'assembling', label:'成员集结'},
+  {key:'executing', label:'攻城执行'},
+  {key:'complete', label:'统计完成'},
+];
+
+function attendanceStage(task){
+  const now = Date.now() / 1000;
+  const taskTime = Number(task.task_time || task.time || 0);
+  if(task.statistics_done || Number(task.status) === 1) return 'complete';
+  if(taskTime && taskTime <= now) return 'executing';
+  if(Number(task.actual_count || task.complete_user_num || 0) > 0) return 'assembling';
+  return 'preparing';
+}
+
+function operationStageStrip(activeStage){
+  return `<div class='operation-stage-strip'>${OPERATION_STAGES.map(stage =>
+    `<span class='operation-stage ${stage.key===activeStage?'is-active':''}' data-stage='${stage.key}' data-state='${stage.key===activeStage?'active':'pending'}'>${stage.label}</span>`
+  ).join('')}</div>`;
+}
+
+function taskStageKey(task, index){
+  const taskId = task?.id;
+  if(
+    typeof taskId === 'number'
+    && Number.isSafeInteger(taskId)
+    && taskId > 0
+  ){
+    return `id-${taskId}`;
+  }
+  const safeIndex = Number.isSafeInteger(index) && index >= 0
+    ? index
+    : 0;
+  return `index-${safeIndex}`;
+}
+
+function operationStageEvents(previousStages, tasks, initialized){
+  if(!initialized) return [];
+  const stageLabels = {
+    preparing:'任务准备',
+    assembling:'成员集结',
+    executing:'攻城执行',
+    complete:'统计完成',
+  };
+  return tasks.flatMap(task=>{
+    const safeIndex = Number.isSafeInteger(task.index) && task.index >= 0
+      ? task.index
+      : 0;
+    const taskKey = /^(?:id|index)-\d+$/.test(String(task.key||''))
+      ? String(task.key)
+      : `index-${safeIndex}`;
+    const previousStage = previousStages.get(taskKey);
+    if(!previousStages.has(taskKey) || previousStage === task.stage) return [];
+    const stageLabel = stageLabels[task.stage];
+    if(!stageLabel) return [];
+    return [{
+      type:'operation:stage-changed',
+      target:task.target || (
+        `[data-task-index="${safeIndex}"]`
+      ),
+      domain:'operations',
+      severity:'info',
+      message:`${task.name} 进入 ${stageLabel}`,
+      dedupeKey:`operation-task:${taskKey}:${task.stage}`,
+    }];
+  });
+}
+
+function taskApiId(rawTaskId){
+  if(
+    typeof rawTaskId !== 'number'
+    || !Number.isSafeInteger(rawTaskId)
+    || rawTaskId < 1
+  ){
+    showToast('任务 ID 无效，操作已拒绝','var(--red)');
+    return null;
+  }
+  return rawTaskId;
+}
+
+function bindTaskActions(root){
+  if(!root?.addEventListener || root._taskActionsBound) return;
+  root._taskActionsBound = true;
+  root.addEventListener('click', event=>{
+    const trigger = event.target?.closest?.('[data-task-action]');
+    if(!trigger || (root.contains && !root.contains(trigger))) return;
+    event.preventDefault?.();
+    const index = Number(trigger.dataset.taskIndex);
+    const task = Number.isSafeInteger(index) && index >= 0
+      ? _taskModels[index]
+      : null;
+    if(!task){
+      showToast('任务 ID 无效，操作已拒绝','var(--red)');
+      return;
+    }
+    const action = trigger.dataset.taskAction;
+    if(action === 'detail') viewTaskDetail(task.id);
+    else if(action === 'statistics') doStatistics(task.id,trigger);
+    else if(action === 'delete') deleteTask(task.id);
+  });
+}
 
 async function loadTasks(){
-  const data = await apiFetch('/api/tasks');
-  const b = document.getElementById('task-body'); b.innerHTML='';
-  const cards = document.getElementById('task-cards'); cards.innerHTML='';
+  const b = document.getElementById('task-body');
+  const cards = document.getElementById('task-cards');
+  if(!b || !cards) return;
+  bindTaskActions(b);
+  const panel = legacyLoaderSurface(b,'tab16');
+  const request = beginLegacyLoaderRequest('tasks',panel,hasTaskSnapshot);
+  const statusHost = ensureLegacyLoaderStatusHost(panel);
   const cnt = document.getElementById('task-count');
-  if(cnt) cnt.textContent=`共${(data||[]).length}个任务`;
-  if(!data||!data.length){
+  if(!request.hasSnapshot){
+    renderLegacyLoaderStatus(statusHost,'loading','正在加载攻城任务…');
+  }else{
+    clearLegacyLoaderStatus(statusHost);
+  }
+  try{
+  const data = await apiFetch('/api/tasks');
+  if(!isLegacyLoaderRequestCurrent(request)) return;
+  if(!Array.isArray(data)){
+    throw new Error(data?.error || '攻城任务暂时不可用');
+  }
+  const tasks = data;
+  _taskModels = tasks.slice();
+  if(cnt) cnt.textContent=`共${tasks.length}个任务`;
+  const taskStageModels = tasks.map((task,index)=>({
+    key:taskStageKey(task,index),
+    stage:attendanceStage(task),
+  }));
+  const currentTaskStages = new Map(taskStageModels.map(task=>[
+    task.key,
+    task.stage,
+  ]));
+  const stageCounts = taskStageModels.reduce((counts, task)=>{
+    const stage = task.stage;
+    counts[stage] = (counts[stage]||0) + 1;
+    return counts;
+  }, {});
+  b.innerHTML='';
+  cards.innerHTML = [
+    ['待准备', stageCounts.preparing||0, 'var(--text-tertiary)'],
+    ['集结中', stageCounts.assembling||0, 'var(--warning)'],
+    ['执行中', stageCounts.executing||0, 'var(--domain-operations)'],
+    ['已完成', stageCounts.complete||0, 'var(--success)'],
+  ].map(([label,value,color]) =>
+    `<div class='hud-kpi' style='--hud-kpi-accent:${color}'><div class='hud-kpi-label'>${label}</div><div class='hud-kpi-value'>${value}</div></div>`
+  ).join('');
+  if(!tasks.length){
     b.innerHTML=`<tr><td colspan=7 style='color:var(--text2);text-align:center;padding:20px'>暂无任务，点击「新建任务」创建</td></tr>`;
+    previousTaskStages = currentTaskStages;
+    hasRenderedTaskStages = true;
+    hasTaskSnapshot = true;
+    clearLegacyLoaderStatus(statusHost);
     return;
   }
-  data.forEach(t=>{
+  b.innerHTML=tasks.map((t,index)=>{
+    const stage = taskStageModels[index].stage;
     const timeStr = t.time ? new Date(t.time*1000).toLocaleString('zh-CN') : '-';
     const groups = (t.target_groups||[]).join('、') || '全员';
     const statusBadge = t.status===1
       ? `<span class='badge badge-win'>已统计</span>`
       : `<span class='badge badge-draw'>待考勤</span>`;
-    const posLabel = (t.wid_name ? `${esc(t.wid_name)} ` : '') + `<span style='font-size:.65rem;color:var(--text2)'>(${esc(t.pos_xy||t.pos)})</span>`;
-    b.innerHTML+=`<tr>
-      <td><b>${esc(t.name)}</b> ${statusBadge}</td>
-      <td style='font-family:Share Tech Mono,monospace;font-size:.72rem'>${posLabel}</td>
+    const posLabel = `<span class='operation-target'><strong>${esc(t.wid_name||'目标地块')}</strong>${esc(t.pos_xy||t.pos)}</span>`;
+    const targetCount = Number(t.target_user_num||0);
+    const completeCount = Number(t.complete_user_num||0);
+    const progress = targetCount ? Math.min(100, Math.round(completeCount/targetCount*100)) : 0;
+    return `<tr data-task-index='${index}'>
+      <td><b>${esc(t.name)}</b> ${statusBadge}${operationStageStrip(stage)}</td>
+      <td>${posLabel}</td>
       <td style='font-size:.72rem'>${timeStr}</td>
-      <td style='font-size:.72rem;color:var(--cyan)'>${esc(groups)}</td>
-      <td>${t.target_user_num}</td>
-      <td style='color:var(--${t.complete_user_num>0?"green":"text2"})'>${t.complete_user_num}</td>
+      <td><span class='operation-member-chip'>${esc(groups)}</span></td>
+      <td>${targetCount}</td>
+      <td><div class='operation-progress'><strong>${completeCount}</strong><div class='operation-progress-track' style='--operation-progress:${progress}%'><i></i></div></div></td>
       <td>
-        <button class='btn' style='font-size:.68rem;padding:2px 6px;border-color:var(--blue);color:var(--blue)' onclick='viewTaskDetail(${t.id})'>考勤详情</button>
-        <button class='btn' style='font-size:.68rem;padding:2px 6px;border-color:var(--gold);color:var(--gold)' onclick='doStatistics(${t.id},this)'>开始统计</button>
-        <button class='btn' style='font-size:.68rem;padding:2px 6px;border-color:var(--red);color:var(--red)' onclick='deleteTask(${t.id})'>删除</button>
+        <button class='btn' type='button' data-task-action='detail' data-task-index='${index}'>考勤详情</button>
+        <button class='btn' type='button' data-task-action='statistics' data-task-index='${index}'>开始统计</button>
+        <button class='btn' type='button' data-task-action='delete' data-task-index='${index}'>删除</button>
       </td>
     </tr>`;
-  });
+  }).join('');
+  const taskRows = [...(b.querySelectorAll?.('tr[data-task-index]') || [])];
+  operationStageEvents(
+    previousTaskStages,
+    tasks.map((task,index)=>({
+      key:taskStageModels[index].key,
+      index,
+      name:task.name,
+      stage:taskStageModels[index].stage,
+      target:taskRows[index] || null,
+    })),
+    hasRenderedTaskStages,
+  ).forEach(event=>window.HudSystem?.emit({
+    ...event,
+    timestamp:Date.now(),
+  }));
+  previousTaskStages = currentTaskStages;
+  hasRenderedTaskStages = true;
+  hasTaskSnapshot = true;
+  clearLegacyLoaderStatus(statusHost);
+  }catch(error){
+    if(!isLegacyLoaderRequestCurrent(request)) return;
+    const message=error?.message || '攻城任务加载失败';
+    if(request.hasSnapshot){
+      renderLegacyLoaderStatus(statusHost,'error',message);
+    }else{
+      cards.innerHTML='';
+      b.innerHTML=`<tr><td colspan=7 style='color:var(--red);text-align:center;padding:20px'>${esc(message)}</td></tr>`;
+      renderLegacyLoaderStatus(statusHost,'error',message);
+    }
+  }finally{
+    finishLegacyLoaderRequest(request);
+  }
 }
 
-async function viewTaskDetail(tid){
+async function viewTaskDetail(rawTaskId){
+  const tid = taskApiId(rawTaskId);
+  if(tid === null) return;
   const data = await apiFetch(`/api/tasks/${tid}`);
   if(!data||data.error)return;
   _currentTaskDetail = data;
@@ -1624,12 +2150,12 @@ async function viewTaskDetail(tid){
       <td>${attended?`<span class='badge badge-win'>出战</span>`:`<span class='badge badge-lose'>缺勤</span>`}</td>
     </tr>`;
   });
-  panel.style.display='block';
+  panel.classList.remove('is-hidden');
 }
 
 function closeTaskDetail(){
-  document.getElementById('task-detail-panel').style.display='none';
-  document.getElementById('task-battles-wrap').style.display='none';
+  document.getElementById('task-detail-panel').classList.add('is-hidden');
+  document.getElementById('task-battles-wrap').classList.add('is-hidden');
   _currentTaskDetail=null;
 }
 
@@ -1642,7 +2168,7 @@ async function loadTaskBattles(){
   const wrap = document.getElementById('task-battles-wrap');
   const b = document.getElementById('task-battles-body');
   const cnt = document.getElementById('task-battles-count');
-  wrap.style.display='block';
+  wrap.classList.remove('is-hidden');
   b.innerHTML=`<tr><td colspan=5 style='color:var(--cyan);text-align:center;padding:12px'>⏳ 加载中...</td></tr>`;
   const membersParam = names.join(',');
   const data = await apiFetch(`/api/battles_all?wid=${pos}&size=200&page=1`, {
@@ -1682,7 +2208,9 @@ async function loadTaskBattles(){
 let _statsConfirmTid = null;
 let _statsConfirmBtn = null;
 
-async function doStatistics(tid, btn){
+async function doStatistics(rawTaskId, btn){
+  const tid = taskApiId(rawTaskId);
+  if(tid === null) return;
   // 获取任务信息展示在确认弹窗里
   const task = await apiFetch(`/api/tasks/${tid}`);
   if(!task) return;
@@ -1708,11 +2236,15 @@ function closeStatsConfirm(){
 }
 
 async function confirmDoStatistics(){
-  if(!_statsConfirmTid) return;
+  const tid = taskApiId(_statsConfirmTid);
+  if(tid === null){
+    closeStatsConfirm();
+    return;
+  }
   const btn = document.getElementById('stats-confirm-btn');
   btn.disabled=true; btn.textContent='统计中...';
   if(_statsConfirmBtn){ _statsConfirmBtn.disabled=true; _statsConfirmBtn.textContent='统计中...'; }
-  const r = await apiFetch(`/api/tasks/${_statsConfirmTid}/statistics`,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+  const r = await apiFetch(`/api/tasks/${tid}/statistics`,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
   btn.disabled=false; btn.textContent='✅ 确认统计';
   if(_statsConfirmBtn){ _statsConfirmBtn.disabled=false; _statsConfirmBtn.textContent='开始统计'; }
   closeStatsConfirm();
@@ -1720,7 +2252,9 @@ async function confirmDoStatistics(){
   else showToast((r&&r.error)||'统计失败','var(--red)');
 }
 
-async function deleteTask(tid){
+async function deleteTask(rawTaskId){
+  const tid = taskApiId(rawTaskId);
+  if(tid === null) return;
   if(!confirm('确认删除该任务？')) return;
   const r = await apiFetch(`/api/tasks/${tid}`,{method:'DELETE'});
   if(r&&r.ok){showToast('删除成功'); loadTasks(); closeTaskDetail();}
@@ -1753,17 +2287,55 @@ function switchCreateMode(mode){
   document.getElementById('ct-mode-nearby').style.color = isGroup?'var(--text2)':'#0a1420';
 }
 
+let _groupTagModels = [];
+
+function bindGroupTagActions(root){
+  if(!root?.addEventListener || root._groupTagActionsBound) return;
+  root._groupTagActionsBound = true;
+  root.addEventListener('click', event=>{
+    const button = event.target?.closest?.('[data-group-tag-index]');
+    if(!button || (root.contains && !root.contains(button))) return;
+    const index = Number(button.dataset.groupTagIndex);
+    const model = Number.isSafeInteger(index) ? _groupTagModels[index] : null;
+    if(!model) return;
+    if(model.selectAll) setGroupTag('');
+    else toggleGroupTag(model.value);
+  });
+}
+
 async function loadGroupTags(){
   const data = await apiFetch('/api/team_groups');
   const el = document.getElementById('ct-group-tags');
   if(!el) return;
-  el.innerHTML='';
-  if(!data||!data.length){ el.innerHTML=`<span style='font-size:.72rem;color:var(--text2)'>暂无分组数据</span>`; return; }
-  // 全员按钮
-  el.innerHTML+=`<button class='btn' style='font-size:.72rem;padding:2px 8px;border-color:var(--green);color:var(--green)' onclick='setGroupTag("")'>全员</button>`;
-  data.forEach(g=>{
-    el.innerHTML+=`<button class='btn' style='font-size:.72rem;padding:2px 8px' onclick='toggleGroupTag("${esc(g)}")' data-group='${esc(g)}'>${esc(g)}</button>`;
+  bindGroupTagActions(el);
+  _groupTagModels = [];
+  if(!Array.isArray(data) || !data.length){
+    const empty = document.createElement('span');
+    empty.style.fontSize = '.72rem';
+    empty.style.color = 'var(--text2)';
+    empty.textContent = '暂无分组数据';
+    el.replaceChildren(empty);
+    return;
+  }
+  _groupTagModels = [
+    {value:'', selectAll:true},
+    ...data.map(group=>({value:String(group??''), selectAll:false})),
+  ];
+  const buttons = _groupTagModels.map((model,index)=>{
+    const button = document.createElement('button');
+    button.className = 'btn';
+    button.type = 'button';
+    button.style.fontSize = '.72rem';
+    button.style.padding = '2px 8px';
+    button.dataset.groupTagIndex = String(index);
+    button.textContent = model.selectAll ? '全员' : model.value;
+    if(model.selectAll){
+      button.style.borderColor = 'var(--green)';
+      button.style.color = 'var(--green)';
+    }
+    return button;
   });
+  el.replaceChildren(...buttons);
 }
 
 function toggleGroupTag(g){
@@ -1774,8 +2346,11 @@ function toggleGroupTag(g){
   else cur.push(g);
   input.value = cur.join(',');
   // 更新按钮高亮
-  document.querySelectorAll('#ct-group-tags button[data-group]').forEach(btn=>{
-    const sel = cur.includes(btn.dataset.group);
+  document.querySelectorAll('#ct-group-tags button[data-group-tag-index]').forEach(btn=>{
+    const index = Number(btn.dataset.groupTagIndex);
+    const model = Number.isSafeInteger(index) ? _groupTagModels[index] : null;
+    if(!model || model.selectAll) return;
+    const sel = cur.includes(model.value);
     btn.style.background = sel?'var(--cyan)':'transparent';
     btn.style.color = sel?'#0a1420':'var(--text)';
   });
@@ -1783,7 +2358,10 @@ function toggleGroupTag(g){
 
 function setGroupTag(g){
   document.getElementById('ct-groups').value=g;
-  document.querySelectorAll('#ct-group-tags button[data-group]').forEach(btn=>{
+  document.querySelectorAll('#ct-group-tags button[data-group-tag-index]').forEach(btn=>{
+    const index = Number(btn.dataset.groupTagIndex);
+    const model = Number.isSafeInteger(index) ? _groupTagModels[index] : null;
+    if(!model || model.selectAll) return;
     btn.style.background='transparent'; btn.style.color='var(--text)';
   });
 }
@@ -1879,6 +2457,7 @@ function exportTaskExcel(){
 let _agtGroupsLoaded = false;
 let _agtCurrentRows = [];
 let _agtExpandedPlayers = new Set();
+let _agtActionModels = [];
 
 function expandAllAlliancePlayerTeams(){
   _agtExpandedPlayers = new Set((_agtCurrentRows||[]).map(r=>`${r._group_name||'未分组'}__${r.player_name||''}`).filter(Boolean));
@@ -1890,15 +2469,36 @@ function collapseAllAlliancePlayerTeams(){
   renderAllianceGroupTeams(_agtCurrentRows);
 }
 
-async function ensureAllianceGroupOptions(){
+function escapeOrganizationAttribute(value){
+  return String(value??'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+function replaceOrganizationOptions(select, values, allLabel='全部'){
+  if(!select) return;
+  const allOption = document.createElement('option');
+  allOption.value = '';
+  allOption.textContent = allLabel;
+  const options = (values||[]).map(value=>{
+    const option = document.createElement('option');
+    option.value = String(value??'');
+    option.textContent = String(value??'');
+    return option;
+  });
+  select.replaceChildren(allOption, ...options);
+}
+
+async function ensureAllianceGroupOptions(request=null){
   const sel = document.getElementById('agt-group');
   if(!sel) return;
   if(_agtGroupsLoaded) return;
   const groups = await apiFetch('/api/team_groups');
-  sel.innerHTML = `<option value=''>全部分组</option>`;
-  (groups||[]).forEach(g=>{
-    sel.innerHTML += `<option value='${esc(g)}'>${esc(g)}</option>`;
-  });
+  if(request && !isOrganizationRequestCurrent(request)) return;
+  replaceOrganizationOptions(sel, groups, '全部分组');
   _agtGroupsLoaded = true;
 }
 
@@ -1915,15 +2515,15 @@ function buildAllianceHeroMiniCard(hid){
     hcfg=HERO_CFG[hid]||{};
     name=hcfg.name||hid;
   }
-  const iconId=hcfg.iconId||0;
+  const iconId=Number(hcfg.iconId)||0;
   const country=hcfg.country||'';
   const countryColor={'魏':'var(--blue)','蜀':'var(--green)','吴':'var(--red)','汉':'var(--gold)','晋':'var(--purple)','群':'var(--text2)'}[country]||'var(--text2)';
-  const imgUrl=iconId?`https://g0.gph.netease.com/ngsocial/community/stzb/cn/cards/cut/card_medium_${iconId}.jpg?gameid=g10`:'';
-  return `<span title='${esc(name)}' style='display:inline-flex;flex-direction:column;align-items:center;gap:2px'>
+  const imgUrl=iconId>0?`https://g0.gph.netease.com/ngsocial/community/stzb/cn/cards/cut/card_medium_${encodeURIComponent(String(Math.trunc(iconId)))}.jpg?gameid=g10`:'';
+  return `<span class='organization-hero-mini' title='${escapeOrganizationAttribute(name)}' style='border-color:${countryColor}'>
     <span style='position:relative;width:26px;height:26px;border-radius:4px;overflow:hidden;border:1px solid ${countryColor};background:#0d1520'>
-      ${imgUrl?`<img src='${imgUrl}' style='width:26px;height:26px;object-fit:cover;object-position:left top' onerror='this.style.display="none"'>`:''}
+      ${imgUrl?`<img data-organization-image src='${escapeOrganizationAttribute(imgUrl)}' style='width:26px;height:26px;object-fit:cover;object-position:left top'>`:''}
     </span>
-    <span style='max-width:34px;font-size:.52rem;color:var(--text2);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>${esc(name)}</span>
+    <strong>${esc(name)}</strong>
   </span>`;
 }
 
@@ -2009,14 +2609,19 @@ function renderAllianceGroupTeams(rows){
   b.innerHTML='';
   if(!_agtCurrentRows.length){
     countEl.textContent='0条';
-    b.innerHTML=`<tr><td colspan=8 style='color:var(--text2);text-align:center;padding:20px'>暂无符合条件的同盟成员队伍</td></tr>`;
+    renderOrganizationTableState(b, {
+      kind:'empty',
+      message:'暂无符合条件的同盟成员队伍',
+      replace:true,
+    });
     return;
   }
 
   const validKeys = new Set(_agtCurrentRows.map(r=>`${r._group_name||'未分组'}__${r.player_name||''}`));
   _agtExpandedPlayers = new Set([..._agtExpandedPlayers].filter(k=>validKeys.has(k)));
-  const actionHtml = validKeys.size ? `<span style='margin-left:10px;display:inline-flex;gap:6px'><button class='btn' style='font-size:.68rem;padding:2px 8px' onclick='event.stopPropagation();expandAllAlliancePlayerTeams()'>全部展开</button><button class='btn' style='font-size:.68rem;padding:2px 8px' onclick='event.stopPropagation();collapseAllAlliancePlayerTeams()'>全部收起</button></span>` : '';
+  const actionHtml = validKeys.size ? `<span style='margin-left:10px;display:inline-flex;gap:6px'><button class='btn' type='button' data-organization-action='expand-alliance' style='font-size:.68rem;padding:2px 8px'>全部展开</button><button class='btn' type='button' data-organization-action='collapse-alliance' style='font-size:.68rem;padding:2px 8px'>全部收起</button></span>` : '';
   countEl.innerHTML = `共${_agtCurrentRows.length}条 · ${validKeys.size}名成员${actionHtml}`;
+  bindOrganizationActions(countEl);
 
   const grouped = [];
   let currentGroup = null;
@@ -2031,6 +2636,7 @@ function renderAllianceGroupTeams(rows){
         memberCount: r._group_member_count||0,
         teamCount: r._group_team_count||0,
         totalBattles: r._group_total_battles||0,
+        isStale: Boolean(r.isStale),
       });
       currentGroup = groupName;
       currentPlayerKey = null;
@@ -2050,6 +2656,7 @@ function renderAllianceGroupTeams(rows){
         mainTeamText: r._player_main_team_text||'—',
         mainTeamCount: r._player_main_team_count||0,
         mainTeamHeroes: r._player_main_team_heroes||[],
+        isStale: Boolean(r.isStale),
       });
       currentPlayerKey = playerKey;
     }
@@ -2057,15 +2664,25 @@ function renderAllianceGroupTeams(rows){
   });
 
   let rank = 0;
+  const rowStates = [];
+  const actionModels = [];
+  const activityMaximum = Math.max(
+    1,
+    ...grouped.map(item=>Number(item.totalBattles)||0),
+  );
   const html = grouped.map(item=>{
     if(item.type==='group'){
-      return `<tr><td colspan='8' style='padding:10px 12px;background:#121c2a;color:var(--gold);font-weight:700;letter-spacing:.08em;border-top:1px solid var(--border)'>
+      rowStates.push({
+        selected:false,
+        isStale:Boolean(item.isStale),
+      });
+      return `<tr class='organization-row' data-selected='false' data-state='${item.isStale?'stale':'current'}'><td colspan='8' style='padding:10px 12px;color:var(--gold);font-weight:700;letter-spacing:.08em;border-top:1px solid var(--border)'>
         <div style='display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap'>
-          <span>分组：${esc(item.groupName)}</span>
+          ${organizationGroupChip(item.groupName)}
           <span style='display:flex;gap:6px;flex-wrap:wrap'>
-            <span class='badge' style='background:#172232;color:var(--text)'>人数 ${item.memberCount}</span>
-            <span class='badge' style='background:#102430;color:var(--cyan)'>队伍 ${item.teamCount}</span>
-            <span class='badge' style='background:#2a2410;color:var(--gold)'>总战数 ${item.totalBattles}</span>
+            <span class='hud-status-chip'>人数 ${item.memberCount}</span>
+            <span class='hud-status-chip'>队伍 ${item.teamCount}</span>
+            ${organizationActivityMarkup(item.totalBattles,activityMaximum,'总战数')}
           </span>
         </div>
       </td></tr>`;
@@ -2076,26 +2693,31 @@ function renderAllianceGroupTeams(rows){
       const wrColor = item.winRate>=60?'var(--green)':item.winRate>=40?'var(--gold)':'var(--red)';
       const loseCount = Math.max(0, item.totalBattles - item.totalWins - item.totalDraws);
       const mainTeamAvatarHtml = (item.mainTeamHeroes||[]).slice(0,3).map(buildAllianceHeroMiniCard).join('');
-      return `<tr onclick='toggleAlliancePlayerTeams(${JSON.stringify(item.key)})' style='cursor:pointer;background:${expanded ? '#101925' : '#0d1420'}'>
+      const actionIndex = actionModels.push({key:item.key}) - 1;
+      rowStates.push({
+        selected:expanded,
+        isStale:Boolean(item.isStale),
+      });
+      return `<tr class='organization-row' data-selected='${expanded?'true':'false'}' data-state='${item.isStale?'stale':'current'}' data-organization-action='toggle-alliance' data-organization-index='${actionIndex}' style='cursor:pointer'>
         <td style='color:var(--gold);font-family:Share Tech Mono,monospace'>${arrow}</td>
-        <td><b>${esc(item.playerName)}</b><div style='font-size:.65rem;color:var(--text2);margin-top:2px'>${expanded?'点击收起':'点击展开'} · ${item.teamCount}支队伍</div></td>
+        <td>${organizationIdentityMarkup(item.playerName, `${expanded?'点击收起':'点击展开'} · ${item.teamCount}支队伍`)}</td>
         <td>
-          <div style='display:flex;flex-wrap:wrap;gap:4px'>
-            ${item.unionName?`<span class='badge' style='background:#172232;color:var(--text)'>${esc(item.unionName)}</span>`:''}
-            <span class='badge' style='background:#102430;color:var(--cyan)'>${esc(item.groupName)}</span>
+          <div class='organization-lineup'>
+            ${item.unionName?organizationGroupChip(item.unionName):''}
+            ${organizationGroupChip(item.groupName)}
           </div>
         </td>
         <td>
           <div style='color:var(--text2);font-size:.72rem'>总队伍：${item.teamCount}</div>
           <div style='display:flex;align-items:flex-start;gap:8px;margin-top:5px'>
-            <div style='display:flex;gap:4px;min-width:88px'>${mainTeamAvatarHtml||`<span style='color:var(--text2);font-size:.68rem'>—</span>`}</div>
+            ${organizationLineupCard(mainTeamAvatarHtml)}
             <div style='min-width:0'>
               <div style='color:var(--gold);font-size:.7rem'>常用主力队</div>
               <div style='color:var(--text2);font-size:.66rem;line-height:1.35;margin-top:2px'>${esc(item.mainTeamText)}<span style='color:var(--text2)'> × ${item.mainTeamCount}</span></div>
             </div>
           </div>
         </td>
-        <td style='font-family:Share Tech Mono,monospace'>${item.totalBattles}</td>
+        <td>${organizationActivityMarkup(item.totalBattles,activityMaximum,'战数')}</td>
         <td style='color:var(--green)'>${item.totalWins}</td>
         <td style='color:var(--text2)'>${item.totalDraws}</td>
         <td style='color:${wrColor}'>${item.winRate}%<span style='color:var(--text2);font-size:.72rem'>（${item.totalWins}胜 / ${item.totalDraws}平 / ${loseCount}负）</span></td>
@@ -2126,13 +2748,17 @@ function renderAllianceGroupTeams(rows){
         if(typeof SKILL_CFG!=='undefined'&&SKILL_CFG[sid])sname=SKILL_CFG[sid].name||sid;
         return `<span style='font-size:.58rem;color:var(--cyan);background:#0d1820;border-radius:2px;padding:0 3px;margin:1px 1px 0 0;white-space:nowrap'>${esc(sname)}</span>`;
       }).join('');
-      return `<span style='display:inline-flex;flex-direction:column;align-items:flex-start;background:var(--panel2);border:1px solid ${countryColor};border-radius:4px;padding:3px 7px 4px 7px;margin-right:5px;margin-bottom:2px;min-width:64px'><span style='display:flex;align-items:center;color:${countryColor};font-size:.70rem;font-weight:bold;white-space:nowrap'>${esc(name)}${starStr}${lvStr}</span><span style='display:flex;flex-wrap:wrap;margin-top:2px'>${skillsHtml}</span></span>`;
+      return `<span class='organization-hero-mini' style='border-color:${countryColor}'><strong style='color:${countryColor}'>${esc(name)}${starStr}${lvStr}</strong><span>${skillsHtml}</span></span>`;
     }).join('');
-    return `<tr style='background:var(--panel2)'>
+    rowStates.push({
+      selected:false,
+      isStale:Boolean(item.isStale),
+    });
+    return `<tr class='organization-row' data-selected='false' data-state='${item.isStale?'stale':'current'}'>
       <td style='color:var(--text2);font-size:.72rem;padding-left:22px'>${rank}</td>
       <td style='color:var(--text2);font-size:.72rem'>└ 队伍</td>
-      <td style='font-size:.68rem;color:var(--text2)'><span class='badge' style='background:#111a28;color:var(--text2)'>明细</span></td>
-      <td style='max-width:480px'>${heroHtml}</td>
+      <td><span class='hud-status-chip'>明细</span></td>
+      <td style='max-width:480px'>${organizationLineupCard(heroHtml)}</td>
       <td style='font-family:Share Tech Mono,monospace'>${item.cnt}</td>
       <td style='color:var(--green)'>${item.wins}</td>
       <td style='color:var(--text2)'>${item.draws||0}</td>
@@ -2140,24 +2766,33 @@ function renderAllianceGroupTeams(rows){
     </tr>`;
   }).join('');
   b.innerHTML = html;
+  _agtActionModels = actionModels;
+  bindOrganizationActions(b, _agtActionModels);
+  syncOrganizationRows(b, rowStates);
 }
 
 async function loadAllianceGroupTeams(){
-  await ensureAllianceGroupOptions();
   const player=document.getElementById('agt-player').value;
   const side=document.getElementById('agt-side').value;
   const group=document.getElementById('agt-group').value;
   const b=document.getElementById('agt-body');
   const countEl=document.getElementById('agt-count');
+  const panel=b?.closest('.organization-table-panel');
+  const request=beginOrganizationRequest('alliance-teams',panel);
+  let statusHost=null;
+  try{
+  statusHost=ensureOrganizationStatusHost(panel);
+  await ensureAllianceGroupOptions(request);
+  if(!isOrganizationRequestCurrent(request)) return;
   const hint=document.getElementById('agt-hint');
   if(hint) hint.textContent='';
-  b.innerHTML=`<tr><td colspan=8 style='color:var(--cyan);text-align:center;padding:20px'>⏳ 加载中...</td></tr>`;
-  countEl.textContent='';
   const teamUsers = await apiFetch('/api/team_users');
+  if(!isOrganizationRequestCurrent(request)) return;
   if(!teamUsers){
-    b.innerHTML=`<tr><td colspan=8 style='color:var(--red);text-align:center;padding:20px'>成员数据加载失败</td></tr>`;
-    return;
+    throw new Error('成员数据加载失败');
   }
+  if(teamUsers.error) throw new Error(String(teamUsers.error));
+  if(!Array.isArray(teamUsers)) throw new Error('成员数据格式异常');
   const memberMap = new Map();
   (teamUsers||[]).forEach(u=>{
     if(u && u.name) memberMap.set(String(u.name).trim(), u);
@@ -2171,10 +2806,13 @@ async function loadAllianceGroupTeams(){
   })();
   const url=`/api/player_battle_teams?player=${encodeURIComponent(player)}&union=${encodeURIComponent(unionName)}&side=${encodeURIComponent(side)}&_t=${Date.now()}`;
   const data=await apiFetch(url);
+  if(!isOrganizationRequestCurrent(request)) return;
   if(!data){
-    b.innerHTML=`<tr><td colspan=8 style='color:var(--red);text-align:center;padding:20px'>请求失败</td></tr>`;
-    return;
+    throw new Error('同盟成员队伍请求失败');
   }
+  if(data.error) throw new Error(String(data.error));
+  if(!Array.isArray(data)) throw new Error('同盟成员队伍数据格式异常');
+  clearOrganizationStatusHost(statusHost);
   const filtered = dedupeBattleTeamsByHeroNames((data||[]).filter(r=>{
     const member = memberMap.get(String(r.player_name||'').trim());
     if(!member) return false;
@@ -2273,7 +2911,28 @@ async function loadAllianceGroupTeams(){
   });
 
   _agtExpandedPlayers = new Set();
+  if(!filtered.length){
+    _agtCurrentRows = [];
+    countEl.textContent='0条';
+    renderOrganizationTableState(b, {
+      kind:'empty',
+      message:'暂无符合条件的同盟成员队伍',
+      replace:true,
+    });
+    return;
+  }
   renderAllianceGroupTeams(filtered);
+  }catch(error){
+    if(isOrganizationRequestCurrent(request)){
+      renderOrganizationLoadError(b, statusHost, {
+        kind:'error',
+        message:error?.message || '同盟成员队伍加载失败',
+        replace:true,
+      });
+    }
+  }finally{
+    finishOrganizationRequest(request);
+  }
 }
 
 // ===== 攻城战场态势 (Tab 17) =====
@@ -2321,7 +2980,7 @@ async function loadBattleField(){
   if(!bf.length){
     b.innerHTML=`<tr><td colspan=7 style='color:var(--text2);text-align:center;padding:20px'>暂无战场数据（需捕获 000018aa）</td></tr>`;
   } else {
-    const CTYPE={8:'攻城营垒',11:'斜候营地',12:'大型要塞',13:'关卡',14:'皇城',17:'联盟城池',20:'战场'};
+    const CTYPE=STZB_META.cityTypes;
     bf.forEach(r=>{
       const coord=(r.x&&r.y)?`(${r.x},${r.y})`:'-';
       const cityName=r.city_name?`<b style='color:var(--gold)'>${esc(r.city_name)}</b>`:`<span style='color:var(--text2)'>${CTYPE[r.cell_type]||'wid:'+r.wid}</span>`;
@@ -2601,38 +3260,71 @@ async function loadMsgHistory(){
 }
 
 // ===== 武将阵容胜率 (Tab 22) =====
+let hasHeroComboSnapshot = false;
+
 async function loadHeroCombo(){
   const min = document.getElementById('combo-min')?.value || 3;
   const cards = document.getElementById('combo-cards');
   const b = document.getElementById('combo-body');
   if(!b) return;
-  b.innerHTML = `<tr><td colspan=8 style='text-align:center;color:var(--text2);padding:20px'>计算中...</td></tr>`;
+  const panel = legacyLoaderSurface(b,'tab23');
+  const request = beginLegacyLoaderRequest(
+    'hero-combo',
+    panel,
+    hasHeroComboSnapshot,
+  );
+  const statusHost = ensureLegacyLoaderStatusHost(panel);
+  if(!request.hasSnapshot){
+    renderLegacyLoaderStatus(statusHost,'loading','正在计算武将阵容…');
+  }else{
+    clearLegacyLoaderStatus(statusHost);
+  }
+  try{
   const data = await apiFetch(`/api/heroes/combo_winrate?min=${min}`);
-  if(!data || data.error){
-    b.innerHTML = `<tr><td colspan=8 style='text-align:center;color:var(--red);padding:20px'>加载失败</td></tr>`;
-    return;
+  if(!isLegacyLoaderRequestCurrent(request)) return;
+  if(!Array.isArray(data)){
+    throw new Error(data?.error || '武将阵容统计暂时不可用');
   }
   // 统计卡片
   if(cards){
     const total = data.reduce((s,r)=>s+r.total,0);
     const top = data[0];
     cards.innerHTML = `
-      <div class='stat-card'><div class='val' style='color:var(--gold)'>${data.length}</div><div class='lbl'>有效组合数</div></div>
-      <div class='stat-card'><div class='val' style='color:var(--cyan)'>${total}</div><div class='lbl'>覆盖战报数</div></div>
-      ${top ? `<div class='stat-card'><div class='val' style='color:var(--green);font-size:.9rem'>${top.win_rate}%</div><div class='lbl'>最高胜率组合</div></div>` : ''}
+      <div class='hud-kpi'><div class='hud-kpi-label'>有效组合数</div><div class='hud-kpi-value'>${data.length}</div></div>
+      <div class='hud-kpi' style='--hud-kpi-accent:var(--domain-organization)'><div class='hud-kpi-label'>覆盖战报数</div><div class='hud-kpi-value'>${total}</div></div>
+      ${top ? `<div class='hud-kpi' style='--hud-kpi-accent:var(--success)'><div class='hud-kpi-label'>最高胜率组合</div><div class='hud-kpi-value'>${top.win_rate}%</div></div>` : ''}
     `;
+  }
+  const topLineups = document.getElementById('combo-top-lineups');
+  if(topLineups){
+    topLineups.innerHTML = data.slice(0,3).map((row,index)=>{
+      const rank=index+1;
+      const rankTier=rank<=3?'top':'standard';
+      return `<article class='analysis-lineup-card analysis-evidence' data-kind='history' data-rank-tier='${rankTier}' style='--rank-accent:var(--${rank===1?'warning':rank===2?'text-secondary':'domain-operations'})'>
+        <span class='analysis-rank' data-rank='${rank}'>${rank}</span>
+        <h3>${esc(row.combo)}</h3>
+        <p>历史样本 ${row.total} 场 · 仅代表当前数据库统计</p>
+        <div class='analysis-lineup-metrics'>
+          <span>胜率 ${row.win_rate}%</span>
+          <span>${row.win} 胜 / ${row.draw} 平 / ${row.lose} 负</span>
+        </div>
+      </article>`;
+    }).join('');
   }
   if(!data.length){
     b.innerHTML = `<tr><td colspan=8 style='text-align:center;color:var(--text2);padding:20px'>暂无数据（需要有武将出战记录的战报）</td></tr>`;
+    hasHeroComboSnapshot = true;
+    clearLegacyLoaderStatus(statusHost);
     return;
   }
   b.innerHTML = data.map((r,i)=>{
     const wr = r.win_rate;
     const barColor = wr>=70?'var(--green)':wr>=50?'var(--gold)':'var(--red)';
-    const heroes = r.combo.split('+').map(h=>`<span class='badge' style='background:#1a2535;color:var(--cyan);margin:1px'>${esc(h)}</span>`).join('');
-    return `<tr>
-      <td style='color:var(--text2);font-family:Share Tech Mono,monospace'>${i+1}</td>
-      <td style='max-width:280px'>${heroes}</td>
+    const heroes = r.combo.split('+').map(h=>`<span class='hud-status-chip'>${esc(h)}</span>`).join('');
+    const rankTier=i<3?'top':'standard';
+    return `<tr class='analysis-row' data-rank-tier='${rankTier}'>
+      <td><span class='analysis-rank' data-rank='${i+1}'>${i+1}</span></td>
+      <td style='max-width:280px'><div class='analysis-evidence-row'>${heroes}</div></td>
       <td style='font-family:Share Tech Mono,monospace'>${r.total}</td>
       <td style='color:var(--green);font-weight:600'>${r.win}</td>
       <td style='color:var(--red)'>${r.lose}</td>
@@ -2641,6 +3333,21 @@ async function loadHeroCombo(){
       <td style='min-width:100px'><div style='background:var(--panel2);border-radius:3px;height:8px;overflow:hidden'><div style='width:${wr}%;height:100%;background:${barColor};border-radius:3px;transition:width .4s'></div></div></td>
     </tr>`;
   }).join('');
+  hasHeroComboSnapshot = true;
+  clearLegacyLoaderStatus(statusHost);
+  }catch(error){
+    if(!isLegacyLoaderRequestCurrent(request)) return;
+    const message=error?.message || '武将阵容统计加载失败';
+    if(request.hasSnapshot){
+      renderLegacyLoaderStatus(statusHost,'error',message);
+    }else{
+      if(cards) cards.innerHTML='';
+      b.innerHTML = `<tr><td colspan=8 style='text-align:center;color:var(--red);padding:20px'>${esc(message)}</td></tr>`;
+      renderLegacyLoaderStatus(statusHost,'error',message);
+    }
+  }finally{
+    finishLegacyLoaderRequest(request);
+  }
 }
 
 // ===== 团数据 (Tab 23) =====
@@ -2648,24 +3355,35 @@ let _trPeriod = 'all';
 let _trData = null;
 
 async function loadTeamReport(period){
-  _trPeriod = period || 'all';
+  const nextPeriod = period || 'all';
   const dim   = document.getElementById('tr-dim')?.value || 'group';
   const group = document.getElementById('tr-group')?.value || '';
 
   // 高亮按钮
   ['today','yesterday','week','lastweek','all'].forEach(p=>{
     const b = document.getElementById('tr-btn-'+p);
-    if(b) b.className = p===_trPeriod ? 'btn btn-primary' : 'btn';
+    if(b) b.className = p===nextPeriod ? 'btn btn-primary' : 'btn';
   });
 
   const tbody = document.getElementById('tr-body');
   const cards = document.getElementById('tr-cards');
-  tbody.innerHTML = `<tr><td colspan=10 style='text-align:center;color:var(--text2);padding:20px'>⏳ 统计中...</td></tr>`;
+  const panel=tbody?.closest('.organization-table-panel');
+  const request=beginOrganizationRequest('team-report',panel);
+  let statusHost=null;
+  try{
+  statusHost=ensureOrganizationStatusHost(panel);
 
-  const url = `/api/team_report?period=${_trPeriod}&dim=${dim}&group=${encodeURIComponent(group)}`;
+  const url = `/api/team_report?period=${nextPeriod}&dim=${dim}&group=${encodeURIComponent(group)}`;
   const res = await apiFetch(url);
-  if(!res){ tbody.innerHTML=`<tr><td colspan=10 style='color:var(--red);text-align:center;padding:20px'>请求失败</td></tr>`; return; }
+  if(!isOrganizationRequestCurrent(request)) return;
+  if(!res){
+    throw new Error('团数据请求失败');
+  }
+  if(res.error) throw new Error(String(res.error));
+  if(!Array.isArray(res.rows)) throw new Error('团数据格式异常');
 
+  clearOrganizationStatusHost(statusHost);
+  _trPeriod = nextPeriod;
   _trData = res;
   const s = res.summary || {};
   const rows = res.rows || [];
@@ -2686,12 +3404,12 @@ async function loadTeamReport(period){
 
   // 汇总卡片
   cards.innerHTML = `
-    <div class='stat-card'><div class='val' style='color:var(--gold)'>${s.total_battles||0}</div><div class='lbl'>总战报</div></div>
-    <div class='stat-card'><div class='val' style='color:var(--green)'>${s.win_rate||0}%</div><div class='lbl'>胜率</div></div>
-    <div class='stat-card'><div class='val' style='color:var(--cyan)'>${s.total_players||0}</div><div class='lbl'>参战人数</div></div>
-    <div class='stat-card'><div class='val' style='color:var(--text2)'>${s.total_draws||0}</div><div class='lbl'>平局</div></div>
-    <div class='stat-card'><div class='val' style='color:var(--red)'>${s.total_city||0}</div><div class='lbl'>攻城场次</div></div>
-    <div class='stat-card'><div class='val' style='color:var(--purple)'>${fmt(s.total_gongxun||0)}</div><div class='lbl'>总功勋</div></div>
+    <div class='hud-kpi'><div class='hud-kpi-label'>总战报</div><div class='hud-kpi-value'>${s.total_battles||0}</div></div>
+    <div class='hud-kpi' style='--hud-kpi-accent:var(--success)'><div class='hud-kpi-label'>胜率</div><div class='hud-kpi-value'>${s.win_rate||0}%</div></div>
+    <div class='hud-kpi' style='--hud-kpi-accent:var(--domain-organization)'><div class='hud-kpi-label'>参战人数</div><div class='hud-kpi-value'>${s.total_players||0}</div></div>
+    <div class='hud-kpi' style='--hud-kpi-accent:var(--text-tertiary)'><div class='hud-kpi-label'>平局</div><div class='hud-kpi-value'>${s.total_draws||0}</div></div>
+    <div class='hud-kpi' style='--hud-kpi-accent:var(--danger)'><div class='hud-kpi-label'>攻城场次</div><div class='hud-kpi-value'>${s.total_city||0}</div></div>
+    <div class='hud-kpi' style='--hud-kpi-accent:var(--domain-analysis)'><div class='hud-kpi-label'>总功勋</div><div class='hud-kpi-value'>${fmt(s.total_gongxun||0)}</div></div>
   `;
 
   // 表头
@@ -2707,12 +3425,12 @@ async function loadTeamReport(period){
     <th>分组</th>
     <th>战报</th><th>胜</th><th>败</th><th>平</th><th>胜率</th><th>攻城</th><th>功勋</th><th>势力值</th>
   </tr>`;
-  document.getElementById('tr-table-title').textContent = isGroup ? '📊 分组战斗数据' : '👤 成员战斗数据';
+  document.getElementById('tr-table-title').textContent = isGroup ? '分组战斗数据' : '成员战斗数据';
 
   // 表格行
-  tbody.innerHTML = rows.map((r,i)=>{
+  const rowHtml = rows.map((r,i)=>{
     const wrColor = r.win_rate>=60?'var(--green)':r.win_rate>=40?'var(--gold)':'var(--red)';
-    const bar = `<div style='display:inline-block;width:${r.win_rate||0}%;min-width:2px;height:6px;background:${wrColor};border-radius:3px;vertical-align:middle'></div>`;
+    const activity = organizationActivityMarkup(r.win_rate,100,'胜率');
     const tailCols = isGroup
       ? `<td style='font-family:Share Tech Mono,monospace;color:var(--purple)'>${fmt(r.total_gongxun||0)}</td>
          <td style='font-family:Share Tech Mono,monospace;color:var(--gold)'>${Math.round(Number(r.avg_gongxun||0))}</td>
@@ -2721,24 +3439,53 @@ async function loadTeamReport(period){
          <td style='font-family:Share Tech Mono,monospace;font-size:.72rem;color:var(--text2)'>${fmt(r.power||0)}</td>`;
     const col2 = isGroup
       ? `<td style='color:var(--text2)'>${r.player_cnt||0}人</td>`
-      : `<td><span class='badge' style='color:var(--cyan)'>${esc(r.group_name||'')}</span></td>`;
-    return `<tr>
+      : `<td>${organizationGroupChip(r.group_name||'未分组')}</td>`;
+    return `<tr class='organization-row' data-selected='false' data-state='${r.isStale?'stale':'current'}'>
       <td style='color:var(--text2);font-family:Share Tech Mono,monospace'>${i+1}</td>
-      <td style='font-weight:600;color:var(--gold2)'>${esc(r.name||'')}</td>
+      <td>${isGroup?organizationGroupChip(r.name||'未知'):organizationIdentityMarkup(r.name||'未知',r.group_name||'成员')}</td>
       ${col2}
       <td style='font-family:Share Tech Mono,monospace'>${r.battles}</td>
       <td style='color:var(--green)'>${r.wins}</td>
       <td style='color:var(--red)'>${r.loses}</td>
       <td style='color:var(--text2)'>${r.draws||0}</td>
-      <td><span style='color:${wrColor};font-weight:600'>${r.win_rate}%</span><span style='color:var(--text2);font-size:.72rem'>（${r.wins||0}胜 / ${r.draws||0}平 / ${r.loses||0}负）</span> <div style='display:inline-block;width:60px;background:var(--panel2);border-radius:3px;height:6px;vertical-align:middle'>${bar}</div></td>
+      <td><span style='color:${wrColor};font-weight:600'>${r.win_rate}%</span><span style='color:var(--text2);font-size:.72rem'>（${r.wins||0}胜 / ${r.draws||0}平 / ${r.loses||0}负）</span>${activity}</td>
       <td style='color:var(--cyan)'>${r.city_battles||0}</td>
       ${tailCols}
     </tr>`;
   }).join('');
+  if(rows.length){
+    tbody.innerHTML = rowHtml;
+    syncOrganizationRows(tbody, rows.map(rowData=>({
+      selected:false,
+      isStale:Boolean(rowData.isStale),
+    })));
+  }else{
+    renderOrganizationTableState(tbody, {
+      kind:'empty',
+      message:'当前筛选没有团数据',
+      replace:true,
+    }, isGroup ? 12 : 11);
+  }
 
   const periodName = {today:'今日',yesterday:'昨日',week:'本周',lastweek:'上周',all:'全部'}[_trPeriod]||'';
   const el = document.getElementById('tr-update-time');
   if(el) el.textContent = `${periodName} · ${rows.length}条 · ${new Date().toLocaleTimeString('zh-CN')}`;
+  const status = document.getElementById('hud-team-report-status');
+  if(status){
+    status.textContent = `LIVE · ${rows.length}`;
+    status.dataset.status = 'live';
+  }
+  }catch(error){
+    if(isOrganizationRequestCurrent(request)){
+      renderOrganizationLoadError(tbody, statusHost, {
+        kind:'error',
+        message:error?.message || '团数据加载失败',
+        replace:true,
+      }, dim==='group' ? 12 : 11);
+    }
+  }finally{
+    finishOrganizationRequest(request);
+  }
 }
 
 function buildTeamReportExportHtml(){
@@ -2931,6 +3678,8 @@ function openTeamReportExportWindow(extraScript=''){
 
 // ===== 州郡 / 团统计 (Tab 26) =====
 let _srData = null;
+let hasStateRegionSnapshot = false;
+let _stateRegionAbortController = null;
 
 const SR_STATE_POLYGONS = [
   { name:'凉州', center:[175,188], label:[176,188], value:[176,212], points:'58,170 72,150 96,140 114,118 150,104 198,106 236,118 268,136 294,160 298,188 284,212 286,238 262,252 226,262 198,274 168,270 138,258 110,244 82,228 64,206' },
@@ -3032,8 +3781,31 @@ function renderStateMap(stateRows){
 async function loadStateRegionStats(){
   const scope = document.getElementById('sr-scope')?.value || 'all';
   const group = document.getElementById('sr-group')?.value || '';
-  const res = await apiFetch(`/api/state_region_stats?scope=${scope}&group=${encodeURIComponent(group)}`);
-  if(!res) return;
+  const panel = document.getElementById('tab26');
+  _stateRegionAbortController?.abort();
+  const request = beginLegacyLoaderRequest(
+    'state-region',
+    panel,
+    hasStateRegionSnapshot,
+  );
+  const controller = new AbortController();
+  request.controller = controller;
+  _stateRegionAbortController = controller;
+  const statusHost = ensureLegacyLoaderStatusHost(panel);
+  if(!request.hasSnapshot){
+    renderLegacyLoaderStatus(statusHost,'loading','正在加载州郡分布…');
+  }else{
+    clearLegacyLoaderStatus(statusHost);
+  }
+  try{
+  const res = await apiFetch(
+    `/api/state_region_stats?scope=${scope}&group=${encodeURIComponent(group)}`,
+    {signal:controller.signal},
+  );
+  if(!isLegacyLoaderRequestCurrent(request)) return;
+  if(!res || res.error){
+    throw new Error(res?.error || '州郡分布暂时不可用');
+  }
   _srData = res;
   const meta = res.meta || {};
 
@@ -3041,7 +3813,16 @@ async function loadStateRegionStats(){
   const groupSel = document.getElementById('sr-group');
   if(groupSel){
     const prev = groupSel.value;
-    groupSel.innerHTML = `<option value=''>全部团</option>` + groups.map(g=>`<option value="${String(g).replace(/"/g,'&quot;')}">${esc(g)}</option>`).join('');
+    const options = [document.createElement('option')];
+    options[0].value = '';
+    options[0].textContent = '全部团';
+    groups.forEach(value=>{
+      const option = document.createElement('option');
+      option.value = String(value);
+      option.textContent = String(value);
+      options.push(option);
+    });
+    groupSel.replaceChildren(...options);
     if(groups.includes(prev)) groupSel.value = prev;
     if(scope !== 'group') groupSel.value = '';
     groupSel.disabled = scope !== 'group';
@@ -3052,29 +3833,36 @@ async function loadStateRegionStats(){
   const stateRows = res.state_rows || [];
   const groupRows = res.group_rows || [];
   const allianceRows = res.alliance_rows || [];
-  const emptyHint = meta.message || (res.error ? `加载失败：${res.error}` : '');
+  const emptyHint = meta.message || '';
 
   const cards = document.getElementById('sr-cards');
   if(cards){
     cards.innerHTML = `
-      <div class='stat-card'><div class='val'>${s.total_players||0}</div><div class='lbl'>统计人数</div></div>
-      <div class='stat-card'><div class='val' style='color:var(--gold)'>${fmt(s.total_power||0)}</div><div class='lbl'>总势力值</div></div>
-      <div class='stat-card'><div class='val' style='color:var(--cyan)'>${s.state_count||0}</div><div class='lbl'>覆盖州数</div></div>
-      <div class='stat-card'><div class='val' style='color:var(--blue)'>${s.alliance_count||0}</div><div class='lbl'>同盟数量</div></div>
-      <div class='stat-card'><div class='val' style='color:var(--purple)'>${s.group_count||0}</div><div class='lbl'>分组数量</div></div>
-      <div class='stat-card'><div class='val' style='color:var(--green)'>${s.grouped_players||0}</div><div class='lbl'>已分组成员</div></div>
+      <div class='hud-kpi'><div class='hud-kpi-label'>统计人数</div><div class='hud-kpi-value'>${s.total_players||0}</div></div>
+      <div class='hud-kpi' style='--hud-kpi-accent:var(--warning)'><div class='hud-kpi-label'>总势力值</div><div class='hud-kpi-value'>${fmt(s.total_power||0)}</div></div>
+      <div class='hud-kpi' style='--hud-kpi-accent:var(--domain-intelligence)'><div class='hud-kpi-label'>覆盖州数</div><div class='hud-kpi-value'>${s.state_count||0}</div></div>
+      <div class='hud-kpi' style='--hud-kpi-accent:var(--info)'><div class='hud-kpi-label'>同盟数量</div><div class='hud-kpi-value'>${s.alliance_count||0}</div></div>
+      <div class='hud-kpi' style='--hud-kpi-accent:var(--domain-analysis)'><div class='hud-kpi-label'>分组数量</div><div class='hud-kpi-value'>${s.group_count||0}</div></div>
+      <div class='hud-kpi' style='--hud-kpi-accent:var(--success)'><div class='hud-kpi-label'>已分组成员</div><div class='hud-kpi-value'>${s.grouped_players||0}</div></div>
     `;
   }
   const noteEl = document.getElementById('sr-note');
   if(noteEl){
     noteEl.textContent = emptyHint;
-    noteEl.style.display = emptyHint ? 'block' : 'none';
+    noteEl.hidden = !emptyHint;
   }
 
   const countEl = document.getElementById('sr-count');
   if(countEl) countEl.textContent = emptyHint ? emptyHint : `州 ${stateRows.length} 条 / 同盟 ${allianceRows.length} 条 / 分组 ${groupRows.length} 条`;
   const timeEl = document.getElementById('sr-update-time');
-  if(timeEl) timeEl.textContent = `更新于 ${new Date().toLocaleTimeString('zh-CN',{hour12:false})}`;
+  const updateText = `更新于 ${new Date().toLocaleTimeString('zh-CN',{hour12:false})}`;
+  if(timeEl) timeEl.textContent = updateText;
+  const freshness = document.getElementById('hud-region-updated');
+  if(freshness){
+    freshness.textContent = emptyHint ? 'DEGRADED' : 'LIVE';
+    freshness.dataset.status = emptyHint ? 'degraded' : 'live';
+    freshness.title = updateText;
+  }
 
   const stateBody = document.getElementById('sr-state-body');
   if(stateBody){
@@ -3145,8 +3933,729 @@ async function loadStateRegionStats(){
       });
     }
   }
+  hasStateRegionSnapshot = true;
+  clearLegacyLoaderStatus(statusHost);
+  }catch(error){
+    if(!isLegacyLoaderRequestCurrent(request)) return;
+    if(error?.name==='AbortError' || controller.signal.aborted) return;
+    const message=error?.message || '州郡分布加载失败';
+    const noteEl = document.getElementById('sr-note');
+    if(request.hasSnapshot){
+      renderLegacyLoaderStatus(statusHost,'error',message);
+      if(noteEl){
+        noteEl.textContent = message;
+        noteEl.hidden = false;
+      }
+    }else{
+      renderLegacyLoaderStatus(statusHost,'error',message);
+      if(noteEl){
+        noteEl.textContent = message;
+        noteEl.hidden = false;
+      }
+      const stateBody=document.getElementById('sr-state-body');
+      const groupBody=document.getElementById('sr-group-body');
+      if(stateBody) stateBody.innerHTML=`<tr><td colspan='6' style='text-align:center;color:var(--red);padding:20px'>${esc(message)}</td></tr>`;
+      if(groupBody) groupBody.innerHTML=`<tr><td colspan='6' style='text-align:center;color:var(--red);padding:20px'>${esc(message)}</td></tr>`;
+    }
+    const freshness=document.getElementById('hud-region-updated');
+    if(freshness){
+      freshness.textContent='DEGRADED';
+      freshness.dataset.status='degraded';
+    }
+  }finally{
+    if(_stateRegionAbortController===controller){
+      _stateRegionAbortController=null;
+    }
+    finishLegacyLoaderRequest(request);
+  }
 }
 
+function exportTeamReportPretty(){
+  return exportTeamReportPDF();
+}
+
+function withOrganizationExportBusy(action, button=document.activeElement){
+  const exportButton = button?.matches?.('button') ? button : null;
+  const previousMinWidth = exportButton?.style.minWidth || '';
+  if(exportButton){
+    const width = Math.ceil(exportButton.getBoundingClientRect().width);
+    if(width) exportButton.style.minWidth = `${width}px`;
+    exportButton.setAttribute("aria-busy", "true");
+    exportButton.disabled = true;
+  }
+  const finish = ()=>{
+    if(!exportButton) return;
+    exportButton.removeAttribute("aria-busy");
+    exportButton.disabled = false;
+    exportButton.style.minWidth = previousMinWidth;
+  };
+  let result;
+  try{
+    result = action();
+  }catch(error){
+    finish();
+    throw error;
+  }
+  return Promise.resolve(result).finally(finish);
+}
+
+function exportTeamReportPDF(){
+  return withOrganizationExportBusy(()=>{
+    const w = openTeamReportExportWindow();
+    if(!w) return null;
+    return new Promise((resolve,reject)=>setTimeout(()=>{
+      try{
+        if(w.closed) throw new Error('导出窗口已关闭');
+        w.print();
+        resolve(w);
+      }catch(error){
+        reject(error);
+      }
+    }, 350));
+  });
+}
+
+function exportTeamReportLongImage(){
+  return withOrganizationExportBusy(()=>{
+    const extraScript = `<script>
+    document.body.classList.add('long-shot');
+    const bar = document.createElement('div');
+    bar.className = 'action-bar';
+    bar.innerHTML = '<button class="action-btn" id="save-long-shot">保存长图</button><button class="action-btn secondary" onclick="window.print()">打印 / 另存PDF</button>';
+    const shell = document.querySelector('.page-shell') || document.body;
+    shell.insertBefore(bar, shell.firstChild);
+    function downloadLongShot(){
+      try{
+        const page = document.getElementById('team-report-page');
+        const shellEl = document.querySelector('.page-shell') || page;
+        const oldBg = document.body.style.background;
+        document.body.style.background = '#f4ecde';
+        const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + shellEl.scrollWidth + '" height="' + shellEl.scrollHeight + '">' +
+          '<foreignObject width="100%" height="100%">' + new XMLSerializer().serializeToString(shellEl) + '</foreignObject>' +
+          '</svg>';
+        const blob = new Blob([svg], {type:'image/svg+xml;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const img = new Image();
+        img.onload = function(){
+          const canvas = document.createElement('canvas');
+          canvas.width = shellEl.scrollWidth;
+          canvas.height = shellEl.scrollHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#f4ecde';
+          ctx.fillRect(0,0,canvas.width,canvas.height);
+          ctx.drawImage(img,0,0);
+          URL.revokeObjectURL(url);
+          document.body.style.background = oldBg;
+          const a = document.createElement('a');
+          a.href = canvas.toDataURL('image/png');
+          a.download = '团数据长图_' + new Date().toISOString().slice(0,10) + '.png';
+          a.click();
+        };
+        img.onerror = function(){
+          URL.revokeObjectURL(url);
+          alert('当前浏览器不支持直接生成长图，请改用“打印 / 另存PDF”。');
+        };
+        img.src = url;
+      }catch(e){
+        alert('生成长图失败：' + (e && e.message ? e.message : e));
+      }
+    }
+    document.getElementById('save-long-shot').addEventListener('click', downloadLongShot);
+  <\/script>`;
+    const w = openTeamReportExportWindow(extraScript);
+    if(!w) return null;
+    return new Promise(resolve=>setTimeout(()=>resolve(w), 350));
+  });
+}
+
+function exportTeamReportCSV(){
+  if(!_trData) return;
+  const dim = document.getElementById('tr-dim')?.value||'group';
+  const isGroup = dim==='group';
+  const headers = isGroup
+    ? ['#','分组','人数','战报','胜','败','平','胜率%','攻城','总功勋','平均武勋','平均势力值']
+    : ['#','成员','分组','战报','胜','败','平','胜率%','攻城','功勋','势力值'];
+  const rows = (_trData.rows||[]).map((r,i)=> isGroup
+    ? [i+1, r.name||'', r.player_cnt||0, r.battles, r.wins, r.loses, r.draws||0, r.win_rate, r.city_battles||0, r.total_gongxun||0, r.avg_gongxun||0, r.avg_power||0]
+    : [i+1, r.name||'', r.group_name||'', r.battles, r.wins, r.loses, r.draws||0, r.win_rate, r.city_battles||0, r.total_gongxun||0, r.power||0]
+  );
+  const csv = [headers,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `团数据_${_trPeriod}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function getCurrentPageEl(){
+  return document.querySelector('.page.active') || document.querySelector('.page');
+}
+
+function getCurrentPageTitle(pageEl){
+  if(!pageEl) return '页面';
+  const headTitle = pageEl.querySelector('.tbl-head h3');
+  if(headTitle && headTitle.textContent.trim()) return headTitle.textContent.trim();
+  const navBtn = document.querySelector(`nav button[onclick*="${pageEl.id?.replace('tab','')}"].active`);
+  if(navBtn && navBtn.textContent.trim()) return navBtn.textContent.trim();
+  return pageEl.id || '页面';
+}
+
+function buildPageExportHtml(pageEl, options={}){
+  if(!pageEl) return '';
+  const title = options.title || getCurrentPageTitle(pageEl);
+  const nowText = new Date().toLocaleString('zh-CN', { hour12:false });
+  const clone = pageEl.cloneNode(true);
+  clone.querySelectorAll('button').forEach(btn=>btn.remove());
+  clone.querySelectorAll('[onclick]').forEach(el=>el.removeAttribute('onclick'));
+  clone.querySelectorAll('input').forEach(inp=>{
+    const span = document.createElement('span');
+    span.textContent = inp.value || inp.placeholder || '';
+    span.style.cssText = 'display:inline-block;min-width:48px;padding:6px 10px;border:1px solid #d6c8ad;border-radius:999px;background:#fbf6ed;color:#2a241c;box-shadow:inset 0 1px 0 rgba(255,255,255,.55);';
+    inp.replaceWith(span);
+  });
+  clone.querySelectorAll('select').forEach(sel=>{
+    const span = document.createElement('span');
+    const text = sel.options && sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex].text : '';
+    span.textContent = text;
+    span.style.cssText = 'display:inline-block;min-width:48px;padding:6px 10px;border:1px solid #d6c8ad;border-radius:999px;background:#fbf6ed;color:#2a241c;box-shadow:inset 0 1px 0 rgba(255,255,255,.55);';
+    sel.replaceWith(span);
+  });
+  clone.querySelectorAll('.tbl-scroll,.feed').forEach(el=>{
+    el.style.maxHeight = 'none';
+    el.style.overflow = 'visible';
+  });
+  clone.querySelectorAll('thead th').forEach(th=>th.style.position='static');
+  const content = clone.innerHTML;
+  return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>${title}</title>
+<style>
+  :root{
+    --paper:#f8f1e4;--paper-soft:#f3e8d6;--paper-soft-2:#eadcc4;--paper-edge:#e1d1b4;--line:#d7c3a0;
+    --text:#2a241c;--muted:#7a6956;--title:#1b1510;--accent:#8f6a2a;--accent-soft:#e7d8ba;
+    --green:#41664d;--red:#9a4d41;--blue:#4e6a8d;--cyan:#557978;--purple:#705c8d;
+  }
+  @page{size:A4 landscape;margin:12mm;}
+  body{
+    margin:0;padding:30px;color:var(--text);font-family:'SimSun','宋体',serif;
+    background:
+      radial-gradient(circle at top left, rgba(143,106,42,.08), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(122,105,86,.08), transparent 24%),
+      linear-gradient(180deg,#fbf5ea 0%,#f4ecde 100%);
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .page-shell{
+    max-width:1520px;margin:0 auto;padding:18px 18px 10px;
+    background:linear-gradient(180deg,rgba(255,251,245,.94) 0%,rgba(248,241,228,.96) 100%);
+    border:1px solid var(--paper-edge);border-radius:18px;
+    box-shadow:0 18px 40px rgba(120,90,45,.10), inset 0 1px 0 rgba(255,255,255,.55);
+    position:relative;overflow:hidden;
+  }
+  .page-shell::before{
+    content:'';position:absolute;inset:10px;border:1px solid rgba(143,106,42,.18);border-radius:12px;pointer-events:none;
+  }
+  .export-header{
+    position:relative;display:flex;justify-content:space-between;align-items:flex-end;
+    border-bottom:2px solid rgba(143,106,42,.45);padding:4px 8px 16px;margin-bottom:22px;gap:12px;
+  }
+  .export-header::after{
+    content:'';position:absolute;left:0;bottom:-2px;width:140px;height:4px;border-radius:999px;
+    background:linear-gradient(90deg,var(--accent),rgba(143,106,42,0));
+  }
+  .export-title{font-size:30px;letter-spacing:.14em;color:var(--title);font-weight:700;}
+  .export-subtitle{margin-top:6px;color:var(--muted);font-size:13px;letter-spacing:.04em;}
+  .export-meta{font-size:13px;color:var(--muted);text-align:right;line-height:1.8;}
+  .page{display:block !important;animation:none !important;position:relative;z-index:1;}
+  .cards-row{display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
+  .stat-card{
+    flex:1;min-width:148px;background:linear-gradient(180deg,#fffaf1 0%,#f4ead9 100%);
+    border:1px solid var(--line);border-radius:16px;padding:16px 14px;text-align:center;
+    box-shadow:0 10px 20px rgba(143,106,42,.08), inset 0 1px 0 rgba(255,255,255,.55);
+  }
+  .stat-card .val{font-size:30px;color:var(--title);line-height:1.1;font-weight:700;}
+  .stat-card .lbl{margin-top:6px;font-size:12px;color:var(--muted);letter-spacing:.14em;}
+  .tbl-wrap{
+    background:rgba(255,250,242,.94);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    box-shadow:0 10px 24px rgba(86,65,33,.06), inset 0 1px 0 rgba(255,255,255,.55);
+  }
+  .tbl-head{
+    display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#f7ecdc 0%,#efdfc5 100%);
+  }
+  .tbl-head h3{font-size:.92rem;letter-spacing:.12em;color:var(--title);margin:0;}
+  .tbl-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);}
+  .tbl-scroll,.feed{max-height:none !important;overflow:visible !important;}
+  table{width:100%;border-collapse:collapse;font-size:14px;background:transparent;}
+  thead th{
+    padding:11px 12px;background:#efe2cc;color:var(--muted);text-align:left;border-bottom:1px solid var(--line);
+    position:static !important;font-weight:600;
+  }
+  tbody td{padding:10px 12px;color:var(--text);border-bottom:1px solid rgba(215,195,160,.55);white-space:nowrap;}
+  tbody tr:nth-child(odd){background:rgba(255,251,245,.82);}
+  tbody tr:nth-child(even){background:rgba(248,239,224,.66);}
+  .badge{
+    display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;
+    background:var(--accent-soft);color:var(--text);border:1px solid #d7c19a;
+  }
+  .feed-item,.bar-row{break-inside:avoid;}
+  .bar-track{background:#e8dac0 !important;border:1px solid var(--line) !important;border-radius:999px !important;}
+  .bar-fill{border-radius:999px !important;}
+  .prog{background:#e8dac0 !important;}
+  .export-footer{margin-top:16px;color:var(--muted);font-size:12px;text-align:right;}
+  .rank-1,.rank-2,.rank-3{color:var(--title) !important;font-weight:700;}
+  .btn{border-color:var(--line) !important;color:var(--text) !important;background:#f8f0e2 !important;}
+  tr[style*='background:#0d1420'],tr[style*='background:#101925'],tr[style*='background:var(--panel2)'],tr[style*='background:#121c2a'],tr[style*='background:#101929'],tr[style*='background:#111a28']{background:rgba(248,239,224,.66) !important;}
+  td[style*='background:#0d1420'],td[style*='background:#101925'],td[style*='background:var(--panel2)'],td[style*='background:#121c2a'],td[style*='background:#101929'],td[style*='background:#111a28'],span[style*='background:#0d1520'],span[style*='background:#0d1820'],span[style*='background:#111a28'],span[style*='background:#172232'],div[style*='background:#0d1520'],div[style*='background:#0d1820'],div[style*='background:#111a28'],div[style*='background:#172232']{background:var(--accent-soft) !important;color:var(--text) !important;border-color:#d7c19a !important;}
+  img{filter:saturate(.88) contrast(.96);}
+  [style*='box-shadow']{box-shadow:none !important;}
+  [style*='text-shadow']{text-shadow:none !important;}
+  [style*='color:transparent']{color:var(--text) !important;}
+  [style*='opacity:0']{opacity:1 !important;}
+  [style*='var(--gold)'],[style*='var(--gold2)']{color:var(--accent) !important;}
+  [style*='var(--green)']{color:var(--green) !important;}
+  [style*='var(--red)']{color:var(--red) !important;}
+  [style*='var(--blue)']{color:var(--blue) !important;}
+  [style*='var(--cyan)']{color:var(--cyan) !important;}
+  [style*='var(--purple)']{color:var(--purple) !important;}
+  [style*='var(--text2)'],[style*='color:#7a8a9a'],[style*='color:#66788b'],[style*='color:#8ea0b3']{color:var(--muted) !important;}
+  [style*='color:var(--text)'],[style*='color:#d4cfc0'],[style*='color:#fff'],[style*='color:white']{color:var(--text) !important;}
+  input,select,span[style*='border:1px solid #cfd6de']{background:#fbf6ed !important;color:var(--text) !important;border-color:#d6c8ad !important;}
+  @media print{
+    body{padding:0;background:#fff !important;color:var(--text) !important;}
+    .page-shell{max-width:none;box-shadow:none;border-radius:0;}
+    .tbl-wrap,.stat-card{break-inside:avoid;box-shadow:none !important;}
+    .tbl-wrap,.stat-card,table{box-shadow:none !important;}
+  }
+</style>
+</head>
+<body>
+  <div class="page-shell">
+    <div class="export-header">
+      <div>
+        <div class="export-title">${title}</div>
+        <div class="export-subtitle">当前页面导出（米色古风战报）</div>
+      </div>
+      <div class="export-meta">
+        <div>导出时间：${nowText}</div>
+      </div>
+    </div>
+    ${content}
+    <div class="export-footer">率土战场指挥台 · 页面导出</div>
+  </div>
+</body>
+</html>`;
+}
+
+function openExportWindowFromHtml(html){
+  if(!html) return null;
+  const w = window.open('', '_blank');
+  if(!w){ showToast('请允许弹窗后再导出','var(--red)'); return null; }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+  return w;
+}
+
+function getPageExportSnapshot(pageEl){
+  if(!pageEl) return null;
+  const title = getCurrentPageTitle(pageEl);
+  const tables = [...pageEl.querySelectorAll('table')].map((table, idx)=>{
+    const wrap = table.closest('.tbl-wrap') || table.parentElement;
+    const h3 = wrap?.querySelector('.tbl-head h3');
+    const secTitle = h3?.textContent?.trim() || `表格 ${idx+1}`;
+    const headers = [...table.querySelectorAll('thead th')].map(th=>th.innerText.trim());
+    const rows = [...table.querySelectorAll('tbody tr')].map(tr=>[...tr.querySelectorAll('td')].map(td=>td.innerText.trim().replace(/\n+/g,' / ')));
+    return { title: secTitle, headers, rows };
+  });
+  const stats = [...pageEl.querySelectorAll('.stat-card')].map(card=>({
+    value: card.querySelector('.val')?.innerText?.trim() || '',
+    label: card.querySelector('.lbl')?.innerText?.trim() || ''
+  })).filter(x=>x.value || x.label);
+  return { title, tables, stats };
+}
+
+function ensureExportLibraries(){
+  const hasExcel = typeof ExcelJS !== 'undefined';
+  const hasPdf = !!(window.jspdf && window.jspdf.jsPDF);
+  if(!hasExcel || !hasPdf){
+    showToast('导出库加载中，请稍后再试','var(--red)');
+    return false;
+  }
+  return true;
+}
+
+async function exportCurrentPagePDF(){
+  const pageEl = getCurrentPageEl();
+  const html = buildPageExportHtml(pageEl);
+  const w = openExportWindowFromHtml(html);
+  if(!w) return;
+  setTimeout(()=>w.print(), 350);
+}
+
+function applyExcelHeaderStyle(cell, fill='FF121D2C', color='FF8EA0B3', size=11){
+  cell.font = { bold:true, color:{ argb:color }, name:'Microsoft YaHei', size };
+  cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:fill } };
+  cell.alignment = { vertical:'middle', horizontal:'center', wrapText:true };
+  cell.border = { top:{style:'thin',color:{argb:'FF1D2A3C'}}, left:{style:'thin',color:{argb:'FF1D2A3C'}}, bottom:{style:'thin',color:{argb:'FF1D2A3C'}}, right:{style:'thin',color:{argb:'FF1D2A3C'}} };
+}
+
+function applyExcelBodyStyle(cell, fill='FF0F1620', align='left'){
+  cell.font = { color:{ argb:'FFD8D2C0' }, name:'Microsoft YaHei', size:10 };
+  cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:fill } };
+  cell.alignment = { vertical:'middle', horizontal:align, wrapText:true };
+  cell.border = { top:{style:'thin',color:{argb:'FF172232'}}, left:{style:'thin',color:{argb:'FF172232'}}, bottom:{style:'thin',color:{argb:'FF172232'}}, right:{style:'thin',color:{argb:'FF172232'}} };
+}
+
+function finishWorksheetLayout(ws, widths, frozenRows=5){
+  ws.columns = widths.map(w=>({ width:w }));
+  ws.views = [{ state:'frozen', ySplit:frozenRows }];
+  if(ws.rowCount >= frozenRows){
+    ws.autoFilter = { from: { row:frozenRows, column:1 }, to: { row:frozenRows, column:widths.length } };
+  }
+}
+
+function buildWorkbookCover(ws, title, subtitle, colCount){
+  ws.mergeCells(1,1,1,colCount);
+  ws.getCell(1,1).value = title;
+  ws.getCell(1,1).font = { size:18, bold:true, color:{ argb:'FFE8C86A' }, name:'Microsoft YaHei' };
+  ws.getCell(1,1).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF0B1019' } };
+  ws.getCell(1,1).alignment = { vertical:'middle', horizontal:'left' };
+  ws.mergeCells(2,1,2,colCount);
+  ws.getCell(2,1).value = subtitle;
+  ws.getCell(2,1).font = { size:10, color:{ argb:'FF8EA0B3' }, name:'Microsoft YaHei' };
+  ws.getCell(2,1).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF0F1620' } };
+}
+
+function exportTeamReportExcel(){
+  if(!_trData) return exportCurrentPageTableGeneric();
+  const wb = new ExcelJS.Workbook();
+  wb.creator = '率土战场指挥台';
+  wb.created = new Date();
+  const ws = wb.addWorksheet('团数据');
+  const dim = document.getElementById('tr-dim')?.value||'group';
+  const isGroup = dim==='group';
+  const periodName = {today:'今日',yesterday:'昨日',week:'本周',lastweek:'上周',all:'全部'}[_trPeriod]||'全部';
+  const s = _trData.summary || {};
+  const rows = _trData.rows || [];
+  buildWorkbookCover(ws, `团数据统计报告（${isGroup?'按分组':'按成员'}）`, `统计周期：${periodName}  ·  导出时间：${new Date().toLocaleString('zh-CN',{hour12:false})}`, isGroup ? 12 : 11);
+  ws.addRow([]);
+  const statLabelRow = ws.addRow(['总战报','胜率','参战人数','平局','攻城场次','总功勋']);
+  const statValueRow = ws.addRow([s.total_battles||0, (s.win_rate||0)/100, s.total_players||0, s.total_draws||0, s.total_city||0, s.total_gongxun||0]);
+  statLabelRow.eachCell(c=>applyExcelHeaderStyle(c,'FF111A28','FFE8C86A',10));
+  statValueRow.eachCell((c,idx)=>{ applyExcelBodyStyle(c,'FF101929', idx===2?'center':'right'); c.numFmt = idx===2 ? '0%' : '#,##0'; });
+  ws.addRow([]);
+  const headers = isGroup
+    ? ['排名','分组','人数','战报','胜','败','平','胜率','攻城','总功勋','平均武勋','平均势力值']
+    : ['排名','成员','分组','战报','胜','败','平','胜率','攻城','功勋','势力值'];
+  const headerRow = ws.addRow(headers);
+  headerRow.eachCell(c=>applyExcelHeaderStyle(c));
+  rows.forEach((r,i)=>{
+    const row = ws.addRow(isGroup
+      ? [i+1, r.name||'', r.player_cnt||0, r.battles||0, r.wins||0, r.loses||0, r.draws||0, (Number(r.win_rate||0))/100, r.city_battles||0, r.total_gongxun||0, Math.round(Number(r.avg_gongxun||0)), Math.round(Number(r.avg_power||0))]
+      : [i+1, r.name||'', r.group_name||'', r.battles||0, r.wins||0, r.loses||0, r.draws||0, (Number(r.win_rate||0))/100, r.city_battles||0, r.total_gongxun||0, r.power||0]
+    );
+    row.eachCell((c,col)=>{
+      applyExcelBodyStyle(c, i%2===0?'FF0D1420':'FF101929', [2,3].includes(col)?'left':'right');
+      if(col===8) c.numFmt = '0%';
+      else if(col>=1) c.numFmt = col===2 || col===3 ? '@' : '#,##0';
+    });
+    row.getCell(2).font = { ...row.getCell(2).font, bold:true, color:{ argb:'FFE8C86A' } };
+    row.getCell(8).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:(Number(r.win_rate||0)>=60?'FF163020':Number(r.win_rate||0)>=40?'FF3A3318':'FF301818') } };
+  });
+  finishWorksheetLayout(ws, isGroup?[8,16,10,10,8,8,8,10,10,14,12,14]:[8,14,12,10,8,8,8,10,10,14,14], 6);
+  return wb.xlsx.writeBuffer().then(buf=>{
+    const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `团数据_${periodName}_${new Date().toISOString().slice(0,10)}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+}
+
+function exportTeamUsersExcel(){
+  if(!_tuData?.length) return exportCurrentPageTableGeneric();
+  const wb = new ExcelJS.Workbook();
+  wb.creator = '率土战场指挥台';
+  wb.created = new Date();
+  const ws = wb.addWorksheet('同盟成员');
+  const totalPower = _tuData.reduce((a,b)=>a+(b.power||0),0);
+  const totalWu = _tuData.reduce((a,b)=>a+(b.wuxun||0),0);
+  buildWorkbookCover(ws, '同盟成员总览', `导出时间：${new Date().toLocaleString('zh-CN',{hour12:false})}`, 9);
+  ws.addRow([]);
+  const statLabelRow = ws.addRow(['同盟人数','总势力值','总武勋']);
+  const statValueRow = ws.addRow([_tuData.length, totalPower, totalWu]);
+  statLabelRow.eachCell(c=>applyExcelHeaderStyle(c,'FF111A28','FFE8C86A',10));
+  statValueRow.eachCell(c=>{ applyExcelBodyStyle(c,'FF101929','right'); c.numFmt='#,##0'; });
+  ws.addRow([]);
+  const headerRow = ws.addRow(['成员','UID','职位','势力值','武勋','周贡献','总贡献','分组','加入日期']);
+  headerRow.eachCell(c=>applyExcelHeaderStyle(c));
+  _tuData.forEach((r,i)=>{
+    const row = ws.addRow([r.name||'', r.uid||0, POS_MAP[r.pos]||('职位'+(r.pos||0)), r.power||0, r.wuxun||0, r.contribute_week||0, r.contribute_total||0, r.group_name||'未分组', r.join_time ? new Date(r.join_time*1000).toLocaleDateString('zh-CN') : '' ]);
+    row.eachCell((c,col)=>{ applyExcelBodyStyle(c, i%2===0?'FF0D1420':'FF101929', [1,3,8,9].includes(col)?'left':'right'); if([2,4,5,6,7].includes(col)) c.numFmt='#,##0'; });
+    row.getCell(1).font = { ...row.getCell(1).font, bold:true, color:{ argb:'FFE8C86A' } };
+    row.getCell(4).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF2A2410' } };
+    row.getCell(5).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF102430' } };
+  });
+  finishWorksheetLayout(ws, [14,14,12,14,14,12,12,12,12], 6);
+  return wb.xlsx.writeBuffer().then(buf=>{
+    const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `同盟成员_${new Date().toISOString().slice(0,10)}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+}
+
+function exportUnionListExcel(){
+  if(!_ulData?.length) return exportCurrentPageTableGeneric();
+  const wb = new ExcelJS.Workbook();
+  wb.creator = '率土战场指挥台';
+  wb.created = new Date();
+  const ws = wb.addWorksheet('联盟列表');
+  const totalPower = _ulData.reduce((s,r)=>s+(r.power||0),0);
+  const totalMember = _ulData.reduce((s,r)=>s+(r.total_member||0),0);
+  buildWorkbookCover(ws, '联盟列表总览', `导出时间：${new Date().toLocaleString('zh-CN',{hour12:false})}`, 9);
+  ws.addRow([]);
+  const statLabelRow = ws.addRow(['联盟数','总势力值','总人数']);
+  const statValueRow = ws.addRow([_ulData.length, totalPower, totalMember]);
+  statLabelRow.eachCell(c=>applyExcelHeaderStyle(c,'FF111A28','FFE8C86A',10));
+  statValueRow.eachCell(c=>{ applyExcelBodyStyle(c,'FF101929','right'); c.numFmt='#,##0'; });
+  ws.addRow([]);
+  const headerRow = ws.addRow(['排名','联盟','等级','势力值','人数','占领值','NPC城','区域','更新时间']);
+  headerRow.eachCell(c=>applyExcelHeaderStyle(c));
+  _ulData.forEach((r,i)=>{
+    const row = ws.addRow([r.rank||i+1, r.name||'', r.level||0, r.power||0, r.total_member||0, r.occupy_city_value||0, r.total_npc_city||0, r.region||'', r.updated_at ? r.updated_at.slice(5,16) : '' ]);
+    row.eachCell((c,col)=>{ applyExcelBodyStyle(c, i%2===0?'FF0D1420':'FF101929', [2,8,9].includes(col)?'left':'right'); if([1,3,4,5,6,7].includes(col)) c.numFmt='#,##0'; });
+    row.getCell(1).font = { ...row.getCell(1).font, bold:true, color:{ argb:i<3?'FFE8C86A':'FFD8D2C0' } };
+    row.getCell(2).font = { ...row.getCell(2).font, bold:true, color:{ argb:'FFE8C86A' } };
+    row.getCell(4).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF2A2410' } };
+  });
+  finishWorksheetLayout(ws, [8,18,8,14,10,10,10,12,12], 6);
+  return wb.xlsx.writeBuffer().then(buf=>{
+    const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `联盟列表_${new Date().toISOString().slice(0,10)}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+}
+
+function exportBattlesAllExcel(){
+  const pageEl = document.getElementById('tab10');
+  const tbody = pageEl?.querySelector('#ba-body');
+  if(!tbody || !tbody.children.length) return exportCurrentPageTableGeneric();
+  const wb = new ExcelJS.Workbook();
+  wb.creator = '率土战场指挥台';
+  wb.created = new Date();
+  const ws = wb.addWorksheet('全部战报');
+  buildWorkbookCover(ws, '全部战报导出', `导出时间：${new Date().toLocaleString('zh-CN',{hour12:false})}`, 7);
+  ws.addRow([]);
+  const filterDesc = [
+    `玩家：${document.getElementById('ba-player')?.value||'全部'}`,
+    `联盟：${document.getElementById('ba-union')?.value||'全部'}`,
+    `结果：${document.getElementById('ba-result')?.value||'全部'}`,
+    `类型：${document.getElementById('ba-ftype')?.value||'全部'}`,
+    `周期：${document.getElementById('ba-period')?.value||'全部'}`
+  ].join('  ·  ');
+  ws.mergeCells(4,1,4,7);
+  ws.getCell(4,1).value = filterDesc;
+  ws.getCell(4,1).font = { size:10, color:{ argb:'FF8EA0B3' }, name:'Microsoft YaHei' };
+  ws.getCell(4,1).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF0F1620' } };
+  const headerRow = ws.addRow(['时间','攻方','攻方武将','结果','守方武将','守方','查看']);
+  headerRow.eachCell(c=>applyExcelHeaderStyle(c));
+  [...tbody.querySelectorAll('tr')].forEach((tr,i)=>{
+    const cells = [...tr.querySelectorAll('td')].map(td=>td.innerText.trim().replace(/\n+/g,' / '));
+    const row = ws.addRow(cells);
+    row.eachCell((c,col)=>{ applyExcelBodyStyle(c, i%2===0?'FF0D1420':'FF101929', [1,2,3,5,6].includes(col)?'left':'center'); });
+    if(String(cells[3]||'').includes('胜')) row.getCell(4).font = { ...row.getCell(4).font, bold:true, color:{ argb:'FF46B06E' } };
+    else if(String(cells[3]||'').includes('败')) row.getCell(4).font = { ...row.getCell(4).font, bold:true, color:{ argb:'FFE05050' } };
+    else row.getCell(4).font = { ...row.getCell(4).font, bold:true, color:{ argb:'FFC8A044' } };
+  });
+  finishWorksheetLayout(ws, [20,18,28,10,28,18,10], 5);
+  return wb.xlsx.writeBuffer().then(buf=>{
+    const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `全部战报_${new Date().toISOString().slice(0,10)}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+}
+
+async function exportCurrentPageTableGeneric(){
+  if(!ensureExportLibraries()) return;
+  const pageEl = getCurrentPageEl();
+  const snap = getPageExportSnapshot(pageEl);
+  if(!snap || !snap.tables.length){
+    showToast('当前页面没有可导出的表格','var(--red)');
+    return;
+  }
+  const wb = new ExcelJS.Workbook();
+  wb.creator = '率土战场指挥台';
+  wb.created = new Date();
+  snap.tables.forEach((table, idx)=>{
+    const ws = wb.addWorksheet((table.title || `表格${idx+1}`).slice(0,31));
+    const title = snap.title || '页面导出';
+    const colCount = Math.max(1, table.headers.length || (table.rows[0]?.length || 1));
+    buildWorkbookCover(ws, title, `${table.title || `表格 ${idx+1}`}  ·  导出时间：${new Date().toLocaleString('zh-CN', { hour12:false })}`, colCount);
+    if(snap.stats.length){
+      ws.addRow([]);
+      const labels = snap.stats.map(s=>s.label);
+      const values = snap.stats.map(s=>s.value);
+      const r1 = ws.addRow(labels);
+      const r2 = ws.addRow(values);
+      r1.eachCell(c=>applyExcelHeaderStyle(c,'FF111A28','FFE8C86A',10));
+      r2.eachCell(c=>applyExcelBodyStyle(c,'FF101929','right'));
+      ws.addRow([]);
+    } else {
+      ws.addRow([]);
+    }
+    const headerRow = ws.addRow(table.headers);
+    headerRow.eachCell(c=>applyExcelHeaderStyle(c));
+    table.rows.forEach((row, ridx)=>{
+      const excelRow = ws.addRow(row);
+      excelRow.eachCell(cell=>applyExcelBodyStyle(cell, ridx % 2 === 0 ? 'FF0D1420' : 'FF101929'));
+    });
+    const widths = Array.from({length: colCount}, (_, i)=>Math.min(40, Math.max(12, Math.max(...ws.getColumn(i+1).values.filter(Boolean).map(v=>String(v).length)) + 2)));
+    finishWorksheetLayout(ws, widths, snap.stats.length ? 6 : 4);
+  });
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${String(snap.title || '页面导出').replace(/[\\/:*?"<>|]/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+async function exportCurrentPageTable(){
+  const pageEl = getCurrentPageEl();
+  const id = pageEl?.id || '';
+  if(id === 'tab23') return exportTeamReportExcel();
+  if(id === 'tab14') return exportTeamUsersExcel();
+  if(id === 'tab18') return exportUnionListExcel();
+  if(id === 'tab10') return exportBattlesAllExcel();
+  return exportCurrentPageTableGeneric();
+}
+
+function injectPageExportButtons(){
+  document.querySelectorAll('.page').forEach(page=>{
+    const head = page.querySelector('.tbl-head');
+    if(!head || head.dataset.exportInjected === '1') return;
+    let controls = head.querySelector('.tbl-controls');
+    if(!controls){
+      controls = document.createElement('div');
+      controls.className = 'tbl-controls';
+      head.appendChild(controls);
+    }
+    const pdfBtn = document.createElement('button');
+    pdfBtn.className = 'btn';
+    pdfBtn.textContent = '📄 导出PDF';
+    pdfBtn.onclick = ()=>exportCurrentPagePDF();
+    const tableBtn = document.createElement('button');
+    tableBtn.className = 'btn';
+    tableBtn.textContent = '📋 导出表格';
+    tableBtn.onclick = ()=>exportCurrentPageTable();
+    controls.appendChild(pdfBtn);
+    controls.appendChild(tableBtn);
+    head.dataset.exportInjected = '1';
+  });
+}
+
+// 添加样式
+(function(){
+  const s = document.createElement('style');
+  s.textContent = `.msg-filter-btn{padding:4px 14px;background:var(--panel2);border:1px solid var(--border);color:var(--text2);border-radius:3px;cursor:pointer;font-size:.78rem;transition:all .2s}
+.msg-filter-btn.active{background:#1a2535;color:var(--gold);border-color:var(--gold)}`;
+  document.head.appendChild(s);
+})();
+
+function filterMsg(kind){
+  _msgFilter = kind;
+  document.querySelectorAll('.msg-filter-btn').forEach(b=>b.classList.remove('active'));
+  const btnMap = {all:'msg-btn-all', chat:'msg-btn-chat', battle_notice:'msg-btn-notice'};
+  const btn = document.getElementById(btnMap[kind]);
+  if(btn) btn.classList.add('active');
+  renderMsgList();
+}
+
+function clearMsgList(){
+  _msgList = [];
+  _msgChatCount = 0;
+  _msgNoticeCount = 0;
+  document.getElementById('msg-chat-count').textContent = '0';
+  document.getElementById('msg-notice-count').textContent = '0';
+  renderMsgList();
+}
+
+function renderMsgList(){
+  const b = document.getElementById('msg-body');
+  if(!b) return;
+  const q = (document.getElementById('msg-search')||{}).value||'';
+  const filtered = _msgList.filter(m=>{
+    if(_msgFilter !== 'all' && m.kind !== _msgFilter) return false;
+    if(q){
+      const s = JSON.stringify(m).toLowerCase();
+      if(!s.includes(q.toLowerCase())) return false;
+    }
+    return true;
+  });
+  b.innerHTML = filtered.slice(0,300).map(m=>{
+    if(m.kind === 'chat'){
+      return `<tr>
+        <td style='color:var(--text2);font-size:.68rem;white-space:nowrap'>${esc(m.time_str||'')}</td>
+        <td><span class='badge' style='background:#1a1a2e;color:var(--cyan)'>💬 聊天</span></td>
+        <td style='color:var(--gold)'><b>${esc(m.sender||'')}</b></td>
+        <td style='color:var(--text2);font-size:.72rem'>${esc(m.union||'')}</td>
+        <td>${esc(m.text||'')}</td>
+      </tr>`;
+    } else {
+      const resClass = m.result===1||m.result===7||m.result===11?'badge-win':m.result===2||m.result===6||m.result===12?'badge-lose':'badge-draw';
+      return `<tr>
+        <td style='color:var(--text2);font-size:.68rem;white-space:nowrap'>${esc(m.time_str||'')}</td>
+        <td><span class='badge' style='background:#1a2010;color:var(--green)'>⚔ 战斗</span></td>
+        <td style='color:var(--red)'><b>${esc(m.atk_name||'')}</b></td>
+        <td style='color:var(--text2);font-size:.72rem'>${esc(m.def_union||'')}</td>
+        <td><span class='badge ${resClass}'>${esc(m.result_desc||'')}</span>
+          <span style='color:var(--text2);font-size:.7rem'> wx=${fmt(m.atk_gongxun||0)}</span>
+          <span style='color:var(--text2);font-size:.7rem'> ${esc(m.fight_type_name||'')} wid=${m.wid||''}</span>
+        </td>
+      </tr>`;
+    }
+  }).join('');
+}
+
+function onMsg834(evt){
+  const d = evt.data||{};
+  if(evt.type === 'chat_834'){
+    _msgChatCount++;
+    document.getElementById('msg-chat-count').textContent = _msgChatCount;
+    _msgList.unshift({kind:'chat', ...d});
+  } else if(evt.type === 'battle_notice'){
+    _msgNoticeCount++;
+    const el=document.getElementById('msg-notice-count');
+    if(el) el.textContent = _msgNoticeCount;
+    _msgList.unshift({kind:'battle_notice', ...d});
+  }
+  if(_msgList.length > 500) _msgList.length = 500;
+  // 只有当前在 tab21 时才实时刷新
+  if(document.getElementById('tab21')&&document.getElementById('tab21').classList.contains('active')){
+    renderMsgList();
+  }
+}
+
+/*
+ * Disabled duplicate module.
+ * The export and message functions below are byte-for-byte duplicates of the
+ * active definitions above. They remain temporarily as commented migration
+ * context and are excluded from runtime execution.
+ */
+/*
 function exportTeamReportPretty(){
   return exportTeamReportPDF();
 }
@@ -3787,644 +5296,4 @@ function onMsg834(evt){
     renderMsgList();
   }
 }
-
-function exportTeamReportPretty(){
-  return exportTeamReportPDF();
-}
-
-function exportTeamReportPDF(){
-  const w = openTeamReportExportWindow();
-  if(!w) return;
-  setTimeout(()=>w.print(), 350);
-}
-
-function exportTeamReportLongImage(){
-  const extraScript = `<script>
-    document.body.classList.add('long-shot');
-    const bar = document.createElement('div');
-    bar.className = 'action-bar';
-    bar.innerHTML = '<button class="action-btn" id="save-long-shot">保存长图</button><button class="action-btn secondary" onclick="window.print()">打印 / 另存PDF</button>';
-    const shell = document.querySelector('.page-shell') || document.body;
-    shell.insertBefore(bar, shell.firstChild);
-    function downloadLongShot(){
-      try{
-        const page = document.getElementById('team-report-page');
-        const shellEl = document.querySelector('.page-shell') || page;
-        const oldBg = document.body.style.background;
-        document.body.style.background = '#f4ecde';
-        const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + shellEl.scrollWidth + '" height="' + shellEl.scrollHeight + '">' +
-          '<foreignObject width="100%" height="100%">' + new XMLSerializer().serializeToString(shellEl) + '</foreignObject>' +
-          '</svg>';
-        const blob = new Blob([svg], {type:'image/svg+xml;charset=utf-8'});
-        const url = URL.createObjectURL(blob);
-        const img = new Image();
-        img.onload = function(){
-          const canvas = document.createElement('canvas');
-          canvas.width = shellEl.scrollWidth;
-          canvas.height = shellEl.scrollHeight;
-          const ctx = canvas.getContext('2d');
-          ctx.fillStyle = '#f4ecde';
-          ctx.fillRect(0,0,canvas.width,canvas.height);
-          ctx.drawImage(img,0,0);
-          URL.revokeObjectURL(url);
-          document.body.style.background = oldBg;
-          const a = document.createElement('a');
-          a.href = canvas.toDataURL('image/png');
-          a.download = '团数据长图_' + new Date().toISOString().slice(0,10) + '.png';
-          a.click();
-        };
-        img.onerror = function(){
-          URL.revokeObjectURL(url);
-          alert('当前浏览器不支持直接生成长图，请改用“打印 / 另存PDF”。');
-        };
-        img.src = url;
-      }catch(e){
-        alert('生成长图失败：' + (e && e.message ? e.message : e));
-      }
-    }
-    document.getElementById('save-long-shot').addEventListener('click', downloadLongShot);
-  <\/script>`;
-  const w = openTeamReportExportWindow(extraScript);
-  if(!w) return;
-}
-
-function exportTeamReportCSV(){
-  if(!_trData) return;
-  const dim = document.getElementById('tr-dim')?.value||'group';
-  const isGroup = dim==='group';
-  const headers = isGroup
-    ? ['#','分组','人数','战报','胜','败','平','胜率%','攻城','总功勋','平均武勋','平均势力值']
-    : ['#','成员','分组','战报','胜','败','平','胜率%','攻城','功勋','势力值'];
-  const rows = (_trData.rows||[]).map((r,i)=> isGroup
-    ? [i+1, r.name||'', r.player_cnt||0, r.battles, r.wins, r.loses, r.draws||0, r.win_rate, r.city_battles||0, r.total_gongxun||0, r.avg_gongxun||0, r.avg_power||0]
-    : [i+1, r.name||'', r.group_name||'', r.battles, r.wins, r.loses, r.draws||0, r.win_rate, r.city_battles||0, r.total_gongxun||0, r.power||0]
-  );
-  const csv = [headers,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `团数据_${_trPeriod}_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-}
-
-function getCurrentPageEl(){
-  return document.querySelector('.page.active') || document.querySelector('.page');
-}
-
-function getCurrentPageTitle(pageEl){
-  if(!pageEl) return '页面';
-  const headTitle = pageEl.querySelector('.tbl-head h3');
-  if(headTitle && headTitle.textContent.trim()) return headTitle.textContent.trim();
-  const navBtn = document.querySelector(`nav button[onclick*="${pageEl.id?.replace('tab','')}"].active`);
-  if(navBtn && navBtn.textContent.trim()) return navBtn.textContent.trim();
-  return pageEl.id || '页面';
-}
-
-function buildPageExportHtml(pageEl, options={}){
-  if(!pageEl) return '';
-  const title = options.title || getCurrentPageTitle(pageEl);
-  const nowText = new Date().toLocaleString('zh-CN', { hour12:false });
-  const clone = pageEl.cloneNode(true);
-  clone.querySelectorAll('button').forEach(btn=>btn.remove());
-  clone.querySelectorAll('[onclick]').forEach(el=>el.removeAttribute('onclick'));
-  clone.querySelectorAll('input').forEach(inp=>{
-    const span = document.createElement('span');
-    span.textContent = inp.value || inp.placeholder || '';
-    span.style.cssText = 'display:inline-block;min-width:48px;padding:6px 10px;border:1px solid #d6c8ad;border-radius:999px;background:#fbf6ed;color:#2a241c;box-shadow:inset 0 1px 0 rgba(255,255,255,.55);';
-    inp.replaceWith(span);
-  });
-  clone.querySelectorAll('select').forEach(sel=>{
-    const span = document.createElement('span');
-    const text = sel.options && sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex].text : '';
-    span.textContent = text;
-    span.style.cssText = 'display:inline-block;min-width:48px;padding:6px 10px;border:1px solid #d6c8ad;border-radius:999px;background:#fbf6ed;color:#2a241c;box-shadow:inset 0 1px 0 rgba(255,255,255,.55);';
-    sel.replaceWith(span);
-  });
-  clone.querySelectorAll('.tbl-scroll,.feed').forEach(el=>{
-    el.style.maxHeight = 'none';
-    el.style.overflow = 'visible';
-  });
-  clone.querySelectorAll('thead th').forEach(th=>th.style.position='static');
-  const content = clone.innerHTML;
-  return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<title>${title}</title>
-<style>
-  :root{
-    --paper:#f8f1e4;--paper-soft:#f3e8d6;--paper-soft-2:#eadcc4;--paper-edge:#e1d1b4;--line:#d7c3a0;
-    --text:#2a241c;--muted:#7a6956;--title:#1b1510;--accent:#8f6a2a;--accent-soft:#e7d8ba;
-    --green:#41664d;--red:#9a4d41;--blue:#4e6a8d;--cyan:#557978;--purple:#705c8d;
-  }
-  @page{size:A4 landscape;margin:12mm;}
-  body{
-    margin:0;padding:30px;color:var(--text);font-family:'SimSun','宋体',serif;
-    background:
-      radial-gradient(circle at top left, rgba(143,106,42,.08), transparent 28%),
-      radial-gradient(circle at bottom right, rgba(122,105,86,.08), transparent 24%),
-      linear-gradient(180deg,#fbf5ea 0%,#f4ecde 100%);
-    -webkit-print-color-adjust:exact;print-color-adjust:exact;
-  }
-  .page-shell{
-    max-width:1520px;margin:0 auto;padding:18px 18px 10px;
-    background:linear-gradient(180deg,rgba(255,251,245,.94) 0%,rgba(248,241,228,.96) 100%);
-    border:1px solid var(--paper-edge);border-radius:18px;
-    box-shadow:0 18px 40px rgba(120,90,45,.10), inset 0 1px 0 rgba(255,255,255,.55);
-    position:relative;overflow:hidden;
-  }
-  .page-shell::before{
-    content:'';position:absolute;inset:10px;border:1px solid rgba(143,106,42,.18);border-radius:12px;pointer-events:none;
-  }
-  .export-header{
-    position:relative;display:flex;justify-content:space-between;align-items:flex-end;
-    border-bottom:2px solid rgba(143,106,42,.45);padding:4px 8px 16px;margin-bottom:22px;gap:12px;
-  }
-  .export-header::after{
-    content:'';position:absolute;left:0;bottom:-2px;width:140px;height:4px;border-radius:999px;
-    background:linear-gradient(90deg,var(--accent),rgba(143,106,42,0));
-  }
-  .export-title{font-size:30px;letter-spacing:.14em;color:var(--title);font-weight:700;}
-  .export-subtitle{margin-top:6px;color:var(--muted);font-size:13px;letter-spacing:.04em;}
-  .export-meta{font-size:13px;color:var(--muted);text-align:right;line-height:1.8;}
-  .page{display:block !important;animation:none !important;position:relative;z-index:1;}
-  .cards-row{display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
-  .stat-card{
-    flex:1;min-width:148px;background:linear-gradient(180deg,#fffaf1 0%,#f4ead9 100%);
-    border:1px solid var(--line);border-radius:16px;padding:16px 14px;text-align:center;
-    box-shadow:0 10px 20px rgba(143,106,42,.08), inset 0 1px 0 rgba(255,255,255,.55);
-  }
-  .stat-card .val{font-size:30px;color:var(--title);line-height:1.1;font-weight:700;}
-  .stat-card .lbl{margin-top:6px;font-size:12px;color:var(--muted);letter-spacing:.14em;}
-  .tbl-wrap{
-    background:rgba(255,250,242,.94);border:1px solid var(--line);border-radius:16px;overflow:hidden;
-    box-shadow:0 10px 24px rgba(86,65,33,.06), inset 0 1px 0 rgba(255,255,255,.55);
-  }
-  .tbl-head{
-    display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--line);
-    background:linear-gradient(180deg,#f7ecdc 0%,#efdfc5 100%);
-  }
-  .tbl-head h3{font-size:.92rem;letter-spacing:.12em;color:var(--title);margin:0;}
-  .tbl-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);}
-  .tbl-scroll,.feed{max-height:none !important;overflow:visible !important;}
-  table{width:100%;border-collapse:collapse;font-size:14px;background:transparent;}
-  thead th{
-    padding:11px 12px;background:#efe2cc;color:var(--muted);text-align:left;border-bottom:1px solid var(--line);
-    position:static !important;font-weight:600;
-  }
-  tbody td{padding:10px 12px;color:var(--text);border-bottom:1px solid rgba(215,195,160,.55);white-space:nowrap;}
-  tbody tr:nth-child(odd){background:rgba(255,251,245,.82);}
-  tbody tr:nth-child(even){background:rgba(248,239,224,.66);}
-  .badge{
-    display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;
-    background:var(--accent-soft);color:var(--text);border:1px solid #d7c19a;
-  }
-  .feed-item,.bar-row{break-inside:avoid;}
-  .bar-track{background:#e8dac0 !important;border:1px solid var(--line) !important;border-radius:999px !important;}
-  .bar-fill{border-radius:999px !important;}
-  .prog{background:#e8dac0 !important;}
-  .export-footer{margin-top:16px;color:var(--muted);font-size:12px;text-align:right;}
-  .rank-1,.rank-2,.rank-3{color:var(--title) !important;font-weight:700;}
-  .btn{border-color:var(--line) !important;color:var(--text) !important;background:#f8f0e2 !important;}
-  tr[style*='background:#0d1420'],tr[style*='background:#101925'],tr[style*='background:var(--panel2)'],tr[style*='background:#121c2a'],tr[style*='background:#101929'],tr[style*='background:#111a28']{background:rgba(248,239,224,.66) !important;}
-  td[style*='background:#0d1420'],td[style*='background:#101925'],td[style*='background:var(--panel2)'],td[style*='background:#121c2a'],td[style*='background:#101929'],td[style*='background:#111a28'],span[style*='background:#0d1520'],span[style*='background:#0d1820'],span[style*='background:#111a28'],span[style*='background:#172232'],div[style*='background:#0d1520'],div[style*='background:#0d1820'],div[style*='background:#111a28'],div[style*='background:#172232']{background:var(--accent-soft) !important;color:var(--text) !important;border-color:#d7c19a !important;}
-  img{filter:saturate(.88) contrast(.96);}
-  [style*='box-shadow']{box-shadow:none !important;}
-  [style*='text-shadow']{text-shadow:none !important;}
-  [style*='color:transparent']{color:var(--text) !important;}
-  [style*='opacity:0']{opacity:1 !important;}
-  [style*='var(--gold)'],[style*='var(--gold2)']{color:var(--accent) !important;}
-  [style*='var(--green)']{color:var(--green) !important;}
-  [style*='var(--red)']{color:var(--red) !important;}
-  [style*='var(--blue)']{color:var(--blue) !important;}
-  [style*='var(--cyan)']{color:var(--cyan) !important;}
-  [style*='var(--purple)']{color:var(--purple) !important;}
-  [style*='var(--text2)'],[style*='color:#7a8a9a'],[style*='color:#66788b'],[style*='color:#8ea0b3']{color:var(--muted) !important;}
-  [style*='color:var(--text)'],[style*='color:#d4cfc0'],[style*='color:#fff'],[style*='color:white']{color:var(--text) !important;}
-  input,select,span[style*='border:1px solid #cfd6de']{background:#fbf6ed !important;color:var(--text) !important;border-color:#d6c8ad !important;}
-  @media print{
-    body{padding:0;background:#fff !important;color:var(--text) !important;}
-    .page-shell{max-width:none;box-shadow:none;border-radius:0;}
-    .tbl-wrap,.stat-card{break-inside:avoid;box-shadow:none !important;}
-    .tbl-wrap,.stat-card,table{box-shadow:none !important;}
-  }
-</style>
-</head>
-<body>
-  <div class="page-shell">
-    <div class="export-header">
-      <div>
-        <div class="export-title">${title}</div>
-        <div class="export-subtitle">当前页面导出（米色古风战报）</div>
-      </div>
-      <div class="export-meta">
-        <div>导出时间：${nowText}</div>
-      </div>
-    </div>
-    ${content}
-    <div class="export-footer">率土战场指挥台 · 页面导出</div>
-  </div>
-</body>
-</html>`;
-}
-
-function openExportWindowFromHtml(html){
-  if(!html) return null;
-  const w = window.open('', '_blank');
-  if(!w){ showToast('请允许弹窗后再导出','var(--red)'); return null; }
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
-  return w;
-}
-
-function getPageExportSnapshot(pageEl){
-  if(!pageEl) return null;
-  const title = getCurrentPageTitle(pageEl);
-  const tables = [...pageEl.querySelectorAll('table')].map((table, idx)=>{
-    const wrap = table.closest('.tbl-wrap') || table.parentElement;
-    const h3 = wrap?.querySelector('.tbl-head h3');
-    const secTitle = h3?.textContent?.trim() || `表格 ${idx+1}`;
-    const headers = [...table.querySelectorAll('thead th')].map(th=>th.innerText.trim());
-    const rows = [...table.querySelectorAll('tbody tr')].map(tr=>[...tr.querySelectorAll('td')].map(td=>td.innerText.trim().replace(/\n+/g,' / ')));
-    return { title: secTitle, headers, rows };
-  });
-  const stats = [...pageEl.querySelectorAll('.stat-card')].map(card=>({
-    value: card.querySelector('.val')?.innerText?.trim() || '',
-    label: card.querySelector('.lbl')?.innerText?.trim() || ''
-  })).filter(x=>x.value || x.label);
-  return { title, tables, stats };
-}
-
-function ensureExportLibraries(){
-  const hasExcel = typeof ExcelJS !== 'undefined';
-  const hasPdf = !!(window.jspdf && window.jspdf.jsPDF);
-  if(!hasExcel || !hasPdf){
-    showToast('导出库加载中，请稍后再试','var(--red)');
-    return false;
-  }
-  return true;
-}
-
-async function exportCurrentPagePDF(){
-  const pageEl = getCurrentPageEl();
-  const html = buildPageExportHtml(pageEl);
-  const w = openExportWindowFromHtml(html);
-  if(!w) return;
-  setTimeout(()=>w.print(), 350);
-}
-
-function applyExcelHeaderStyle(cell, fill='FF121D2C', color='FF8EA0B3', size=11){
-  cell.font = { bold:true, color:{ argb:color }, name:'Microsoft YaHei', size };
-  cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:fill } };
-  cell.alignment = { vertical:'middle', horizontal:'center', wrapText:true };
-  cell.border = { top:{style:'thin',color:{argb:'FF1D2A3C'}}, left:{style:'thin',color:{argb:'FF1D2A3C'}}, bottom:{style:'thin',color:{argb:'FF1D2A3C'}}, right:{style:'thin',color:{argb:'FF1D2A3C'}} };
-}
-
-function applyExcelBodyStyle(cell, fill='FF0F1620', align='left'){
-  cell.font = { color:{ argb:'FFD8D2C0' }, name:'Microsoft YaHei', size:10 };
-  cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:fill } };
-  cell.alignment = { vertical:'middle', horizontal:align, wrapText:true };
-  cell.border = { top:{style:'thin',color:{argb:'FF172232'}}, left:{style:'thin',color:{argb:'FF172232'}}, bottom:{style:'thin',color:{argb:'FF172232'}}, right:{style:'thin',color:{argb:'FF172232'}} };
-}
-
-function finishWorksheetLayout(ws, widths, frozenRows=5){
-  ws.columns = widths.map(w=>({ width:w }));
-  ws.views = [{ state:'frozen', ySplit:frozenRows }];
-  if(ws.rowCount >= frozenRows){
-    ws.autoFilter = { from: { row:frozenRows, column:1 }, to: { row:frozenRows, column:widths.length } };
-  }
-}
-
-function buildWorkbookCover(ws, title, subtitle, colCount){
-  ws.mergeCells(1,1,1,colCount);
-  ws.getCell(1,1).value = title;
-  ws.getCell(1,1).font = { size:18, bold:true, color:{ argb:'FFE8C86A' }, name:'Microsoft YaHei' };
-  ws.getCell(1,1).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF0B1019' } };
-  ws.getCell(1,1).alignment = { vertical:'middle', horizontal:'left' };
-  ws.mergeCells(2,1,2,colCount);
-  ws.getCell(2,1).value = subtitle;
-  ws.getCell(2,1).font = { size:10, color:{ argb:'FF8EA0B3' }, name:'Microsoft YaHei' };
-  ws.getCell(2,1).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF0F1620' } };
-}
-
-function exportTeamReportExcel(){
-  if(!_trData) return exportCurrentPageTableGeneric();
-  const wb = new ExcelJS.Workbook();
-  wb.creator = '率土战场指挥台';
-  wb.created = new Date();
-  const ws = wb.addWorksheet('团数据');
-  const dim = document.getElementById('tr-dim')?.value||'group';
-  const isGroup = dim==='group';
-  const periodName = {today:'今日',yesterday:'昨日',week:'本周',lastweek:'上周',all:'全部'}[_trPeriod]||'全部';
-  const s = _trData.summary || {};
-  const rows = _trData.rows || [];
-  buildWorkbookCover(ws, `团数据统计报告（${isGroup?'按分组':'按成员'}）`, `统计周期：${periodName}  ·  导出时间：${new Date().toLocaleString('zh-CN',{hour12:false})}`, isGroup ? 12 : 11);
-  ws.addRow([]);
-  const statLabelRow = ws.addRow(['总战报','胜率','参战人数','平局','攻城场次','总功勋']);
-  const statValueRow = ws.addRow([s.total_battles||0, (s.win_rate||0)/100, s.total_players||0, s.total_draws||0, s.total_city||0, s.total_gongxun||0]);
-  statLabelRow.eachCell(c=>applyExcelHeaderStyle(c,'FF111A28','FFE8C86A',10));
-  statValueRow.eachCell((c,idx)=>{ applyExcelBodyStyle(c,'FF101929', idx===2?'center':'right'); c.numFmt = idx===2 ? '0%' : '#,##0'; });
-  ws.addRow([]);
-  const headers = isGroup
-    ? ['排名','分组','人数','战报','胜','败','平','胜率','攻城','总功勋','平均武勋','平均势力值']
-    : ['排名','成员','分组','战报','胜','败','平','胜率','攻城','功勋','势力值'];
-  const headerRow = ws.addRow(headers);
-  headerRow.eachCell(c=>applyExcelHeaderStyle(c));
-  rows.forEach((r,i)=>{
-    const row = ws.addRow(isGroup
-      ? [i+1, r.name||'', r.player_cnt||0, r.battles||0, r.wins||0, r.loses||0, r.draws||0, (Number(r.win_rate||0))/100, r.city_battles||0, r.total_gongxun||0, Math.round(Number(r.avg_gongxun||0)), Math.round(Number(r.avg_power||0))]
-      : [i+1, r.name||'', r.group_name||'', r.battles||0, r.wins||0, r.loses||0, r.draws||0, (Number(r.win_rate||0))/100, r.city_battles||0, r.total_gongxun||0, r.power||0]
-    );
-    row.eachCell((c,col)=>{
-      applyExcelBodyStyle(c, i%2===0?'FF0D1420':'FF101929', [2,3].includes(col)?'left':'right');
-      if(col===8) c.numFmt = '0%';
-      else if(col>=1) c.numFmt = col===2 || col===3 ? '@' : '#,##0';
-    });
-    row.getCell(2).font = { ...row.getCell(2).font, bold:true, color:{ argb:'FFE8C86A' } };
-    row.getCell(8).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:(Number(r.win_rate||0)>=60?'FF163020':Number(r.win_rate||0)>=40?'FF3A3318':'FF301818') } };
-  });
-  finishWorksheetLayout(ws, isGroup?[8,16,10,10,8,8,8,10,10,14,12,14]:[8,14,12,10,8,8,8,10,10,14,14], 6);
-  return wb.xlsx.writeBuffer().then(buf=>{
-    const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `团数据_${periodName}_${new Date().toISOString().slice(0,10)}.xlsx`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  });
-}
-
-function exportTeamUsersExcel(){
-  if(!_tuData?.length) return exportCurrentPageTableGeneric();
-  const wb = new ExcelJS.Workbook();
-  wb.creator = '率土战场指挥台';
-  wb.created = new Date();
-  const ws = wb.addWorksheet('同盟成员');
-  const totalPower = _tuData.reduce((a,b)=>a+(b.power||0),0);
-  const totalWu = _tuData.reduce((a,b)=>a+(b.wuxun||0),0);
-  buildWorkbookCover(ws, '同盟成员总览', `导出时间：${new Date().toLocaleString('zh-CN',{hour12:false})}`, 9);
-  ws.addRow([]);
-  const statLabelRow = ws.addRow(['同盟人数','总势力值','总武勋']);
-  const statValueRow = ws.addRow([_tuData.length, totalPower, totalWu]);
-  statLabelRow.eachCell(c=>applyExcelHeaderStyle(c,'FF111A28','FFE8C86A',10));
-  statValueRow.eachCell(c=>{ applyExcelBodyStyle(c,'FF101929','right'); c.numFmt='#,##0'; });
-  ws.addRow([]);
-  const headerRow = ws.addRow(['成员','UID','职位','势力值','武勋','周贡献','总贡献','分组','加入日期']);
-  headerRow.eachCell(c=>applyExcelHeaderStyle(c));
-  _tuData.forEach((r,i)=>{
-    const row = ws.addRow([r.name||'', r.uid||0, POS_MAP[r.pos]||('职位'+(r.pos||0)), r.power||0, r.wuxun||0, r.contribute_week||0, r.contribute_total||0, r.group_name||'未分组', r.join_time ? new Date(r.join_time*1000).toLocaleDateString('zh-CN') : '' ]);
-    row.eachCell((c,col)=>{ applyExcelBodyStyle(c, i%2===0?'FF0D1420':'FF101929', [1,3,8,9].includes(col)?'left':'right'); if([2,4,5,6,7].includes(col)) c.numFmt='#,##0'; });
-    row.getCell(1).font = { ...row.getCell(1).font, bold:true, color:{ argb:'FFE8C86A' } };
-    row.getCell(4).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF2A2410' } };
-    row.getCell(5).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF102430' } };
-  });
-  finishWorksheetLayout(ws, [14,14,12,14,14,12,12,12,12], 6);
-  return wb.xlsx.writeBuffer().then(buf=>{
-    const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `同盟成员_${new Date().toISOString().slice(0,10)}.xlsx`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  });
-}
-
-function exportUnionListExcel(){
-  if(!_ulData?.length) return exportCurrentPageTableGeneric();
-  const wb = new ExcelJS.Workbook();
-  wb.creator = '率土战场指挥台';
-  wb.created = new Date();
-  const ws = wb.addWorksheet('联盟列表');
-  const totalPower = _ulData.reduce((s,r)=>s+(r.power||0),0);
-  const totalMember = _ulData.reduce((s,r)=>s+(r.total_member||0),0);
-  buildWorkbookCover(ws, '联盟列表总览', `导出时间：${new Date().toLocaleString('zh-CN',{hour12:false})}`, 9);
-  ws.addRow([]);
-  const statLabelRow = ws.addRow(['联盟数','总势力值','总人数']);
-  const statValueRow = ws.addRow([_ulData.length, totalPower, totalMember]);
-  statLabelRow.eachCell(c=>applyExcelHeaderStyle(c,'FF111A28','FFE8C86A',10));
-  statValueRow.eachCell(c=>{ applyExcelBodyStyle(c,'FF101929','right'); c.numFmt='#,##0'; });
-  ws.addRow([]);
-  const headerRow = ws.addRow(['排名','联盟','等级','势力值','人数','占领值','NPC城','区域','更新时间']);
-  headerRow.eachCell(c=>applyExcelHeaderStyle(c));
-  _ulData.forEach((r,i)=>{
-    const row = ws.addRow([r.rank||i+1, r.name||'', r.level||0, r.power||0, r.total_member||0, r.occupy_city_value||0, r.total_npc_city||0, r.region||'', r.updated_at ? r.updated_at.slice(5,16) : '' ]);
-    row.eachCell((c,col)=>{ applyExcelBodyStyle(c, i%2===0?'FF0D1420':'FF101929', [2,8,9].includes(col)?'left':'right'); if([1,3,4,5,6,7].includes(col)) c.numFmt='#,##0'; });
-    row.getCell(1).font = { ...row.getCell(1).font, bold:true, color:{ argb:i<3?'FFE8C86A':'FFD8D2C0' } };
-    row.getCell(2).font = { ...row.getCell(2).font, bold:true, color:{ argb:'FFE8C86A' } };
-    row.getCell(4).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF2A2410' } };
-  });
-  finishWorksheetLayout(ws, [8,18,8,14,10,10,10,12,12], 6);
-  return wb.xlsx.writeBuffer().then(buf=>{
-    const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `联盟列表_${new Date().toISOString().slice(0,10)}.xlsx`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  });
-}
-
-function exportBattlesAllExcel(){
-  const pageEl = document.getElementById('tab10');
-  const tbody = pageEl?.querySelector('#ba-body');
-  if(!tbody || !tbody.children.length) return exportCurrentPageTableGeneric();
-  const wb = new ExcelJS.Workbook();
-  wb.creator = '率土战场指挥台';
-  wb.created = new Date();
-  const ws = wb.addWorksheet('全部战报');
-  buildWorkbookCover(ws, '全部战报导出', `导出时间：${new Date().toLocaleString('zh-CN',{hour12:false})}`, 7);
-  ws.addRow([]);
-  const filterDesc = [
-    `玩家：${document.getElementById('ba-player')?.value||'全部'}`,
-    `联盟：${document.getElementById('ba-union')?.value||'全部'}`,
-    `结果：${document.getElementById('ba-result')?.value||'全部'}`,
-    `类型：${document.getElementById('ba-ftype')?.value||'全部'}`,
-    `周期：${document.getElementById('ba-period')?.value||'全部'}`
-  ].join('  ·  ');
-  ws.mergeCells(4,1,4,7);
-  ws.getCell(4,1).value = filterDesc;
-  ws.getCell(4,1).font = { size:10, color:{ argb:'FF8EA0B3' }, name:'Microsoft YaHei' };
-  ws.getCell(4,1).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF0F1620' } };
-  const headerRow = ws.addRow(['时间','攻方','攻方武将','结果','守方武将','守方','查看']);
-  headerRow.eachCell(c=>applyExcelHeaderStyle(c));
-  [...tbody.querySelectorAll('tr')].forEach((tr,i)=>{
-    const cells = [...tr.querySelectorAll('td')].map(td=>td.innerText.trim().replace(/\n+/g,' / '));
-    const row = ws.addRow(cells);
-    row.eachCell((c,col)=>{ applyExcelBodyStyle(c, i%2===0?'FF0D1420':'FF101929', [1,2,3,5,6].includes(col)?'left':'center'); });
-    if(String(cells[3]||'').includes('胜')) row.getCell(4).font = { ...row.getCell(4).font, bold:true, color:{ argb:'FF46B06E' } };
-    else if(String(cells[3]||'').includes('败')) row.getCell(4).font = { ...row.getCell(4).font, bold:true, color:{ argb:'FFE05050' } };
-    else row.getCell(4).font = { ...row.getCell(4).font, bold:true, color:{ argb:'FFC8A044' } };
-  });
-  finishWorksheetLayout(ws, [20,18,28,10,28,18,10], 5);
-  return wb.xlsx.writeBuffer().then(buf=>{
-    const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `全部战报_${new Date().toISOString().slice(0,10)}.xlsx`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  });
-}
-
-async function exportCurrentPageTableGeneric(){
-  if(!ensureExportLibraries()) return;
-  const pageEl = getCurrentPageEl();
-  const snap = getPageExportSnapshot(pageEl);
-  if(!snap || !snap.tables.length){
-    showToast('当前页面没有可导出的表格','var(--red)');
-    return;
-  }
-  const wb = new ExcelJS.Workbook();
-  wb.creator = '率土战场指挥台';
-  wb.created = new Date();
-  snap.tables.forEach((table, idx)=>{
-    const ws = wb.addWorksheet((table.title || `表格${idx+1}`).slice(0,31));
-    const title = snap.title || '页面导出';
-    const colCount = Math.max(1, table.headers.length || (table.rows[0]?.length || 1));
-    buildWorkbookCover(ws, title, `${table.title || `表格 ${idx+1}`}  ·  导出时间：${new Date().toLocaleString('zh-CN', { hour12:false })}`, colCount);
-    if(snap.stats.length){
-      ws.addRow([]);
-      const labels = snap.stats.map(s=>s.label);
-      const values = snap.stats.map(s=>s.value);
-      const r1 = ws.addRow(labels);
-      const r2 = ws.addRow(values);
-      r1.eachCell(c=>applyExcelHeaderStyle(c,'FF111A28','FFE8C86A',10));
-      r2.eachCell(c=>applyExcelBodyStyle(c,'FF101929','right'));
-      ws.addRow([]);
-    } else {
-      ws.addRow([]);
-    }
-    const headerRow = ws.addRow(table.headers);
-    headerRow.eachCell(c=>applyExcelHeaderStyle(c));
-    table.rows.forEach((row, ridx)=>{
-      const excelRow = ws.addRow(row);
-      excelRow.eachCell(cell=>applyExcelBodyStyle(cell, ridx % 2 === 0 ? 'FF0D1420' : 'FF101929'));
-    });
-    const widths = Array.from({length: colCount}, (_, i)=>Math.min(40, Math.max(12, Math.max(...ws.getColumn(i+1).values.filter(Boolean).map(v=>String(v).length)) + 2)));
-    finishWorksheetLayout(ws, widths, snap.stats.length ? 6 : 4);
-  });
-  const buf = await wb.xlsx.writeBuffer();
-  const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `${String(snap.title || '页面导出').replace(/[\\/:*?"<>|]/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-async function exportCurrentPageTable(){
-  const pageEl = getCurrentPageEl();
-  const id = pageEl?.id || '';
-  if(id === 'tab23') return exportTeamReportExcel();
-  if(id === 'tab14') return exportTeamUsersExcel();
-  if(id === 'tab18') return exportUnionListExcel();
-  if(id === 'tab10') return exportBattlesAllExcel();
-  return exportCurrentPageTableGeneric();
-}
-
-function injectPageExportButtons(){
-  document.querySelectorAll('.page').forEach(page=>{
-    const head = page.querySelector('.tbl-head');
-    if(!head || head.dataset.exportInjected === '1') return;
-    let controls = head.querySelector('.tbl-controls');
-    if(!controls){
-      controls = document.createElement('div');
-      controls.className = 'tbl-controls';
-      head.appendChild(controls);
-    }
-    const pdfBtn = document.createElement('button');
-    pdfBtn.className = 'btn';
-    pdfBtn.textContent = '📄 导出PDF';
-    pdfBtn.onclick = ()=>exportCurrentPagePDF();
-    const tableBtn = document.createElement('button');
-    tableBtn.className = 'btn';
-    tableBtn.textContent = '📋 导出表格';
-    tableBtn.onclick = ()=>exportCurrentPageTable();
-    controls.appendChild(pdfBtn);
-    controls.appendChild(tableBtn);
-    head.dataset.exportInjected = '1';
-  });
-}
-
-// 添加样式
-(function(){
-  const s = document.createElement('style');
-  s.textContent = `.msg-filter-btn{padding:4px 14px;background:var(--panel2);border:1px solid var(--border);color:var(--text2);border-radius:3px;cursor:pointer;font-size:.78rem;transition:all .2s}
-.msg-filter-btn.active{background:#1a2535;color:var(--gold);border-color:var(--gold)}`;
-  document.head.appendChild(s);
-})();
-
-function filterMsg(kind){
-  _msgFilter = kind;
-  document.querySelectorAll('.msg-filter-btn').forEach(b=>b.classList.remove('active'));
-  const btnMap = {all:'msg-btn-all', chat:'msg-btn-chat', battle_notice:'msg-btn-notice'};
-  const btn = document.getElementById(btnMap[kind]);
-  if(btn) btn.classList.add('active');
-  renderMsgList();
-}
-
-function clearMsgList(){
-  _msgList = [];
-  _msgChatCount = 0;
-  _msgNoticeCount = 0;
-  document.getElementById('msg-chat-count').textContent = '0';
-  document.getElementById('msg-notice-count').textContent = '0';
-  renderMsgList();
-}
-
-function renderMsgList(){
-  const b = document.getElementById('msg-body');
-  if(!b) return;
-  const q = (document.getElementById('msg-search')||{}).value||'';
-  const filtered = _msgList.filter(m=>{
-    if(_msgFilter !== 'all' && m.kind !== _msgFilter) return false;
-    if(q){
-      const s = JSON.stringify(m).toLowerCase();
-      if(!s.includes(q.toLowerCase())) return false;
-    }
-    return true;
-  });
-  b.innerHTML = filtered.slice(0,300).map(m=>{
-    if(m.kind === 'chat'){
-      return `<tr>
-        <td style='color:var(--text2);font-size:.68rem;white-space:nowrap'>${esc(m.time_str||'')}</td>
-        <td><span class='badge' style='background:#1a1a2e;color:var(--cyan)'>💬 聊天</span></td>
-        <td style='color:var(--gold)'><b>${esc(m.sender||'')}</b></td>
-        <td style='color:var(--text2);font-size:.72rem'>${esc(m.union||'')}</td>
-        <td>${esc(m.text||'')}</td>
-      </tr>`;
-    } else {
-      const resClass = m.result===1||m.result===7||m.result===11?'badge-win':m.result===2||m.result===6||m.result===12?'badge-lose':'badge-draw';
-      return `<tr>
-        <td style='color:var(--text2);font-size:.68rem;white-space:nowrap'>${esc(m.time_str||'')}</td>
-        <td><span class='badge' style='background:#1a2010;color:var(--green)'>⚔ 战斗</span></td>
-        <td style='color:var(--red)'><b>${esc(m.atk_name||'')}</b></td>
-        <td style='color:var(--text2);font-size:.72rem'>${esc(m.def_union||'')}</td>
-        <td><span class='badge ${resClass}'>${esc(m.result_desc||'')}</span>
-          <span style='color:var(--text2);font-size:.7rem'> wx=${fmt(m.atk_gongxun||0)}</span>
-          <span style='color:var(--text2);font-size:.7rem'> ${esc(m.fight_type_name||'')} wid=${m.wid||''}</span>
-        </td>
-      </tr>`;
-    }
-  }).join('');
-}
-
-function onMsg834(evt){
-  const d = evt.data||{};
-  if(evt.type === 'chat_834'){
-    _msgChatCount++;
-    document.getElementById('msg-chat-count').textContent = _msgChatCount;
-    _msgList.unshift({kind:'chat', ...d});
-  } else if(evt.type === 'battle_notice'){
-    _msgNoticeCount++;
-    const el=document.getElementById('msg-notice-count');
-    if(el) el.textContent = _msgNoticeCount;
-    _msgList.unshift({kind:'battle_notice', ...d});
-  }
-  if(_msgList.length > 500) _msgList.length = 500;
-  // 只有当前在 tab21 时才实时刷新
-  if(document.getElementById('tab21')&&document.getElementById('tab21').classList.contains('active')){
-    renderMsgList();
-  }
-}
+*/

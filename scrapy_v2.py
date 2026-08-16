@@ -514,6 +514,7 @@ def run_sniff():
                 filter=bpf,
                 prn=process_packet,
                 store=0,
+                promisc=False,
                 stop_filter=lambda p: _sniff_stop_event.is_set(),
             )
         except Exception as e:

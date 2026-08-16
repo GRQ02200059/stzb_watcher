@@ -8,6 +8,7 @@ import sqlite3, json, os, time, glob, threading, queue, sys
 from datetime import datetime
 from collections import deque
 from world_scene.parser import WorldSceneAssembler, parse_world_scene_packet
+from world_scene.state_store import WorldStateStore
 from world_scene.store import WorldSceneStore
 
 APP_DIR      = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
@@ -157,7 +158,13 @@ def backfill_team_users_team_id(conn, player_name, team_id):
 
 def push_event(evt_type, data):
     """向所有订阅者推送事件，并记录到 recent_events"""
-    evt = {'type': evt_type, 'data': data, 'ts': datetime.now().strftime('%H:%M:%S')}
+    now = time.time()
+    evt = {
+        'type': evt_type,
+        'data': data,
+        'timestamp': now,
+        'ts': datetime.fromtimestamp(now).strftime('%H:%M:%S'),
+    }
     with _event_lock:
         recent_events.append(evt)
     # 广播给所有 SSE 连接
@@ -200,24 +207,31 @@ def persist_world_scene_packet(conn, msg_type, data, fpath, assembler=None):
         return None
     if packet.cmd_id == 5026 and not gate.snapshot_complete:
         return None
-    store = WorldSceneStore(conn)
+    applied_packet = gate.packet or packet
+    store = WorldStateStore(conn)
     store.ensure_schema()
-    seq = store.apply_packet(packet)
-    entity_count = sum(len(items) for items in packet.entities.values())
+    if applied_packet.cmd_id == 5026:
+        change_set = store.apply_baseline(applied_packet)
+    else:
+        change_set = store.apply_delta(applied_packet)
+    seq = change_set.packet_seq
+    entity_count = sum(len(items) for items in applied_packet.entities.values())
     return {
         'seq': seq,
-        'cmd_id': packet.cmd_id,
-        'server_order_id': packet.server_order_id,
+        'state_version': change_set.state_version,
+        'completeness': change_set.completeness,
+        'cmd_id': applied_packet.cmd_id,
+        'server_order_id': applied_packet.server_order_id,
         'snapshot_complete': bool(gate.snapshot_complete),
-        'source': packet.source,
+        'source': applied_packet.source,
         'counts': {
-            'tiles': len(packet.tiles),
-            'armies': len(packet.armies),
-            'deleted_armies': len(packet.direct_deleted_army_ids) + len(packet.block_deleted_army_ids),
-            'marches': len(packet.real_marches),
-            'visual_fields': 0 if packet.visual_field_raw in ({}, [], None, "") else 1,
+            'tiles': len(applied_packet.tiles),
+            'armies': len(applied_packet.armies),
+            'deleted_armies': len(applied_packet.direct_deleted_army_ids) + len(applied_packet.block_deleted_army_ids),
+            'marches': len(applied_packet.real_marches),
+            'visual_fields': 0 if applied_packet.visual_field_raw in ({}, [], None, "") else 1,
             'entities': entity_count,
-            'clear_chunks': len(packet.clear_chunks),
+            'clear_chunks': len(applied_packet.clear_chunks),
         },
     }
 
@@ -2631,6 +2645,35 @@ class RealtimeWriter:
                         'heroes': [h['hero_name'] for h in b['atk_heroes'][:3]],
                     })
                     print(f'[battle-0a] {b["atk_name"]} {b["result_desc"]} wx={b["atk_gongxun"]} vs {b["def_union"]} (id={b["battle_id"]})')
+
+        elif msg_type == '0000005c':
+            try:
+                battles = parse_battle_5c(data, fpath)
+                for b in battles:
+                    if upsert_battle_0a(conn, b):
+                        self.stats['battles'] += 1
+                        push_event('battle', {
+                            'battle_id': b['battle_id'],
+                            'atk_name': b['atk_name'],
+                            'atk_uid': b['atk_uid'],
+                            'result': b['result'],
+                            'result_desc': b['result_desc'],
+                            'time_str': b['time_str'],
+                            'fight_type': b['fight_type'],
+                            'fight_type_name': FIGHT_TYPE_MAP.get(b['fight_type'], str(b['fight_type'])),
+                            'wid': b['wid'],
+                            'wid_code': b['wid_code'],
+                            'def_name': b['def_name'],
+                            'def_union': b['def_union'],
+                            'def_level': b['def_level'],
+                            'atk_union': b['atk_union'],
+                            'atk_gongxun': b['atk_gongxun'],
+                            'atk_power': b['atk_power'],
+                            'heroes': [h['hero_name'] for h in b['atk_heroes'][:3]],
+                        })
+                        print(f'[battle-5c] {b["atk_name"]} {b["result_desc"]} wx={b["atk_gongxun"]} vs {b["def_union"]} (id={b["battle_id"]})')
+            except Exception as e:
+                print(f'[battle-5c ERR] {e}')
 
         elif msg_type == '00000067':
             try:

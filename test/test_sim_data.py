@@ -43,6 +43,52 @@ class SimDataTest(unittest.TestCase):
             self.assertIn(s["skill_type"], (1, 2, 3, 4))
             self.assertTrue(s["name"])
 
+    def test_heroes_expose_local_portrait_and_cdn_fallback(self):
+        by_id = {hero["id"]: hero for hero in sim_data.load_heroes()}
+        zhangliao = by_id[100027]
+
+        self.assertEqual(100027, zhangliao["iconId"])
+        self.assertEqual(
+            "/static/hero-portraits/cards/100027.webp",
+            zhangliao["portraitUrl"],
+        )
+        self.assertTrue(zhangliao["portraitLocal"])
+        self.assertIn(
+            "card_medium_100027.jpg",
+            zhangliao["portraitFallbackUrl"],
+        )
+
+    def test_corrupt_local_portrait_uses_placeholder_and_cdn_fallback(self):
+        by_id = {hero["id"]: hero for hero in sim_data.load_heroes()}
+        weiyan = by_id[100649]
+
+        self.assertFalse(weiyan["portraitLocal"])
+        self.assertEqual(
+            "/static/hero-portraits/placeholder.svg",
+            weiyan["portraitUrl"],
+        )
+        self.assertIn(
+            "card_medium_100649.jpg",
+            weiyan["portraitFallbackUrl"],
+        )
+
+    def test_missing_local_portrait_uses_placeholder(self):
+        hero = sim_data._portrait_fields(
+            hero_id=999999,
+            icon_id=999999,
+            manifest={"heroes": {}},
+        )
+
+        self.assertFalse(hero["portraitLocal"])
+        self.assertEqual(
+            "/static/hero-portraits/placeholder.svg",
+            hero["portraitUrl"],
+        )
+        self.assertIn(
+            "card_medium_999999.jpg",
+            hero["portraitFallbackUrl"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

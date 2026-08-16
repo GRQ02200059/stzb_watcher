@@ -1,9 +1,79 @@
 const API='';
 let _battles=0,_wx=0,_players=new Set(),_sync=0,_evtCnt=0;
+let _sseReconnectAttempt=0,_sseReconnectTimer=null,_sseConnection=null;
+const SSE_ERROR_TOAST_THRESHOLD=3;
 
-const RESULT_MAP={0:'平局',1:'攻方胜',2:'守方胜',3:'攻方溃',4:'守方溃',5:'双溃',6:'守方胜(NPC)',7:'攻方胜',8:'攻方溃',9:'守方溃',10:'平局',11:'攻方胜',12:'守方胜',13:'攻方溃',14:'守方溃',15:'双溃'};
-const FIGHT_MAP={0:'野战',1:'援军',2:'援军',11:'攻城',27:'宝物',33:'大城',35:'援军',80:'攻城',102:'攻城',140:'攻城',141:'攻城',184:'攻城',194:'攻城',209:'攻城',224:'攻城'};
-const REGION_MAP={1:'司隶',2:'雍州',3:'兖州',4:'豫州',5:'冀州',6:'青州',7:'徐州',8:'凉州',9:'并州',10:'扬州',11:'益州',12:'幽州',13:'荆州'};
+function createStreamConnectionTracker({
+  errorToastThreshold=3,
+  onRestored=()=>{},
+  onErrorThreshold=()=>{},
+}={}){
+  let state="connecting";
+  let hasOpened=false;
+  let consecutiveErrors=0;
+  let errorToastShown=false;
+  return {
+    open(){
+      const restored=hasOpened&&(state==="error"||state==="stale");
+      state="open";
+      hasOpened=true;
+      consecutiveErrors=0;
+      errorToastShown=false;
+      if(restored) onRestored();
+      return state;
+    },
+    error(){
+      state="error";
+      consecutiveErrors+=1;
+      if(consecutiveErrors>=errorToastThreshold&&!errorToastShown){
+        errorToastShown=true;
+        onErrorThreshold();
+      }
+      return state;
+    },
+    markStale(){
+      state="stale";
+      return state;
+    },
+    get state(){
+      return state;
+    },
+    get hasOpened(){
+      return hasOpened;
+    },
+  };
+}
+
+const streamConnectionTracker=createStreamConnectionTracker({
+  errorToastThreshold:SSE_ERROR_TOAST_THRESHOLD,
+  onRestored(){
+    window.HudSystem?.emit({
+      type:"connection:restored",
+      target:"#cstat",
+      domain:"system",
+      severity:"success",
+      message:"实时连接已恢复",
+      timestamp:Date.now(),
+      dedupeKey:"connection:restored",
+    });
+  },
+  onErrorThreshold(){
+    window.HudSystem?.toast({
+      severity:"warning",
+      title:"实时连接中断",
+      message:"正在后台重试，恢复后将自动刷新当前页面。",
+      source:"实时数据流",
+      timestamp:Date.now(),
+      dedupeKey: "connection:error",
+    });
+  },
+});
+window.markStreamStale=()=>streamConnectionTracker.markStale();
+
+const RESULT_MAP=STZB_META.results;
+const FIGHT_MAP=STZB_META.fightTypes;
+const REGION_MAP=STZB_META.regions;
+const VISIBLE_HOME_TABS=new Set([33]);
 
 function regionName(v){
   const n=Number(v||0);
@@ -17,12 +87,28 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 function fmt(n){return Number(n||0).toLocaleString();}
 function showToast(m,c='var(--green)'){const t=document.getElementById('toast');t.textContent=m;t.style.borderColor=c;t.style.color=c;t.style.opacity='1';setTimeout(()=>t.style.opacity='0',3000);}
 
+function applyOrganizationRowState(row, selected, rowData={}){
+  if(!row) return row;
+  row.dataset.selected = String(selected);
+  row.dataset.state = rowData.isStale ? "stale" : "current";
+  return row;
+}
+
 function switchTab(i,el){
+  if(i===30){
+    const intelligenceBtn=[...document.querySelectorAll('nav button')].find(
+      b=>String(b.getAttribute('onclick')||'').includes('switchTab(33,')
+    );
+    switchTab(33,intelligenceBtn);
+    window.IntelligenceCenter?.openView('map');
+    return;
+  }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const target=document.getElementById('tab'+i);
   if(target) target.classList.add('active');
+  window.dispatchEvent(new CustomEvent('stzb:tab-changed',{detail:{tabId:i}}));
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
+  if(el) el.classList.add('active');
   localStorage.setItem('lastTab', i);
   if(i===29 && typeof loadAncientChinaMapDemo==='function') loadAncientChinaMapDemo();
   if(i===1 && typeof loadRanking==='function') loadRanking();
@@ -31,6 +117,7 @@ function switchTab(i,el){
   else if(i===4 && typeof loadAttendance==='function') loadAttendance();
   else if(i===6 && typeof loadAnalysis==='function') loadAnalysis();
   else if(i===7){ if(typeof loadTeams==='function') loadTeams(); if(typeof loadPlayerBattleTeams==='function') loadPlayerBattleTeams(); }
+  else if(i===8 && window.ScoreCenter) ScoreCenter.load();
   else if(i===10 && typeof loadBattlesAll==='function') loadBattlesAll(1);
   else if(i===11 && typeof loadTeamStats==='function') loadTeamStats();
   else if(i===12 && typeof loadMapStats==='function') loadMapStats();
@@ -49,17 +136,38 @@ function switchTab(i,el){
   else if(i===26 && typeof loadStateRegionStats==='function') loadStateRegionStats();
   else if(i===27 && typeof loadBattleMonitor==='function') loadBattleMonitor();
   else if(i===28 && typeof loadBattleMonitor13a2==='function') loadBattleMonitor13a2();
-  else if(i===30 && typeof loadWorldScene==='function') loadWorldScene();
+  else if(i===31 && typeof loadCommandCenterOverview==='function') loadCommandCenterOverview();
+  else if(i===32 && typeof loadCommandCenterSettings==='function') loadCommandCenterSettings();
+  else if(i===33 && typeof loadIntelligenceCenter==='function') loadIntelligenceCenter();
+  else if(i===35 && window.LiveArmyCommand) window.LiveArmyCommand.load();
+  else if(i===34 && typeof loadIntelligenceResearch==='function') loadIntelligenceResearch();
+}
+
+function readStoredHome(){
+  try{
+    const value=JSON.parse(localStorage.getItem('stzb.commandCenter.settings')||'{}');
+    const home=parseInt(value.home);
+    return VISIBLE_HOME_TABS.has(home)?home:33;
+  }catch(_){
+    return 33;
+  }
 }
 
 // 页面加载时恢复上次的 tab
 document.addEventListener('DOMContentLoaded', ()=>{
-  const last = parseInt(localStorage.getItem('lastTab'));
+  const preferredHome = readStoredHome();
+  const stored = localStorage.getItem('lastTab');
+  const last = stored == null ? preferredHome : parseInt(stored);
+  let restored = false;
   if(!isNaN(last) && last >= 0){
     const btns = document.querySelectorAll('nav button');
     // 找到对应 tab 的按钮（通过 onclick 属性匹配）
     const btn = [...btns].find(b=>b.onclick&&b.onclick.toString().includes(`switchTab(${last},`)&&b.style.display!=='none');
-    if(btn) switchTab(last, btn);
+    if(btn){ switchTab(last, btn); restored = true; }
+  }
+  if(!restored){
+    const intelligenceBtn=[...document.querySelectorAll('nav button')].find(b=>String(b.getAttribute('onclick')).includes('switchTab(33,'));
+    switchTab(33, intelligenceBtn);
   }
 });
 
@@ -68,6 +176,10 @@ setInterval(()=>{document.getElementById('hc-time').textContent=new Date().toLoc
 async function apiFetch(url,opts){
   try{
     const finalOpts = Object.assign({cache:'no-store'}, opts||{});
+    const token=sessionStorage.getItem('stzb.apiToken')||localStorage.getItem('stzb.apiToken')||'';
+    if(token){
+      finalOpts.headers=Object.assign({},finalOpts.headers||{}, {'X-STZB-Token':token});
+    }
     const r=await fetch(API+url,finalOpts);
     return await r.json();
   }catch(e){
@@ -93,16 +205,51 @@ function currentQueryAgentContext(){
 function renderQueryAgentResponse(data){
   const box=document.getElementById('query-agent-answer');
   if(!box) return;
+  box.replaceChildren();
   if(!data || !data.ok){
-    box.innerHTML=`<div style="color:var(--red)">查询失败：${esc(data?.error||'未知错误')}</div>`;
+    const error=document.createElement('div');
+    error.style.color='var(--red)';
+    error.textContent=`查询失败：${data?.error||'未知错误'}`;
+    box.append(error);
     return;
   }
-  const evidence=(data.evidence||[]).map(e=>`<li>${esc(e.label||e.source)} · ${esc(e.entityType||'')} ${esc(e.entityId||'')} · ${esc(e.freshness||'')}</li>`).join('');
-  const actions=(data.uiActions||[]).map((a,i)=>{
-    const encoded=JSON.stringify(a).replace(/'/g,'&#39;');
-    return `<button class="btn" onclick='applyQueryAgentAction(${encoded})'>执行动作 ${i+1}</button>`;
-  }).join(' ');
-  box.innerHTML=`<div>${esc(data.answer||'')}</div>${evidence?`<ul>${evidence}</ul>`:''}<div style="margin-top:8px">${actions}</div>`;
+  box._queryAgentActions=Array.isArray(data.uiActions)?data.uiActions.slice():[];
+  const answer=document.createElement('div');
+  const modelMeta=document.createElement('div');
+  answer.textContent=String(data.answer||'');
+  modelMeta.style.marginTop='6px';
+  modelMeta.style.fontSize='.72rem';
+  if(data.llmUsed){
+    modelMeta.style.color='var(--green)';
+    modelMeta.textContent=`大模型：${data.llmModel||'local'}`;
+  }else if(data.llmError){
+    modelMeta.style.color='var(--amber)';
+    modelMeta.textContent=`模型降级：${data.llmError}`;
+  }else{
+    modelMeta.style.color='var(--text2)';
+    modelMeta.textContent='本地规则回答';
+  }
+  box.append(answer,modelMeta);
+  if(Array.isArray(data.evidence)&&data.evidence.length){
+    const evidence=document.createElement('ul');
+    data.evidence.forEach(item=>{
+      const row=document.createElement('li');
+      row.textContent=`${item.label||item.source||''} · ${item.entityType||''} ${item.entityId||''} · ${item.freshness||''}`;
+      evidence.append(row);
+    });
+    box.append(evidence);
+  }
+  const actions=document.createElement('div');
+  actions.style.marginTop='8px';
+  box._queryAgentActions.forEach((action,index)=>{
+    const button=document.createElement('button');
+    button.className='btn';
+    button.type='button';
+    button.dataset.queryActionIndex=String(index);
+    button.textContent=`执行动作 ${index+1}`;
+    actions.append(button);
+  });
+  box.append(actions);
 }
 
 async function sendQueryAgentMessage(){
@@ -135,6 +282,14 @@ function applyQueryAgentAction(action){
   } else if(action.route==='alliance-members'){
     const btn=[...document.querySelectorAll('nav button')].find(b=>String(b.onclick).includes('switchTab(14,'));
     if(btn) switchTab(14,btn);
+  } else if(action.route==='intelligence-research'){
+    const btn=[...document.querySelectorAll('nav button')].find(b=>String(b.onclick).includes('switchTab(34,'));
+    if(btn) switchTab(34,btn);
+    setTimeout(()=>{
+      if(action.params?.heroId) ResearchCenter?.openHero(action.params.heroId);
+      else if(action.params?.skillId) ResearchCenter?.openSkill(action.params.skillId);
+      else if(action.params?.packId) ResearchCenter?.openCardPack(action.params.packId);
+    },80);
   }
 }
 
@@ -145,6 +300,13 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target.id==='modal-overlay')closeModal();});
   document.getElementById('srch-battle').addEventListener('input',applyBattleSearch);
+  document.getElementById('query-agent-answer')?.addEventListener('click',event=>{
+    const button=event.target.closest('[data-query-action-index]');
+    if(!button)return;
+    const index=Number(button.dataset.queryActionIndex);
+    const actions=event.currentTarget._queryAgentActions||[];
+    if(Number.isSafeInteger(index)&&actions[index])applyQueryAgentAction(actions[index]);
+  });
   loadProfiles();
 });
 
@@ -346,10 +508,20 @@ async function showBattleDetail(bid){
 // SSE
 function connectSSE(){
   const dot=document.getElementById('cdot'),st=document.getElementById('cstat');
+  if(_sseConnection) _sseConnection.close();
   const es=new EventSource(API+'/api/stream');
-  es.onopen=()=>{dot.className='conn-dot live';st.textContent='实时';showToast('已连接实时数据流');refreshAll();};
+  _sseConnection=es;
+  es.onopen=()=>{
+    streamConnectionTracker.open();
+    _sseReconnectAttempt=0;
+    dot.className='conn-dot live';
+    st.textContent='实时';
+    if(typeof refreshActivePage==='function') refreshActivePage({includeStatus:true});
+  };
   es.onmessage=(e)=>{
     let evt;try{evt=JSON.parse(e.data);}catch{return;}
+    streamConnectionTracker.open();
+    window.dispatchEvent(new CustomEvent('stzb:stream-event',{detail:evt}));
     addEvtFeed(evt);
     if(evt.type==='battle')onBattle(evt.data);
     else if(evt.type==='battle_monitor_13a4'){ if(typeof renderBattleMonitor==='function') renderBattleMonitor(Object.assign({ok:true}, evt.data||{})); }
@@ -380,7 +552,25 @@ function connectSSE(){
       if(typeof refreshAll==='function')setTimeout(refreshAll,500);
     }
   };
-  es.onerror=()=>{dot.className='conn-dot';st.textContent='断开';es.close();setTimeout(connectSSE,4000);};
+  es.onerror=()=>{
+    streamConnectionTracker.error();
+    dot.className='conn-dot';
+    st.textContent='断开';
+    es.close();
+    if(_sseConnection===es) _sseConnection=null;
+    scheduleSseReconnect();
+  };
+}
+
+function scheduleSseReconnect(){
+  if(_sseReconnectTimer) return;
+  const attempt=_sseReconnectAttempt++;
+  const delay=window.DashboardRuntime?.backoffDelay(attempt) ?? Math.min(30000,1000*Math.pow(2,attempt));
+  _sseReconnectTimer=setTimeout(()=>{
+    _sseReconnectTimer=null;
+    if(document.visibilityState==='visible') connectSSE();
+    else scheduleSseReconnect();
+  },delay);
 }
 
 function onBattle(b){
@@ -423,9 +613,9 @@ function addEvtFeed(evt){
   let body='';
   if(evt.type==='battle'){const b=evt.data||{};body=`${esc(b.atk_name||'')} ${esc(b.result_desc||'')} wx=${b.atk_gongxun||0}`;}
   else if(evt.type==='db_sync')body=(evt.data?.tables||[]).map(t=>`<span style='color:var(--cyan)'>${t}</span>`).join(' ');
-  else if(evt.type==='notification'){const n=evt.data||{};body=`type=${n.type} ${esc(n.name1||'')} ${esc(n.name2||'')}`;}
-  else body=JSON.stringify(evt.data||{}).slice(0,60);
-  d.innerHTML=`<span class='feed-time'>${ic} ${evt.ts||''}</span><div class='feed-body'>${body}</div>`;
+  else if(evt.type==='notification'){const n=evt.data||{};body=`type=${n.type || evt.type || 'notification'} ${esc(n.name1||'')} ${esc(n.name2||'')}`;}
+  else body=window.DashboardRuntime?.normalizeEventText(evt.data||{}) ?? esc(JSON.stringify(evt.data||{}).slice(0,60));
+  d.innerHTML=`<span class='feed-time'>${ic} ${esc(evt.ts||'')}</span><div class='feed-body'>${body}</div>`;
   f.prepend(d);if(f.children.length>200)f.removeChild(f.lastChild);
 }
 

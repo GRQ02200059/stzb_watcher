@@ -1,0 +1,2251 @@
+{
+  "sides": {
+    "0": 0,
+    "7": 0
+  },
+  "squads": {
+    "1": {
+      "slot": 1,
+      "side": "攻方",
+      "rank": 44,
+      "speed": 8899,
+      "hero1": 200016,
+      "skill1": 10,
+      "hero2": 200265,
+      "skill2": 10,
+      "hero3": 200267,
+      "skill3": 5,
+      "formation1": "3201",
+      "formation2": "3207",
+      "equips": [
+        [
+          400025,
+          6
+        ],
+        [
+          400026,
+          6
+        ],
+        [
+          400027,
+          1
+        ]
+      ]
+    },
+    "2": {
+      "slot": 2,
+      "side": "攻方",
+      "rank": 44,
+      "speed": 7980,
+      "hero1": 200961,
+      "skill1": 10,
+      "hero2": 200863,
+      "skill2": 10,
+      "hero3": 200766,
+      "skill3": 10,
+      "formation1": "3202",
+      "formation2": "3201",
+      "equips": [
+        [
+          400019,
+          6
+        ],
+        [
+          400020,
+          6
+        ],
+        [
+          400021,
+          1
+        ]
+      ]
+    },
+    "3": {
+      "slot": 3,
+      "side": "攻方",
+      "rank": 44,
+      "speed": 8970,
+      "hero1": 200272,
+      "skill1": 10,
+      "hero2": 200770,
+      "skill2": 10,
+      "hero3": 200900,
+      "skill3": 10,
+      "formation1": "3201",
+      "formation2": "3207",
+      "equips": [
+        [
+          400046,
+          6
+        ],
+        [
+          400047,
+          6
+        ],
+        [
+          400048,
+          1
+        ]
+      ]
+    },
+    "6": {
+      "slot": 6,
+      "side": "守方",
+      "rank": 32,
+      "speed": 4435,
+      "hero1": 200020,
+      "skill1": 10,
+      "hero2": 200016,
+      "skill2": 10,
+      "hero3": 200886,
+      "skill3": 10,
+      "formation1": "3201",
+      "formation2": "3207",
+      "equips": [
+        [
+          400097,
+          5
+        ]
+      ]
+    },
+    "5": {
+      "slot": 5,
+      "side": "守方",
+      "rank": 41,
+      "speed": 7931,
+      "hero1": 200961,
+      "skill1": 10,
+      "hero2": 200863,
+      "skill2": 10,
+      "hero3": 200252,
+      "skill3": 10,
+      "formation1": "3202",
+      "formation2": "3201",
+      "equips": [
+        [
+          400046,
+          6
+        ],
+        [
+          400047,
+          6
+        ],
+        [
+          400048,
+          1
+        ]
+      ]
+    },
+    "4": {
+      "slot": 4,
+      "side": "守方",
+      "rank": 41,
+      "speed": 1212,
+      "hero1": 200930,
+      "skill1": 10,
+      "hero2": 200766,
+      "skill2": 10,
+      "hero3": 200237,
+      "skill3": 10,
+      "formation1": "3201",
+      "formation2": "3207",
+      "equips": [
+        [
+          400070,
+          5
+        ]
+      ]
+    }
+  },
+  "init_hp": {
+    "1": 857522,
+    "1_backup": 891587,
+    "2": 998377,
+    "3": 835237,
+    "3_backup": 421832,
+    "4": 575931,
+    "5": 590859,
+    "6": 117396,
+    "6_backup": 415692
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "actions": [
+        {
+          "type": "attack",
+          "slot": 1,
+          "hero": 200020,
+          "rage_cost": 83,
+          "hp_after": 8816
+        },
+        {
+          "type": "rage_gain",
+          "slot": 1,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 59
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 400021,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 20
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 281002,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 5
+        },
+        {
+          "type": "attack",
+          "slot": 2,
+          "hero": 200020,
+          "rage_cost": 127,
+          "hp_after": 7853
+        },
+        {
+          "type": "rage_gain",
+          "slot": 2,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 59
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 213900,
+          "rage_gain": 59
+        },
+        {
+          "type": "chase",
+          "slot": 3,
+          "hero": 200272,
+          "target": 3,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 50
+        },
+        {
+          "type": "chase",
+          "slot": 3,
+          "hero": 200272,
+          "target": 3,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 50
+        },
+        {
+          "type": "attack",
+          "slot": 3,
+          "hero": 200020,
+          "rage_cost": 114,
+          "hp_after": 8856
+        },
+        {
+          "type": "buff",
+          "slot": 6,
+          "buff_id": "523",
+          "buff_name": "追击↑"
+        },
+        {
+          "type": "buff",
+          "slot": 6,
+          "buff_id": "521",
+          "buff_name": "追击↙"
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 211770,
+          "rage_gain": 47
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 59
+        },
+        {
+          "type": "buff",
+          "slot": 5,
+          "buff_id": "524",
+          "buff_name": "追击↓"
+        },
+        {
+          "type": "buff",
+          "slot": 5,
+          "buff_id": "522",
+          "buff_name": "追击↘"
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 20
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 40
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 60
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 20
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 40
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 60
+        },
+        {
+          "type": "rage_gain",
+          "slot": 2,
+          "target_slot": 2,
+          "hero": 210863,
+          "rage_gain": 77
+        },
+        {
+          "type": "rage_gain",
+          "slot": 2,
+          "target_slot": 2,
+          "hero": 210863,
+          "rage_gain": 77
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 212863,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 50
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 215766,
+          "target": 2,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 40
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 215766,
+          "target": 2,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 40
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 213961,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 8
+        },
+        {
+          "type": "rage_gain",
+          "slot": 6,
+          "target_slot": 2,
+          "hero": 212961,
+          "rage_gain": 83
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 213961,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 16
+        },
+        {
+          "type": "rage_gain",
+          "slot": 4,
+          "target_slot": 2,
+          "hero": 212961,
+          "rage_gain": 83
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 213961,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 24
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 2,
+          "hero": 212961,
+          "rage_gain": 83
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 213961,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 32
+        },
+        {
+          "type": "rage_gain",
+          "slot": 1,
+          "target_slot": 2,
+          "hero": 212961,
+          "rage_gain": 83
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 213961,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 40
+        },
+        {
+          "type": "rage_check",
+          "slot": 2,
+          "rage": 99
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 2,
+          "hero": 211961,
+          "target_slot": 4,
+          "dmg": 1212,
+          "hp_after": 0,
+          "turns": 32
+        },
+        {
+          "type": "dead",
+          "slot": 4
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 2,
+          "hero": 212961,
+          "rage_gain": 83
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 213961,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 8
+        },
+        {
+          "type": "rage_check",
+          "slot": 2,
+          "rage": 1
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 40
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 40
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 55
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 5,
+          "hero": 210863,
+          "rage_gain": 72
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 5,
+          "hero": 210863,
+          "rage_gain": 72
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 212863,
+          "target": 5,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 50
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 213961,
+          "target": 5,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 8
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 5,
+          "hero": 212961,
+          "rage_gain": 78
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 213961,
+          "target": 5,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 16
+        },
+        {
+          "type": "rage_gain",
+          "slot": 1,
+          "target_slot": 5,
+          "hero": 212961,
+          "rage_gain": 78
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 213961,
+          "target": 5,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 24
+        },
+        {
+          "type": "rage_gain",
+          "slot": 6,
+          "target_slot": 5,
+          "hero": 212961,
+          "rage_gain": 78
+        },
+        {
+          "type": "rage_gain",
+          "slot": 2,
+          "target_slot": 5,
+          "hero": 212961,
+          "rage_gain": 33
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 211900,
+          "rage_gain": 59
+        },
+        {
+          "type": "buff",
+          "slot": 3,
+          "buff_id": "714",
+          "buff_name": "控制"
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 212900,
+          "rage_gain": 59
+        },
+        {
+          "type": "rage_check",
+          "slot": 5,
+          "rage": 18
+        },
+        {
+          "type": "buff",
+          "slot": 5,
+          "buff_id": "523",
+          "buff_name": "追击↑"
+        },
+        {
+          "type": "buff",
+          "slot": 5,
+          "buff_id": "521",
+          "buff_name": "追击↙"
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 211770,
+          "rage_gain": 47
+        },
+        {
+          "type": "chase",
+          "slot": 3,
+          "hero": 210272,
+          "target": 5,
+          "chase_type": "523",
+          "chase_name": "策追",
+          "stacks": 14
+        },
+        {
+          "type": "chase",
+          "slot": 3,
+          "hero": 210272,
+          "target": 5,
+          "chase_type": "521",
+          "chase_name": "左追",
+          "stacks": 14
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 3,
+          "hero": 210770,
+          "target_slot": 5,
+          "dmg": 305,
+          "hp_after": 7589,
+          "turns": 12
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 20
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 20
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 55
+        },
+        {
+          "type": "chase",
+          "slot": 3,
+          "hero": 210272,
+          "target": 6,
+          "chase_type": "523",
+          "chase_name": "策追",
+          "stacks": 14
+        },
+        {
+          "type": "chase",
+          "slot": 3,
+          "hero": 210272,
+          "target": 6,
+          "chase_type": "521",
+          "chase_name": "左追",
+          "stacks": 14
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 3,
+          "hero": 210770,
+          "target_slot": 6,
+          "dmg": 425,
+          "hp_after": 4010,
+          "turns": 12
+        },
+        {
+          "type": "rage_gain",
+          "slot": 6,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 55
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 65
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 40
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 40
+        },
+        {
+          "type": "rage_gain",
+          "slot": 6,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 55
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 20
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 20
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 55
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 211900,
+          "rage_gain": 59
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "actions": [
+        {
+          "type": "attack",
+          "slot": 1,
+          "hero": 200020,
+          "rage_cost": 83,
+          "hp_after": 8811
+        },
+        {
+          "type": "rage_gain",
+          "slot": 1,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 65
+        },
+        {
+          "type": "attack",
+          "slot": 2,
+          "hero": 200020,
+          "rage_cost": 127,
+          "hp_after": 7846
+        },
+        {
+          "type": "rage_gain",
+          "slot": 2,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 65
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 213900,
+          "rage_gain": 59
+        },
+        {
+          "type": "attack",
+          "slot": 3,
+          "hero": 200020,
+          "rage_cost": 114,
+          "hp_after": 8825
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 211770,
+          "rage_gain": 47
+        },
+        {
+          "type": "chase",
+          "slot": 3,
+          "hero": 210272,
+          "target": 6,
+          "chase_type": "523",
+          "chase_name": "策追",
+          "stacks": 28
+        },
+        {
+          "type": "chase",
+          "slot": 3,
+          "hero": 210272,
+          "target": 6,
+          "chase_type": "521",
+          "chase_name": "左追",
+          "stacks": 28
+        },
+        {
+          "type": "rage_check",
+          "slot": 3,
+          "rage": 12
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 3,
+          "hero": 210770,
+          "target_slot": 6,
+          "dmg": 475,
+          "hp_after": 3274,
+          "turns": 12
+        },
+        {
+          "type": "rage_gain",
+          "slot": 6,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 55
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 3,
+          "hero": 210770,
+          "target_slot": 5,
+          "dmg": 352,
+          "hp_after": 7510,
+          "turns": 12
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 0
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 0
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 61
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 65
+        },
+        {
+          "type": "rage_gain",
+          "slot": 2,
+          "target_slot": 2,
+          "hero": 210863,
+          "rage_gain": 77
+        },
+        {
+          "type": "rage_gain",
+          "slot": 2,
+          "target_slot": 2,
+          "hero": 210863,
+          "rage_gain": 77
+        },
+        {
+          "type": "dmg_phys",
+          "slot": 2,
+          "hero": 214766,
+          "pct": 50.0,
+          "angle": 379.1
+        },
+        {
+          "type": "dmg_strat",
+          "slot": 2,
+          "hero": 214766,
+          "pct": 50.0,
+          "angle": 275.0
+        },
+        {
+          "type": "dmg_lead",
+          "slot": 2,
+          "hero": 214766,
+          "pct": 50.0,
+          "angle": 178.2
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 215766,
+          "target": 2,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 40
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 215766,
+          "target": 2,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 40
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 213961,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 16
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 2,
+          "hero": 212961,
+          "rage_gain": 83
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 213961,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 24
+        },
+        {
+          "type": "rage_gain",
+          "slot": 6,
+          "target_slot": 2,
+          "hero": 212961,
+          "rage_gain": 83
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 213961,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 32
+        },
+        {
+          "type": "rage_gain",
+          "slot": 1,
+          "target_slot": 2,
+          "hero": 212961,
+          "rage_gain": 83
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 213961,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 40
+        },
+        {
+          "type": "rage_check",
+          "slot": 2,
+          "rage": 77
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 2,
+          "hero": 211961,
+          "target_slot": 6,
+          "dmg": 2111,
+          "hp_after": 1484,
+          "turns": 32
+        },
+        {
+          "type": "rage_gain",
+          "slot": 6,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 61
+        },
+        {
+          "type": "rage_check",
+          "slot": 2,
+          "rage": 57
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 2,
+          "hero": 211961,
+          "target_slot": 5,
+          "dmg": 1907,
+          "hp_after": 5937,
+          "turns": 32
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 61
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 2,
+          "hero": 212961,
+          "rage_gain": 83
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 213961,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 8
+        },
+        {
+          "type": "rage_check",
+          "slot": 2,
+          "rage": 25
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 61
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 5,
+          "hero": 210863,
+          "rage_gain": 72
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 5,
+          "hero": 210863,
+          "rage_gain": 72
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 212863,
+          "target": 5,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 50
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 213961,
+          "target": 5,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 32
+        },
+        {
+          "type": "rage_gain",
+          "slot": 6,
+          "target_slot": 5,
+          "hero": 212961,
+          "rage_gain": 78
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 213961,
+          "target": 5,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 40
+        },
+        {
+          "type": "rage_check",
+          "slot": 5,
+          "rage": 72
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 5,
+          "hero": 211961,
+          "target_slot": 1,
+          "dmg": 1296,
+          "hp_after": 7593,
+          "turns": 32
+        },
+        {
+          "type": "rage_gain",
+          "slot": 1,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 65
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 20
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 20
+        },
+        {
+          "type": "rage_check",
+          "slot": 5,
+          "rage": 34
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 5,
+          "hero": 211961,
+          "target_slot": 3,
+          "dmg": 751,
+          "hp_after": 8074,
+          "turns": 32
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 211770,
+          "rage_gain": 47
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 71
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 40
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 40
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 5,
+          "hero": 212961,
+          "rage_gain": 33
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 213961,
+          "target": 5,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 8
+        },
+        {
+          "type": "rage_gain",
+          "slot": 1,
+          "target_slot": 5,
+          "hero": 212961,
+          "rage_gain": 33
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 213961,
+          "target": 5,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 16
+        },
+        {
+          "type": "rage_gain",
+          "slot": 2,
+          "target_slot": 5,
+          "hero": 212961,
+          "rage_gain": 33
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 211900,
+          "rage_gain": 59
+        },
+        {
+          "type": "buff",
+          "slot": 3,
+          "buff_id": "714",
+          "buff_name": "控制"
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 212900,
+          "rage_gain": 59
+        },
+        {
+          "type": "rage_check",
+          "slot": 5,
+          "rage": 10
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 211770,
+          "rage_gain": 47
+        },
+        {
+          "type": "rage_check",
+          "slot": 3,
+          "rage": 12
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 3,
+          "hero": 210770,
+          "target_slot": 6,
+          "dmg": 459,
+          "hp_after": 1346,
+          "turns": 12
+        },
+        {
+          "type": "rage_gain",
+          "slot": 6,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 61
+        },
+        {
+          "type": "chase",
+          "slot": 3,
+          "hero": 210272,
+          "target": 5,
+          "chase_type": "523",
+          "chase_name": "策追",
+          "stacks": 42
+        },
+        {
+          "type": "chase",
+          "slot": 3,
+          "hero": 210272,
+          "target": 5,
+          "chase_type": "521",
+          "chase_name": "左追",
+          "stacks": 42
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 3,
+          "hero": 210770,
+          "target_slot": 5,
+          "dmg": 354,
+          "hp_after": 5099,
+          "turns": 12
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 20
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 20
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 67
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 71
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 40
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 40
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 20
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 20
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 67
+        },
+        {
+          "type": "rage_check",
+          "slot": 1,
+          "rage": 0
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 0
+        },
+        {
+          "type": "chase",
+          "slot": 5,
+          "hero": 211252,
+          "target": 5,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 0
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 67
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 211900,
+          "rage_gain": 59
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "actions": [
+        {
+          "type": "chase",
+          "slot": 1,
+          "hero": 211265,
+          "target": 2,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 50
+        },
+        {
+          "type": "chase",
+          "slot": 1,
+          "hero": 211265,
+          "target": 1,
+          "chase_type": "522",
+          "chase_name": "右追",
+          "stacks": 50
+        },
+        {
+          "type": "chase",
+          "slot": 1,
+          "hero": 211265,
+          "target": 2,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 50
+        },
+        {
+          "type": "chase",
+          "slot": 1,
+          "hero": 211265,
+          "target": 1,
+          "chase_type": "524",
+          "chase_name": "统追",
+          "stacks": 50
+        },
+        {
+          "type": "attack",
+          "slot": 1,
+          "hero": 200020,
+          "rage_cost": 59,
+          "hp_after": 7922
+        },
+        {
+          "type": "rage_gain",
+          "slot": 1,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 71
+        },
+        {
+          "type": "skill_trigger",
+          "slot": 2,
+          "rage": 12,
+          "hp": 7834
+        },
+        {
+          "type": "rage_gain",
+          "slot": 2,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 71
+        },
+        {
+          "type": "skill_trigger",
+          "slot": 3,
+          "rage": 12,
+          "hp": 8682
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 211770,
+          "rage_gain": 47
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 77
+        },
+        {
+          "type": "counter",
+          "slot": 1,
+          "hero": 200020,
+          "rage_cost": 64,
+          "hp_after": 8246
+        },
+        {
+          "type": "rage_gain",
+          "slot": 1,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 77
+        },
+        {
+          "type": "skill_trigger",
+          "slot": 2,
+          "rage": 13,
+          "hp": 7936
+        },
+        {
+          "type": "rage_gain",
+          "slot": 2,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 77
+        },
+        {
+          "type": "skill_trigger",
+          "slot": 3,
+          "rage": 13,
+          "hp": 8836
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 211770,
+          "rage_gain": 47
+        },
+        {
+          "type": "rage_check",
+          "slot": 3,
+          "rage": 20
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 3,
+          "hero": 210770,
+          "target_slot": 5,
+          "dmg": 460,
+          "hp_after": 6307,
+          "turns": 12
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 72
+        },
+        {
+          "type": "chase",
+          "slot": 3,
+          "hero": 210272,
+          "target": 6,
+          "chase_type": "523",
+          "chase_name": "策追",
+          "stacks": 56
+        },
+        {
+          "type": "chase",
+          "slot": 3,
+          "hero": 210272,
+          "target": 6,
+          "chase_type": "521",
+          "chase_name": "左追",
+          "stacks": 56
+        },
+        {
+          "type": "rage_check",
+          "slot": 3,
+          "rage": 40
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 3,
+          "hero": 210770,
+          "target_slot": 6,
+          "dmg": 545,
+          "hp_after": 1122,
+          "turns": 12
+        },
+        {
+          "type": "rage_gain",
+          "slot": 6,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 72
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 77
+        },
+        {
+          "type": "attack",
+          "slot": 2,
+          "hero": 200020,
+          "rage_cost": 89,
+          "hp_after": 7859
+        },
+        {
+          "type": "rage_gain",
+          "slot": 2,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 83
+        },
+        {
+          "type": "skill_trigger",
+          "slot": 1,
+          "rage": 19,
+          "hp": 8227
+        },
+        {
+          "type": "rage_gain",
+          "slot": 1,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 83
+        },
+        {
+          "type": "skill_trigger",
+          "slot": 3,
+          "rage": 19,
+          "hp": 8829
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 211770,
+          "rage_gain": 47
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 83
+        },
+        {
+          "type": "counter",
+          "slot": 2,
+          "hero": 200020,
+          "rage_cost": 98,
+          "hp_after": 7845
+        },
+        {
+          "type": "rage_gain",
+          "slot": 2,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 89
+        },
+        {
+          "type": "skill_trigger",
+          "slot": 1,
+          "rage": 21,
+          "hp": 8594
+        },
+        {
+          "type": "rage_gain",
+          "slot": 1,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 89
+        },
+        {
+          "type": "skill_trigger",
+          "slot": 3,
+          "rage": 21,
+          "hp": 8826
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 211770,
+          "rage_gain": 47
+        },
+        {
+          "type": "rage_check",
+          "slot": 3,
+          "rage": 20
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 3,
+          "hero": 210770,
+          "target_slot": 5,
+          "dmg": 456,
+          "hp_after": 6253,
+          "turns": 12
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 72
+        },
+        {
+          "type": "chase",
+          "slot": 3,
+          "hero": 210272,
+          "target": 6,
+          "chase_type": "523",
+          "chase_name": "策追",
+          "stacks": 84
+        },
+        {
+          "type": "chase",
+          "slot": 3,
+          "hero": 210272,
+          "target": 6,
+          "chase_type": "521",
+          "chase_name": "左追",
+          "stacks": 84
+        },
+        {
+          "type": "rage_check",
+          "slot": 3,
+          "rage": 68
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 3,
+          "hero": 210770,
+          "target_slot": 6,
+          "dmg": 600,
+          "hp_after": 843,
+          "turns": 12
+        },
+        {
+          "type": "rage_gain",
+          "slot": 6,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 72
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 89
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 213900,
+          "rage_gain": 59
+        },
+        {
+          "type": "attack",
+          "slot": 3,
+          "hero": 200020,
+          "rage_cost": 80,
+          "hp_after": 8765
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 211770,
+          "rage_gain": 47
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 95
+        },
+        {
+          "type": "skill_trigger",
+          "slot": 1,
+          "rage": 17,
+          "hp": 8687
+        },
+        {
+          "type": "rage_gain",
+          "slot": 1,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 95
+        },
+        {
+          "type": "skill_trigger",
+          "slot": 2,
+          "rage": 17,
+          "hp": 7921
+        },
+        {
+          "type": "rage_gain",
+          "slot": 2,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 95
+        },
+        {
+          "type": "counter",
+          "slot": 3,
+          "hero": 200020,
+          "rage_cost": 89,
+          "hp_after": 8752
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 3,
+          "hero": 211770,
+          "rage_gain": 47
+        },
+        {
+          "type": "chase",
+          "slot": 3,
+          "hero": 210272,
+          "target": 6,
+          "chase_type": "523",
+          "chase_name": "策追",
+          "stacks": 112
+        },
+        {
+          "type": "chase",
+          "slot": 3,
+          "hero": 210272,
+          "target": 6,
+          "chase_type": "521",
+          "chase_name": "左追",
+          "stacks": 112
+        },
+        {
+          "type": "rage_check",
+          "slot": 3,
+          "rage": 96
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 3,
+          "hero": 210770,
+          "target_slot": 6,
+          "dmg": 663,
+          "hp_after": 501,
+          "turns": 12
+        },
+        {
+          "type": "rage_gain",
+          "slot": 6,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 78
+        },
+        {
+          "type": "rage_check",
+          "slot": 3,
+          "rage": 20
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 3,
+          "hero": 210770,
+          "target_slot": 5,
+          "dmg": 450,
+          "hp_after": 5803,
+          "turns": 12
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 78
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 100
+        },
+        {
+          "type": "skill_trigger",
+          "slot": 1,
+          "rage": 18,
+          "hp": 8685
+        },
+        {
+          "type": "rage_gain",
+          "slot": 1,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 100
+        },
+        {
+          "type": "skill_trigger",
+          "slot": 2,
+          "rage": 18,
+          "hp": 7919
+        },
+        {
+          "type": "rage_gain",
+          "slot": 2,
+          "target_slot": 1,
+          "hero": 200016,
+          "rage_gain": 100
+        },
+        {
+          "type": "rage_gain",
+          "slot": 2,
+          "target_slot": 2,
+          "hero": 210863,
+          "rage_gain": 77
+        },
+        {
+          "type": "rage_gain",
+          "slot": 2,
+          "target_slot": 2,
+          "hero": 210863,
+          "rage_gain": 77
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 212863,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 50
+        },
+        {
+          "type": "dmg_phys",
+          "slot": 2,
+          "hero": 214766,
+          "pct": 50.0,
+          "angle": 379.1
+        },
+        {
+          "type": "dmg_strat",
+          "slot": 2,
+          "hero": 214766,
+          "pct": 50.0,
+          "angle": 275.0
+        },
+        {
+          "type": "dmg_lead",
+          "slot": 2,
+          "hero": 214766,
+          "pct": 50.0,
+          "angle": 178.2
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 213961,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 16
+        },
+        {
+          "type": "rage_gain",
+          "slot": 3,
+          "target_slot": 2,
+          "hero": 212961,
+          "rage_gain": 83
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 213961,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 24
+        },
+        {
+          "type": "rage_gain",
+          "slot": 1,
+          "target_slot": 2,
+          "hero": 212961,
+          "rage_gain": 83
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 213961,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 32
+        },
+        {
+          "type": "rage_gain",
+          "slot": 6,
+          "target_slot": 2,
+          "hero": 212961,
+          "rage_gain": 83
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 213961,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 40
+        },
+        {
+          "type": "rage_check",
+          "slot": 2,
+          "rage": 115
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 2,
+          "hero": 211961,
+          "target_slot": 5,
+          "dmg": 2595,
+          "hp_after": 3208,
+          "turns": 32
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 6,
+          "hero": 200016,
+          "rage_gain": 78
+        },
+        {
+          "type": "rage_check",
+          "slot": 2,
+          "rage": 191
+        },
+        {
+          "type": "skill_dmg",
+          "slot": 2,
+          "hero": 211961,
+          "target_slot": 6,
+          "dmg": 501,
+          "hp_after": 0,
+          "turns": 32
+        },
+        {
+          "type": "dead",
+          "slot": 6
+        },
+        {
+          "type": "rage_gain",
+          "slot": 5,
+          "target_slot": 2,
+          "hero": 212961,
+          "rage_gain": 83
+        },
+        {
+          "type": "chase",
+          "slot": 2,
+          "hero": 213961,
+          "target": 2,
+          "chase_type": "531",
+          "chase_name": "正追",
+          "stacks": 8
+        }
+      ]
+    }
+  ],
+  "damage_out": {
+    "1": 0,
+    "2": 287,
+    "3": 0,
+    "4": 1507,
+    "5": 3715,
+    "6": 2402
+  },
+  "damage_in": {
+    "1": {
+      "kills": 744,
+      "dmg_recv": 0,
+      "skill_hits": 34,
+      "unk": 3356
+    },
+    "2": {
+      "kills": 1613,
+      "dmg_recv": 8326,
+      "skill_hits": 14,
+      "unk": 0
+    },
+    "3": {
+      "kills": 1066,
+      "dmg_recv": 5544,
+      "skill_hits": 41,
+      "unk": 556
+    },
+    "4": {
+      "kills": 0,
+      "dmg_recv": 0,
+      "skill_hits": 2,
+      "unk": 0
+    },
+    "5": {
+      "kills": 913,
+      "dmg_recv": 2047,
+      "skill_hits": 7,
+      "unk": 2802
+    },
+    "6": {
+      "kills": 0,
+      "dmg_recv": 1327,
+      "skill_hits": 19,
+      "unk": 4523
+    }
+  },
+  "final_hp": {
+    "1": 9704,
+    "11": 0,
+    "2": 9704,
+    "3": 9704,
+    "13": 0,
+    "4": 556,
+    "5": 556,
+    "6": 556,
+    "16": 0
+  },
+  "result": {
+    "1": [
+      2,
+      7973,
+      16587,
+      false,
+      5,
+      7862,
+      15276,
+      false,
+      3,
+      8939,
+      12638,
+      false,
+      1,
+      8894,
+      12361,
+      false,
+      6,
+      3749,
+      7801,
+      false
+    ],
+    "2": [
+      2,
+      7846,
+      16587,
+      false,
+      5,
+      6767,
+      13276,
+      false,
+      3,
+      8694,
+      12638,
+      false,
+      1,
+      7981,
+      12361,
+      false,
+      6,
+      1667,
+      7801,
+      false
+    ],
+    "3": [
+      2,
+      7936,
+      15587,
+      false
+    ]
+  }
+}

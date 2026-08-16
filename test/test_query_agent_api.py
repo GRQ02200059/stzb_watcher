@@ -60,6 +60,27 @@ class QueryAgentApiTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.get_json()["ok"])
 
+    def test_post_message_uses_llm_factory(self):
+        class FakeLlmClient:
+            model_name = "fake-api-model"
+
+            def answer(self, context):
+                return f"API LLM: {context['draftAnswer']}"
+
+        app = Flask(__name__)
+        register_query_agent_api(
+            app, lambda: self.conn, llm_client_factory=lambda: FakeLlmClient()
+        )
+        client = app.test_client()
+
+        response = client.post("/api/query-agent/messages", json={"message": "查 10004"})
+        body = response.get_json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(body["llmUsed"])
+        self.assertEqual(body["llmModel"], "fake-api-model")
+        self.assertIn("API LLM:", body["answer"])
+
 
 if __name__ == "__main__":
     unittest.main()

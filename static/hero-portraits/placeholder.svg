@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" viewBox="0 0 720 720">
+<defs><radialGradient id="g"><stop stop-color="#193653"/><stop offset="1" stop-color="#07101d"/></radialGradient></defs>
+<rect width="720" height="720" fill="url(#g)"/>
+<path d="M190 500c34-88 93-132 170-132s136 44 170 132" fill="none" stroke="#43d5ff55" stroke-width="18"/>
+<circle cx="360" cy="258" r="94" fill="none" stroke="#43d5ff55" stroke-width="18"/>
+<text x="360" y="650" text-anchor="middle" fill="#8ca3bb" font-family="monospace" font-size="24" letter-spacing="6">PORTRAIT OFFLINE</text>
+</svg>

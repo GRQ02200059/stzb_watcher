@@ -1,0 +1,42 @@
+{
+  "evidence": [
+    "/Users/bytedance/stzb/tools/monitor-agent/web/farming/map_codec.py",
+    "/Users/bytedance/stzb/tools/monitor-agent/docs/superpowers/specs/2026-08-02-farming-map-risk-heatmap-design.md"
+  ],
+  "freshness": {
+    "freshSeconds": 120,
+    "staleSeconds": 600
+  },
+  "levelColors": {
+    "0": "#18232d",
+    "1": "#263746",
+    "2": "#24536a",
+    "3": "#167a78",
+    "4": "#199f69",
+    "5": "#75b83b",
+    "6": "#d1b52c",
+    "7": "#e87e25",
+    "8": "#ed4936",
+    "9": "#ff174f"
+  },
+  "newResLv": {
+    "levelDigit": "tens",
+    "resourceDigit": "ones"
+  },
+  "ownershipColors": {
+    "ally": "#54a6ff",
+    "enemy": "#f05267",
+    "self": "#34d399",
+    "unknown": "#7183a7"
+  },
+  "riskWeights": {
+    "earliestArrival": 15,
+    "enemyOwnership": 15,
+    "estimatedTroops": 10,
+    "incomingArmyCount": 20,
+    "landLevel": 25,
+    "protectionGuard": 5,
+    "staleIntel": 10
+  },
+  "rulesVersion": 1
+}

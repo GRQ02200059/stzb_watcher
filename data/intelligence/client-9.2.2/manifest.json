@@ -1,0 +1,64 @@
+{
+  "clientPackage": "com.netease.stzb.netease",
+  "clientVersion": "9.2.2",
+  "datasetVersion": "client-9.2.2",
+  "files": [
+    {
+      "bytes": 1148020,
+      "rows": 2077,
+      "sha256": "af98cc6c41c905b5e72dea16ad57d5032bdfff58464f6050f4df3b7d39555589",
+      "source": "/Users/bytedance/stzb/hero_table.csv",
+      "target": "hero_table.csv"
+    },
+    {
+      "bytes": 929,
+      "rows": 0,
+      "sha256": "c988374be7d72554f38565b63661e4b9e3998fae76ae9f66b65324f5ea98d54b",
+      "source": "/Users/bytedance/stzb/tools/monitor-agent/docs/superpowers/specs/2026-08-02-farming-map-risk-heatmap-design.md",
+      "target": "land_intelligence_rules.json"
+    },
+    {
+      "bytes": 1688630,
+      "rows": 12694,
+      "sha256": "9ed63994c8d8fc40b054fec6b14f8b58f4f68e2d356995e4a47b8fc2b2b6185b",
+      "source": "/Users/bytedance/stzb/skill_detail_table.csv",
+      "target": "skill_detail_table.csv"
+    },
+    {
+      "bytes": 11754,
+      "rows": 206,
+      "sha256": "5f40e0d6b937daaa382c540c8026dd7dcf929901a3e8a7d5cb19796bf91b6d88",
+      "source": "/Users/bytedance/stzb/skill_effect_table.csv",
+      "target": "skill_effect_table.csv"
+    },
+    {
+      "bytes": 1232250,
+      "rows": 6572,
+      "sha256": "ad52232bd3f0bdbd872747f2a95f53db314a7a426365e5cccdff0a50d1510ea9",
+      "source": "/Users/bytedance/stzb/skill_table.csv",
+      "target": "skill_table.csv"
+    },
+    {
+      "bytes": 3625,
+      "rows": 0,
+      "sha256": "e2f1e86818766d96503c7f8924b61444384ab15d6f098a1856fdd2eae2210ebe",
+      "source": "/Users/bytedance/stzb/docs/protocol/5026-5028-world-scene-fields.md",
+      "target": "world_scene_schema.json"
+    }
+  ],
+  "generatedAt": "2026-08-14T22:17:40+08:00",
+  "privacy": {
+    "containsAccountData": false,
+    "containsCaptureData": false,
+    "containsPlayerOrAllianceData": false
+  },
+  "validation": {
+    "hero_rows": 2077,
+    "missing_effects": [],
+    "missing_initial_skills": [],
+    "missing_main_details": [],
+    "skill_detail_rows": 12694,
+    "skill_effect_rows": 206,
+    "skill_rows": 6572
+  }
+}

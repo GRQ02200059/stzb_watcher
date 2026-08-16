@@ -145,7 +145,7 @@ class ClientBattleReportStore private constructor(
             put("result", result.outcome.toClientResult())
             put("fight_type", 3)
             put("city_type", 0)
-            put("attack_name", GameServerConfig.ROLE_NAME)
+            put("attack_name", "模拟攻方")
             put("defend_name", "守军")
             put("attack_base_heroid", attacker.firstOrNull()?.id?.value ?: 0)
             put("defend_base_heroid", defender.firstOrNull()?.id?.value ?: 0)
@@ -175,8 +175,8 @@ class ClientBattleReportStore private constructor(
             put("defender_army_effect", "")
             put("attacker_gear_info", attacker.toGearInfo())
             put("defender_gear_info", emptyFourRows(3))
-            put("attacker_surface", attackerSurfaces.toBattleSurfaceInfo())
-            put("defender_surface", defenderSurfaces.toBattleSurfaceInfo())
+            put("attacker_surface", attackerSurfaces.toAttackerBattleSurfaceInfo())
+            put("defender_surface", defenderSurfaces.toDefenderBattleSurfaceInfo())
             put("attack_idu", "0,0,0,0,0")
             put("defend_idu", "0,0,0,0,0")
             put("lose_tips", "")
@@ -220,11 +220,20 @@ class ClientBattleReportStore private constructor(
             "${surface?.heroId ?: 0},${surface?.dynamicIcon ?: 0}"
         }
 
-    private fun List<BattleHeroSurface>.toBattleSurfaceInfo(): String =
+    private fun List<BattleHeroSurface>.toAttackerBattleSurfaceInfo(): String =
         (listOf("0,0,0") + (0..2).map { position ->
             val surface = firstOrNull { it.position == position }
-            "${surface?.cardBorder ?: 0},${surface?.dynamicIcon ?: 0},${surface?.activeFeatureId ?: 0}"
+            surface.toBattleSurfaceRow()
         }).joinToString(";")
+
+    private fun List<BattleHeroSurface>.toDefenderBattleSurfaceInfo(): String =
+        ((2 downTo 0).map { position ->
+            val surface = firstOrNull { it.position == position }
+            surface.toBattleSurfaceRow()
+        } + "0,0,0").joinToString(";")
+
+    private fun BattleHeroSurface?.toBattleSurfaceRow(): String =
+        "${this?.cardBorder ?: 0},${this?.dynamicIcon ?: 0},${this?.activeFeatureId ?: 0}"
 
     private fun emptyFourRows(width: Int): String =
         emptyRows(rows = 4, width = width)
@@ -311,7 +320,7 @@ class ClientBattleReportStore private constructor(
             return ClientBattleReport(
                 battleId = battleId,
                 ownerUserId = ownerUserId,
-                wid = GameServerConfig.CITY_WID + 1,
+                wid = 10001,
                 timeSec = nowSec,
                 result = BattleEngine.resolve(
                     BattleRequest(attacker, defender, maxRounds = 8),

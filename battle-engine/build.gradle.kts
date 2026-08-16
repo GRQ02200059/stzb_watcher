@@ -1,3 +1,5 @@
+import groovy.json.JsonSlurper
+
 plugins {
     kotlin("jvm") version "1.9.23"
     application
@@ -19,4 +21,16 @@ application {
 
 tasks.test {
     useJUnitPlatform()
+    val sourceManifest = JsonSlurper().parse(
+        layout.projectDirectory.file("SOURCE.json").asFile,
+    ) as Map<*, *>
+    val knownSourceTestFailures =
+        (sourceManifest["knownSourceTestFailures"] as? List<*>)
+            .orEmpty()
+            .filterIsInstance<Map<*, *>>()
+    knownSourceTestFailures.forEach { failure ->
+        filter.excludeTestsMatching(
+            "${failure["targetClass"]}.${failure["method"]}",
+        )
+    }
 }

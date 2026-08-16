@@ -3,6 +3,7 @@ let _simHeroes = null;
 let _simSkills = null;
 let _simState  = { blue: [], red: [] };
 let _simSkillPicker = null; // {camp, heroIdx, slot}
+let _simSourceContext = null;
 
 const SIM_POS       = ['大营','中军','前锋'];
 const SIM_CAMP_NAME = ['','蜀','魏','吴','汉','群','晋'];
@@ -34,6 +35,55 @@ async function initSimulator() {
     {id:100023,level:40,up:5,equip_skills:[0,0]},
   ];
   _renderSim();
+}
+
+function _normalizeHandoffHero(hero) {
+  const id = Number(hero && (hero.id || hero.heroId));
+  if (!Number.isInteger(id) || id <= 0) throw new Error('无效武将 ID');
+  return {
+    id,
+    level: Math.min(45, Math.max(1, Number(hero.level) || 40)),
+    up: Math.min(9, Math.max(0, Number(hero.up) || 0)),
+    equip_skills: (hero.equip_skills || hero.equipSkills || [])
+      .map(Number)
+      .filter(skillId => Number.isInteger(skillId) && skillId > 0)
+      .slice(0, 2),
+  };
+}
+
+async function loadLineup(lineup, options = {}) {
+  await initSimulator();
+  const camp = options.camp === 'red' ? 'red' : 'blue';
+  const heroes = Array.isArray(lineup) ? lineup : lineup && lineup.heroes;
+  if (!Array.isArray(heroes) || heroes.length < 1 || heroes.length > 3) {
+    throw new Error('阵容必须包含 1 至 3 名武将');
+  }
+  const normalized = heroes.map(_normalizeHandoffHero);
+  const missing = normalized.filter(
+    hero => !(_simHeroes || []).some(candidate => candidate.id === hero.id)
+  );
+  if (missing.length) throw new Error(`模拟器缺少武将 ${missing.map(hero => hero.id).join(', ')}`);
+  _simState[camp] = normalized;
+  const morale = Number((lineup && lineup.morale) ?? options.morale);
+  const moraleInput = document.getElementById(`sim-${camp}-morale`);
+  if (moraleInput && Number.isFinite(morale)) {
+    moraleInput.value = String(Math.min(200, Math.max(0, morale)));
+  }
+  _simSourceContext = {
+    source: options.source || 'external',
+    lineupKey: options.lineupKey || '',
+    camp,
+  };
+  _renderTeamCards(camp);
+  return getSimulatorState();
+}
+
+function getSimulatorState() {
+  return {
+    blue: _simState.blue.map(hero => ({...hero, equip_skills:[...(hero.equip_skills || [])]})),
+    red: _simState.red.map(hero => ({...hero, equip_skills:[...(hero.equip_skills || [])]})),
+    sourceContext: _simSourceContext ? {..._simSourceContext} : null,
+  };
 }
 
 // ─── 武将图片
@@ -405,6 +455,16 @@ async function runSimulate(repeat) {
   if (repeat===1) _renderSingleResult(r.result);
   else _renderMultiResult(r);
   _updateHP(r, repeat);
+  window.dispatchEvent(new CustomEvent('stzb:simulation-completed', {
+    detail: {
+      evidenceClass: 'SIMULATION',
+      repeat,
+      engine: r.engine || '',
+      response: r,
+      sourceContext: _simSourceContext ? {..._simSourceContext} : null,
+      notice: '模拟结果来自战斗引擎，不等同于真实历史胜率。',
+    },
+  }));
 }
 
 function _updateHP(r, repeat) {
@@ -545,3 +605,10 @@ function simToggleLog() {
   box.style.display=h?'':'none';
   btn.textContent=h?'收起':'展开';
 }
+
+window.StzbSimulator = {
+  init: initSimulator,
+  loadLineup,
+  getState: getSimulatorState,
+  run: runSimulate,
+};

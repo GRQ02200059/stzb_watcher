@@ -1,9 +1,11 @@
 import ast
 import json
 import re
+from dataclasses import replace
 from typing import Any, Iterable, Tuple
 
 from .models import (
+    ObservedArea,
     WorldArmy,
     WorldMapUser,
     WorldRealMarch,
@@ -128,10 +130,12 @@ def parse_world_scene_packet(
             raw=raw,
         )
 
+    tile_chunks = {}
     tiles = {}
     for wid, chunk_map in _entries(payload[14]):
         if not isinstance(chunk_map, dict):
             continue
+        tile_chunks[wid] = {str(key): value for key, value in chunk_map.items()}
         raw = chunk_map.get("0") or chunk_map.get(0)
         if isinstance(raw, list) and len(raw) >= 21:
             tiles[wid] = WorldTile(
@@ -160,16 +164,29 @@ def parse_world_scene_packet(
                 real_march_id=real_id,
                 last_wid=_as_int(raw[0]),
                 current_wid=_as_int(raw[1]),
-                next_wid=_as_int(raw[2]),
-                start_time=_as_int(raw[3]),
-                next_time=_as_int(raw[4]),
-                end_time=_as_int(raw[5]),
-                path_id=_as_int(raw[6]),
-                unit_time_cost=_as_int(raw[7]),
-                march_type=_as_int(raw[8]),
-                belong_id=_as_int(raw[9]),
+                current_arrive_time=_as_int(raw[2]),
+                next_wid=_as_int(raw[3]),
+                next_begin_time=_as_int(raw[4]),
+                next_need_time=_as_int(raw[5]),
+                next_spend_time=_as_int(raw[6]),
+                path_id=_as_int(raw[7]),
+                unit_time_cost=_as_int(raw[8]),
+                march_type=_as_int(raw[9]),
+                belong_id=_as_int(raw[10]),
+                morale=_as_int(raw[11]),
+                morale_stay_last_calc_time=_as_int(raw[12]),
+                morale_hungry_last_calc_time=_as_int(raw[13]),
                 raw=raw,
             )
+
+    observed_area = None
+    if isinstance(payload[17], list) and len(payload[17]) == 4:
+        observed_area = ObservedArea(
+            row_up=_as_int(payload[17][0]),
+            row_down=_as_int(payload[17][1]),
+            col_left=_as_int(payload[17][2]),
+            col_right=_as_int(payload[17][3]),
+        )
 
     block_info = None
     if isinstance(payload[20], list) and len(payload[20]) >= 2:
@@ -200,12 +217,33 @@ def parse_world_scene_packet(
             for value in payload[7]
             if isinstance(payload[7], list) and _as_int(value) > 0
         ),
+        deleted_ship_ids=tuple(
+            _as_int(value)
+            for value in payload[9]
+            if isinstance(payload[9], list) and _as_int(value) > 0
+        ),
+        deleted_assist_army_ids=tuple(
+            _as_int(value)
+            for value in payload[11]
+            if isinstance(payload[11], list) and _as_int(value) > 0
+        ),
         block_info=block_info,
         block_armies={
             block: tuple(_as_int(value) for value in ids if _as_int(value) > 0)
             for block, ids in _entries(payload[21])
             if isinstance(ids, list)
         },
+        block_ships={
+            block: tuple(_as_int(value) for value in ids if _as_int(value) > 0)
+            for block, ids in _entries(payload[22])
+            if isinstance(ids, list)
+        },
+        block_assist_armies={
+            block: tuple(_as_int(value) for value in ids if _as_int(value) > 0)
+            for block, ids in _entries(payload[23])
+            if isinstance(ids, list)
+        },
+        tile_chunks=tile_chunks,
         tiles=tiles,
         clear_chunks={
             wid: tuple(str(value) for value in values)
@@ -214,6 +252,7 @@ def parse_world_scene_packet(
         },
         real_marches=real_marches,
         entities=entities,
+        observed_area=observed_area,
         raw_payload=decoded_text,
     )
 
@@ -221,16 +260,90 @@ def parse_world_scene_packet(
 class WorldSceneAssembler:
     def __init__(self) -> None:
         self.last_completed_server_order_id = -1
-        self._assembling_5026 = False
+        self._pending_5026: list[WorldScenePacket] = []
 
     def apply(self, packet: WorldScenePacket) -> WorldSceneApplyResult:
         if packet.cmd_id == 5026:
-            self._assembling_5026 = packet.server_order_id <= 0
+            self._pending_5026.append(packet)
             if packet.server_order_id > 0:
-                self.last_completed_server_order_id = packet.server_order_id
-                return WorldSceneApplyResult(True, True, packet=packet)
+                merged = _merge_5026_packets(self._pending_5026)
+                self._pending_5026 = []
+                self.last_completed_server_order_id = merged.server_order_id
+                return WorldSceneApplyResult(True, True, packet=merged)
             return WorldSceneApplyResult(True, False, packet=packet)
         if packet.cmd_id == 5028 and packet.server_order_id != SPECIAL_ORDER_ID:
             if packet.server_order_id <= self.last_completed_server_order_id:
                 return WorldSceneApplyResult(False, False, "STALE_5028", packet)
         return WorldSceneApplyResult(True, False, packet=packet)
+
+
+def _merge_dicts(packets, field_name):
+    merged = {}
+    for packet in packets:
+        merged.update(getattr(packet, field_name))
+    return merged
+
+
+def _merge_5026_packets(packets: list[WorldScenePacket]) -> WorldScenePacket:
+    final = packets[-1]
+    visual = {}
+    for packet in packets:
+        if isinstance(packet.visual_field_raw, dict):
+            visual.update(packet.visual_field_raw)
+    return replace(
+        final,
+        source="|".join(packet.source for packet in packets),
+        observed_at_ms=max(packet.observed_at_ms for packet in packets),
+        visual_field_raw=visual or final.visual_field_raw,
+        users=_merge_dicts(packets, "users"),
+        unions=_merge_dicts(packets, "unions"),
+        armies=_merge_dicts(packets, "armies"),
+        direct_deleted_army_ids=tuple(
+            value for packet in packets for value in packet.direct_deleted_army_ids
+        ),
+        block_deleted_army_ids=tuple(
+            value for packet in packets for value in packet.block_deleted_army_ids
+        ),
+        deleted_ship_ids=tuple(
+            value for packet in packets for value in packet.deleted_ship_ids
+        ),
+        deleted_assist_army_ids=tuple(
+            value for packet in packets for value in packet.deleted_assist_army_ids
+        ),
+        block_armies=_merge_dicts(packets, "block_armies"),
+        block_ships=_merge_dicts(packets, "block_ships"),
+        block_assist_armies=_merge_dicts(packets, "block_assist_armies"),
+        tile_chunks=_merge_nested_dicts(packets, "tile_chunks"),
+        tiles=_merge_dicts(packets, "tiles"),
+        clear_chunks=_merge_dicts(packets, "clear_chunks"),
+        real_marches=_merge_dicts(packets, "real_marches"),
+        entities={
+            category: {
+                key: value
+                for packet in packets
+                for key, value in packet.entities.get(category, {}).items()
+            }
+            for category in {
+                category
+                for packet in packets
+                for category in packet.entities
+            }
+        },
+        observed_area=next(
+            (
+                packet.observed_area
+                for packet in reversed(packets)
+                if packet.observed_area is not None
+            ),
+            None,
+        ),
+        raw_payload="\n".join(packet.raw_payload for packet in packets),
+    )
+
+
+def _merge_nested_dicts(packets, field_name):
+    merged = {}
+    for packet in packets:
+        for key, values in getattr(packet, field_name).items():
+            merged.setdefault(key, {}).update(values)
+    return merged
