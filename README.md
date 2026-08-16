@@ -37,20 +37,11 @@ Web 与 Android 使用一致的数据口径和业务语义，覆盖同一套核�
 
 ### Web 全景
 
-> **截图待上传：Web 战场情报全景**
->
-> 文件名：`docs/assets/screenshots/overview-intelligence.webp`
->
-> 建议画面：完整侧栏、顶栏、战场地图、图层控制与情报区域。
-
-<!--
 <img src="docs/assets/screenshots/overview-intelligence.webp"
      alt="Web 战场情报全景"
      width="100%">
--->
 
-截图上传与启用方法见
-[`docs/assets/screenshots/README.md`](docs/assets/screenshots/README.md)。
+战场情报将全域地图、图层控制、风险态势和情报详情收拢到同一个宽屏工作区。
 
 ## 核心价值
 
@@ -67,48 +58,36 @@ Web 与 Android 使用一致的数据口径和业务语义，覆盖同一套核�
 <table>
   <tr>
     <td width="50%" align="center">
-      <!-- <img src="docs/assets/screenshots/gallery-live-army.webp" alt="Web 实时部队" width="100%"> -->
-      <strong>截图待上传</strong><br>
-      <code>gallery-live-army.webp</code><br><br>
+      <img src="docs/assets/screenshots/gallery-live-army.webp" alt="Web 实时部队" width="100%"><br>
       <strong>实时部队</strong><br>
       聚合位置、路线、目标和精确战报阵容，形成三栏指挥视图。
     </td>
     <td width="50%" align="center">
-      <!-- <img src="docs/assets/screenshots/gallery-simulator.webp" alt="Web 战斗模拟" width="100%"> -->
-      <strong>截图待上传</strong><br>
-      <code>gallery-simulator.webp</code><br><br>
+      <img src="docs/assets/screenshots/gallery-simulator.webp" alt="Web 战斗模拟" width="100%"><br>
       <strong>战斗模拟</strong><br>
       配置攻守阵容，执行单场或批量推演，并查看语义事件回放。
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
-      <!-- <img src="docs/assets/screenshots/gallery-research.webp" alt="Web 阵容战法研究" width="100%"> -->
-      <strong>截图待上传</strong><br>
-      <code>gallery-research.webp</code><br><br>
+      <img src="docs/assets/screenshots/gallery-research.webp" alt="Web 阵容战法研究" width="100%"><br>
       <strong>阵容战法研究</strong><br>
       连接历史对阵、战法执行链与模拟结果，验证阵容思路。
     </td>
     <td width="50%" align="center">
-      <!-- <img src="docs/assets/screenshots/gallery-score.webp" alt="Web 自定义积分" width="100%"> -->
-      <strong>截图待上传</strong><br>
-      <code>gallery-score.webp</code><br><br>
+      <img src="docs/assets/screenshots/gallery-score.webp" alt="Web 自定义积分" width="100%"><br>
       <strong>自定义积分</strong><br>
       按赛季规则计算榜单，支持筛选、调整、重算与规则管理。
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
-      <!-- <img src="docs/assets/screenshots/gallery-attendance.webp" alt="Web 打城考勤" width="100%"> -->
-      <strong>截图待上传</strong><br>
-      <code>gallery-attendance.webp</code><br><br>
+      <img src="docs/assets/screenshots/gallery-attendance.webp" alt="Web 打城考勤" width="100%"><br>
       <strong>打城考勤</strong><br>
       管理任务阶段、成员安排与攻城出勤，统一团队执行记录。
     </td>
     <td width="50%" align="center">
-      <!-- <img src="docs/assets/screenshots/gallery-player-teams.webp" alt="Web 玩家队伍" width="100%"> -->
-      <strong>截图待上传</strong><br>
-      <code>gallery-player-teams.webp</code><br><br>
+      <img src="docs/assets/screenshots/gallery-player-teams.webp" alt="Web 玩家队伍" width="100%"><br>
       <strong>玩家队伍</strong><br>
       按玩家、同盟和攻守侧查看常用阵容、战法与实战表现。
     </td>
@@ -116,6 +95,9 @@ Web 与 Android 使用一致的数据口径和业务语义，覆盖同一套核�
 </table>
 
 ## Android 产品预览
+
+Android 截图仍待上传，固定文件名与启用步骤见
+[`docs/assets/screenshots/README.md`](docs/assets/screenshots/README.md)。
 
 <table>
   <tr>

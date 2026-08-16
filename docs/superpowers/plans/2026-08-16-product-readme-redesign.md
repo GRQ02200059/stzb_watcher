@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace the long technical README with a Chinese product homepage that presents Web and Android as capability-equivalent clients and reserves ten screenshot positions without creating broken images.
+**Goal:** Maintain a Chinese product homepage that presents Web and Android as capability-equivalent clients, displays seven real Web screenshots, and reserves three Android screenshot positions without creating broken images.
 
-**Architecture:** `README.md` owns the short product narrative, capability matrix, launch paths, privacy guidance, and visible screenshot placeholders. `docs/assets/screenshots/README.md` owns the stable screenshot filename contract and the exact upload/enable workflow. The approved design spec remains the source of truth.
+**Architecture:** `README.md` owns the short product narrative, capability matrix, launch paths, privacy guidance, seven visible Web screenshots, and three Android placeholders. `docs/assets/screenshots/README.md` owns the stable screenshot filename contract and the Android upload/enable workflow. The approved design spec remains the source of truth.
 
 **Tech Stack:** Markdown, GitHub HTML tables and details blocks, Mermaid, Python 3.9+, Flask, Vanilla JavaScript, Kotlin/JVM 17, Android SDK 35, Gradle.
 
@@ -12,15 +12,15 @@
 
 - Write the product homepage in Chinese and do not use Emoji.
 - Present Web and Android as having the same core business capabilities; differences are limited to interaction form and runtime.
-- Reserve one Web overview, six Web gallery, and three Android screenshot positions.
-- Do not capture, generate, compress, or add screenshot assets in this task.
-- Do not visibly reference missing image files; use text placeholders and commented image tags until the user uploads the fixed filenames.
+- Display one Web overview and six Web gallery screenshots captured from the real local product.
+- Reserve three Android screenshot positions for later user uploads.
+- Do not visibly reference missing Android image files; use text placeholders and commented image tags until the user uploads the fixed filenames.
 - Do not expose local absolute paths, account details, databases, packet captures, or profile contents.
 - Keep the README focused on users; move API dictionaries and implementation state-machine details out of the main reading path.
 
 ---
 
-### Task 1: Define the screenshot upload contract
+### Task 1: Define the screenshot contract
 
 **Files:**
 - Create: `docs/assets/screenshots/README.md`
@@ -46,7 +46,7 @@ android-teams.webp
 android-simulator.webp
 ```
 
-Document that the user uploads the files to `docs/assets/screenshots/`, then replaces each visible placeholder in `README.md` by uncommenting the adjacent `<img>` tag.
+Document that the seven Web files are already enabled. For Android, the user uploads the three files to `docs/assets/screenshots/`, then replaces each visible placeholder in `README.md` by uncommenting the adjacent `<img>` tag.
 
 - [ ] **Step 2: Verify the filename contract**
 
@@ -103,7 +103,7 @@ Android 产品预览
 许可与联系
 ```
 
-Use one full-width text placeholder, a two-column Web table, and a three-column Android table. Every slot must display its fixed filename and contain an adjacent commented repository-relative `<img>` tag.
+Use one full-width Web screenshot, a two-column Web screenshot table, and a three-column Android placeholder table. Every Android slot must display its fixed filename and contain an adjacent commented repository-relative `<img>` tag.
 
 - [ ] **Step 2: Keep launch commands executable**
 
@@ -158,7 +158,7 @@ Expected: all positioning, screenshot, and launch terms are present.
 
 - [ ] **Step 1: Check visible local links and image references**
 
-Run a small Python check that extracts visible Markdown links from `README.md`, ignores `http`, anchors, and content inside HTML comments, and asserts every repository-relative target exists. Assert that no visible Markdown image points to one of the ten not-yet-uploaded WebP files.
+Run a small Python check that extracts visible Markdown links from `README.md`, ignores `http`, anchors, and content inside HTML comments, and asserts every repository-relative target exists. Assert that all seven visible Web images exist and all three missing Android images remain commented.
 
 Expected: prints `README links OK`.
 

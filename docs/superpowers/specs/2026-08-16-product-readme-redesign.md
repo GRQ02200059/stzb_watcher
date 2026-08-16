@@ -136,15 +136,15 @@ README 目标长度约 200–280 行，按以下顺序组织：
 - `android-teams.webp`：Android 队伍与团队；
 - `android-simulator.webp`：Android 战斗模拟。
 
-### 占位与上传约定
+### 截图与上传约定
 
-- 本任务不采集、不生成、不压缩任何产品截图；
-- 用户后续自行将 WebP 图片上传到 `docs/assets/screenshots/`；
-- README 使用可见文字占位卡，不直接引用尚不存在的图片；
-- 每个占位位旁保留注释状态的仓库相对图片标签，上传后取消注释即可启用；
+- Web 端七张截图由本地真实页面采集，统一保存为 WebP 并在 README 中启用；
+- Android 端三张截图由用户后续上传到 `docs/assets/screenshots/`；
+- Android 截图缺失时，README 使用可见文字占位卡，不直接引用尚不存在的图片；
+- Android 占位位旁保留注释状态的仓库相对图片标签，上传后取消注释即可启用；
 - `docs/assets/screenshots/README.md` 记录十个固定文件名、建议画面和启用步骤；
 - 上传前后都不得要求本机绝对路径或外部图床；
-- 不创建临时截图、示意图、GIF、视频或替代图片资产。
+- 不创建示意图、GIF、视频或替代图片资产。
 
 ### 建议画面
 
@@ -189,14 +189,14 @@ README 目标长度约 200–280 行，按以下顺序组织：
 
 1. README 首屏明确展示 Web + Android 双端完整产品定位；
 2. Web 与 Android 被描述为业务能力对等，不出现主端/精简端关系；
-3. README 明确预留十个固定截图文件名，并且图片缺失时不出现破图；
-4. Web 六图占位画廊在 GitHub 桌面端保持两列，在窄屏自然纵向排列；
+3. README 启用七张 Web 截图，并为三张 Android 截图保留固定文件名且不出现破图；
+4. Web 六图画廊在 GitHub 桌面端保持两列，在窄屏自然纵向排列；
 5. Android 三图占位画廊在桌面端横排，在窄屏保持可读；
 6. 双端能力矩阵中的核心能力均标记 Web 与 Android 支持；
 7. README 中的双端启动命令可以从干净环境理解并执行；
 8. 不引用已经删除的 `dashboard/` 原型或根目录旧导出 JSON；
 9. 不包含本机绝对路径作为用户必需配置；
-10. 可见 Markdown 链接全部指向仓库内存在的文件，未上传图片仅存在于 HTML 注释；
+10. 可见 Markdown 链接与图片全部指向仓库内存在的文件，未上传 Android 图片仅存在于 HTML 注释；
 11. `docs/assets/screenshots/README.md` 完整记录上传与启用步骤；
 12. Node、Python 与 Android 验证继续通过；
 13. `git diff --check` 通过。
