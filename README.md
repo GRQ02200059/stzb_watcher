@@ -47,7 +47,7 @@
 - **Frontend**: 静态 Dashboard（Vanilla JS + CSS Design System）
 - **Realtime**: SSE（`/api/stream`）+ 后台实时入库
 - **Battle Engine**: Kotlin 1.9.23 / JVM 17；战斗语义镜像自 `/Users/bytedance/stzb/server`
-- **Extra**: 另附独立 Vue/Vite 模拟器子项目 `stzbBattleSimulator-main/`
+- **Legacy Reference**: 保留独立 Vue/Vite 模拟器子项目 `stzbBattleSimulator-main/`，当前产品使用 `static/` 内的 Vanilla JS 工作台
 
 前端导出依赖已固定到 `static/vendor/`，Dashboard 不依赖 Google Fonts 或
 jsDelivr 才能完成基础渲染与 Excel/PDF 导出。
@@ -164,8 +164,9 @@ python api_server.py
 ### 3. 数据目录说明
 
 - 抓包原始数据默认写入 `capture_new/`
-- 当前账号信息保存在 `current_profile.json`
-- 历史账号信息保存在 `profiles.json`
+- 当前账号信息运行时保存在本机 `current_profile.json`
+- 历史账号信息运行时保存在本机 `profiles.json`
+- 两个文件包含本机路径、区服与角色信息，已从 Git 跟踪中排除
 - 不同区服会自动切换到不同 `stzb_<server_ip>.db`
 
 ### 4. 可选：离线建库 / 导入
@@ -403,8 +404,8 @@ stzb_watcher/
 │   └── skillcfg.json             # 技能配置
 ├── hero_scraper/
 │   └── output/                   # 武将 / 技能等基础资料
-├── dashboard/                    # 早期页面 / 原型文件
-├── stzbBattleSimulator-main/     # 独立 Vue + Vite 模拟器子项目
+├── docs/research/                # 调研、迁移可行性与历史技术说明
+├── stzbBattleSimulator-main/     # 旧 Vue + Vite 模拟器参考实现
 └── test/                         # 测试目录
 ```
 

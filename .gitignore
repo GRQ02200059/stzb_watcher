@@ -17,6 +17,10 @@ local.properties
 /.vscode/
 /.superpowers/brainstorm/
 
+# 运行时账号档案（包含本机路径、区服和角色信息）
+/current_profile.json
+/profiles.json
+
 # 二进制/抓包文件
 *.pcap
 *.bin
