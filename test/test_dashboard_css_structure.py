@@ -292,7 +292,7 @@ class DashboardCssStructureTest(unittest.TestCase):
     def test_product_readme_documents_dual_platform_and_screenshot_contract(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         visible_readme = re.sub(r"<!--.*?-->", "", readme, flags=re.DOTALL)
-        web_screenshot_names = (
+        screenshot_names = (
             "overview-intelligence.webp",
             "gallery-live-army.webp",
             "gallery-simulator.webp",
@@ -300,8 +300,6 @@ class DashboardCssStructureTest(unittest.TestCase):
             "gallery-score.webp",
             "gallery-attendance.webp",
             "gallery-player-teams.webp",
-        )
-        android_screenshot_names = (
             "android-battlefield.webp",
             "android-teams.webp",
             "android-simulator.webp",
@@ -317,22 +315,12 @@ class DashboardCssStructureTest(unittest.TestCase):
         ):
             with self.subTest(token=token):
                 self.assertIn(token, readme)
-        for screenshot_name in web_screenshot_names:
+        for screenshot_name in screenshot_names:
             with self.subTest(screenshot=screenshot_name):
                 self.assertIn(screenshot_name, readme)
                 self.assertRegex(
                     visible_readme,
                     rf"<img[^>]+{re.escape(screenshot_name)}[^>]*>",
-                )
-        for screenshot_name in android_screenshot_names:
-            with self.subTest(screenshot=screenshot_name):
-                self.assertIn(screenshot_name, readme)
-                self.assertIsNotNone(
-                    re.search(
-                        rf"<!--.*?<img[^>]+{re.escape(screenshot_name)}[^>]*>.*?-->",
-                        readme,
-                        flags=re.DOTALL,
-                    )
                 )
         for deprecated_positioning in ("PoC", "精简版", "部分迁移", "附属端"):
             self.assertNotIn(deprecated_positioning, readme)

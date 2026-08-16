@@ -96,25 +96,19 @@ Web 与 Android 使用一致的数据口径和业务语义，覆盖同一套核�
 
 ## Android 产品预览
 
-Android 截图仍待上传，固定文件名与启用步骤见
+截图文件名、尺寸与替换约定见
 [`docs/assets/screenshots/README.md`](docs/assets/screenshots/README.md)。
 
 <table>
   <tr>
     <td width="33%" align="center">
-      <!-- <img src="docs/assets/screenshots/android-battlefield.webp" alt="Android 战场总览" width="100%"> -->
-      <strong>截图待上传</strong><br>
-      <code>android-battlefield.webp</code>
+      <img src="docs/assets/screenshots/android-battlefield.webp" alt="Android 战场总览" width="100%">
     </td>
     <td width="33%" align="center">
-      <!-- <img src="docs/assets/screenshots/android-teams.webp" alt="Android 队伍与团队" width="100%"> -->
-      <strong>截图待上传</strong><br>
-      <code>android-teams.webp</code>
+      <img src="docs/assets/screenshots/android-teams.webp" alt="Android 队伍与团队" width="100%">
     </td>
     <td width="33%" align="center">
-      <!-- <img src="docs/assets/screenshots/android-simulator.webp" alt="Android 战斗模拟" width="100%"> -->
-      <strong>截图待上传</strong><br>
-      <code>android-simulator.webp</code>
+      <img src="docs/assets/screenshots/android-simulator.webp" alt="Android 战斗模拟" width="100%">
     </td>
   </tr>
   <tr>
@@ -123,6 +117,8 @@ Android 截图仍待上传，固定文件名与启用步骤见
     <td align="center"><strong>战斗模拟</strong><br>复用一致的阵容配置、战斗语义与推演能力。</td>
   </tr>
 </table>
+
+[截图资产说明](docs/assets/screenshots/README.md)
 
 ## 核心能力
 
