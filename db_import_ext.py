@@ -19,8 +19,28 @@ try:
 except:
     HERO_NAMES = {}
 
+def normalize_hero_id(hid):
+    """将赛季武将ID转换为基础ID（13xxxx -> 10xxxx, 14xxxx -> 10xxxx）"""
+    if not hid:
+        return hid
+    hid_int = int(hid)
+    # 赛季武将ID：13xxxx - 30000 = 10xxxx, 14xxxx - 40000 = 10xxxx
+    if 130000 <= hid_int < 140000:
+        return hid_int - 30000
+    elif 140000 <= hid_int < 150000:
+        return hid_int - 40000
+    return hid_int
+
 def hero_name(hid):
-    return HERO_NAMES.get(int(hid), f'武将{hid}') if hid else ''
+    if not hid:
+        return ''
+    # 先尝试原始ID
+    hid_int = int(hid)
+    if hid_int in HERO_NAMES:
+        return HERO_NAMES[hid_int]
+    # 尝试转换后的ID
+    normalized_id = normalize_hero_id(hid_int)
+    return HERO_NAMES.get(normalized_id, f'武将{hid}')
 
 def ts_now():
     return datetime.now().strftime('%Y-%m-%d %H:%M:%S')

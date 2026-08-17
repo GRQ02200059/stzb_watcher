@@ -18,7 +18,30 @@ try:
         SKILL_NAMES = {str(s['id']): s['name'] for s in json.load(f) if s.get('id') and s.get('name')}
 except: SKILL_NAMES = {}
 
-def hero_name(hid): return HERO_NAMES.get(str(hid), f'武将{hid}' if hid else '')
+def normalize_hero_id(hid):
+    """将赛季武将ID转换为基础ID（13xxxx -> 10xxxx, 14xxxx -> 10xxxx）"""
+    if not hid:
+        return hid
+    hid_int = int(hid)
+    # 赛季武将ID：13xxxx - 30000 = 10xxxx, 14xxxx - 40000 = 10xxxx
+    if 130000 <= hid_int < 140000:
+        return hid_int - 30000
+    elif 140000 <= hid_int < 150000:
+        return hid_int - 40000
+    return hid_int
+
+def hero_name(hid):
+    if not hid:
+        return ''
+    # 先尝试原始ID
+    hid_str = str(hid)
+    if hid_str in HERO_NAMES:
+        return HERO_NAMES[hid_str]
+    # 尝试转换后的ID
+    normalized_id = normalize_hero_id(hid)
+    normalized_str = str(normalized_id)
+    return HERO_NAMES.get(normalized_str, f'武将{hid}')
+
 def skill_name(sid): return SKILL_NAMES.get(str(sid), f'技能{sid}' if sid else '')
 
 RESULT_MAP = {0:'平局',1:'攻方胜',2:'守方胜',3:'攻方溃',4:'守方溃',5:'双溃',6:'守方胜(NPC)'}
