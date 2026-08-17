@@ -1,6 +1,6 @@
 <div align="center">
 
-# stzb_watcher.   问题反馈：QQ群 1063894809
+# stzb_watcher
 
 ### 《率土之滨》Web + Android 双端战场数据平台
 
@@ -14,10 +14,10 @@ Web 与 Android 使用一致的数据口径和业务语义，覆盖同一套核�
 ![Tests](https://img.shields.io/badge/Tests-Node%20%2B%20Python%20%2B%20Chrome-2EA44F)
 
 [产品预览](#产品预览) · [核心能力](#核心能力) · [快速开始](#快速开始) · [常用功能](#常用功能) · [完整使用文档](docs/USER_GUIDE.md) · [项目结构](#项目结构)
-
 </div>
 
 ---
+## 问题反馈：QQ群 1063894809
 
 ## 双端产品
 
