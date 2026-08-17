@@ -11,9 +11,28 @@
 - 当前正式 APK 路径：
   - `app/build/outputs/apk/release/app-release.apk`
 
-## 2. 安装要求
+## 2. 普通用户下载与安装
 
-### 2.1 系统要求
+普通用户不需要下载源码或自行编译。请打开项目的
+[Releases 页面](https://github.com/GRQ02200059/stzb_watcher/releases)，进入最新版本，
+在 `Assets` 中点击 `app-release.apk` 下载，然后在手机上点击 APK 安装。
+
+下载时注意：
+
+- 不要下载 `Source code (zip)` 或 `Source code (tar.gz)`；
+- 不要优先安装 `app-debug.apk`；
+- 如果同时存在 `app-release-unsigned.apk`，请改用已签名的 `app-release.apk`；
+- 如果 Android 系统提示限制安装未知应用，请允许当前浏览器或文件管理器安装应用后重试。
+
+也可以使用 ADB 安装已下载的正式包：
+
+```bash
+"$HOME/Library/Android/sdk/platform-tools/adb" install -r /path/to/app-release.apk
+```
+
+## 3. 安装要求
+
+### 3.1 系统要求
 
 - Android 13 及以上
 - ARM 设备
@@ -25,7 +44,7 @@
 - 当前工程 `minSdk = 33`，Android 13 以下设备无法安装。
 - x86 / x86_64 模拟器默认不在当前 APK 支持范围内。
 
-### 2.2 安装方式
+### 3.2 构建产物安装方式
 
 推荐安装正式包：
 
@@ -47,7 +66,7 @@ app-debug.apk
 
 否则可能遇到测试包安装限制。
 
-## 3. 如何生成正式 APK
+## 4. 如何生成正式 APK
 
 项目根目录已提供一键脚本：
 
@@ -66,7 +85,7 @@ cd /Users/bytedance/stzb_watcher/astzb
 
 [BUILD_RELEASE.md](file:///Users/bytedance/stzb_watcher/astzb/BUILD_RELEASE.md)
 
-## 4. 首次启动怎么用
+## 5. 首次启动怎么用
 
 首次打开 App 后，建议按下面顺序操作：
 
@@ -78,7 +97,7 @@ cd /Users/bytedance/stzb_watcher/astzb
 5. 返回游戏进行联网操作
 6. 再回到本 App 查看解析结果和各业务页面
 
-## 5. 主流程使用说明
+## 6. 主流程使用说明
 
 ### 5.1 启动抓包
 
@@ -113,7 +132,7 @@ cd /Users/bytedance/stzb_watcher/astzb
 
 侧栏通过左上角 `菜单` 按钮打开，不再依赖边缘左滑唤起。
 
-## 6. 主要页面怎么使用
+## 7. 主要页面怎么使用
 
 以下页面都在 Dashboard 侧栏或对应入口中。
 
@@ -211,7 +230,7 @@ cd /Users/bytedance/stzb_watcher/astzb
 
 - 5026 地图地块与辅助队伍索引链路是否正常
 
-## 7. 刷新与导出
+## 8. 刷新与导出
 
 ### 7.1 刷新
 
@@ -238,7 +257,7 @@ cd /Users/bytedance/stzb_watcher/astzb
 2. 导出的数据库
 3. 导出的解析包
 
-## 8. 常见问题
+## 9. 常见问题
 
 ### 8.1 安装失败 `-15`
 
@@ -313,7 +332,7 @@ cd /Users/bytedance/stzb_watcher/astzb
 
 不再支持边缘左滑直接唤起。
 
-## 9. 推荐使用流程
+## 10. 推荐使用流程
 
 建议你平时按下面这个顺序使用：
 
@@ -325,7 +344,7 @@ cd /Users/bytedance/stzb_watcher/astzb
 6. 再看 `全部战报`、`同盟成员`、`工程考勤`、`团数据`
 7. 需要排错时导出数据库和解析包
 
-## 10. 文档索引
+## 11. 文档索引
 
 - 工程说明：[README.md](file:///Users/bytedance/stzb_watcher/astzb/README.md)
 - 出包说明：[BUILD_RELEASE.md](file:///Users/bytedance/stzb_watcher/astzb/BUILD_RELEASE.md)
