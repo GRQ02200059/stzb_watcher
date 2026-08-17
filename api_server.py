@@ -2426,7 +2426,7 @@ def api_player_battle_teams():
                 heroes_ids = '+'.join(str(x) for x in [dh1,dh2,dh3] if x)
             if heroes_ids:
                 stars = parse_advance_stars(def_advance)
-                skills = parse_skill_info(skill_info, [4,5,6])
+                skills = parse_skill_info(skill_info, [6,5,4])
                 k = (def_name.strip(), '', heroes_ids)
                 d = team_map[k]
                 d['cnt'] += 1
