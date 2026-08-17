@@ -1,0 +1,6 @@
+[submodule "astzb/third_party/hev-socks5-tunnel"]
+	path = astzb/third_party/hev-socks5-tunnel
+	url = https://github.com/heiher/hev-socks5-tunnel.git
+[submodule "astzb/third_party/sockstun"]
+	path = astzb/third_party/sockstun
+	url = https://github.com/heiher/sockstun.git

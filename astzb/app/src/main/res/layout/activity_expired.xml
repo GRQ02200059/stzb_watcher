@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/expiredRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8FAFC"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/expiredTitleView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="应用已过期"
+        android:textColor="#0F172A"
+        android:textSize="28sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/expiredSubtitleView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="应用试用期已结束"
+        android:textColor="#DC2626"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/expiredDetailView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="#FFFFFF"
+        android:gravity="center"
+        android:lineSpacingExtra="4dp"
+        android:padding="18dp"
+        android:textColor="#334155"
+        android:textSize="16sp" />
+
+</LinearLayout>

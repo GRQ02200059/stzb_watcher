@@ -1,0 +1,178 @@
+{
+  "baselineCommand": 5026,
+  "deltaCommand": 5028,
+  "evidence": [
+    "/Users/bytedance/stzb/docs/protocol/5026-5028-world-scene-fields.md"
+  ],
+  "int64Fields": [
+    "visualField.*",
+    "worldCity.protectEndTime",
+    "worldCity.guardEndTime",
+    "worldCity.worldCityBeginTime",
+    "worldCity.worldCityEndTime"
+  ],
+  "payloadLength": 31,
+  "schemaVersion": 1,
+  "slots": {
+    "0": {
+      "5026": "visualField",
+      "5028": "visualFieldChanges",
+      "type": "object"
+    },
+    "1": {
+      "5026": "mapUsers",
+      "5028": "mapUserChanges",
+      "type": "object"
+    },
+    "10": {
+      "5026": "assistArmies",
+      "5028": "assistArmyChanges",
+      "type": "object"
+    },
+    "11": {
+      "5026": "reserved11",
+      "5028": "deletedAssistArmies",
+      "type": "array"
+    },
+    "12": {
+      "5026": "armyGroups",
+      "5028": "armyGroups",
+      "type": "object"
+    },
+    "13": {
+      "5026": "shortMessages",
+      "5028": "shortMessages",
+      "type": "object"
+    },
+    "14": {
+      "5026": "worldChunks",
+      "5028": "worldChunkChanges",
+      "type": "object"
+    },
+    "15": {
+      "5026": "reserved15",
+      "5028": "clearChunks",
+      "type": "object"
+    },
+    "16": {
+      "5026": "extGarrison",
+      "5028": "reserved16",
+      "type": "object"
+    },
+    "17": {
+      "5026": "observedMapArea",
+      "5028": "reserved17",
+      "type": "array|null"
+    },
+    "18": {
+      "5026": "serverOrderId",
+      "5028": "serverOrderId",
+      "type": "int"
+    },
+    "19": {
+      "5026": "manorFamily",
+      "5028": "reserved19",
+      "type": "object"
+    },
+    "2": {
+      "5026": "reserved2",
+      "5028": "reserved2"
+    },
+    "20": {
+      "5026": "blockInfo",
+      "5026Type": "null",
+      "5028": "blockInfo",
+      "5028Type": "array[2]"
+    },
+    "21": {
+      "5026": "blockArmies",
+      "5028": "reserved21",
+      "type": "object"
+    },
+    "22": {
+      "5026": "blockShips",
+      "5028": "reserved22",
+      "type": "object"
+    },
+    "23": {
+      "5026": "blockAssistArmies",
+      "5028": "reserved23",
+      "type": "object"
+    },
+    "24": {
+      "5026": "careerSupportAdd",
+      "5028": "careerSupportAdd",
+      "type": "object"
+    },
+    "25": {
+      "5026": "careerSupportRemove",
+      "5028": "careerSupportRemove",
+      "type": "array"
+    },
+    "26": {
+      "5026": "reserved26",
+      "5028": "clearHunter",
+      "type": "array"
+    },
+    "27": {
+      "5026": "reserved27",
+      "5028": "clearStrategy",
+      "type": "array"
+    },
+    "28": {
+      "5026": "reserved28",
+      "5028": "reserved28"
+    },
+    "29": {
+      "5026": "realMarch",
+      "5028": "realMarch",
+      "type": "object"
+    },
+    "3": {
+      "5026": "unions",
+      "5028": "unionChanges",
+      "type": "object"
+    },
+    "30": {
+      "5026": "reserved30",
+      "5028": "reserved30"
+    },
+    "4": {
+      "5026": "strategies",
+      "5028": "strategyChanges",
+      "type": "object"
+    },
+    "5": {
+      "5026": "nationStrategies",
+      "5028": "nationStrategyChanges",
+      "type": "object"
+    },
+    "6": {
+      "5026": "armies",
+      "5028": "armyChanges",
+      "type": "object"
+    },
+    "7": {
+      "5026": "reserved7",
+      "5028": "deletedArmies",
+      "type": "array"
+    },
+    "8": {
+      "5026": "warShips",
+      "5028": "warShipChanges",
+      "type": "object"
+    },
+    "9": {
+      "5026": "reserved9",
+      "5028": "deletedShips",
+      "type": "array"
+    }
+  },
+  "specialOrderBypass": -999999999,
+  "tupleLengths": {
+    "mapArmy": 33,
+    "mapUser": 25,
+    "realMarch": 14,
+    "worldCity": 21
+  }
+}

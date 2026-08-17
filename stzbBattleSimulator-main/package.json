@@ -1,0 +1,19 @@
+{
+  "name": "stzbbattlesimulator",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.2.45"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.0.0",
+    "sass": "^1.66.1",
+    "vite": "^4.1.0"
+  }
+}

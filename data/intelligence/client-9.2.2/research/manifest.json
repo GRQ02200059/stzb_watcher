@@ -1,0 +1,41 @@
+{
+  "datasetVersion": "client-9.2.2-research",
+  "files": [
+    {
+      "bytes": 163563,
+      "sha256": "c306c035037332f159219a5b84caa926d55d7ac09d7e9ed326179220d48d5eb4",
+      "target": "card_packs.json"
+    },
+    {
+      "bytes": 1902542,
+      "sha256": "e1f54f2d53e4915e98e27a97ca5396f6549e3eff5e00444db39719b1197a43c6",
+      "target": "protocol_commands.json"
+    },
+    {
+      "bytes": 60297,
+      "sha256": "c7aeeb3ea6b54dc7b262b908138696901df9a70395f84379b5eeaa88b63ab0e6",
+      "target": "table_fields.json"
+    }
+  ],
+  "generatedAt": "2026-08-15T02:32:26+08:00",
+  "privacy": {
+    "containsAccountData": false,
+    "containsCapturePayloads": false,
+    "containsPlayerOrAllianceData": false
+  },
+  "sourceRoot": "/Users/bytedance/stzb/server/src/main/resources",
+  "validation": {
+    "cardPackCount": 271,
+    "protocolDiff": {
+      "added": 63,
+      "removed": 2,
+      "renamed": 1
+    },
+    "protocolVersions": [
+      "9.2.2",
+      "9.2.4"
+    ],
+    "schemaTableCount": 12,
+    "uniqueCardPackCount": 271
+  }
+}

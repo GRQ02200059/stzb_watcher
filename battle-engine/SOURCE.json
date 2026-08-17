@@ -1,0 +1,1389 @@
+{
+  "adapters": [
+    "remove-redundant-same-package-imports",
+    "remove-server-config-dependency",
+    "standalone-resource-path",
+    "standalone-test-fixture-path"
+  ],
+  "excludedTests": [
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleActionResolverTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleConfigRepositoryTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleCoverageSmokeTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleEnginePlayableTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleEngineSkillTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleEquipmentApplierTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleEquipmentRepositoryTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleHeroGrowthTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleIntegrationTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleModelRuntimeTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleSkillInterpreterTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleSkillRuntimeTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/ClientBattlePreparationEventProjectorTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/ClientBattleReportStoreTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/LegacySkillCatalogTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/BattleEffectRegistryTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/BattleEffectStoreTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/BattleStateChangeApplierTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/ChijieOngoingDamageIntegrationTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/CompleteSkillCoverageTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/CoreEffectHandlersTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/SkillRuleCatalogTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/SkillRuntimeStateTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/SkillScopeCatalogTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/SkillTargetSelectorTest.kt"
+    },
+    {
+      "reason": "not selected for the standalone core regression allowlist",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/SpecialSkillPluginTest.kt"
+    }
+  ],
+  "files": [
+    {
+      "adapter": "",
+      "generatedSha256": "67d3ce4cfcd613f24124abdc0356243ce380124f5822414c887d36894ed6ad0e",
+      "source": "assent/cfg/paper/11/cap_20260311222842345_0000000b_zlib.json",
+      "sourceSha256": "67d3ce4cfcd613f24124abdc0356243ce380124f5822414c887d36894ed6ad0e",
+      "target": "src/test/resources/assent/cfg/paper/11/cap_20260311222842345_0000000b_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "ffb9a5a7804cd59adeb16aebbaadcbfa4466ecda6f6ed4fba69fdc5ea1ef1b36",
+      "source": "assent/cfg/paper/11/cap_20260311223101614_0000000b_zlib.json",
+      "sourceSha256": "ffb9a5a7804cd59adeb16aebbaadcbfa4466ecda6f6ed4fba69fdc5ea1ef1b36",
+      "target": "src/test/resources/assent/cfg/paper/11/cap_20260311223101614_0000000b_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "93824052c57e16e70b35dfd73f5386e131e42996ec2ac10768a1384f4721a938",
+      "source": "assent/cfg/paper/11/cap_20260311223210795_0000000b_zlib.json",
+      "sourceSha256": "93824052c57e16e70b35dfd73f5386e131e42996ec2ac10768a1384f4721a938",
+      "target": "src/test/resources/assent/cfg/paper/11/cap_20260311223210795_0000000b_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "135ae260768b32b54585a5060bace9c25b1cd1a3f8c2a36a9e8ed4925bf64b11",
+      "source": "assent/cfg/paper/11/cap_20260311223905520_0000000b_zlib.json",
+      "sourceSha256": "135ae260768b32b54585a5060bace9c25b1cd1a3f8c2a36a9e8ed4925bf64b11",
+      "target": "src/test/resources/assent/cfg/paper/11/cap_20260311223905520_0000000b_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "79cb565bdc1eaffd55beb3ee0c28433bef58a9f5766cf6e4d91bb74f2464ff3a",
+      "source": "assent/cfg/paper/11/cap_20260311224730035_0000000b_zlib.json",
+      "sourceSha256": "79cb565bdc1eaffd55beb3ee0c28433bef58a9f5766cf6e4d91bb74f2464ff3a",
+      "target": "src/test/resources/assent/cfg/paper/11/cap_20260311224730035_0000000b_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "63090f345920ffdda4f82399d4d996b18eb8dc1ce6bd88f3603ef133f76e7882",
+      "source": "assent/cfg/paper/11/cap_20260312014510506_0000000b_zlib.json",
+      "sourceSha256": "63090f345920ffdda4f82399d4d996b18eb8dc1ce6bd88f3603ef133f76e7882",
+      "target": "src/test/resources/assent/cfg/paper/11/cap_20260312014510506_0000000b_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "d7cb7534dbd3e59781c1ba2f86719823a2a3b48fc2183c991dc40f6e159c6419",
+      "source": "assent/cfg/paper/11/cap_20260312162454986_0000000b_zlib.json",
+      "sourceSha256": "d7cb7534dbd3e59781c1ba2f86719823a2a3b48fc2183c991dc40f6e159c6419",
+      "target": "src/test/resources/assent/cfg/paper/11/cap_20260312162454986_0000000b_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "c757a7c12163cd2a9e2500b4c39ba813fcc03ba782c514355fa50e93053412ee",
+      "source": "assent/cfg/paper/6231/cap_20260311215508902_00001857_zlib.json",
+      "sourceSha256": "c757a7c12163cd2a9e2500b4c39ba813fcc03ba782c514355fa50e93053412ee",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311215508902_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "a2d69b2c1585bb17eafd5441ed6effce4c995dc23ee7d3c1d53abdeb23e0891c",
+      "source": "assent/cfg/paper/6231/cap_20260311222841970_00001857_zlib.json",
+      "sourceSha256": "a2d69b2c1585bb17eafd5441ed6effce4c995dc23ee7d3c1d53abdeb23e0891c",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311222841970_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "d3ce14ba178003b119cd9cb19082a46326904071da22c78d9408297ea183508a",
+      "source": "assent/cfg/paper/6231/cap_20260311223101271_00001857_zlib.json",
+      "sourceSha256": "d3ce14ba178003b119cd9cb19082a46326904071da22c78d9408297ea183508a",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311223101271_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "f3f002a943ef1dc2042cca61de46ae3f36dd197a814d4631a8f5119dcc40ac4f",
+      "source": "assent/cfg/paper/6231/cap_20260311223129102_00001857_zlib.json",
+      "sourceSha256": "f3f002a943ef1dc2042cca61de46ae3f36dd197a814d4631a8f5119dcc40ac4f",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311223129102_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "41ddc17dd17cffc0fdb3f531ad2d28adfaa5838e40bd63a9fcdd8ce4759eb7f6",
+      "source": "assent/cfg/paper/6231/cap_20260311223210467_00001857_zlib.json",
+      "sourceSha256": "41ddc17dd17cffc0fdb3f531ad2d28adfaa5838e40bd63a9fcdd8ce4759eb7f6",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311223210467_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "28109886b11263e0e3432422018c6e83674925bc0a2bc316bb2138f6b1482c2d",
+      "source": "assent/cfg/paper/6231/cap_20260311223648438_00001857_zlib.json",
+      "sourceSha256": "28109886b11263e0e3432422018c6e83674925bc0a2bc316bb2138f6b1482c2d",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311223648438_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "3346449cb30e42c6f1ecdaa1fd66c442b7fa849f5f42a0a3e5f9abcea368887f",
+      "source": "assent/cfg/paper/6231/cap_20260311223905199_00001857_zlib.json",
+      "sourceSha256": "3346449cb30e42c6f1ecdaa1fd66c442b7fa849f5f42a0a3e5f9abcea368887f",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311223905199_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "051417d4850b6d5110109ec3c82a4c42f6683ef46545ef1ba5c028cba2351e34",
+      "source": "assent/cfg/paper/6231/cap_20260311224542066_00001857_zlib.json",
+      "sourceSha256": "051417d4850b6d5110109ec3c82a4c42f6683ef46545ef1ba5c028cba2351e34",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311224542066_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "10806fd42bea83a62146cdb42b791c9dac2eb6aa7d002b47db1b51ac811b14f2",
+      "source": "assent/cfg/paper/6231/cap_20260311224556137_00001857_zlib.json",
+      "sourceSha256": "10806fd42bea83a62146cdb42b791c9dac2eb6aa7d002b47db1b51ac811b14f2",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311224556137_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "72098b08d57dd158badbd255052c3fdbe5686eae74e917035fb341f135179f08",
+      "source": "assent/cfg/paper/6231/cap_20260311224729767_00001857_zlib.json",
+      "sourceSha256": "72098b08d57dd158badbd255052c3fdbe5686eae74e917035fb341f135179f08",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311224729767_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "2ab4c648e7f1994ec9ef66d9db6c9d9f5f894e092151103e9ce958eed7e1eb0f",
+      "source": "assent/cfg/paper/6231/cap_20260311230758305_00001857_zlib.json",
+      "sourceSha256": "2ab4c648e7f1994ec9ef66d9db6c9d9f5f894e092151103e9ce958eed7e1eb0f",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311230758305_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "e512003af150a55fc3449577022e2f449a9c72aa2243997b0e824b2a1a5509a0",
+      "source": "assent/cfg/paper/6231/cap_20260312002259656_00001857_zlib.json",
+      "sourceSha256": "e512003af150a55fc3449577022e2f449a9c72aa2243997b0e824b2a1a5509a0",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312002259656_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "bbd0d1e2721bc856163ada3fe6b397fd85d6dc3fe44b2db36d3c225a21a54460",
+      "source": "assent/cfg/paper/6231/cap_20260312004747562_00001857_zlib.json",
+      "sourceSha256": "bbd0d1e2721bc856163ada3fe6b397fd85d6dc3fe44b2db36d3c225a21a54460",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312004747562_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "dd39c2a30acdd7e0f0f69ba25ba268400e95280ff469034269f7e7de2f687d95",
+      "source": "assent/cfg/paper/6231/cap_20260312010800158_00001857_zlib.json",
+      "sourceSha256": "dd39c2a30acdd7e0f0f69ba25ba268400e95280ff469034269f7e7de2f687d95",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312010800158_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "aeeb1c4f47465fdf779052182b9891ad52db0d2ab6a8385d842bf30f808f25e8",
+      "source": "assent/cfg/paper/6231/cap_20260312012516624_00001857_zlib.json",
+      "sourceSha256": "aeeb1c4f47465fdf779052182b9891ad52db0d2ab6a8385d842bf30f808f25e8",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312012516624_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "0aaa5147df3f094404761e099bb24d7583827a744750e323e793ec854473f1e4",
+      "source": "assent/cfg/paper/6231/cap_20260312013216423_00001857_zlib.json",
+      "sourceSha256": "0aaa5147df3f094404761e099bb24d7583827a744750e323e793ec854473f1e4",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312013216423_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "936573077fbad967081068096bf4f357a89d9b5e7f4bb6c49120eab1966ca1d7",
+      "source": "assent/cfg/paper/6231/cap_20260312014510224_00001857_zlib.json",
+      "sourceSha256": "936573077fbad967081068096bf4f357a89d9b5e7f4bb6c49120eab1966ca1d7",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312014510224_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "a5b5a3702dbc1db02b1716351d536cae89e3c97876022cac382da96f0d59a85b",
+      "source": "assent/cfg/paper/6231/cap_20260312065238322_00001857_zlib.json",
+      "sourceSha256": "a5b5a3702dbc1db02b1716351d536cae89e3c97876022cac382da96f0d59a85b",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312065238322_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "423289896775b92aa989038c34f4caf1c9517b988ea0329e251cf4bf280d4dd1",
+      "source": "assent/cfg/paper/6231/cap_20260312074501252_00001857_zlib.json",
+      "sourceSha256": "423289896775b92aa989038c34f4caf1c9517b988ea0329e251cf4bf280d4dd1",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312074501252_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "9a71765b2d028c9da0690bf1f474100a9bbe5675dda42806052ab5af372e5fd7",
+      "source": "assent/cfg/paper/6231/cap_20260312084549916_00001857_zlib.json",
+      "sourceSha256": "9a71765b2d028c9da0690bf1f474100a9bbe5675dda42806052ab5af372e5fd7",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312084549916_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "6c238b495d651d647325d4ff96b50225d468b6d78897d9190d6105214abc2d52",
+      "source": "assent/cfg/paper/6231/cap_20260312162029597_00001857_xor.json",
+      "sourceSha256": "6c238b495d651d647325d4ff96b50225d468b6d78897d9190d6105214abc2d52",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312162029597_00001857_xor.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "54679f123532dbbc6be851b1d029b3162c0246997e800992a4ce78aa45372d39",
+      "source": "assent/cfg/paper/6231/cap_20260312162454760_00001857_zlib.json",
+      "sourceSha256": "54679f123532dbbc6be851b1d029b3162c0246997e800992a4ce78aa45372d39",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312162454760_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "cec41b52a4c1f7d7eb9b6738161c87d370cbd84133897685e27cc6328a67f340",
+      "source": "assent/cfg/paper/6231/cap_20260312162500131_00001857_zlib.json",
+      "sourceSha256": "cec41b52a4c1f7d7eb9b6738161c87d370cbd84133897685e27cc6328a67f340",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312162500131_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "943570a36a0afde3dd3869c4813110f0e6cb78a644a378c32d0944bcabe08e1e",
+      "source": "assent/cfg/paper/6231/cap_20260312162500131_00001857_zlib_parsed.json",
+      "sourceSha256": "943570a36a0afde3dd3869c4813110f0e6cb78a644a378c32d0944bcabe08e1e",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312162500131_00001857_zlib_parsed.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "dba9e5feed81382666c8bb1678c47983bab4a478ef3b20b1f1ad7152a635f077",
+      "source": "assent/cfg/paper/6231/cap_20260312172723261_00001857_zlib.json",
+      "sourceSha256": "dba9e5feed81382666c8bb1678c47983bab4a478ef3b20b1f1ad7152a635f077",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312172723261_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "f77946ff87f88d65f53b2aef6d55a3cc9f9e160664701b90a2091d156b089809",
+      "source": "assent/cfg/paper/6231/cap_20260312172752527_00001857_zlib.json",
+      "sourceSha256": "f77946ff87f88d65f53b2aef6d55a3cc9f9e160664701b90a2091d156b089809",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312172752527_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "846d2c79822fdbf94fb5131c016243042c686024019b58e3ce837e60e24cd6d8",
+      "source": "assent/cfg/paper/6231/cap_20260312222258484_00001857_zlib.json",
+      "sourceSha256": "846d2c79822fdbf94fb5131c016243042c686024019b58e3ce837e60e24cd6d8",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312222258484_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "80eb3ff7ec63a4a6874d88c00d31362e7feac09cbb62c5a1e0ec9a81b8bd269d",
+      "source": "assent/cfg/paper/6231/cap_20260313025235816_00001857_zlib.json",
+      "sourceSha256": "80eb3ff7ec63a4a6874d88c00d31362e7feac09cbb62c5a1e0ec9a81b8bd269d",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260313025235816_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "177895b5a62a539005294753873ebecaa9a62c7d1e5bbbdd80098632b97fd072",
+      "source": "assent/cfg/paper/6231/cap_20260313030507243_00001857_zlib.json",
+      "sourceSha256": "177895b5a62a539005294753873ebecaa9a62c7d1e5bbbdd80098632b97fd072",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260313030507243_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "bf901382ff5ef3c6472bcc6682bfa5d1fd318a115dfc71a258b3a2348f0f21ba",
+      "source": "assent/cfg/paper.zip",
+      "sourceSha256": "bf901382ff5ef3c6472bcc6682bfa5d1fd318a115dfc71a258b3a2348f0f21ba",
+      "target": "src/test/resources/assent/cfg/paper.zip"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "f9db107189b0448eac67f1dd2766b9d32ca2891dd4e9313568ddf7ca7873abcc",
+      "source": "src/main/kotlin/com/stzb/server/game/ClientNpcArmyRepository.kt",
+      "sourceSha256": "c7c724c5c7b28381191a3c20ebc90969f5a96702973c49f62827e5a5afbb0f72",
+      "target": "src/main/kotlin/com/stzb/battle/core/ClientNpcArmyRepository.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "8e9c35ec05ad0d7268a6cfd5876e49c205f51d10d2e226a7aa65bd0973ff15c4",
+      "source": "src/main/kotlin/com/stzb/server/game/SkillInventoryCatalog.kt",
+      "sourceSha256": "ed9d9be706b3d254bf4449b88476ff002319145d881da246c6ca133aadd02e78",
+      "target": "src/main/kotlin/com/stzb/battle/core/SkillInventoryCatalog.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "b6aec8a689cd611b72ea0f31014eb0b4a6d3ffc496a029e334af1c0e75e72605",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/BattleActionResolver.kt",
+      "sourceSha256": "4404bc03003cd58683eb817c3cc25a23b31ece73cef33adc6f6014c7e1f457ab",
+      "target": "src/main/kotlin/com/stzb/battle/core/BattleActionResolver.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "4177375f3a6cc719bd2bf8d974015951c92d7de99028a4bd33f6ac281c214952",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/BattleConfigRepository.kt",
+      "sourceSha256": "5703b796c22e2ea06deb144c5dd77f790b764c2c2d0718ef62dd7d7e10c3aaef",
+      "target": "src/main/kotlin/com/stzb/battle/core/BattleConfigRepository.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "0584aaff620edca8c563db3ecb8d67d4ec0744a5012b3c71e96a0e9cf4c0a866",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/BattleDamageCalculator.kt",
+      "sourceSha256": "dd45d3b61411aba2f5dbeb0407fbfcbaeac9678b5ae1c315b229623fe6beacdc",
+      "target": "src/main/kotlin/com/stzb/battle/core/BattleDamageCalculator.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "448d1f3641c9efd7c7b03732293f9b53d4f9294967942edb91870ebf0d532e86",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/BattleEffectState.kt",
+      "sourceSha256": "ecfd8051bae0d6ecec0e0af02d82be56e47982dad172aa30a2bdc366107dd32f",
+      "target": "src/main/kotlin/com/stzb/battle/core/BattleEffectState.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "b1ce61482ce325a3874e791f44a35d0960fb43d1877c896f8f6b43feefe1d0b6",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/BattleEngine.kt",
+      "sourceSha256": "fb8fe3d0beb315ce07dff7e8215e6fd160037c09f9599adde5b6e9a64e49312d",
+      "target": "src/main/kotlin/com/stzb/battle/core/BattleEngine.kt"
+    },
+    {
+      "adapter": "standalone-resource-path",
+      "generatedSha256": "ff83669b7d6b9d265bda58a0ac83f9d72b767ae43f1a6850242b599147c393a2",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/BattleEquipmentRepository.kt",
+      "sourceSha256": "fac733e55889b61d40eeae227d9f7803f18cb60b28416163a771755e7acab099",
+      "target": "src/main/kotlin/com/stzb/battle/core/BattleEquipmentRepository.kt"
+    },
+    {
+      "adapter": "remove-redundant-same-package-imports",
+      "generatedSha256": "f65270390b3df592b9f169ee5d60e0cfffefcec4ee62e246472bb68d13b7adc0",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/BattleFormationCalculator.kt",
+      "sourceSha256": "b1e4d64c7f36ffa3163a9abd25ccb0321dfcb69ee9ff0ee42f6daad45dd12b72",
+      "target": "src/main/kotlin/com/stzb/battle/core/BattleFormationCalculator.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "a91a46ab7f5bd1cc53f968e8fc5b96f34a0917abdd7176785738af688a42a64f",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/BattleModel.kt",
+      "sourceSha256": "855c067e39610a62323bda478c626f7fd5312b86fd41d26813ee70d3fa6a4692",
+      "target": "src/main/kotlin/com/stzb/battle/core/BattleModel.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "66206b7e1744f124b866e6a3c3b17c0bfd48f1eac2a98a3ed2c8e9ba39178c5f",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/BattleModifierParser.kt",
+      "sourceSha256": "42704577e8b6c989b537c427b446d1be31c4e12a2738b33f3a3e5b07af92cdc1",
+      "target": "src/main/kotlin/com/stzb/battle/core/BattleModifierParser.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "70d421c1e650005b532794ba5f16c68a4e788af7187b4abd7e08ed62ef7aa07c",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/BattleRandom.kt",
+      "sourceSha256": "c8a43baec87b91c49c96657904950260a51db7159c3cc55ab70ab7518c570d99",
+      "target": "src/main/kotlin/com/stzb/battle/core/BattleRandom.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "5fa6265a514df35ebaf4868b320433ca45f6ce7dc684fcfa68331d5eba499175",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/BattleReportCodec.kt",
+      "sourceSha256": "a0a92258e3d3390b805f1532123905d5086b128fa515c722a2a328a4230a4179",
+      "target": "src/main/kotlin/com/stzb/battle/core/BattleReportCodec.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "a782cc2499488b809238e501e1ff8f59bd092ebf1c263bd11af2a52caf35018e",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/BattleSkillInterpreter.kt",
+      "sourceSha256": "863e93c09404ff5189205db86565fdda97da70fcb1ae7b401d699a688beefb20",
+      "target": "src/main/kotlin/com/stzb/battle/core/BattleSkillInterpreter.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "ea7a3faaf77dcd2bcc55578f53cc3f7579252d1bdc144e625b75edf251de98aa",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/BattleSkillRuntime.kt",
+      "sourceSha256": "6db28b5fc87015b8f973fc10cedf2f8d2d7f05f05a8329f31e9d1473c7bbab59",
+      "target": "src/main/kotlin/com/stzb/battle/core/BattleSkillRuntime.kt"
+    },
+    {
+      "adapter": "remove-redundant-same-package-imports",
+      "generatedSha256": "217f2d77cc11a11638d5dc0d4262755b1c91aaaaeeb545cb87d368e0dd48c1aa",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/BattleTeamBuilder.kt",
+      "sourceSha256": "d8cd624a4cd4bb73dc95e05b6c43d2b882fadb099aab03ca39a99eb6c21fa0c4",
+      "target": "src/main/kotlin/com/stzb/battle/core/BattleTeamBuilder.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "da9bb3954d650f761134d9501511ed6747027f2abfe2cb83ddb6ae0dd6d9203a",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/ClientBattlePreparationEventProjector.kt",
+      "sourceSha256": "ebab746fce035175c170ec76c15bfbbc9868aac25ecc3822f82030b94d4a4a56",
+      "target": "src/main/kotlin/com/stzb/battle/core/ClientBattlePreparationEventProjector.kt"
+    },
+    {
+      "adapter": "remove-server-config-dependency",
+      "generatedSha256": "21c54da0982dad60cead58398b3bead4a4f7e0e58f0556aacd9aa5d36d439c46",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/ClientBattleReportStore.kt",
+      "sourceSha256": "6871151c1e86bc65bdf153a57f71ba70f5be1657cba82ea1f5985cdf35421e19",
+      "target": "src/main/kotlin/com/stzb/battle/core/ClientBattleReportStore.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "4b05a35fc0642bd543f0d94d629e1dba71bd5bd5af27cc0b0b002420cef085da",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/ClientBattleTextReplayAdapter.kt",
+      "sourceSha256": "991b6f133cdcc164678b79c9b20429e10c72396e4f1fb91cc2ba2983f854b78d",
+      "target": "src/main/kotlin/com/stzb/battle/core/ClientBattleTextReplayAdapter.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "0cfb0300a526d790534209bd1d372d3fd6ca36eb47b8534b5d0062052bf40cc9",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/ClientBattleTextReplayProtocol.kt",
+      "sourceSha256": "03350db2e2c7ad11ea0e6ec9d5a3280a8ab0fbbc9298d225db09d076bffe42a3",
+      "target": "src/main/kotlin/com/stzb/battle/core/ClientBattleTextReplayProtocol.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "43f77a024dd52e8a9360a5aff415b010dede3598048d9ac0332d087db8bab55d",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/ClientReportTextEncoder.kt",
+      "sourceSha256": "00927ae5e9c7cbda5a1cd6a1d9035c123583f8a9f5d67c71f95ce530cfdbc29e",
+      "target": "src/main/kotlin/com/stzb/battle/core/ClientReportTextEncoder.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "b54f2e4af8957bf9b8c21acbbcd0e7491e10b0861f7196082fa8111d17d3c6a0",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/LegacySkillCatalog.kt",
+      "sourceSha256": "bb1a7923ccdcdcfd277dc9f6bbcfc32dfe2ac5fb22425d29cd2ca8e1784faa0c",
+      "target": "src/main/kotlin/com/stzb/battle/core/LegacySkillCatalog.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "c741b10c883d8da07bd2f29d0455b683346b354e6ecf442f72c40c68acb40aad",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/BattleEffectRegistry.kt",
+      "sourceSha256": "4c8fcb7fad2ade9c998b69b87f621e0ec8dc6389d9a52c6dada84acc1a0b12e8",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/BattleEffectRegistry.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "70461937ecf99e6824516adaf56cb7631c26865b6dfa50f15785fba594348ecb",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/BattleEffectStore.kt",
+      "sourceSha256": "330c48c224c7341be5e7c7b4199c8a7f465c97d8ff801996c756c7ade80c8148",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/BattleEffectStore.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "749d2deb1c6725c5977ee88ef69e8d8837ee074d8f1d7be82a39f4ab59761e67",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/BattleStateChangeApplier.kt",
+      "sourceSha256": "6e28e793e88ecf7b224cfa62363bc3616aac313509f58d68f83905ca910ed805",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/BattleStateChangeApplier.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "64dd862689e7a4dda84c3e7a69ad43a1e62310d97ddbc376e7d01e9e70c01593",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/BattleTargetDecisionSource.kt",
+      "sourceSha256": "ca81baad0d4c108c0c6da68c6a97091c2581a18ccdbcae6d8b2f554d111f9651",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/BattleTargetDecisionSource.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "adcff99e346a1eefe3dd171b9a25a42b66029a4c7e6588d5ea6db2e6444ba12c",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/CompleteSkillEngine.kt",
+      "sourceSha256": "1d7c409054fdf8fa9ad164818c0c30c47291c1eb35d2bab01761aad04e09d77e",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/CompleteSkillEngine.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "44883a0947feae47f595f9345f3294974acb7557633b29c72f7bd7fd5feccd1d",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/ConfiguredSpecialSkillPlugins.kt",
+      "sourceSha256": "52d6acad3da20add7d08be3567f20f7494401d56c8d306c1326c93b79680cb0f",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/ConfiguredSpecialSkillPlugins.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "8ffa5db4db1e8aa14accb37445a19ff902f847805116d46d3f6917b2abc65ddc",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/ControlEffectHandlers.kt",
+      "sourceSha256": "a9f3d09ccabd09a16fb39acd3ded5c43ca4b01e2478ae7d9e16708ef56d9ca34",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/ControlEffectHandlers.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "5c44fb16320b2389b295f9fc8f4db5721babdfdbb4812110ce15fcec07bef6c5",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/CoreEffectHandlers.kt",
+      "sourceSha256": "3ffed8a14dd5902d3d285db87e2c2826fc126602d8667c02f45b1ab5d82667f9",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/CoreEffectHandlers.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "e11a59060fde23f8072351c690b473d459b7aa51c3f470a24b920ec00a00d88d",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/MetaEffectHandlers.kt",
+      "sourceSha256": "b45044a7f603c9485e6eda0453984ed63ab33e987c6f4fe84850d779cc986c7a",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/MetaEffectHandlers.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "09be9a96eb28b1481193e5707e7a15cf0a956f8786d0dbe40c2966d4db7efe04",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/SkillBattleContext.kt",
+      "sourceSha256": "3dfc3dc32b3a60a512d5efe074f65cec7e781f2a8bbda4904cc07b66d3f0cbac",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/SkillBattleContext.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "67b50df5a41247b3e496014b8d93149e48a356301ecda0ea9b94d4fecf646413",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/SkillConditionInterpreter.kt",
+      "sourceSha256": "b15c3ae392e3c44d466c8f589cd6b973d74a67101a6fedbb297de6d83177ed99",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/SkillConditionInterpreter.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "5bbaec945d4f7079744c4058dad149d175857de3419134a2419785056f3565ec",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/SkillCoverageReport.kt",
+      "sourceSha256": "8efde2c599aa11937e3528c8ee026663237b4c9af4430e9683743d317f373f5e",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/SkillCoverageReport.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "c243b14905026351ba0f3c6133c02caf4d6e931f6395ff7d105eb3919bdce971",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/SkillRuleCatalog.kt",
+      "sourceSha256": "b21f277857ca748894e327dddb5dfb3e7b0ba481cd29fffd353e7f3dd25b9425",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/SkillRuleCatalog.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "278a1d63b8cbbc967dcb3a8244fca54e139d3cbaf88715d0e6886ba219e243e3",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/SkillRuleInterpreter.kt",
+      "sourceSha256": "e18a4fd4f0d405187636194439eb6e1a06f1a186891d329a1de5429327e4663e",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/SkillRuleInterpreter.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "e46f7b7263755bdd4e6cd21a270a9be22f097be2f715251131850e9a544537df",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/SkillRuleModel.kt",
+      "sourceSha256": "3dcc266a7053b87a70b293c74acdcf49326f2bf7079d92ca2f57d95194e3e8f3",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/SkillRuleModel.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "c8922b778066520d3d27ee6ac4623e70a6b179cb9448c317313f95e40ca3c0fc",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/SkillRuntimeState.kt",
+      "sourceSha256": "b255f42e4a303d40cfe4534b2e0d7c4100cfd0e4f3e1dd2d291c7b9b6b330896",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/SkillRuntimeState.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "9abb4641ec8eceb07f56bb0e11e7254f7d3b6fa5740df9afb6d89ef71e1ee076",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/SkillScopeCatalog.kt",
+      "sourceSha256": "a1ebfd3538b7f1a817c69d968b78c92455dd844099108011e571479bc4a703e4",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/SkillScopeCatalog.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "2e50de7052ac71f925a16f9bbcfd4bea531c8a1205cfcbbd1bb3280b6c1af66b",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/SkillTargetSelector.kt",
+      "sourceSha256": "a9735eb3fd543fef9a4a4e5e1385b2146568c0b3f1295c5683816196abe29e32",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/SkillTargetSelector.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "2a1cb48a38615a88a096cd932eab13c1777a1f1c390a88c0a85d4e4e680c0c07",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/SkillTimingCoordinator.kt",
+      "sourceSha256": "ae587ec1e2d72360802f6701f832006b101ff867f37b46b2232470d1b01fdca9",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/SkillTimingCoordinator.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "0a1484a828c5a95bc86e5167a775df3027cf70938deb3ed434ce741f01850a19",
+      "source": "src/main/kotlin/com/stzb/server/game/battle/skill/SpecialSkillPlugin.kt",
+      "sourceSha256": "c3fab4b25eb1b1f742efb8dbb3309a836b158b6666f283406658bbe6fa18c211",
+      "target": "src/main/kotlin/com/stzb/battle/core/skill/SpecialSkillPlugin.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "167d045fe18c80198779d3b6b923e1995925cf7e917ad550ba30f9c9821b1a94",
+      "source": "src/main/resources/battle-config/army_extra.json",
+      "sourceSha256": "167d045fe18c80198779d3b6b923e1995925cf7e917ad550ba30f9c9821b1a94",
+      "target": "src/main/resources/battle-config/army_extra.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "e96cc20872e6620f25ecda5edde0a0bbdc04ed55480a1f3b207056542a52f73c",
+      "source": "src/main/resources/battle-config/hero_extra.json",
+      "sourceSha256": "e96cc20872e6620f25ecda5edde0a0bbdc04ed55480a1f3b207056542a52f73c",
+      "target": "src/main/resources/battle-config/hero_extra.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "af98cc6c41c905b5e72dea16ad57d5032bdfff58464f6050f4df3b7d39555589",
+      "source": "src/main/resources/battle-config/hero_table.csv",
+      "sourceSha256": "af98cc6c41c905b5e72dea16ad57d5032bdfff58464f6050f4df3b7d39555589",
+      "target": "src/main/resources/battle-config/hero_table.csv"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "9ed63994c8d8fc40b054fec6b14f8b58f4f68e2d356995e4a47b8fc2b2b6185b",
+      "source": "src/main/resources/battle-config/skill_detail_table.csv",
+      "sourceSha256": "9ed63994c8d8fc40b054fec6b14f8b58f4f68e2d356995e4a47b8fc2b2b6185b",
+      "target": "src/main/resources/battle-config/skill_detail_table.csv"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "5f40e0d6b937daaa382c540c8026dd7dcf929901a3e8a7d5cb19796bf91b6d88",
+      "source": "src/main/resources/battle-config/skill_effect_table.csv",
+      "sourceSha256": "5f40e0d6b937daaa382c540c8026dd7dcf929901a3e8a7d5cb19796bf91b6d88",
+      "target": "src/main/resources/battle-config/skill_effect_table.csv"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "6fc583f0596db70c327ee32340c642ace5abebca26218149ff41ccbe584d065a",
+      "source": "src/main/resources/battle-config/skill_extra.json",
+      "sourceSha256": "6fc583f0596db70c327ee32340c642ace5abebca26218149ff41ccbe584d065a",
+      "target": "src/main/resources/battle-config/skill_extra.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "ad52232bd3f0bdbd872747f2a95f53db314a7a426365e5cccdff0a50d1510ea9",
+      "source": "src/main/resources/battle-config/skill_table.csv",
+      "sourceSha256": "ad52232bd3f0bdbd872747f2a95f53db314a7a426365e5cccdff0a50d1510ea9",
+      "target": "src/main/resources/battle-config/skill_table.csv"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "5e1ba2a6dc6da2c9b1799f073b0274a4ca0f9f2d53599b15182f5582157a9e68",
+      "source": "src/main/resources/client-config/tb_cfg_gear.bin",
+      "sourceSha256": "5e1ba2a6dc6da2c9b1799f073b0274a4ca0f9f2d53599b15182f5582157a9e68",
+      "target": "src/main/resources/client-config/tb_cfg_gear.bin"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "283c22bc1c8ad676db6dc5c1bdc4ba09f9689212d10e9cb23ab7c7518db33540",
+      "source": "src/main/resources/client-config/tb_cfg_gear_feature.bin",
+      "sourceSha256": "283c22bc1c8ad676db6dc5c1bdc4ba09f9689212d10e9cb23ab7c7518db33540",
+      "target": "src/main/resources/client-config/tb_cfg_gear_feature.bin"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "b081651953839d77fda4c9cc98b32af8ad096c31eccd8d6464d7dae4c6946207",
+      "source": "src/main/resources/client-config/tb_cfg_hero_type_feature.bin",
+      "sourceSha256": "b081651953839d77fda4c9cc98b32af8ad096c31eccd8d6464d7dae4c6946207",
+      "target": "src/main/resources/client-config/tb_cfg_hero_type_feature.bin"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "c6db8d3c915b27a368e6dd32d7ff8a08c8caf7519080055a71bc29cf90e732ac",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleDamageCalculatorTest.kt",
+      "sourceSha256": "f8b3224017a695f3b96207b38c68df5267a8d7cbd33f0f49442c0a808131fe17",
+      "target": "src/test/kotlin/com/stzb/battle/core/BattleDamageCalculatorTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "a606d442731e4cfcf086f4c4df67b2a25df8c011d09f78172e24bf12047f4803",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleEffectStateTest.kt",
+      "sourceSha256": "d4aed62ae79bb665a9bcbb682467f0f7ab72f9e429f50dfeec58881263c10419",
+      "target": "src/test/kotlin/com/stzb/battle/core/BattleEffectStateTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "87f5a2e2a882721cedee2295922e98c5e67834c37463fa25d0005caa80484953",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleEngineTest.kt",
+      "sourceSha256": "702524a42fa4a3188a051279445a17a2cb1c68a6099791dbeb019a0fcaa6aa90",
+      "target": "src/test/kotlin/com/stzb/battle/core/BattleEngineTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "6b5c279b0437b6422b3b7175eefed5b7bfb7d0cf4e5ee40ccd4bcbcd751d40f0",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleFormationCalculatorTest.kt",
+      "sourceSha256": "08b24d80877002e9b9876d198e0d3b185b59df30ff43ec4075ef0b8b0195b53b",
+      "target": "src/test/kotlin/com/stzb/battle/core/BattleFormationCalculatorTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "69feaee1add774cff517ff69620c15fd1fd9d6dd1fd391e8124f282d2238a874",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleReportCodecTest.kt",
+      "sourceSha256": "e1e84a137cb9890cfd8ed040ef5e984905b9de4ab8ac1746f0a3d5e19669e912",
+      "target": "src/test/kotlin/com/stzb/battle/core/BattleReportCodecTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "9f9ecf1838a3ab9b78cee276ef7f1f26af1ec447148da2175d45221a1e61f80c",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleTeamBuilderTest.kt",
+      "sourceSha256": "88786d974377ebae047cfde9189f734dc69b8376c17de04b9ff6f7e25e449470",
+      "target": "src/test/kotlin/com/stzb/battle/core/BattleTeamBuilderTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "709580fb279e110fb23385206a5b3a229675cf197127244f964e6c696edabadd",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/ClientBattleTextReplayAdapterTest.kt",
+      "sourceSha256": "6efb2f5db7cafb3f845c96d734cea9ca506ac2376c4004c3437ffa7627ecee4b",
+      "target": "src/test/kotlin/com/stzb/battle/core/ClientBattleTextReplayAdapterTest.kt"
+    },
+    {
+      "adapter": "standalone-test-fixture-path",
+      "generatedSha256": "c28aa6616aa2859250d2e2f7b1b0fa41fe00c36ffe885ec8c0e315ffab48aac8",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/ClientBattleTextReplayProtocolTest.kt",
+      "sourceSha256": "cb0df6b788037eea3cf39a3a27b1f5662065542c998d80a76cfa01eda3477ac2",
+      "target": "src/test/kotlin/com/stzb/battle/core/ClientBattleTextReplayProtocolTest.kt"
+    },
+    {
+      "adapter": "standalone-test-fixture-path",
+      "generatedSha256": "cfaa8102928568e8dc0b53c2180133fe34e6fd00a94c9397b9f452c169be92ef",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/OfficialFullBattleReportDiffTest.kt",
+      "sourceSha256": "be9414531bb27ee28a249e1ad8bebe2e5f7c37ea5db538e77ffd06f7b94448ec",
+      "target": "src/test/kotlin/com/stzb/battle/core/OfficialFullBattleReportDiffTest.kt"
+    },
+    {
+      "adapter": "standalone-test-fixture-path",
+      "generatedSha256": "b9c1be3fc4ec59094ed0dc06ea646fe42537efb6d1a8ab88ff9abfe03c8daf6f",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/OfficialPreparationReportDiffTest.kt",
+      "sourceSha256": "5a6fb54fed41e16899bb80c53fd2cce122bf81b103c7b0fc7cac4792c0bb1d43",
+      "target": "src/test/kotlin/com/stzb/battle/core/OfficialPreparationReportDiffTest.kt"
+    },
+    {
+      "adapter": "standalone-test-fixture-path",
+      "generatedSha256": "2ff1185d1b42a541a235059033629f7c0bf2d8f81d6cc7e97add94060516bd4f",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/OfficialReportFixture.kt",
+      "sourceSha256": "72f9b93fe34053a01a5270e5bead412cdfa166d392530f6a078cbb1984856860",
+      "target": "src/test/kotlin/com/stzb/battle/core/OfficialReportFixture.kt"
+    },
+    {
+      "adapter": "standalone-test-fixture-path",
+      "generatedSha256": "b58309aeb758b3819782de44ef7c0851e0753e3dcd73454967966d925d3ac0fc",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/OfficialReportFixtureTest.kt",
+      "sourceSha256": "e9527977dc5f541ee0c78627dd500f734240d1049df9cfe1166a0546ce1b484d",
+      "target": "src/test/kotlin/com/stzb/battle/core/OfficialReportFixtureTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "7199b62705837063307b50d582b05d4461da40a5c17f7aa753978fde95c88d00",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/CompleteSkillEngineIntegrationTest.kt",
+      "sourceSha256": "036dbc187c91df920db7641a225152b4c94f08d7c34c8cbe3544cb9784c8476e",
+      "target": "src/test/kotlin/com/stzb/battle/core/skill/CompleteSkillEngineIntegrationTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "0678aeab2527020cb701fb56e15962ea4e778b4890f3427230323187ee47b73d",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/ControlEffectHandlersTest.kt",
+      "sourceSha256": "339dea99b212bc94c7a3f68bc0ef95271b9e776bc0d082aafd9b0184325871b2",
+      "target": "src/test/kotlin/com/stzb/battle/core/skill/ControlEffectHandlersTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "699014ea3868fab0dfeee434e05b88c5a694565a8cc1e732f5505645f2e6104d",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/SkillConditionInterpreterTest.kt",
+      "sourceSha256": "b8b67384f27e450187efe56d872363c898d6c9e8dafdaa3f3b498bf747567c44",
+      "target": "src/test/kotlin/com/stzb/battle/core/skill/SkillConditionInterpreterTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "774d219df3b7cf38761df62e7177b5ca920f8f0951ef0976ec3a0fbfebb447d2",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/SkillRuleInterpreterTest.kt",
+      "sourceSha256": "4ca76d458cafbbcd4732b0bfcf5c55a7b9f403e464039300d81e1d49c70836d0",
+      "target": "src/test/kotlin/com/stzb/battle/core/skill/SkillRuleInterpreterTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "e5f27a2afa4bdd956da9a9d9782976bff4afdac907e4a206a4810ac5f88f1fac",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/SkillTimingTest.kt",
+      "sourceSha256": "ffc9c4546eba549e5bbbbde19166f0a1c76ff6b6ee2f0ca2aad14f2d68a29416",
+      "target": "src/test/kotlin/com/stzb/battle/core/skill/SkillTimingTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "5d3bb62877ad9f3f89211f7438c09cef9d935466b71cc05c4a548a498d857f45",
+      "source": "src/test/resources/skill-condition-plugin-owners.csv",
+      "sourceSha256": "5d3bb62877ad9f3f89211f7438c09cef9d935466b71cc05c4a548a498d857f45",
+      "target": "src/test/resources/skill-condition-plugin-owners.csv"
+    }
+  ],
+  "generatedAt": "2026-08-15T03:43:50+08:00",
+  "knownSourceTestFailures": [
+    {
+      "method": "surface cautious attack declares and applies physical damage reduction",
+      "reason": "reproduces in the source repository at the recorded source commit",
+      "sourceClass": "com.stzb.server.game.battle.BattleTeamBuilderTest",
+      "targetClass": "com.stzb.battle.core.BattleTeamBuilderTest"
+    },
+    {
+      "method": "official full battles stay inside deterministic simulation envelopes",
+      "reason": "reproduces in the source repository at the recorded source commit",
+      "sourceClass": "com.stzb.server.game.battle.OfficialFullBattleReportDiffTest",
+      "targetClass": "com.stzb.battle.core.OfficialFullBattleReportDiffTest"
+    },
+    {
+      "method": "baizhan and huangyi paper recovery stays inside deterministic simulation envelope",
+      "reason": "reproduces in the source repository at the recorded source commit",
+      "sourceClass": "com.stzb.server.game.battle.OfficialFullBattleReportDiffTest",
+      "targetClass": "com.stzb.battle.core.OfficialFullBattleReportDiffTest"
+    },
+    {
+      "method": "shuangyan paper total triggers include its zhengshi retrigger",
+      "reason": "reproduces in the source repository at the recorded source commit",
+      "sourceClass": "com.stzb.server.game.battle.OfficialFullBattleReportDiffTest",
+      "targetClass": "com.stzb.battle.core.OfficialFullBattleReportDiffTest"
+    },
+    {
+      "method": "fenji paper repeatedly reaches the attacker front",
+      "reason": "reproduces in the source repository at the recorded source commit",
+      "sourceClass": "com.stzb.server.game.battle.OfficialFullBattleReportDiffTest",
+      "targetClass": "com.stzb.battle.core.OfficialFullBattleReportDiffTest"
+    },
+    {
+      "method": "dual huangyi paper defender offense and attacker recovery stay inside simulation envelope",
+      "reason": "reproduces in the source repository at the recorded source commit",
+      "sourceClass": "com.stzb.server.game.battle.OfficialFullBattleReportDiffTest",
+      "targetClass": "com.stzb.battle.core.OfficialFullBattleReportDiffTest"
+    },
+    {
+      "method": "morale huangyi paper recovery stays inside deterministic simulation envelope",
+      "reason": "reproduces in the source repository at the recorded source commit",
+      "sourceClass": "com.stzb.server.game.battle.OfficialFullBattleReportDiffTest",
+      "targetClass": "com.stzb.battle.core.OfficialFullBattleReportDiffTest"
+    },
+    {
+      "method": "first round defender victory can reproduce the attacker base defeat",
+      "reason": "reproduces in the source repository at the recorded source commit",
+      "sourceClass": "com.stzb.server.game.battle.OfficialFullBattleReportDiffTest",
+      "targetClass": "com.stzb.battle.core.OfficialFullBattleReportDiffTest"
+    },
+    {
+      "method": "scoped condition inventory is an independent literal",
+      "reason": "reproduces in the source repository at the recorded source commit",
+      "sourceClass": "com.stzb.server.game.battle.skill.SkillConditionInterpreterTest",
+      "targetClass": "com.stzb.battle.core.skill.SkillConditionInterpreterTest"
+    }
+  ],
+  "packageMapping": {
+    "com.stzb.server.game": "com.stzb.battle.core",
+    "com.stzb.server.game.battle": "com.stzb.battle.core",
+    "com.stzb.server.game.battle.skill": "com.stzb.battle.core.skill"
+  },
+  "resources": [
+    {
+      "adapter": "",
+      "generatedSha256": "67d3ce4cfcd613f24124abdc0356243ce380124f5822414c887d36894ed6ad0e",
+      "source": "assent/cfg/paper/11/cap_20260311222842345_0000000b_zlib.json",
+      "sourceSha256": "67d3ce4cfcd613f24124abdc0356243ce380124f5822414c887d36894ed6ad0e",
+      "target": "src/test/resources/assent/cfg/paper/11/cap_20260311222842345_0000000b_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "ffb9a5a7804cd59adeb16aebbaadcbfa4466ecda6f6ed4fba69fdc5ea1ef1b36",
+      "source": "assent/cfg/paper/11/cap_20260311223101614_0000000b_zlib.json",
+      "sourceSha256": "ffb9a5a7804cd59adeb16aebbaadcbfa4466ecda6f6ed4fba69fdc5ea1ef1b36",
+      "target": "src/test/resources/assent/cfg/paper/11/cap_20260311223101614_0000000b_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "93824052c57e16e70b35dfd73f5386e131e42996ec2ac10768a1384f4721a938",
+      "source": "assent/cfg/paper/11/cap_20260311223210795_0000000b_zlib.json",
+      "sourceSha256": "93824052c57e16e70b35dfd73f5386e131e42996ec2ac10768a1384f4721a938",
+      "target": "src/test/resources/assent/cfg/paper/11/cap_20260311223210795_0000000b_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "135ae260768b32b54585a5060bace9c25b1cd1a3f8c2a36a9e8ed4925bf64b11",
+      "source": "assent/cfg/paper/11/cap_20260311223905520_0000000b_zlib.json",
+      "sourceSha256": "135ae260768b32b54585a5060bace9c25b1cd1a3f8c2a36a9e8ed4925bf64b11",
+      "target": "src/test/resources/assent/cfg/paper/11/cap_20260311223905520_0000000b_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "79cb565bdc1eaffd55beb3ee0c28433bef58a9f5766cf6e4d91bb74f2464ff3a",
+      "source": "assent/cfg/paper/11/cap_20260311224730035_0000000b_zlib.json",
+      "sourceSha256": "79cb565bdc1eaffd55beb3ee0c28433bef58a9f5766cf6e4d91bb74f2464ff3a",
+      "target": "src/test/resources/assent/cfg/paper/11/cap_20260311224730035_0000000b_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "63090f345920ffdda4f82399d4d996b18eb8dc1ce6bd88f3603ef133f76e7882",
+      "source": "assent/cfg/paper/11/cap_20260312014510506_0000000b_zlib.json",
+      "sourceSha256": "63090f345920ffdda4f82399d4d996b18eb8dc1ce6bd88f3603ef133f76e7882",
+      "target": "src/test/resources/assent/cfg/paper/11/cap_20260312014510506_0000000b_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "d7cb7534dbd3e59781c1ba2f86719823a2a3b48fc2183c991dc40f6e159c6419",
+      "source": "assent/cfg/paper/11/cap_20260312162454986_0000000b_zlib.json",
+      "sourceSha256": "d7cb7534dbd3e59781c1ba2f86719823a2a3b48fc2183c991dc40f6e159c6419",
+      "target": "src/test/resources/assent/cfg/paper/11/cap_20260312162454986_0000000b_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "c757a7c12163cd2a9e2500b4c39ba813fcc03ba782c514355fa50e93053412ee",
+      "source": "assent/cfg/paper/6231/cap_20260311215508902_00001857_zlib.json",
+      "sourceSha256": "c757a7c12163cd2a9e2500b4c39ba813fcc03ba782c514355fa50e93053412ee",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311215508902_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "a2d69b2c1585bb17eafd5441ed6effce4c995dc23ee7d3c1d53abdeb23e0891c",
+      "source": "assent/cfg/paper/6231/cap_20260311222841970_00001857_zlib.json",
+      "sourceSha256": "a2d69b2c1585bb17eafd5441ed6effce4c995dc23ee7d3c1d53abdeb23e0891c",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311222841970_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "d3ce14ba178003b119cd9cb19082a46326904071da22c78d9408297ea183508a",
+      "source": "assent/cfg/paper/6231/cap_20260311223101271_00001857_zlib.json",
+      "sourceSha256": "d3ce14ba178003b119cd9cb19082a46326904071da22c78d9408297ea183508a",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311223101271_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "f3f002a943ef1dc2042cca61de46ae3f36dd197a814d4631a8f5119dcc40ac4f",
+      "source": "assent/cfg/paper/6231/cap_20260311223129102_00001857_zlib.json",
+      "sourceSha256": "f3f002a943ef1dc2042cca61de46ae3f36dd197a814d4631a8f5119dcc40ac4f",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311223129102_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "41ddc17dd17cffc0fdb3f531ad2d28adfaa5838e40bd63a9fcdd8ce4759eb7f6",
+      "source": "assent/cfg/paper/6231/cap_20260311223210467_00001857_zlib.json",
+      "sourceSha256": "41ddc17dd17cffc0fdb3f531ad2d28adfaa5838e40bd63a9fcdd8ce4759eb7f6",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311223210467_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "28109886b11263e0e3432422018c6e83674925bc0a2bc316bb2138f6b1482c2d",
+      "source": "assent/cfg/paper/6231/cap_20260311223648438_00001857_zlib.json",
+      "sourceSha256": "28109886b11263e0e3432422018c6e83674925bc0a2bc316bb2138f6b1482c2d",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311223648438_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "3346449cb30e42c6f1ecdaa1fd66c442b7fa849f5f42a0a3e5f9abcea368887f",
+      "source": "assent/cfg/paper/6231/cap_20260311223905199_00001857_zlib.json",
+      "sourceSha256": "3346449cb30e42c6f1ecdaa1fd66c442b7fa849f5f42a0a3e5f9abcea368887f",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311223905199_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "051417d4850b6d5110109ec3c82a4c42f6683ef46545ef1ba5c028cba2351e34",
+      "source": "assent/cfg/paper/6231/cap_20260311224542066_00001857_zlib.json",
+      "sourceSha256": "051417d4850b6d5110109ec3c82a4c42f6683ef46545ef1ba5c028cba2351e34",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311224542066_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "10806fd42bea83a62146cdb42b791c9dac2eb6aa7d002b47db1b51ac811b14f2",
+      "source": "assent/cfg/paper/6231/cap_20260311224556137_00001857_zlib.json",
+      "sourceSha256": "10806fd42bea83a62146cdb42b791c9dac2eb6aa7d002b47db1b51ac811b14f2",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311224556137_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "72098b08d57dd158badbd255052c3fdbe5686eae74e917035fb341f135179f08",
+      "source": "assent/cfg/paper/6231/cap_20260311224729767_00001857_zlib.json",
+      "sourceSha256": "72098b08d57dd158badbd255052c3fdbe5686eae74e917035fb341f135179f08",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311224729767_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "2ab4c648e7f1994ec9ef66d9db6c9d9f5f894e092151103e9ce958eed7e1eb0f",
+      "source": "assent/cfg/paper/6231/cap_20260311230758305_00001857_zlib.json",
+      "sourceSha256": "2ab4c648e7f1994ec9ef66d9db6c9d9f5f894e092151103e9ce958eed7e1eb0f",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260311230758305_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "e512003af150a55fc3449577022e2f449a9c72aa2243997b0e824b2a1a5509a0",
+      "source": "assent/cfg/paper/6231/cap_20260312002259656_00001857_zlib.json",
+      "sourceSha256": "e512003af150a55fc3449577022e2f449a9c72aa2243997b0e824b2a1a5509a0",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312002259656_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "bbd0d1e2721bc856163ada3fe6b397fd85d6dc3fe44b2db36d3c225a21a54460",
+      "source": "assent/cfg/paper/6231/cap_20260312004747562_00001857_zlib.json",
+      "sourceSha256": "bbd0d1e2721bc856163ada3fe6b397fd85d6dc3fe44b2db36d3c225a21a54460",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312004747562_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "dd39c2a30acdd7e0f0f69ba25ba268400e95280ff469034269f7e7de2f687d95",
+      "source": "assent/cfg/paper/6231/cap_20260312010800158_00001857_zlib.json",
+      "sourceSha256": "dd39c2a30acdd7e0f0f69ba25ba268400e95280ff469034269f7e7de2f687d95",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312010800158_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "aeeb1c4f47465fdf779052182b9891ad52db0d2ab6a8385d842bf30f808f25e8",
+      "source": "assent/cfg/paper/6231/cap_20260312012516624_00001857_zlib.json",
+      "sourceSha256": "aeeb1c4f47465fdf779052182b9891ad52db0d2ab6a8385d842bf30f808f25e8",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312012516624_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "0aaa5147df3f094404761e099bb24d7583827a744750e323e793ec854473f1e4",
+      "source": "assent/cfg/paper/6231/cap_20260312013216423_00001857_zlib.json",
+      "sourceSha256": "0aaa5147df3f094404761e099bb24d7583827a744750e323e793ec854473f1e4",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312013216423_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "936573077fbad967081068096bf4f357a89d9b5e7f4bb6c49120eab1966ca1d7",
+      "source": "assent/cfg/paper/6231/cap_20260312014510224_00001857_zlib.json",
+      "sourceSha256": "936573077fbad967081068096bf4f357a89d9b5e7f4bb6c49120eab1966ca1d7",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312014510224_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "a5b5a3702dbc1db02b1716351d536cae89e3c97876022cac382da96f0d59a85b",
+      "source": "assent/cfg/paper/6231/cap_20260312065238322_00001857_zlib.json",
+      "sourceSha256": "a5b5a3702dbc1db02b1716351d536cae89e3c97876022cac382da96f0d59a85b",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312065238322_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "423289896775b92aa989038c34f4caf1c9517b988ea0329e251cf4bf280d4dd1",
+      "source": "assent/cfg/paper/6231/cap_20260312074501252_00001857_zlib.json",
+      "sourceSha256": "423289896775b92aa989038c34f4caf1c9517b988ea0329e251cf4bf280d4dd1",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312074501252_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "9a71765b2d028c9da0690bf1f474100a9bbe5675dda42806052ab5af372e5fd7",
+      "source": "assent/cfg/paper/6231/cap_20260312084549916_00001857_zlib.json",
+      "sourceSha256": "9a71765b2d028c9da0690bf1f474100a9bbe5675dda42806052ab5af372e5fd7",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312084549916_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "6c238b495d651d647325d4ff96b50225d468b6d78897d9190d6105214abc2d52",
+      "source": "assent/cfg/paper/6231/cap_20260312162029597_00001857_xor.json",
+      "sourceSha256": "6c238b495d651d647325d4ff96b50225d468b6d78897d9190d6105214abc2d52",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312162029597_00001857_xor.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "54679f123532dbbc6be851b1d029b3162c0246997e800992a4ce78aa45372d39",
+      "source": "assent/cfg/paper/6231/cap_20260312162454760_00001857_zlib.json",
+      "sourceSha256": "54679f123532dbbc6be851b1d029b3162c0246997e800992a4ce78aa45372d39",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312162454760_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "cec41b52a4c1f7d7eb9b6738161c87d370cbd84133897685e27cc6328a67f340",
+      "source": "assent/cfg/paper/6231/cap_20260312162500131_00001857_zlib.json",
+      "sourceSha256": "cec41b52a4c1f7d7eb9b6738161c87d370cbd84133897685e27cc6328a67f340",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312162500131_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "943570a36a0afde3dd3869c4813110f0e6cb78a644a378c32d0944bcabe08e1e",
+      "source": "assent/cfg/paper/6231/cap_20260312162500131_00001857_zlib_parsed.json",
+      "sourceSha256": "943570a36a0afde3dd3869c4813110f0e6cb78a644a378c32d0944bcabe08e1e",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312162500131_00001857_zlib_parsed.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "dba9e5feed81382666c8bb1678c47983bab4a478ef3b20b1f1ad7152a635f077",
+      "source": "assent/cfg/paper/6231/cap_20260312172723261_00001857_zlib.json",
+      "sourceSha256": "dba9e5feed81382666c8bb1678c47983bab4a478ef3b20b1f1ad7152a635f077",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312172723261_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "f77946ff87f88d65f53b2aef6d55a3cc9f9e160664701b90a2091d156b089809",
+      "source": "assent/cfg/paper/6231/cap_20260312172752527_00001857_zlib.json",
+      "sourceSha256": "f77946ff87f88d65f53b2aef6d55a3cc9f9e160664701b90a2091d156b089809",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312172752527_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "846d2c79822fdbf94fb5131c016243042c686024019b58e3ce837e60e24cd6d8",
+      "source": "assent/cfg/paper/6231/cap_20260312222258484_00001857_zlib.json",
+      "sourceSha256": "846d2c79822fdbf94fb5131c016243042c686024019b58e3ce837e60e24cd6d8",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260312222258484_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "80eb3ff7ec63a4a6874d88c00d31362e7feac09cbb62c5a1e0ec9a81b8bd269d",
+      "source": "assent/cfg/paper/6231/cap_20260313025235816_00001857_zlib.json",
+      "sourceSha256": "80eb3ff7ec63a4a6874d88c00d31362e7feac09cbb62c5a1e0ec9a81b8bd269d",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260313025235816_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "177895b5a62a539005294753873ebecaa9a62c7d1e5bbbdd80098632b97fd072",
+      "source": "assent/cfg/paper/6231/cap_20260313030507243_00001857_zlib.json",
+      "sourceSha256": "177895b5a62a539005294753873ebecaa9a62c7d1e5bbbdd80098632b97fd072",
+      "target": "src/test/resources/assent/cfg/paper/6231/cap_20260313030507243_00001857_zlib.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "bf901382ff5ef3c6472bcc6682bfa5d1fd318a115dfc71a258b3a2348f0f21ba",
+      "source": "assent/cfg/paper.zip",
+      "sourceSha256": "bf901382ff5ef3c6472bcc6682bfa5d1fd318a115dfc71a258b3a2348f0f21ba",
+      "target": "src/test/resources/assent/cfg/paper.zip"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "167d045fe18c80198779d3b6b923e1995925cf7e917ad550ba30f9c9821b1a94",
+      "source": "src/main/resources/battle-config/army_extra.json",
+      "sourceSha256": "167d045fe18c80198779d3b6b923e1995925cf7e917ad550ba30f9c9821b1a94",
+      "target": "src/main/resources/battle-config/army_extra.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "e96cc20872e6620f25ecda5edde0a0bbdc04ed55480a1f3b207056542a52f73c",
+      "source": "src/main/resources/battle-config/hero_extra.json",
+      "sourceSha256": "e96cc20872e6620f25ecda5edde0a0bbdc04ed55480a1f3b207056542a52f73c",
+      "target": "src/main/resources/battle-config/hero_extra.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "af98cc6c41c905b5e72dea16ad57d5032bdfff58464f6050f4df3b7d39555589",
+      "source": "src/main/resources/battle-config/hero_table.csv",
+      "sourceSha256": "af98cc6c41c905b5e72dea16ad57d5032bdfff58464f6050f4df3b7d39555589",
+      "target": "src/main/resources/battle-config/hero_table.csv"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "9ed63994c8d8fc40b054fec6b14f8b58f4f68e2d356995e4a47b8fc2b2b6185b",
+      "source": "src/main/resources/battle-config/skill_detail_table.csv",
+      "sourceSha256": "9ed63994c8d8fc40b054fec6b14f8b58f4f68e2d356995e4a47b8fc2b2b6185b",
+      "target": "src/main/resources/battle-config/skill_detail_table.csv"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "5f40e0d6b937daaa382c540c8026dd7dcf929901a3e8a7d5cb19796bf91b6d88",
+      "source": "src/main/resources/battle-config/skill_effect_table.csv",
+      "sourceSha256": "5f40e0d6b937daaa382c540c8026dd7dcf929901a3e8a7d5cb19796bf91b6d88",
+      "target": "src/main/resources/battle-config/skill_effect_table.csv"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "6fc583f0596db70c327ee32340c642ace5abebca26218149ff41ccbe584d065a",
+      "source": "src/main/resources/battle-config/skill_extra.json",
+      "sourceSha256": "6fc583f0596db70c327ee32340c642ace5abebca26218149ff41ccbe584d065a",
+      "target": "src/main/resources/battle-config/skill_extra.json"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "ad52232bd3f0bdbd872747f2a95f53db314a7a426365e5cccdff0a50d1510ea9",
+      "source": "src/main/resources/battle-config/skill_table.csv",
+      "sourceSha256": "ad52232bd3f0bdbd872747f2a95f53db314a7a426365e5cccdff0a50d1510ea9",
+      "target": "src/main/resources/battle-config/skill_table.csv"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "5e1ba2a6dc6da2c9b1799f073b0274a4ca0f9f2d53599b15182f5582157a9e68",
+      "source": "src/main/resources/client-config/tb_cfg_gear.bin",
+      "sourceSha256": "5e1ba2a6dc6da2c9b1799f073b0274a4ca0f9f2d53599b15182f5582157a9e68",
+      "target": "src/main/resources/client-config/tb_cfg_gear.bin"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "283c22bc1c8ad676db6dc5c1bdc4ba09f9689212d10e9cb23ab7c7518db33540",
+      "source": "src/main/resources/client-config/tb_cfg_gear_feature.bin",
+      "sourceSha256": "283c22bc1c8ad676db6dc5c1bdc4ba09f9689212d10e9cb23ab7c7518db33540",
+      "target": "src/main/resources/client-config/tb_cfg_gear_feature.bin"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "b081651953839d77fda4c9cc98b32af8ad096c31eccd8d6464d7dae4c6946207",
+      "source": "src/main/resources/client-config/tb_cfg_hero_type_feature.bin",
+      "sourceSha256": "b081651953839d77fda4c9cc98b32af8ad096c31eccd8d6464d7dae4c6946207",
+      "target": "src/main/resources/client-config/tb_cfg_hero_type_feature.bin"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "5d3bb62877ad9f3f89211f7438c09cef9d935466b71cc05c4a548a498d857f45",
+      "source": "src/test/resources/skill-condition-plugin-owners.csv",
+      "sourceSha256": "5d3bb62877ad9f3f89211f7438c09cef9d935466b71cc05c4a548a498d857f45",
+      "target": "src/test/resources/skill-condition-plugin-owners.csv"
+    }
+  ],
+  "schemaVersion": 1,
+  "sourceCommit": "93ee999937d011b2a3dadf67ed39edfbb409aaca",
+  "sourceRepository": "/Users/bytedance/stzb/server",
+  "tests": [
+    {
+      "adapter": "",
+      "generatedSha256": "c6db8d3c915b27a368e6dd32d7ff8a08c8caf7519080055a71bc29cf90e732ac",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleDamageCalculatorTest.kt",
+      "sourceSha256": "f8b3224017a695f3b96207b38c68df5267a8d7cbd33f0f49442c0a808131fe17",
+      "target": "src/test/kotlin/com/stzb/battle/core/BattleDamageCalculatorTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "a606d442731e4cfcf086f4c4df67b2a25df8c011d09f78172e24bf12047f4803",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleEffectStateTest.kt",
+      "sourceSha256": "d4aed62ae79bb665a9bcbb682467f0f7ab72f9e429f50dfeec58881263c10419",
+      "target": "src/test/kotlin/com/stzb/battle/core/BattleEffectStateTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "87f5a2e2a882721cedee2295922e98c5e67834c37463fa25d0005caa80484953",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleEngineTest.kt",
+      "sourceSha256": "702524a42fa4a3188a051279445a17a2cb1c68a6099791dbeb019a0fcaa6aa90",
+      "target": "src/test/kotlin/com/stzb/battle/core/BattleEngineTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "6b5c279b0437b6422b3b7175eefed5b7bfb7d0cf4e5ee40ccd4bcbcd751d40f0",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleFormationCalculatorTest.kt",
+      "sourceSha256": "08b24d80877002e9b9876d198e0d3b185b59df30ff43ec4075ef0b8b0195b53b",
+      "target": "src/test/kotlin/com/stzb/battle/core/BattleFormationCalculatorTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "69feaee1add774cff517ff69620c15fd1fd9d6dd1fd391e8124f282d2238a874",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleReportCodecTest.kt",
+      "sourceSha256": "e1e84a137cb9890cfd8ed040ef5e984905b9de4ab8ac1746f0a3d5e19669e912",
+      "target": "src/test/kotlin/com/stzb/battle/core/BattleReportCodecTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "9f9ecf1838a3ab9b78cee276ef7f1f26af1ec447148da2175d45221a1e61f80c",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/BattleTeamBuilderTest.kt",
+      "sourceSha256": "88786d974377ebae047cfde9189f734dc69b8376c17de04b9ff6f7e25e449470",
+      "target": "src/test/kotlin/com/stzb/battle/core/BattleTeamBuilderTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "709580fb279e110fb23385206a5b3a229675cf197127244f964e6c696edabadd",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/ClientBattleTextReplayAdapterTest.kt",
+      "sourceSha256": "6efb2f5db7cafb3f845c96d734cea9ca506ac2376c4004c3437ffa7627ecee4b",
+      "target": "src/test/kotlin/com/stzb/battle/core/ClientBattleTextReplayAdapterTest.kt"
+    },
+    {
+      "adapter": "standalone-test-fixture-path",
+      "generatedSha256": "c28aa6616aa2859250d2e2f7b1b0fa41fe00c36ffe885ec8c0e315ffab48aac8",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/ClientBattleTextReplayProtocolTest.kt",
+      "sourceSha256": "cb0df6b788037eea3cf39a3a27b1f5662065542c998d80a76cfa01eda3477ac2",
+      "target": "src/test/kotlin/com/stzb/battle/core/ClientBattleTextReplayProtocolTest.kt"
+    },
+    {
+      "adapter": "standalone-test-fixture-path",
+      "generatedSha256": "cfaa8102928568e8dc0b53c2180133fe34e6fd00a94c9397b9f452c169be92ef",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/OfficialFullBattleReportDiffTest.kt",
+      "sourceSha256": "be9414531bb27ee28a249e1ad8bebe2e5f7c37ea5db538e77ffd06f7b94448ec",
+      "target": "src/test/kotlin/com/stzb/battle/core/OfficialFullBattleReportDiffTest.kt"
+    },
+    {
+      "adapter": "standalone-test-fixture-path",
+      "generatedSha256": "b9c1be3fc4ec59094ed0dc06ea646fe42537efb6d1a8ab88ff9abfe03c8daf6f",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/OfficialPreparationReportDiffTest.kt",
+      "sourceSha256": "5a6fb54fed41e16899bb80c53fd2cce122bf81b103c7b0fc7cac4792c0bb1d43",
+      "target": "src/test/kotlin/com/stzb/battle/core/OfficialPreparationReportDiffTest.kt"
+    },
+    {
+      "adapter": "standalone-test-fixture-path",
+      "generatedSha256": "2ff1185d1b42a541a235059033629f7c0bf2d8f81d6cc7e97add94060516bd4f",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/OfficialReportFixture.kt",
+      "sourceSha256": "72f9b93fe34053a01a5270e5bead412cdfa166d392530f6a078cbb1984856860",
+      "target": "src/test/kotlin/com/stzb/battle/core/OfficialReportFixture.kt"
+    },
+    {
+      "adapter": "standalone-test-fixture-path",
+      "generatedSha256": "b58309aeb758b3819782de44ef7c0851e0753e3dcd73454967966d925d3ac0fc",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/OfficialReportFixtureTest.kt",
+      "sourceSha256": "e9527977dc5f541ee0c78627dd500f734240d1049df9cfe1166a0546ce1b484d",
+      "target": "src/test/kotlin/com/stzb/battle/core/OfficialReportFixtureTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "7199b62705837063307b50d582b05d4461da40a5c17f7aa753978fde95c88d00",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/CompleteSkillEngineIntegrationTest.kt",
+      "sourceSha256": "036dbc187c91df920db7641a225152b4c94f08d7c34c8cbe3544cb9784c8476e",
+      "target": "src/test/kotlin/com/stzb/battle/core/skill/CompleteSkillEngineIntegrationTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "0678aeab2527020cb701fb56e15962ea4e778b4890f3427230323187ee47b73d",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/ControlEffectHandlersTest.kt",
+      "sourceSha256": "339dea99b212bc94c7a3f68bc0ef95271b9e776bc0d082aafd9b0184325871b2",
+      "target": "src/test/kotlin/com/stzb/battle/core/skill/ControlEffectHandlersTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "699014ea3868fab0dfeee434e05b88c5a694565a8cc1e732f5505645f2e6104d",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/SkillConditionInterpreterTest.kt",
+      "sourceSha256": "b8b67384f27e450187efe56d872363c898d6c9e8dafdaa3f3b498bf747567c44",
+      "target": "src/test/kotlin/com/stzb/battle/core/skill/SkillConditionInterpreterTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "774d219df3b7cf38761df62e7177b5ca920f8f0951ef0976ec3a0fbfebb447d2",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/SkillRuleInterpreterTest.kt",
+      "sourceSha256": "4ca76d458cafbbcd4732b0bfcf5c55a7b9f403e464039300d81e1d49c70836d0",
+      "target": "src/test/kotlin/com/stzb/battle/core/skill/SkillRuleInterpreterTest.kt"
+    },
+    {
+      "adapter": "",
+      "generatedSha256": "e5f27a2afa4bdd956da9a9d9782976bff4afdac907e4a206a4810ac5f88f1fac",
+      "source": "src/test/kotlin/com/stzb/server/game/battle/skill/SkillTimingTest.kt",
+      "sourceSha256": "ffc9c4546eba549e5bbbbde19166f0a1c76ff6b6ee2f0ca2aad14f2d68a29416",
+      "target": "src/test/kotlin/com/stzb/battle/core/skill/SkillTimingTest.kt"
+    }
+  ]
+}

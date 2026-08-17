@@ -1,0 +1,187 @@
+package com.local.stzb.data.battlefield
+
+import com.example.myapplication.LocalTeamMove
+import com.example.myapplication.LocalBattleField
+import com.example.myapplication.LocalFullBattle
+import com.example.myapplication.Local13A2HeroLineup
+import com.example.myapplication.Local13A2Lineup
+import com.example.myapplication.Local13A2SkillLineup
+import com.example.myapplication.Local13A2TeamInsight
+import com.example.myapplication.Local13A2TeamStats
+import com.local.stzb.domain.battlefield.EventCategory
+import com.local.stzb.domain.battlefield.EventPriority
+import com.local.stzb.domain.battlefield.EventTarget
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class BattlefieldEventMapperTest {
+    @Test
+    fun moveBecomesReadableMarchEvent() {
+        val move = LocalTeamMove(
+            teamId = 42,
+            moveType = 1,
+            subjectId = 7,
+            ownerUid = 9,
+            ownerName = "前锋",
+            ownerUnion = "测试盟",
+            fromWid = 100010,
+            toWid = 100020,
+            currentWid = 100015,
+            fromXy = "10,10",
+            toXy = "10,20",
+            currentXy = "10,15",
+            startTime = 1_700_000_000L,
+            arriveTime = 1_700_000_600L,
+            speed = 100,
+            morale = 88,
+            armyHeroType = "2,22;1,31;3,23;",
+        )
+
+        val event = BattlefieldEventMapper.fromMove(move)
+
+        assertEquals(EventCategory.MARCH, event.category)
+        assertEquals("前锋 · 测试盟", event.title)
+        assertEquals("地图队伍 · 10,10 → 10,20 · 士气 88 · 队伍类型 2,22 / 1,31 / 3,23", event.summary)
+        assertEquals(EventTarget.Team(42), event.target)
+    }
+
+    @Test
+    fun recordedTeamReplacesUnresolvedPlaceholderWithKnownLineup() {
+        val move = LocalTeamMove(
+            teamId = 42, moveType = 1, subjectId = 7, ownerUid = 7,
+            ownerName = "前锋", ownerUnion = "测试盟",
+            fromWid = 100010, toWid = 100020, currentWid = 100015,
+            fromXy = "10,10", toXy = "10,20", currentXy = "10,15",
+            startTime = 1_700_000_000L, arriveTime = 1_700_000_600L, speed = 0,
+        )
+        val insight = Local13A2TeamInsight.empty().copy(
+            stats = Local13A2TeamStats(10, 6, 2, 2, 60.0),
+            lineup = Local13A2Lineup(
+                battleId = 99,
+                side = "def",
+                timeStr = "2026-08-01 12:00:00",
+                heroes = listOf(
+                    Local13A2HeroLineup(1, 101, "陆逊", 50, 5, listOf(Local13A2SkillLineup(1, "深谋远虑", 10))),
+                    Local13A2HeroLineup(2, 102, "周瑜", 50, 5, emptyList()),
+                    Local13A2HeroLineup(3, 103, "吕蒙", 50, 5, emptyList()),
+                ),
+            ),
+        )
+
+        val event = BattlefieldEventMapper.fromMove(move, insight)
+
+        assertEquals("已记录队伍：陆逊 / 周瑜 / 吕蒙", event.details.first())
+        assertEquals("1号位 陆逊 Lv.50 进阶5 · 深谋远虑 Lv.10", event.details[1])
+        assertFalse(event.details.any { it.contains("等待战报") })
+        assertEquals(listOf("大营", "中军", "前锋"), event.teamPresentation!!.heroes.map { it.positionLabel })
+        assertEquals(listOf(101L, 102L, 103L), event.teamPresentation!!.heroes.map { it.heroId })
+        assertEquals(listOf("深谋远虑"), event.teamPresentation!!.heroes.first().skills.map { it.name })
+        assertEquals("10,10 → 10,20", event.teamPresentation!!.routeText)
+        assertEquals("士气 0", event.teamPresentation!!.moraleText)
+        assertEquals("到达 06:23:20", event.teamPresentation!!.arrivalText)
+        assertEquals(42, event.teamPresentation!!.teamId)
+        assertEquals("10,20", event.teamPresentation!!.destinationText)
+        assertEquals(1_700_000_600L, event.teamPresentation!!.arrivalAt)
+        assertEquals(60.0, event.teamPresentation!!.winRate)
+        assertEquals(listOf(5, 5, 5), event.teamPresentation!!.heroes.map { it.advance })
+
+        assertEquals(null, BattlefieldEventMapper.fromMove(move).teamPresentation)
+    }
+
+    @Test
+    fun battleCodesBecomeReadableLabelsWithoutRawIdentifiers() {
+        val event = BattlefieldEventMapper.fromBattle(fullBattle())
+
+        assertEquals(EventCategory.BATTLE, event.category)
+        assertEquals(EventPriority.IMPORTANT, event.priority)
+        assertEquals("前锋 vs 守军", event.title)
+        assertEquals("洛阳 · 攻城 · 胜利", event.summary)
+        assertFalse(event.title.contains("9001"))
+        assertFalse(event.summary.contains("9001"))
+        assertEquals(EventTarget.Battle(9001), event.target)
+    }
+
+    @Test
+    fun battleTimestampIsNormalizedToEpochSeconds() {
+        val event = BattlefieldEventMapper.fromBattle(
+            fullBattle().copy(time = 1_700_000_000_123L),
+        )
+
+        assertEquals(1_700_000_000L, event.occurredAt)
+    }
+
+    @Test
+    fun siegeWidBecomesCoordinatesWithoutExposingSourceId() {
+        val event = BattlefieldEventMapper.fromSiege(
+            LocalBattleField(
+                wid = 100020,
+                attackerUid = 9988,
+                nearbyUids = "1,2,3",
+                nearbyCount = 3,
+                sourceMsgId = "raw-message-123",
+            ),
+        )
+
+        assertEquals("攻城目标 10,20", event.title)
+        assertEquals("附近 3 人", event.summary)
+        assertEquals("siege:100020:9988", event.id)
+        assertFalse(event.id.contains("raw-message-123"))
+        assertFalse(event.title.contains("100020"))
+        assertFalse(event.summary.contains("raw-message-123"))
+        assertEquals(EventTarget.Cell(100020), event.target)
+    }
+
+    private fun fullBattle() = LocalFullBattle(
+        battleId = 9001,
+        time = 1_700_000_000L,
+        result = 1,
+        fightType = 1,
+        wid = 100020,
+        widName = "洛阳",
+        widCode = "raw-wid-code",
+        attackerName = "前锋",
+        attackerUid = "11",
+        attackerUnion = "测试盟",
+        attackerUnionId = 12,
+        attackerPower = 100,
+        attackerGongxun = 20,
+        attackerHp = 90,
+        defenderName = "守军",
+        defenderUid = "21",
+        defenderUnion = "守方盟",
+        defenderUnionId = 22,
+        defenderLevel = 10,
+        defenderPower = 90,
+        defenderGongxun = 10,
+        defenderHp = 80,
+        weather = 0,
+        inNight = 0,
+        isNpc = 0,
+        isAi = 0,
+        blockId = 0,
+        cityType = 1,
+        borrowLand = 0,
+        garrison = 1,
+        firstOccupyLvnLand = 0,
+        attackerTeamId = 31,
+        defenderTeamId = 32,
+        attackerAdvance = "",
+        defenderAdvance = "",
+        attackerHeroType = "",
+        defenderHeroType = "",
+        attackerGearInfo = "",
+        defenderGearInfo = "",
+        allSkillInfo = "",
+        attackAllHeroInfo = "",
+        defendAllHeroInfo = "",
+        attackAllSubHeroInfo = "",
+        defendAllSubHeroInfo = "",
+        attackSupportUserInfo = "",
+        defendSupportUserInfo = "",
+        sourceMsgId = "raw-source-id",
+        rawJson = "{}",
+        attackerHeroes = emptyList(),
+        defenderHeroes = emptyList(),
+    )
+}
