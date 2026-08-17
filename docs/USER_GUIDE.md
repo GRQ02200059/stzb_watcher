@@ -40,7 +40,22 @@ Web 端适合电脑大屏、持续监控和多区域对比；Android 端适合�
 
 ### 2.2 Web 用户：本地启动
 
-Web 端需要在运行项目的电脑上启动本地服务：
+Windows 用户可以优先下载 Release 中的 EXE，其他用户可以通过 Python 命令启动 Web 服务。
+
+#### Windows EXE 启动
+
+1. 打开项目的 [Releases 页面](https://github.com/GRQ02200059/stzb_watcher/releases)。
+2. 进入最新版本，展开 `Assets`。
+3. 下载文件名以 `.exe` 结尾的 Windows 程序。
+4. 如果下载的是压缩包，先完整解压。
+5. 双击运行 EXE。
+6. 如果程序没有自动打开浏览器，访问 `http://127.0.0.1:8080`。
+
+使用过程中请保持 EXE 进程运行。关闭 EXE 后，本地 Web 服务也会停止。如果 Windows Defender 弹出安全提示，请确认下载来源是项目 Release 后再选择允许运行。
+
+下载时不要选择 `Source code (zip)`、`Source code (tar.gz)` 或 Android 的 `.apk` 文件。Release 中存在多个 EXE 时，优先选择标注为 Windows、release 或正式版本的文件。
+
+#### Python 启动
 
 ```bash
 python3 -m venv .venv
