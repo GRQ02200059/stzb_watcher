@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.local.stzb.core.ui.LoadingPanel
+import com.local.stzb.core.ui.GlassCard
 import com.local.stzb.domain.battles.BattleSide
 
 @Composable
@@ -41,7 +42,7 @@ fun BattleDetailScreen(state: BattlesUiState, onBack: () -> Unit, modifier: Modi
 
 @Composable
 private fun SideCard(side: BattleSide) {
-    Card(Modifier.fillMaxWidth()) {
+    GlassCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(side.label, fontWeight = FontWeight.Bold)
             Text(side.name.ifBlank { "未知" }, style = MaterialTheme.typography.titleLarge)

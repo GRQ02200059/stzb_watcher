@@ -17,6 +17,7 @@ import androidx.core.app.NotificationCompat;
 
 import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
+import com.local.stzb.auth.AuthEntryGuard;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -49,6 +50,9 @@ public class TProxyService extends VpnService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (AuthEntryGuard.stopServiceIfDenied(this)) {
+            return START_NOT_STICKY;
+        }
         if (intent != null && ACTION_DISCONNECT.equals(intent.getAction())) {
             stopTunnel();
             return START_NOT_STICKY;

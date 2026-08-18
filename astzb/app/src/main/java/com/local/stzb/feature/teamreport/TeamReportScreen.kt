@@ -9,6 +9,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -18,10 +21,11 @@ import androidx.compose.ui.unit.dp
 import com.local.stzb.core.ui.EmptyPanel
 import com.local.stzb.core.ui.ErrorPanel
 import com.local.stzb.core.ui.LoadingPanel
+import com.local.stzb.core.ui.GlassCard
 import com.local.stzb.domain.rankings.*
 
 @Composable
-fun TeamReportScreen(state: TeamReportUiState, viewModel: TeamReportViewModel, modifier: Modifier = Modifier) {
+fun TeamReportScreen(state: TeamReportUiState, viewModel: TeamReportViewModel, modifier: Modifier = Modifier, onBack: (() -> Unit)? = null) {
     val context = LocalContext.current
     val report = state.report
     val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
@@ -32,8 +36,19 @@ fun TeamReportScreen(state: TeamReportUiState, viewModel: TeamReportViewModel, m
         }
     }
     Column(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("团队报表", style = MaterialTheme.typography.headlineMedium)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (onBack != null) {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "返回工具")
+                    }
+                }
+                Text("团队报表", style = MaterialTheme.typography.headlineMedium)
+            }
             OutlinedButton(
                 onClick = { exporter.launch("团队报表_${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"))}.csv") },
                 enabled = !report?.rows.isNullOrEmpty(),
@@ -64,7 +79,7 @@ fun TeamReportScreen(state: TeamReportUiState, viewModel: TeamReportViewModel, m
         Text("共 ${snapshot.rows.size} 项 · 战斗 ${snapshot.rows.sumOf { it.battles }} · 武勋 ${snapshot.rows.sumOf { it.totalGongxun }}", color = MaterialTheme.colorScheme.onSurfaceVariant)
         LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(snapshot.rows, key = { "${it.rank}:${it.groupName}:${it.name}" }) { row ->
-                Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(14.dp), Arrangement.spacedBy(4.dp)) {
+                GlassCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(14.dp), Arrangement.spacedBy(4.dp)) {
                     Text("#${row.rank}  ${row.name}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     if (row.groupName != row.name) Text(row.groupName, color = MaterialTheme.colorScheme.primary)
                     Text("战斗 ${row.battles} · 胜 ${row.wins} / 负 ${row.losses} / 平 ${row.draws} · 胜率 ${"%.1f".format(row.winRate)}%")

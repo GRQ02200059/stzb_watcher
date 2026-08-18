@@ -48,25 +48,41 @@ class StzbNavigationTest {
         }
 
         rule.onNodeWithText("实时战场").assertIsDisplayed()
-        rule.onNodeWithText("队伍").performClick()
-        rule.onNodeWithText("全服玩家队伍").assertIsDisplayed()
-        rule.onNodeWithText("团队").performClick()
-        rule.onNodeWithText("团队报表").assertIsDisplayed()
-        rule.onNodeWithText("模拟").performClick()
-        rule.onNodeWithText("战斗模拟器").assertIsDisplayed()
-        rule.onNodeWithText("更多").performClick()
+
+        // Primary bottom navigation: 战场 / 战报 / 同盟 / 工具
+        rule.onNodeWithText("战报").performClick()
+        rule.onNodeWithText("本机战报").assertIsDisplayed()
+
+        rule.onNodeWithText("同盟").performClick()
+        rule.onNodeWithText("同盟中心").assertIsDisplayed()
+
+        rule.onNodeWithText("工具").performClick()
         rule.onNodeWithText("抓包启动台").performClick()
         rule.onNodeWithText("启动抓包").assertIsDisplayed()
         rule.onNodeWithContentDescription("返回更多").performClick()
-        rule.onNodeWithText("更多工具").assertIsDisplayed()
+        rule.onNodeWithText("工具").assertIsDisplayed()
+
+        // Secondary pages remain reachable from tools entry.
+        rule.onNodeWithText("队伍").performClick()
+        rule.onNodeWithText("全服玩家队伍").assertIsDisplayed()
+        rule.onNodeWithText("工具").performClick()
+        rule.onNodeWithText("工具").assertIsDisplayed()
+
+        rule.onNodeWithText("团队报表").performClick()
+        rule.onNodeWithText("团队报表").assertIsDisplayed()
+        rule.onNodeWithText("工具").performClick()
+        rule.onNodeWithText("工具").assertIsDisplayed()
+
+        rule.onNodeWithText("模拟器").performClick()
+        rule.onNodeWithText("战斗模拟器").assertIsDisplayed()
+        rule.onNodeWithText("工具").performClick()
+        rule.onNodeWithText("工具").assertIsDisplayed()
 
         rule.onNodeWithText("战报").performClick()
         rule.onNodeWithText("本机战报").assertIsDisplayed()
-        rule.onNodeWithContentDescription("返回更多").performClick()
+        rule.onNodeWithText("工具").performClick()
 
-        rule.onNodeWithText("同盟成员").performClick()
         rule.onNodeWithText("同盟中心").assertIsDisplayed()
-        rule.onNodeWithContentDescription("返回更多").performClick()
 
         rule.onNodeWithText("地图与城池").performClick()
         rule.onNodeWithText("本机还没有地图格子数据").assertIsDisplayed()
@@ -80,6 +96,60 @@ class StzbNavigationTest {
         rule.onNodeWithText("本机还没有战功榜数据").assertIsDisplayed()
         rule.onNodeWithText("返回").performClick()
         rule.onNodeWithText("抓包启动台").assertIsDisplayed()
+    }
+
+    @Test
+    fun toolsScreenHasVisibleBackAction() {
+        val repository = FakeBattlefieldRepository(
+            BattlefieldSnapshot(
+                capture = CaptureStatus(false, "抓包未启动", null),
+                metrics = BattlefieldMetrics(0, 0, 0, 0),
+                events = emptyList(),
+            ),
+        )
+        rule.setContent {
+            AstzbTheme {
+                StzbApp(repository, EmptyTeamsRepository, EmptyBattleRepository, EmptyAllianceRepository, EmptyIntelRepository, EmptyRankingRepository, EmptyCaptureController, openLegacyDashboard = {}, openCaptureConsole = {})
+            }
+        }
+
+        rule.onNodeWithText("工具").performClick()
+        rule.onNodeWithContentDescription("返回上一页").assertIsDisplayed()
+
+        rule.onNodeWithContentDescription("返回上一页").performClick()
+        rule.onNodeWithText("实时战场").assertIsDisplayed()
+    }
+
+    @Test
+    fun toolSecondaryPagesHaveVisibleBackAction() {
+        val repository = FakeBattlefieldRepository(
+            BattlefieldSnapshot(
+                capture = CaptureStatus(false, "抓包未启动", null),
+                metrics = BattlefieldMetrics(0, 0, 0, 0),
+                events = emptyList(),
+            ),
+        )
+        rule.setContent {
+            AstzbTheme {
+                StzbApp(repository, EmptyTeamsRepository, EmptyBattleRepository, EmptyAllianceRepository, EmptyIntelRepository, EmptyRankingRepository, EmptyCaptureController, openLegacyDashboard = {}, openCaptureConsole = {})
+            }
+        }
+
+        rule.onNodeWithText("工具").performClick()
+        rule.onNodeWithText("队伍").performClick()
+        rule.onNodeWithContentDescription("返回工具").assertIsDisplayed()
+        rule.onNodeWithContentDescription("返回工具").performClick()
+        rule.onNodeWithText("工具中心").assertIsDisplayed()
+
+        rule.onNodeWithText("团队报表").performClick()
+        rule.onNodeWithContentDescription("返回工具").assertIsDisplayed()
+        rule.onNodeWithContentDescription("返回工具").performClick()
+        rule.onNodeWithText("工具中心").assertIsDisplayed()
+
+        rule.onNodeWithText("模拟器").performClick()
+        rule.onNodeWithContentDescription("返回工具").assertIsDisplayed()
+        rule.onNodeWithContentDescription("返回工具").performClick()
+        rule.onNodeWithText("工具中心").assertIsDisplayed()
     }
 
     private object EmptyTeamsRepository : TeamsRepository { override fun loadTeams() = emptyList<com.local.stzb.domain.teams.PlayerTeam>() }

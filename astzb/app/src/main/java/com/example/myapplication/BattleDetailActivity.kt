@@ -3,6 +3,7 @@ package com.example.myapplication
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.local.stzb.auth.AuthEntryGuard
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -23,9 +24,7 @@ class BattleDetailActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (LocalTrialManager.ensureAccessOrRedirect(this)) {
-            return
-        }
+        if (AuthEntryGuard.redirectActivityIfDenied(this)) return
         setContentView(R.layout.activity_battle_detail)
         StatusBarInsetHelper.applyTopSafeSpacing(findViewById(R.id.battleDetailRoot))
 

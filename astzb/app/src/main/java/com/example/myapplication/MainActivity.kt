@@ -19,6 +19,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButtonToggleGroup
+import com.local.stzb.auth.AuthEntryGuard
 import hev.sockstun.Preferences
 import hev.sockstun.TProxyService
 
@@ -57,9 +58,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (LocalTrialManager.ensureAccessOrRedirect(this)) {
-            return
-        }
+        if (AuthEntryGuard.redirectActivityIfDenied(this)) return
         setContentView(R.layout.activity_capture_console)
         StatusBarInsetHelper.applyTopSafeSpacing(findViewById(R.id.captureConsoleRoot))
         logsView = findViewById(R.id.logsView)

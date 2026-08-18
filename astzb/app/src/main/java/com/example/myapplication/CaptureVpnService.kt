@@ -3,6 +3,7 @@ package com.example.myapplication
 import android.content.Intent
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
+import com.local.stzb.auth.AuthEntryGuard
 import java.io.FileInputStream
 import java.net.InetAddress
 import kotlin.math.min
@@ -16,6 +17,7 @@ class CaptureVpnService : VpnService() {
     private var activeBridge: Tun2SocksBridge? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (AuthEntryGuard.stopServiceIfDenied(this)) return START_NOT_STICKY
         val targetPackage = intent?.getStringExtra(EXTRA_TARGET_PACKAGE).orEmpty()
         val socksHost = intent?.getStringExtra(EXTRA_SOCKS_HOST).orEmpty()
         val socksPort = intent?.getIntExtra(EXTRA_SOCKS_PORT, 1080) ?: 1080

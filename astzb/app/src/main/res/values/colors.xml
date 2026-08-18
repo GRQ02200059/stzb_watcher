@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF1E40AF</color>
-    <color name="purple_700">#FF1E3A8A</color>
-    <color name="teal_200">#FFF59E0B</color>
-    <color name="teal_700">#FFD97706</color>
+    <color name="glacier_blue_50">#FFF7FAFF</color>
+    <color name="glacier_blue_200">#FFDCE6F6</color>
+    <color name="glacier_blue_500">#FF5275CF</color>
+    <color name="glacier_blue_700">#FF3F5DA8</color>
+    <color name="glass_surface">#D9FFFFFF</color>
+    <color name="line_glass">#295275CF</color>
+    <color name="ink_dark">#FF16243D</color>
+    <color name="ink_secondary">#FF64738C</color>
+    <color name="status_background">#FFE0F4EE</color>
+    <color name="status_error">#FFF9E2E5</color>
+    <color name="raw_payload_bg">#FFE8EEF7</color>
+    <color name="raw_payload_text">#FF33415C</color>
+    <color name="sidebar_overlay">#CCFFFFFF</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

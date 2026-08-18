@@ -27,6 +27,7 @@ import com.local.stzb.core.ui.EmptyPanel
 import com.local.stzb.core.ui.ErrorPanel
 import com.local.stzb.core.ui.LoadState
 import com.local.stzb.core.ui.LoadingPanel
+import com.local.stzb.core.ui.GlassSurface
 import com.local.stzb.domain.battlefield.BattlefieldEvent
 
 @Composable
@@ -78,8 +79,10 @@ fun BattlefieldScreen(
 @Composable
 private fun BattlefieldStatePanel(content: @Composable () -> Unit) {
     Column(Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 20.dp)) {
-        Text("实时战场", style = MaterialTheme.typography.headlineMedium)
-        Box(Modifier.weight(1f)) { content() }
+        GlassSurface(Modifier.fillMaxWidth()) {
+            Text("实时战场", Modifier.padding(16.dp), style = MaterialTheme.typography.headlineMedium)
+        }
+        Box(Modifier.weight(1f).padding(top = 12.dp)) { content() }
     }
 }
 

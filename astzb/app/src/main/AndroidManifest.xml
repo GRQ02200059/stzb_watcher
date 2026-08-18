@@ -45,10 +45,6 @@
             android:name=".BattleDetailActivity"
             android:exported="false" />
 
-        <activity
-            android:name=".ExpiredActivity"
-            android:exported="false" />
-
         <service
             android:name=".CaptureVpnService"
             android:enabled="true"

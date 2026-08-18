@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -27,14 +31,26 @@ import androidx.compose.ui.unit.dp
 import com.local.stzb.core.ui.EmptyPanel
 import com.local.stzb.core.ui.ErrorPanel
 import com.local.stzb.core.ui.LoadingPanel
+import com.local.stzb.core.ui.GlassCard
 import com.local.stzb.domain.battlefield.BattlefieldHero
 import com.local.stzb.domain.teams.PlayerTeam
 import com.local.stzb.feature.battlefield.BattlefieldHeroPortrait
 
 @Composable
-fun TeamsScreen(state: TeamsUiState, onIntent: (TeamsIntent) -> Unit, modifier: Modifier = Modifier) {
+fun TeamsScreen(state: TeamsUiState, onIntent: (TeamsIntent) -> Unit, modifier: Modifier = Modifier, onBack: (() -> Unit)? = null) {
     Column(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("全服玩家队伍", style = MaterialTheme.typography.headlineMedium)
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (onBack != null) {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "返回工具")
+                }
+            }
+            Text("全服玩家队伍", style = MaterialTheme.typography.headlineMedium)
+        }
         val players = state.allTeams.map { it.player }.distinct().size
         Text("队伍 ${state.allTeams.size} · 玩家 $players", color = MaterialTheme.colorScheme.onSurfaceVariant)
         OutlinedTextField(
@@ -69,10 +85,7 @@ fun TeamsScreen(state: TeamsUiState, onIntent: (TeamsIntent) -> Unit, modifier: 
 
 @Composable
 private fun PlayerTeamCard(team: PlayerTeam) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-    ) {
+    GlassCard {
         Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Text(

@@ -7,10 +7,10 @@
     android:layout_marginTop="6dp"
     android:layout_marginEnd="8dp"
     android:layout_marginBottom="4dp"
-    app:cardBackgroundColor="#FFFFFF"
+    app:cardBackgroundColor="@color/glass_surface"
     app:cardCornerRadius="16dp"
     app:cardElevation="0dp"
-    app:strokeColor="#E2E8F0"
+    app:strokeColor="@color/line_glass"
     app:strokeWidth="1dp">
 
     <LinearLayout
@@ -33,7 +33,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textColor="#111827"
+                android:textColor="@color/ink_dark"
                 android:textSize="13sp"
                 android:textStyle="bold" />
 
@@ -41,12 +41,12 @@
                 android:id="@+id/battleTypeBadgeView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="#EFF6FF"
+                android:background="@color/status_background"
                 android:paddingStart="7dp"
                 android:paddingTop="3dp"
                 android:paddingEnd="7dp"
                 android:paddingBottom="3dp"
-                android:textColor="#1D4ED8"
+                android:textColor="@color/glacier_blue_700"
                 android:textSize="10sp"
                 android:textStyle="bold" />
 
@@ -59,7 +59,7 @@
                 android:paddingTop="3dp"
                 android:paddingEnd="7dp"
                 android:paddingBottom="3dp"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 android:textSize="10sp"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -69,7 +69,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="9dp"
-            android:textColor="#111827"
+            android:textColor="@color/ink_dark"
             android:textSize="15sp"
             android:textStyle="bold" />
 
@@ -78,7 +78,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:textColor="#64748B"
+            android:textColor="@color/ink_secondary"
             android:textSize="12sp" />
 
         <TextView
@@ -86,7 +86,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="7dp"
-            android:textColor="#1E3A8A"
+            android:textColor="@color/glacier_blue_700"
             android:textSize="11sp"
             android:textStyle="bold" />
     </LinearLayout>

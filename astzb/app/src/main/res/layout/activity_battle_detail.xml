@@ -4,7 +4,7 @@
     android:id="@+id/battleDetailRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8FAFC"
+    android:background="@color/glacier_blue_50"
     android:fillViewport="true">
 
     <LinearLayout
@@ -16,10 +16,10 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="#FFFFFF"
+            app:cardBackgroundColor="@color/glass_surface"
             app:cardCornerRadius="22dp"
             app:cardElevation="0dp"
-            app:strokeColor="#E2E8F0"
+            app:strokeColor="@color/line_glass"
             app:strokeWidth="1dp">
 
             <LinearLayout
@@ -40,7 +40,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="战报详情"
-                        android:textColor="#1E40AF"
+                        android:textColor="@color/glacier_blue_700"
                         android:textSize="22sp"
                         android:textStyle="bold" />
 
@@ -54,7 +54,7 @@
                         android:paddingEnd="10dp"
                         android:paddingBottom="5dp"
                         android:text="--"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/white"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
@@ -76,7 +76,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:text="加载中..."
-                    android:textColor="#475569"
+                    android:textColor="@color/ink_secondary"
                     android:textSize="13sp" />
 
                 <TextView
@@ -84,10 +84,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:background="#EFF6FF"
+                    android:background="@color/status_background"
                     android:lineSpacingExtra="3dp"
                     android:padding="12dp"
-                    android:textColor="#1E3A8A"
+                    android:textColor="@color/ink_dark"
                     android:textSize="13sp"
                     android:typeface="monospace" />
             </LinearLayout>
@@ -103,10 +103,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/glass_surface"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
-                app:strokeColor="#E2E8F0"
+                app:strokeColor="@color/line_glass"
                 app:strokeWidth="1dp">
 
                 <TextView
@@ -115,7 +115,7 @@
                     android:layout_height="wrap_content"
                     android:lineSpacingExtra="3dp"
                     android:padding="14dp"
-                    android:textColor="#111827"
+                    android:textColor="@color/ink_dark"
                     android:textSize="12sp" />
             </com.google.android.material.card.MaterialCardView>
 
@@ -124,10 +124,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_weight="1"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/glass_surface"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
-                app:strokeColor="#E2E8F0"
+                app:strokeColor="@color/line_glass"
                 app:strokeWidth="1dp">
 
                 <TextView
@@ -136,7 +136,7 @@
                     android:layout_height="wrap_content"
                     android:lineSpacingExtra="3dp"
                     android:padding="14dp"
-                    android:textColor="#111827"
+                    android:textColor="@color/ink_dark"
                     android:textSize="12sp" />
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
@@ -145,10 +145,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            app:cardBackgroundColor="#FFFFFF"
+            app:cardBackgroundColor="@color/glass_surface"
             app:cardCornerRadius="18dp"
             app:cardElevation="0dp"
-            app:strokeColor="#E2E8F0"
+            app:strokeColor="@color/line_glass"
             app:strokeWidth="1dp">
 
             <TextView
@@ -157,7 +157,7 @@
                 android:layout_height="wrap_content"
                 android:lineSpacingExtra="3dp"
                 android:padding="14dp"
-                android:textColor="#1E3A8A"
+                android:textColor="@color/ink_dark"
                 android:textSize="12sp" />
         </com.google.android.material.card.MaterialCardView>
 
@@ -165,10 +165,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            app:cardBackgroundColor="#FFFFFF"
+            app:cardBackgroundColor="@color/glass_surface"
             app:cardCornerRadius="18dp"
             app:cardElevation="0dp"
-            app:strokeColor="#E2E8F0"
+            app:strokeColor="@color/line_glass"
             app:strokeWidth="1dp">
 
             <TextView
@@ -177,7 +177,7 @@
                 android:layout_height="wrap_content"
                 android:lineSpacingExtra="3dp"
                 android:padding="14dp"
-                android:textColor="#475569"
+                android:textColor="@color/ink_secondary"
                 android:textSize="12sp" />
         </com.google.android.material.card.MaterialCardView>
 
@@ -186,10 +186,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:background="#0F172A"
+            android:background="@color/raw_payload_bg"
             android:lineSpacingExtra="3dp"
             android:padding="12dp"
-            android:textColor="#E2E8F0"
+            android:textColor="@color/raw_payload_text"
             android:textIsSelectable="true"
             android:textSize="11sp" />
     </LinearLayout>

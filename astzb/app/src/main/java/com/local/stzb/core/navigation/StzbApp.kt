@@ -7,16 +7,20 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.Radar
 import androidx.compose.material.icons.outlined.Science
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,6 +31,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Brush
+import com.local.stzb.core.designsystem.AstzbColors
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -78,6 +85,7 @@ fun StzbApp(
     captureController: CaptureConsoleController,
     openLegacyDashboard: (String) -> Unit,
     openCaptureConsole: () -> Unit,
+    onLogout: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val navController = rememberNavController()
@@ -135,20 +143,26 @@ fun StzbApp(
     Scaffold(
         modifier = modifier,
         bottomBar = {
-            NavigationBar {
-                AppDestination.entries.forEach { destination ->
-                    NavigationBarItem(
-                        selected = currentRoute == destination.route,
-                        onClick = {
-                            navController.navigate(destination.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = { Icon(destination.icon, contentDescription = destination.label) },
-                        label = { Text(destination.label) },
-                    )
+            Surface(
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+                tonalElevation = 0.dp,
+                shadowElevation = 0.dp,
+            ) {
+                NavigationBar(containerColor = androidx.compose.ui.graphics.Color.Transparent) {
+                    AppDestination.entries.forEach { destination ->
+                        NavigationBarItem(
+                            selected = currentRoute == destination.route,
+                            onClick = {
+                                navController.navigate(destination.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            icon = { Icon(destination.icon, contentDescription = destination.label) },
+                            label = { Text(destination.label) },
+                        )
+                    }
                 }
             }
         },
@@ -156,7 +170,10 @@ fun StzbApp(
         NavHost(
             navController = navController,
             startDestination = AppDestination.BATTLEFIELD.route,
-            modifier = Modifier.padding(padding),
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .background(Brush.verticalGradient(listOf(AstzbColors.BackgroundTop, AstzbColors.BackgroundBottom))),
         ) {
             composable(AppDestination.BATTLEFIELD.route) {
                 BattlefieldScreen(
@@ -167,22 +184,7 @@ fun StzbApp(
                     onToggleOverlay = ::toggleOverlay,
                 )
             }
-            composable(AppDestination.TEAMS.route) { TeamsScreen(teamsState, teamsViewModel::onIntent) }
-            composable(AppDestination.TEAM_REPORT.route) { TeamReportScreen(teamReportState, teamReportViewModel) }
-            composable(AppDestination.SIMULATOR.route) {
-                BattleSimulatorScreen(
-                    state = simulatorState,
-                    onIntent = simulatorViewModel::onIntent,
-                    heroName = LocalBattleSimulatorEngine::heroName,
-                    heroIconId = LocalBattleSimulatorEngine::heroIconId,
-                    skillName = LocalBattleSimulatorEngine::skillName,
-                    onOpenLog = { navController.navigate("simulator-log") },
-                )
-            }
-            composable("simulator-log") {
-                BattleLogScreen(simulatorState.result?.firstRun) { navController.popBackStack() }
-            }
-            composable("battles") {
+            composable(AppDestination.BATTLES.route) {
                 if (battlesState.selected == null) {
                     BattlesScreen(battlesState, battlesViewModel::onIntent, { navController.popBackStack() })
                 } else {
@@ -192,19 +194,42 @@ fun StzbApp(
                     )
                 }
             }
-            composable("alliance") {
+            composable(AppDestination.ALLIANCE.route) {
                 AllianceScreen(allianceState, allianceViewModel, { navController.popBackStack() })
             }
-            composable(AppDestination.MORE.route) {
+            composable(AppDestination.TOOLS.route) {
                 LegacyToolsScreen(
                     openCaptureConsole = { navController.navigate("capture-console") },
                     openLegacyDashboard = { openLegacyDashboard("ranking") },
                     openMap = { navController.navigate("map") },
                     openAnnouncements = { navController.navigate("announcements") },
                     openRankings = { navController.navigate("rankings") },
-                    openBattles = { navController.navigate("battles") },
-                    openAlliance = { navController.navigate("alliance") },
+                    openTeams = { navController.navigate("teams") },
+                    openTeamReport = { navController.navigate("team-report") },
+                    openSimulator = { navController.navigate("simulator") },
+                    onLogout = onLogout,
+                    onBack = {
+                        if (!navController.popBackStack()) {
+                            navController.navigate(AppDestination.BATTLEFIELD.route) { launchSingleTop = true }
+                        }
+                    },
                 )
+            }
+            composable("teams") { TeamsScreen(teamsState, teamsViewModel::onIntent, onBack = { navController.popBackStack() }) }
+            composable("team-report") { TeamReportScreen(teamReportState, teamReportViewModel, onBack = { navController.popBackStack() }) }
+            composable("simulator") {
+                BattleSimulatorScreen(
+                    state = simulatorState,
+                    onIntent = simulatorViewModel::onIntent,
+                    heroName = LocalBattleSimulatorEngine::heroName,
+                    heroIconId = LocalBattleSimulatorEngine::heroIconId,
+                    skillName = LocalBattleSimulatorEngine::skillName,
+                    onOpenLog = { navController.navigate("simulator-log") },
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("simulator-log") {
+                BattleLogScreen(simulatorState.result?.firstRun) { navController.popBackStack() }
             }
             composable("map") {
                 IntelScreen(IntelPage.MAP, intelRepository.load(), { navController.popBackStack() }, intelRepository::load)
@@ -243,8 +268,7 @@ fun StzbApp(
 private val AppDestination.icon: ImageVector
     get() = when (this) {
         AppDestination.BATTLEFIELD -> Icons.Outlined.Radar
-        AppDestination.TEAMS -> Icons.AutoMirrored.Outlined.ReceiptLong
-        AppDestination.TEAM_REPORT -> Icons.Outlined.Groups
-        AppDestination.SIMULATOR -> Icons.Outlined.Science
-        AppDestination.MORE -> Icons.Outlined.MoreHoriz
+        AppDestination.BATTLES -> Icons.AutoMirrored.Outlined.ReceiptLong
+        AppDestination.ALLIANCE -> Icons.Outlined.Groups
+        AppDestination.TOOLS -> Icons.Outlined.MoreHoriz
     }

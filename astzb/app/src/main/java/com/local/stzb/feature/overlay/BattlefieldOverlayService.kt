@@ -29,6 +29,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.local.stzb.StzbAppActivity
 import com.local.stzb.StzbApplication
+import com.local.stzb.auth.AuthEntryGuard
 import com.local.stzb.core.designsystem.AstzbTheme
 import kotlinx.coroutines.*
 
@@ -47,6 +48,7 @@ class BattlefieldOverlayService : Service(), LifecycleOwner, SavedStateRegistryO
 
     override fun onCreate() {
         super.onCreate()
+        if (AuthEntryGuard.stopServiceIfDenied(this)) return
         savedStateController.performAttach()
         savedStateController.performRestore(null)
         registry.currentState = Lifecycle.State.CREATED

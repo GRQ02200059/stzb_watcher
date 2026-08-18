@@ -45,6 +45,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.local.stzb.core.designsystem.AstzbColors
 import com.local.stzb.core.ui.MetricCard
+import com.local.stzb.core.ui.GlassCard
+import com.local.stzb.core.ui.GlassStatus
+import com.local.stzb.core.ui.GlassStatusPill
 import com.local.stzb.domain.battlefield.BattlefieldEvent
 import com.local.stzb.domain.battlefield.BattlefieldMetrics
 import com.local.stzb.domain.battlefield.CaptureStatus
@@ -68,7 +71,8 @@ fun BattlefieldHeader(
     val statusColor = if (capture.running) AstzbColors.Success else AstzbColors.Error
     val actionDescription = if (paused) "继续实时刷新" else "暂停实时刷新"
 
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    GlassCard(modifier.fillMaxWidth()) {
+      Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -83,7 +87,7 @@ fun BattlefieldHeader(
                         modifier = Modifier.size(18.dp),
                         tint = statusColor,
                     )
-                    Text(statusText, color = statusColor, style = MaterialTheme.typography.labelLarge)
+                    GlassStatusPill(statusText, if (capture.running) GlassStatus.SUCCESS else GlassStatus.ERROR)
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -105,6 +109,7 @@ fun BattlefieldHeader(
         capture.warning?.let {
             Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
         }
+      }
     }
 }
 
@@ -174,13 +179,11 @@ fun BattlefieldEventCard(
         BattlefieldTeamCard(event, accent, onClick, modifier)
         return
     }
-    Card(
+    GlassCard(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 96.dp)
             .clickable(role = Role.Button, onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, accent.copy(alpha = 0.55f)),
     ) {
         Row(
             Modifier.fillMaxWidth().padding(16.dp),

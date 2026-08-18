@@ -12,11 +12,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -35,6 +39,7 @@ import com.example.myapplication.LocalSimSkillOption
 import com.example.myapplication.LocalSimTeamConfig
 import com.local.stzb.core.ui.ErrorPanel
 import com.local.stzb.core.ui.LoadingPanel
+import com.local.stzb.core.ui.GlassCard
 import com.local.stzb.domain.battlefield.BattlefieldHero
 import com.local.stzb.feature.battlefield.BattlefieldHeroPortrait
 
@@ -47,6 +52,7 @@ fun BattleSimulatorScreen(
     skillName: (Long) -> String,
     onOpenLog: () -> Unit,
     modifier: Modifier = Modifier,
+    onBack: (() -> Unit)? = null,
 ) {
     when {
         state.loading -> LoadingPanel(modifier.fillMaxSize())
@@ -57,7 +63,18 @@ fun BattleSimulatorScreen(
         ) {
             item {
                 Column(Modifier.padding(top = 14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("战斗模拟器", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        if (onBack != null) {
+                            IconButton(onClick = onBack) {
+                                Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "返回工具")
+                            }
+                        }
+                        Text("战斗模拟器", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                    }
                     Text(
                         "本地武将 ${state.heroOptions.size} · 战法 ${state.skillOptions.size}",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -84,7 +101,7 @@ fun BattleSimulatorScreen(
             }
             state.result?.let { result ->
                 item {
-                    Card(border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary), modifier = Modifier.fillMaxWidth()) {
+                    GlassCard(modifier = Modifier.fillMaxWidth()) {
                         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text("模拟结果 · ${result.repeat} 次", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                             Text("攻方胜率 ${"%.1f".format(result.blueWinRate)}%")
@@ -115,11 +132,7 @@ private fun SimulatorTeamCard(
     heroIconId: (Long) -> Long,
     skillName: (Long) -> String,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-    ) {
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -185,7 +198,7 @@ private fun Stepper(label: String, onMinus: () -> Unit, onPlus: () -> Unit) {
 
 @Composable
 private fun RunActions(running: Boolean, onIntent: (BattleSimulatorIntent) -> Unit) {
-    Card(Modifier.fillMaxWidth()) {
+    GlassCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("开始模拟", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             if (running) {

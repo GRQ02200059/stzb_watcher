@@ -1,26 +1,41 @@
 package com.local.stzb.feature.tools
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.NetworkCheck
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.Leaderboard
-import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.Groups
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.outlined.Science
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.local.stzb.core.ui.GlassCard
+import com.local.stzb.core.ui.GlassToolbar
 
 @Composable
 fun LegacyToolsScreen(
@@ -29,48 +44,114 @@ fun LegacyToolsScreen(
     openMap: () -> Unit,
     openAnnouncements: () -> Unit,
     openRankings: () -> Unit,
-    openBattles: () -> Unit,
-    openAlliance: () -> Unit,
+    openTeams: () -> Unit,
+    openTeamReport: () -> Unit,
+    openSimulator: () -> Unit,
+    onLogout: () -> Unit = {},
+    onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier.fillMaxSize().padding(24.dp),
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 16.dp, top = 14.dp, end = 16.dp, bottom = 28.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text("更多工具")
-        Button(onClick = openBattles, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-            Icon(Icons.AutoMirrored.Outlined.ReceiptLong, contentDescription = null)
-            Text("战报", modifier = Modifier.padding(start = 8.dp))
+        item {
+            GlassToolbar(
+                title = "工具中心",
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (onBack != null) {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "返回上一页")
+                        }
+                    }
+                    Text("工具中心", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurface)
+                }
+            }
         }
-        OutlinedButton(onClick = openAlliance, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-            Icon(Icons.Outlined.Groups, contentDescription = null)
-            Text("同盟成员", modifier = Modifier.padding(start = 8.dp))
+        item {
+            ToolSection("战斗与队伍") {
+                ToolActionCard(Icons.Outlined.Groups, "队伍", openTeams)
+                ToolActionCard(Icons.Outlined.Groups, "团队报表", openTeamReport)
+                ToolActionCard(Icons.Outlined.Science, "模拟器", openSimulator)
+            }
         }
-        Button(onClick = openMap, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-            Icon(Icons.Outlined.Map, contentDescription = null)
-            Text("地图与城池", modifier = Modifier.padding(start = 8.dp))
+        item {
+            ToolSection("情报与榜单") {
+                ToolActionCard(Icons.Outlined.Map, "地图与城池", openMap)
+                ToolActionCard(Icons.Outlined.Campaign, "游戏公告", openAnnouncements)
+                ToolActionCard(Icons.Outlined.Leaderboard, "排行榜", openRankings)
+            }
         }
-        OutlinedButton(onClick = openAnnouncements, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-            Icon(Icons.Outlined.Campaign, contentDescription = null)
-            Text("游戏公告", modifier = Modifier.padding(start = 8.dp))
+        item {
+            ToolSection("抓包与经典") {
+                ToolActionCard(Icons.Outlined.NetworkCheck, "抓包启动台", openCaptureConsole)
+                ToolActionCard(Icons.Outlined.Dashboard, "经典数据页面", openLegacyDashboard)
+            }
         }
-        Button(onClick = openRankings, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-            Icon(Icons.Outlined.Leaderboard, contentDescription = null)
-            Text("排行榜", modifier = Modifier.padding(start = 8.dp))
+        item {
+            ToolSection("账号") {
+                ToolActionCard(Icons.AutoMirrored.Outlined.Logout, "退出登录", onLogout)
+            }
         }
-        Button(
-            onClick = openCaptureConsole,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+    }
+}
+
+@Composable
+private fun ToolSection(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        content()
+    }
+}
+
+@Composable
+private fun ToolActionCard(icon: ImageVector, label: String, onClick: () -> Unit) {
+    GlassCard(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
+        onClick = onClick,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(Icons.Outlined.NetworkCheck, contentDescription = null)
-            Text("抓包启动台", modifier = Modifier.padding(start = 8.dp))
-        }
-        OutlinedButton(
-            onClick = openLegacyDashboard,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-        ) {
-            Icon(Icons.Outlined.Dashboard, contentDescription = null)
-            Text("经典数据页面", modifier = Modifier.padding(start = 8.dp))
+            Surface(
+                modifier = Modifier.size(40.dp),
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.primary,
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(icon, contentDescription = null, modifier = Modifier.size(21.dp))
+                }
+            }
+            Text(
+                text = label,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

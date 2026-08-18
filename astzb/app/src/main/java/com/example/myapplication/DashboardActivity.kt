@@ -31,6 +31,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButtonToggleGroup
+import com.local.stzb.auth.AuthEntryGuard
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -93,9 +94,7 @@ class DashboardActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (LocalTrialManager.ensureAccessOrRedirect(this)) {
-            return
-        }
+        if (AuthEntryGuard.redirectActivityIfDenied(this)) return
         setContentView(R.layout.activity_dashboard)
         StatusBarInsetHelper.applyTopSafeSpacing(findViewById(R.id.dashboardRoot))
         HeroNameResolver.init(applicationContext)

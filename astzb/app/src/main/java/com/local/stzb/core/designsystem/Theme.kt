@@ -1,26 +1,30 @@
 package com.local.stzb.core.designsystem
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
-private val AstzbDarkScheme = darkColorScheme(
+private val AstzbLightScheme = lightColorScheme(
     primary = AstzbColors.Primary,
-    onPrimary = AstzbColors.Background,
-    secondary = AstzbColors.Secondary,
-    background = AstzbColors.Background,
+    onPrimary = AstzbColors.OnPrimary,
+    primaryContainer = AstzbColors.PrimaryContainer,
+    onPrimaryContainer = AstzbColors.TextPrimary,
+    background = AstzbColors.BackgroundBottom,
     onBackground = AstzbColors.TextPrimary,
-    surface = AstzbColors.Surface,
+    surface = AstzbColors.GlassMedium,
     onSurface = AstzbColors.TextPrimary,
-    surfaceContainerHigh = AstzbColors.SurfaceHigh,
+    surfaceVariant = AstzbColors.GlassLow,
+    onSurfaceVariant = AstzbColors.TextSecondary,
     outline = AstzbColors.Outline,
+    outlineVariant = AstzbColors.OutlineLow,
     error = AstzbColors.Error,
+    onError = AstzbColors.OnPrimary,
 )
 
 @Composable
 fun AstzbTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = AstzbDarkScheme,
+        colorScheme = AstzbLightScheme,
         typography = AstzbTypography,
         content = content,
     )

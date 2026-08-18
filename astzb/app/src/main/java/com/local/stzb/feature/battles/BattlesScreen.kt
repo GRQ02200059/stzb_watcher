@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.local.stzb.core.ui.EmptyPanel
 import com.local.stzb.core.ui.ErrorPanel
 import com.local.stzb.core.ui.LoadingPanel
+import com.local.stzb.core.ui.GlassCard
 import com.local.stzb.domain.battles.BattleOutcome
 import com.local.stzb.domain.battles.BattleSummary
 import java.time.Instant
@@ -78,11 +79,7 @@ fun BattlesScreen(state: BattlesUiState, onIntent: (BattlesIntent) -> Unit, onBa
 
 @Composable
 private fun BattleCard(battle: BattleSummary, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, battle.outcome.color.copy(alpha = .65f)),
-    ) {
+    GlassCard(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(battle.outcomeLabel, color = battle.outcome.color, fontWeight = FontWeight.Bold)

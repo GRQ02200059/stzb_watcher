@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.local.stzb.core.ui.EmptyPanel
 import com.local.stzb.core.ui.ErrorPanel
 import com.local.stzb.core.ui.LoadingPanel
+import com.local.stzb.core.ui.GlassCard
 import com.local.stzb.domain.alliance.AllianceMember
 
 @Composable
@@ -64,7 +65,7 @@ fun AllianceScreen(state: AllianceUiState, viewModel: AllianceViewModel, onBack:
 
 @Composable
 private fun MemberCard(member: AllianceMember) {
-    Card(Modifier.fillMaxWidth()) {
+    GlassCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(member.name.ifBlank { "未知成员" }, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)

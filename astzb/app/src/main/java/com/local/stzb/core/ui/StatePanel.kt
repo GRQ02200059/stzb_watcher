@@ -12,6 +12,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,14 +21,22 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.local.stzb.core.designsystem.AstzbColors
 
 @Composable
 fun LoadingPanel(modifier: Modifier = Modifier) {
-    StatePanelContainer(modifier) {
+    StatePanelContainer(
+        modifier = modifier.semantics { contentDescription = "正在加载战场动态" },
+        title = "加载中",
+    ) {
         CircularProgressIndicator(
-            modifier = Modifier.semantics { contentDescription = "正在加载" },
+            modifier = Modifier.semantics { contentDescription = "加载进度指示器" },
         )
-        Text("正在加载战场动态", style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = "正在加载战场动态",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 
@@ -38,11 +47,28 @@ fun EmptyPanel(
     onAction: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    StatePanelContainer(modifier) {
-        Icon(Icons.Outlined.Inbox, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
-        Text(message, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
+    StatePanelContainer(
+        modifier = modifier.semantics { contentDescription = "空状态：$message" },
+        title = "空状态",
+    ) {
+        Icon(
+            Icons.Outlined.Inbox,
+            contentDescription = null,
+            tint = AstzbColors.Info,
+        )
+        Text(
+            text = message,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
         if (actionLabel != null) {
-            Button(onClick = onAction, modifier = Modifier.heightIn(min = 48.dp)) {
+            OutlinedButton(
+                onClick = onAction,
+                modifier = Modifier
+                    .heightIn(min = 48.dp)
+                    .semantics { contentDescription = actionLabel },
+            ) {
                 Text(actionLabel)
             }
         }
@@ -56,11 +82,28 @@ fun ErrorPanel(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    StatePanelContainer(modifier) {
-        Icon(Icons.Outlined.CloudOff, contentDescription = null, tint = MaterialTheme.colorScheme.error)
-        Text(message, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
+    StatePanelContainer(
+        modifier = modifier.semantics { contentDescription = "错误：$message" },
+        title = "错误",
+    ) {
+        Icon(
+            Icons.Outlined.CloudOff,
+            contentDescription = null,
+            tint = AstzbColors.Error,
+        )
+        Text(
+            text = message,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
         if (retryable) {
-            Button(onClick = onRetry, modifier = Modifier.heightIn(min = 48.dp)) {
+            Button(
+                onClick = onRetry,
+                modifier = Modifier
+                    .heightIn(min = 48.dp)
+                    .semantics { contentDescription = "重试操作" },
+            ) {
                 Text("重试")
             }
         }
@@ -70,13 +113,23 @@ fun ErrorPanel(
 @Composable
 private fun StatePanelContainer(
     modifier: Modifier,
+    title: String,
     content: @Composable () -> Unit,
 ) {
-    Column(
-        modifier = modifier.fillMaxSize().padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+    GlassSurface(
+        modifier = modifier.fillMaxSize(),
     ) {
-        content()
+        Column(
+            modifier = Modifier.padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            content()
+        }
     }
 }

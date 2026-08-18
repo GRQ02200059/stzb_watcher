@@ -3,7 +3,7 @@
     android:id="@+id/expiredRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8FAFC"
+    android:background="@color/glacier_blue_50"
     android:gravity="center"
     android:orientation="vertical"
     android:padding="24dp">
@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="应用已过期"
-        android:textColor="#0F172A"
+        android:textColor="@color/ink_dark"
         android:textSize="28sp"
         android:textStyle="bold" />
 
@@ -24,7 +24,7 @@
         android:layout_marginTop="20dp"
         android:gravity="center"
         android:text="应用试用期已结束"
-        android:textColor="#DC2626"
+        android:textColor="@color/status_error"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -33,11 +33,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:background="#FFFFFF"
+        android:background="@color/glass_surface"
         android:gravity="center"
         android:lineSpacingExtra="4dp"
         android:padding="18dp"
-        android:textColor="#334155"
+        android:textColor="@color/ink_secondary"
         android:textSize="16sp" />
 
 </LinearLayout>

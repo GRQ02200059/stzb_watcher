@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8FAFC">
+    android:background="@color/glacier_blue_50">
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/captureConsoleRoot"
@@ -23,10 +23,10 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/glass_surface"
                 app:cardCornerRadius="28dp"
                 app:cardElevation="0dp"
-                app:strokeColor="#E2E8F0"
+                app:strokeColor="@color/line_glass"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -48,7 +48,7 @@
                             android:layout_weight="1"
                             android:letterSpacing="0.14"
                             android:text="STZB CAPTURE CONSOLE"
-                            android:textColor="#1E40AF"
+                            android:textColor="@color/glacier_blue_700"
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
@@ -68,7 +68,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
                         android:text="本机抓包启动台"
-                        android:textColor="#1E3A8A"
+                        android:textColor="@color/ink_dark"
                         android:textSize="28sp"
                         android:textStyle="bold" />
 
@@ -77,10 +77,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
-                        android:background="#EFF6FF"
+                        android:background="@color/status_background"
                         android:padding="12dp"
                         android:text="状态：未启动"
-                        android:textColor="#1E3A8A"
+                        android:textColor="@color/glacier_blue_700"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
@@ -89,7 +89,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:text="流程已收敛为一键授权启动：选择或确认率土包名后，App 会拉起系统 VPN 授权、启动 tun2socks 桥接、接入本机 SOCKS5 捕获器，并只展示 STZB 解析后的业务日志。"
-                        android:textColor="#475569"
+                        android:textColor="@color/ink_secondary"
                         android:textSize="13sp" />
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -207,10 +207,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/glass_surface"
                 app:cardCornerRadius="22dp"
                 app:cardElevation="0dp"
-                app:strokeColor="#E2E8F0"
+                app:strokeColor="@color/line_glass"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -223,7 +223,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="STZB 解析日志"
-                        android:textColor="#1E40AF"
+                        android:textColor="@color/glacier_blue_700"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
@@ -253,12 +253,12 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
-                        android:background="#F8FAFC"
+                        android:background="@color/glacier_blue_50"
                         android:lineSpacingExtra="3dp"
                         android:minHeight="260dp"
                         android:padding="12dp"
                         android:text="等待 STZB 业务包解析..."
-                        android:textColor="#1E3A8A"
+                        android:textColor="@color/ink_dark"
                         android:textIsSelectable="true"
                         android:textSize="12sp"
                         android:typeface="monospace" />
@@ -269,10 +269,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/glass_surface"
                 app:cardCornerRadius="22dp"
                 app:cardElevation="0dp"
-                app:strokeColor="#E2E8F0"
+                app:strokeColor="@color/line_glass"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -285,7 +285,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="导出与诊断"
-                        android:textColor="#1E3A8A"
+                        android:textColor="@color/ink_dark"
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
@@ -329,7 +329,7 @@
         android:id="@+id/sidebarScrim"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#33000000"
+        android:background="@color/sidebar_overlay"
         android:elevation="40dp"
         android:translationZ="40dp"
         android:visibility="gone" />
@@ -338,7 +338,7 @@
         android:id="@+id/mainTabGroup"
         android:layout_width="252dp"
         android:layout_height="match_parent"
-        android:background="#FFFFFF"
+        android:background="@color/glass_surface"
         android:elevation="56dp"
         android:orientation="vertical"
         android:paddingStart="12dp"
@@ -446,7 +446,7 @@
         android:padding="0dp"
         android:contentDescription="点击打开侧栏"
         android:text="菜单"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/white"
         android:textSize="14sp"
         android:translationZ="72dp"
         app:cornerRadius="12dp" />
