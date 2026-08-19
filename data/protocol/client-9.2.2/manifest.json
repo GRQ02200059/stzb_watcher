@@ -1,0 +1,30 @@
+{
+  "androidStatusCounts": {
+    "raw": 84,
+    "typed": 10,
+    "unsupported": 0
+  },
+  "clientVersion": "9.2.2",
+  "commandCount": 94,
+  "fieldCount": 28,
+  "files": {
+    "command-catalog.json": {
+      "sha256": "ac864c60d77552d10a420d2b6e2b216649c533ce999a010de72ff5c212558e46",
+      "size": 2159228
+    },
+    "field-registry.json": {
+      "sha256": "885f5f008b8f7f5050f73c6c8e03b97a1063ebc3ed4675be48e06d407537646f",
+      "size": 13057
+    },
+    "protocol-coverage-client-9.2.2.md": {
+      "sha256": "b862d3ef026bb134db27663ed18a77adeef423a03b610ec12f3deb760292559c",
+      "size": 8861
+    }
+  },
+  "generatorVersion": 1,
+  "webStatusCounts": {
+    "raw": 85,
+    "typed": 9,
+    "unsupported": 0
+  }
+}
