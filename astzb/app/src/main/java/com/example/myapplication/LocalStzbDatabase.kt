@@ -6,14 +6,18 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class LocalStzbDatabase(context: Context) : SQLiteOpenHelper(
+class LocalStzbDatabase(
+    context: Context,
+    databaseName: String = DEFAULT_DATABASE_NAME,
+) : SQLiteOpenHelper(
     context,
-    DB_NAME,
+    databaseName,
     null,
     DB_VERSION,
 ) {
@@ -106,6 +110,114 @@ class LocalStzbDatabase(context: Context) : SQLiteOpenHelper(
         )
         db.execSQL(
             """
+            CREATE TABLE IF NOT EXISTS world_state_versions (
+                version INTEGER PRIMARY KEY AUTOINCREMENT,
+                source_msg_id TEXT NOT NULL,
+                marker INTEGER NOT NULL,
+                raw_length INTEGER NOT NULL,
+                completeness TEXT NOT NULL,
+                block_mode INTEGER DEFAULT 0,
+                block_id INTEGER DEFAULT 0,
+                move_count INTEGER DEFAULT 0,
+                map_state_count INTEGER DEFAULT 0,
+                captured_at INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS world_state_events (
+                seq INTEGER PRIMARY KEY AUTOINCREMENT,
+                state_version INTEGER NOT NULL,
+                source_msg_id TEXT NOT NULL,
+                event_type TEXT NOT NULL,
+                entity_type TEXT,
+                entity_id INTEGER,
+                evidence_json TEXT NOT NULL,
+                captured_at INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS world_scene_slots (
+                state_version INTEGER NOT NULL,
+                slot_index INTEGER NOT NULL,
+                raw_json TEXT NOT NULL,
+                PRIMARY KEY(state_version, slot_index)
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS world_real_marches (
+                real_march_id INTEGER PRIMARY KEY,
+                last_wid INTEGER, current_wid INTEGER, current_arrive_time INTEGER,
+                next_wid INTEGER, next_begin_time INTEGER, next_need_time INTEGER,
+                next_spend_time INTEGER, path_id INTEGER, unit_time_cost INTEGER,
+                march_type INTEGER, belong_id INTEGER, morale INTEGER,
+                morale_stay_last_calc_time INTEGER, morale_hungry_last_calc_time INTEGER,
+                source_version INTEGER NOT NULL, updated_at INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS world_tile_chunks (
+                wid INTEGER NOT NULL,
+                chunk_type TEXT NOT NULL,
+                raw_json TEXT NOT NULL,
+                source_version INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL,
+                PRIMARY KEY(wid, chunk_type)
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS world_army_blocks (
+                block_id INTEGER NOT NULL,
+                army_id INTEGER NOT NULL,
+                source_version INTEGER NOT NULL,
+                PRIMARY KEY(block_id, army_id)
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS world_scene_entities (
+                category TEXT NOT NULL,
+                entity_id INTEGER NOT NULL,
+                raw_json TEXT NOT NULL,
+                source_version INTEGER NOT NULL,
+                deleted_at_version INTEGER,
+                updated_at INTEGER NOT NULL,
+                PRIMARY KEY(category, entity_id)
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS world_ship_blocks (
+                block_id INTEGER NOT NULL,
+                ship_id INTEGER NOT NULL,
+                source_version INTEGER NOT NULL,
+                PRIMARY KEY(block_id, ship_id)
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS world_assist_army_blocks (
+                block_id INTEGER NOT NULL,
+                assist_army_id INTEGER NOT NULL,
+                source_version INTEGER NOT NULL,
+                PRIMARY KEY(block_id, assist_army_id)
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
             CREATE TABLE IF NOT EXISTS local_records (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 record_type TEXT NOT NULL,
@@ -134,6 +246,10 @@ class LocalStzbDatabase(context: Context) : SQLiteOpenHelper(
                 hero_config_id INTEGER DEFAULT 0,
                 team_id INTEGER DEFAULT 0,
                 hero_skills TEXT,
+                head_id INTEGER DEFAULT 0,
+                head_frame TEXT,
+                week_wuxun INTEGER DEFAULT 0,
+                total_wuxun INTEGER DEFAULT 0,
                 join_time INTEGER DEFAULT 0,
                 source_msg_id TEXT,
                 updated_at INTEGER NOT NULL
@@ -154,6 +270,19 @@ class LocalStzbDatabase(context: Context) : SQLiteOpenHelper(
                 parent_wid INTEGER DEFAULT 0,
                 source_msg_id TEXT,
                 updated_at INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS wuxun_weekly_snapshots (
+                week_start TEXT NOT NULL,
+                uid INTEGER NOT NULL,
+                player_name TEXT NOT NULL,
+                group_name TEXT,
+                wuxun INTEGER NOT NULL DEFAULT 0,
+                captured_at INTEGER NOT NULL,
+                PRIMARY KEY(week_start, uid)
             )
             """.trimIndent()
         )
@@ -480,10 +609,58 @@ class LocalStzbDatabase(context: Context) : SQLiteOpenHelper(
             )
             """.trimIndent()
         )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS score_rule_versions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                version INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                preset_key TEXT NOT NULL,
+                config_json TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'DRAFT',
+                created_at INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS score_adjustments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_name TEXT NOT NULL,
+                points REAL NOT NULL,
+                reason TEXT NOT NULL,
+                created_at INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS custom_scores (
+                player_name TEXT PRIMARY KEY,
+                union_name TEXT,
+                rank INTEGER DEFAULT 0,
+                battles INTEGER DEFAULT 0,
+                wins INTEGER DEFAULT 0,
+                draws INTEGER DEFAULT 0,
+                gongxun_total INTEGER DEFAULT 0,
+                main_city_cnt INTEGER DEFAULT 0,
+                tear_cnt INTEGER DEFAULT 0,
+                attendance_cnt INTEGER DEFAULT 0,
+                battle_score REAL DEFAULT 0,
+                siege_score REAL DEFAULT 0,
+                adjustment_score REAL DEFAULT 0,
+                score REAL DEFAULT 0,
+                rule_version_id INTEGER,
+                updated_at INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_packets_msg_id ON stzb_packets(msg_id)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_packets_time ON stzb_packets(captured_at)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_battle_time ON battle_notices(time)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_monitor_arrive ON battle_monitor_moves(arrive_time)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_world_versions_marker ON world_state_versions(marker)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_world_events_version ON world_state_events(state_version)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_local_records_type ON local_records(record_type)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_battles_time ON battles_v2(time)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_battles_atk ON battles_v2(atk_name)")
@@ -585,11 +762,30 @@ class LocalStzbDatabase(context: Context) : SQLiteOpenHelper(
             db.execSQL("ALTER TABLE battle_monitor_moves ADD COLUMN battle_show TEXT")
             db.execSQL("ALTER TABLE battle_monitor_moves ADD COLUMN state_id INTEGER")
         }
+        if (oldVersion < 16) {
+            db.execSQL("DELETE FROM battle_field WHERE source_msg_id = '6314'")
+            db.execSQL("DELETE FROM local_records WHERE source_msg_id = '6314' AND record_type = 'battle_field'")
+        }
+        if (oldVersion < 17) {
+            db.execSQL("DELETE FROM battle_field WHERE source_msg_id = '6314'")
+            db.execSQL("DELETE FROM local_records WHERE source_msg_id = '6314' AND record_type = 'battle_field'")
+            db.execSQL("DELETE FROM custom_scores")
+        }
+        if (oldVersion < 18) {
+            // Rebuild battle-skill links with the corrected defender 6/5/4 order.
+            db.execSQL("DELETE FROM battle_skills")
+        }
+        if (oldVersion < 20) {
+            db.execSQL("ALTER TABLE team_users ADD COLUMN head_id INTEGER DEFAULT 0")
+            db.execSQL("ALTER TABLE team_users ADD COLUMN head_frame TEXT")
+            db.execSQL("ALTER TABLE team_users ADD COLUMN week_wuxun INTEGER DEFAULT 0")
+            db.execSQL("ALTER TABLE team_users ADD COLUMN total_wuxun INTEGER DEFAULT 0")
+        }
     }
 
     companion object {
-        private const val DB_NAME = "astzb_local.db"
-        private const val DB_VERSION = 15
+        const val DEFAULT_DATABASE_NAME = "astzb_local.db"
+        private const val DB_VERSION = 21
     }
 }
 
@@ -601,11 +797,19 @@ object LocalStzbRepository {
     private const val PLAYER_BATTLE_WHERE_B = "COALESCE(b.is_npc, 0)=0 AND b.result != 6 AND COALESCE(b.result_desc, '') NOT LIKE '%NPC%'"
 
     @Synchronized
-    fun init(context: Context) {
+    fun init(context: Context, databaseName: String = LocalStzbDatabase.DEFAULT_DATABASE_NAME) {
         if (dbHelper == null) {
-            dbHelper = LocalStzbDatabase(context.applicationContext)
+            dbHelper = LocalStzbDatabase(context.applicationContext, databaseName)
             backfillBattleSkills(db())
         }
+    }
+
+    @Synchronized
+    fun switchDatabase(context: Context, databaseName: String) {
+        require(databaseName.matches(Regex("[A-Za-z0-9_.-]+\\.db"))) { "非法数据库文件名" }
+        dbHelper?.close()
+        dbHelper = LocalStzbDatabase(context.applicationContext, databaseName)
+        backfillBattleSkills(db())
     }
 
     private fun db(): SQLiteDatabase = requireNotNull(dbHelper) {
@@ -684,13 +888,18 @@ object LocalStzbRepository {
     }
 
     @Synchronized
-    fun saveBattleMonitor(snapshot: LocalBattleMonitorSnapshot) {
+    fun saveBattleMonitor(snapshot: LocalBattleMonitorSnapshot, sourceMessageId: String = snapshot.sourceMessageId) {
         val database = db()
         val now = System.currentTimeMillis()
-        syncBattleMonitor(database, snapshot, now)
+        syncBattleMonitor(database, snapshot, now, sourceMessageId)
     }
 
-    internal fun syncBattleMonitor(database: SQLiteDatabase, snapshot: LocalBattleMonitorSnapshot, now: Long) {
+    internal fun syncBattleMonitor(
+        database: SQLiteDatabase,
+        snapshot: LocalBattleMonitorSnapshot,
+        now: Long,
+        sourceMessageId: String = snapshot.sourceMessageId.ifBlank { "unknown" },
+    ) {
         database.beginTransaction()
         try {
             database.delete("battle_monitor_moves", null, null)
@@ -728,11 +937,260 @@ object LocalStzbRepository {
                     SQLiteDatabase.CONFLICT_REPLACE,
                 )
             }
+            val version = database.insertOrThrow(
+                "world_state_versions",
+                null,
+                ContentValues().apply {
+                    put("source_msg_id", sourceMessageId.ifBlank { "unknown" })
+                    put("marker", snapshot.marker)
+                    put("raw_length", snapshot.rawLength)
+                    put("completeness", if (sourceMessageId == "5026") "baseline" else "delta")
+                    put("block_mode", snapshot.blockMode)
+                    put("block_id", snapshot.blockId)
+                    put("move_count", snapshot.moves.size)
+                    put("map_state_count", snapshot.mapStates.size)
+                    put("captured_at", now)
+                },
+            )
+            snapshot.slotPayloads.forEach { (slotIndex, rawJson) ->
+                database.insertOrThrow(
+                    "world_scene_slots", null, ContentValues().apply {
+                        put("state_version", version); put("slot_index", slotIndex)
+                        put("raw_json", rawJson)
+                    },
+                )
+            }
+            fun event(type: String, entityType: String, entityId: Int, evidence: JSONObject) {
+                database.insertOrThrow(
+                    "world_state_events",
+                    null,
+                    ContentValues().apply {
+                        put("state_version", version)
+                        put("source_msg_id", sourceMessageId.ifBlank { "unknown" })
+                        put("event_type", type)
+                        put("entity_type", entityType)
+                        put("entity_id", entityId)
+                        put("evidence_json", evidence.toString())
+                        put("captured_at", now)
+                    },
+                )
+            }
+            val baseEvidence = JSONObject().put("marker", snapshot.marker).put("blockId", snapshot.blockId)
+            snapshot.changedTeamIds.distinct().forEach { event("entity_upserted", "army", it, baseEvidence) }
+            (snapshot.directDeletedTeamIds + snapshot.deletedTeamIds).distinct().forEach {
+                event("entity_deleted", "army", it, baseEvidence)
+            }
+            snapshot.clearChunks.forEach { (wid, types) ->
+                types.forEach { type ->
+                    event("chunk_cleared", "tile_chunk", wid, JSONObject(baseEvidence.toString()).put("chunkType", type))
+                }
+            }
+            if (sourceMessageId == "5026") {
+                database.delete("world_real_marches", null, null)
+                database.delete("world_tile_chunks", null, null)
+                database.delete("world_army_blocks", null, null)
+                database.delete("world_scene_entities", null, null)
+                database.delete("world_ship_blocks", null, null)
+                database.delete("world_assist_army_blocks", null, null)
+            }
+            snapshot.entities.forEach { entity ->
+                database.insertWithOnConflict(
+                    "world_scene_entities", null, ContentValues().apply {
+                        put("category", entity.category); put("entity_id", entity.entityId)
+                        put("raw_json", entity.rawJson); put("source_version", version)
+                        putNull("deleted_at_version"); put("updated_at", now)
+                    }, SQLiteDatabase.CONFLICT_REPLACE,
+                )
+                event("entity_upserted", entity.category, entity.entityId, baseEvidence)
+            }
+            snapshot.mapStates.forEach { state ->
+                val chunks = runCatching { JSONObject(state.chunksJson) }.getOrNull() ?: JSONObject()
+                val keys = chunks.keys()
+                while (keys.hasNext()) {
+                    val chunkType = keys.next()
+                    database.insertWithOnConflict(
+                        "world_tile_chunks", null, ContentValues().apply {
+                            put("wid", state.wid); put("chunk_type", chunkType)
+                            put("raw_json", chunks.opt(chunkType)?.toString() ?: "null")
+                            put("source_version", version); put("updated_at", now)
+                        }, SQLiteDatabase.CONFLICT_REPLACE,
+                    )
+                }
+            }
+            snapshot.clearChunks.forEach { (wid, types) ->
+                types.forEach { chunkType ->
+                    database.delete("world_tile_chunks", "wid = ? AND chunk_type = ?", arrayOf(wid.toString(), chunkType))
+                }
+            }
+            snapshot.blockArmyIds.forEach { (blockId, armyIds) ->
+                database.delete("world_army_blocks", "block_id = ?", arrayOf(blockId.toString()))
+                armyIds.distinct().forEach { armyId ->
+                    database.insertOrThrow(
+                        "world_army_blocks", null, ContentValues().apply {
+                            put("block_id", blockId); put("army_id", armyId); put("source_version", version)
+                        },
+                    )
+                }
+            }
+            replaceWorldMemberships(database, "world_ship_blocks", "ship_id", snapshot.blockShipIds, version)
+            replaceWorldMemberships(database, "world_assist_army_blocks", "assist_army_id", snapshot.blockAssistArmyIds, version)
+            snapshot.directDeletedTeamIds.distinct().forEach { armyId ->
+                database.delete("world_army_blocks", "army_id = ?", arrayOf(armyId.toString()))
+            }
+            if (snapshot.blockMode == 2 && snapshot.blockId > 0) {
+                snapshot.deletedTeamIds.distinct().forEach { armyId ->
+                    database.delete(
+                        "world_army_blocks",
+                        "block_id = ? AND army_id = ?",
+                        arrayOf(snapshot.blockId.toString(), armyId.toString()),
+                    )
+                }
+            }
+            snapshot.deletedEntityIds.forEach { (category, entityIds) ->
+                entityIds.distinct().forEach { entityId ->
+                    val membership = when (category) {
+                        "war_ship" -> "world_ship_blocks" to "ship_id"
+                        "assist_army" -> "world_assist_army_blocks" to "assist_army_id"
+                        else -> null
+                    }
+                    var shouldDelete = true
+                    if (membership != null && snapshot.blockMode == 2 && snapshot.blockId > 0) {
+                        database.delete(
+                            membership.first,
+                            "block_id = ? AND ${membership.second} = ?",
+                            arrayOf(snapshot.blockId.toString(), entityId.toString()),
+                        )
+                        shouldDelete = database.rawQuery(
+                            "SELECT 1 FROM ${membership.first} WHERE ${membership.second}=? LIMIT 1",
+                            arrayOf(entityId.toString()),
+                        ).useCursor { cursor -> !cursor.moveToFirst() }
+                    }
+                    if (shouldDelete) {
+                        database.execSQL(
+                            "UPDATE world_scene_entities SET deleted_at_version=?,updated_at=? WHERE category=? AND entity_id=?",
+                            arrayOf(version, now, category, entityId),
+                        )
+                        event("entity_deleted", category, entityId, baseEvidence)
+                    }
+                }
+            }
+            snapshot.directDeletedEntityIds.forEach { (category, entityIds) ->
+                entityIds.distinct().forEach { entityId ->
+                    when (category) {
+                        "war_ship" -> database.delete("world_ship_blocks", "ship_id=?", arrayOf(entityId.toString()))
+                        "assist_army" -> database.delete("world_assist_army_blocks", "assist_army_id=?", arrayOf(entityId.toString()))
+                    }
+                    database.execSQL(
+                        "UPDATE world_scene_entities SET deleted_at_version=?,updated_at=? WHERE category=? AND entity_id=?",
+                        arrayOf(version, now, category, entityId),
+                    )
+                    event("entity_deleted", category, entityId, baseEvidence)
+                }
+            }
+            snapshot.realMarches.forEach { march ->
+                database.insertWithOnConflict(
+                    "world_real_marches", null, ContentValues().apply {
+                        put("real_march_id", march.id); put("last_wid", march.lastWid)
+                        put("current_wid", march.currentWid); put("current_arrive_time", march.currentArriveTime)
+                        put("next_wid", march.nextWid); put("next_begin_time", march.nextBeginTime)
+                        put("next_need_time", march.nextNeedTime); put("next_spend_time", march.nextSpendTime)
+                        put("path_id", march.pathId); put("unit_time_cost", march.unitTimeCost)
+                        put("march_type", march.marchType); put("belong_id", march.belongId)
+                        put("morale", march.morale); put("morale_stay_last_calc_time", march.moraleStayLastCalcTime)
+                        put("morale_hungry_last_calc_time", march.moraleHungryLastCalcTime)
+                        put("source_version", version); put("updated_at", now)
+                    }, SQLiteDatabase.CONFLICT_REPLACE,
+                )
+            }
             database.setTransactionSuccessful()
         } finally {
             database.endTransaction()
         }
     }
+
+    private fun replaceWorldMemberships(
+        database: SQLiteDatabase,
+        table: String,
+        idColumn: String,
+        memberships: Map<Int, List<Int>>,
+        version: Long,
+    ) {
+        memberships.forEach { (blockId, entityIds) ->
+            database.delete(table, "block_id=?", arrayOf(blockId.toString()))
+            entityIds.distinct().forEach { entityId ->
+                database.insertOrThrow(table, null, ContentValues().apply {
+                    put("block_id", blockId); put(idColumn, entityId); put("source_version", version)
+                })
+            }
+        }
+    }
+
+    internal fun loadWorldStateHistory(
+        database: SQLiteDatabase = db(),
+        limit: Int = 50,
+    ): List<LocalWorldStateVersion> = database.rawQuery(
+        """
+        SELECT version,source_msg_id,marker,completeness,block_mode,block_id,
+               move_count,map_state_count,captured_at
+        FROM world_state_versions ORDER BY version DESC LIMIT ?
+        """.trimIndent(),
+        arrayOf(limit.coerceIn(1, 500).toString()),
+    ).useCursor { cursor ->
+        buildList {
+            while (cursor.moveToNext()) {
+                add(cursor.toWorldStateVersion())
+            }
+        }
+    }
+
+    internal fun loadWorldStateReplay(
+        database: SQLiteDatabase = db(),
+        version: Long,
+    ): LocalWorldStateReplay? {
+        val stateVersion = database.rawQuery(
+            """
+            SELECT version,source_msg_id,marker,completeness,block_mode,block_id,
+                   move_count,map_state_count,captured_at
+            FROM world_state_versions WHERE version=?
+            """.trimIndent(),
+            arrayOf(version.toString()),
+        ).useCursor { cursor ->
+            if (cursor.moveToFirst()) cursor.toWorldStateVersion() else null
+        } ?: return null
+        val events = database.rawQuery(
+            """
+            SELECT seq,event_type,entity_type,entity_id,evidence_json,captured_at
+            FROM world_state_events WHERE state_version=? ORDER BY seq
+            """.trimIndent(),
+            arrayOf(version.toString()),
+        ).useCursor { cursor ->
+            buildList {
+                while (cursor.moveToNext()) {
+                    add(LocalWorldStateEvent(
+                        seq = cursor.long("seq"),
+                        eventType = cursor.string("event_type"),
+                        entityType = cursor.string("entity_type"),
+                        entityId = cursor.int("entity_id"),
+                        evidenceJson = cursor.string("evidence_json"),
+                        capturedAt = cursor.long("captured_at"),
+                    ))
+                }
+            }
+        }
+        return LocalWorldStateReplay(stateVersion, events)
+    }
+
+    private fun Cursor.toWorldStateVersion() = LocalWorldStateVersion(
+        version = long("version"),
+        sourceMsgId = string("source_msg_id"),
+        marker = int("marker"),
+        completeness = string("completeness"),
+        blockMode = int("block_mode"),
+        blockId = int("block_id"),
+        moveCount = int("move_count"),
+        mapStateCount = int("map_state_count"),
+        capturedAt = long("captured_at"),
+    )
 
     @Synchronized
     fun saveRecord(record: LocalRecord) {
@@ -804,6 +1262,10 @@ object LocalStzbRepository {
                         put("hero_config_id", user.heroConfigId)
                         put("team_id", user.teamId)
                         put("hero_skills", user.heroSkills)
+                        put("head_id", user.headId)
+                        put("head_frame", user.headFrame)
+                        put("week_wuxun", user.weekWuxun)
+                        put("total_wuxun", user.totalWuxun)
                         put("join_time", user.joinTime)
                         put("source_msg_id", user.sourceMsgId)
                         put("updated_at", now)
@@ -815,6 +1277,119 @@ object LocalStzbRepository {
         } finally {
             database.endTransaction()
         }
+        captureSundayWuxunSnapshot(database, now)
+    }
+
+    internal fun captureSundayWuxunSnapshot(
+        database: SQLiteDatabase = db(),
+        now: Long = System.currentTimeMillis(),
+    ): Int {
+        val calendar = java.util.Calendar.getInstance(Locale.CHINA).apply { timeInMillis = now }
+        if (calendar.get(java.util.Calendar.DAY_OF_WEEK) != java.util.Calendar.SUNDAY) return 0
+        calendar.add(java.util.Calendar.DAY_OF_MONTH, -6)
+        val weekStart = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).format(calendar.time)
+        val rows = database.rawQuery(
+            "SELECT uid,name,group_name,wuxun FROM team_users WHERE COALESCE(name,'') != ''",
+            emptyArray(),
+        ).useCursor { cursor ->
+            buildList {
+                while (cursor.moveToNext()) {
+                    add(arrayOf(
+                        cursor.long("uid"), cursor.string("name"),
+                        cursor.string("group_name"), cursor.int("wuxun"),
+                    ))
+                }
+            }
+        }
+        rows.forEach { row ->
+            database.execSQL(
+                """
+                INSERT INTO wuxun_weekly_snapshots(week_start,uid,player_name,group_name,wuxun,captured_at)
+                VALUES(?,?,?,?,?,?)
+                ON CONFLICT(week_start,uid) DO UPDATE SET
+                    player_name=excluded.player_name, group_name=excluded.group_name,
+                    wuxun=MAX(wuxun,excluded.wuxun), captured_at=excluded.captured_at
+                """.trimIndent(),
+                arrayOf(weekStart, row[0], row[1], row[2], row[3], now),
+            )
+        }
+        return rows.size
+    }
+
+    internal fun cumulativeWuxun(
+        database: SQLiteDatabase = db(),
+        uid: Long,
+    ): Int = database.rawQuery(
+        "SELECT COALESCE(SUM(wuxun),0) AS total FROM wuxun_weekly_snapshots WHERE uid=?",
+        arrayOf(uid.toString()),
+    ).useCursor { cursor -> if (cursor.moveToFirst()) cursor.int("total") else 0 }
+
+    internal fun loadPlayerSeasonTrend(
+        database: SQLiteDatabase = db(),
+        playerName: String,
+    ): List<LocalPlayerSeasonWeek> {
+        val weeks = linkedMapOf<String, MutablePlayerSeasonWeek>()
+        database.rawQuery(
+            "SELECT time,result FROM battles_v2 WHERE atk_name=? ORDER BY time",
+            arrayOf(playerName),
+        ).useCursor { cursor ->
+            while (cursor.moveToNext()) {
+                val calendar = java.util.Calendar.getInstance(Locale.CHINA).apply {
+                    timeInMillis = cursor.long("time") * 1000L
+                    firstDayOfWeek = java.util.Calendar.MONDAY
+                    set(java.util.Calendar.DAY_OF_WEEK, java.util.Calendar.MONDAY)
+                }
+                val weekStart = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).format(calendar.time)
+                val week = weeks.getOrPut(weekStart) { MutablePlayerSeasonWeek(weekStart) }
+                week.battles += 1
+                when (cursor.int("result")) {
+                    1, 7, 11 -> week.wins += 1
+                    2, 6, 12 -> Unit
+                    else -> week.draws += 1
+                }
+            }
+        }
+        database.rawQuery(
+            """
+            SELECT week_start,MAX(wuxun) AS member_wuxun
+            FROM wuxun_weekly_snapshots WHERE player_name=? GROUP BY week_start
+            """.trimIndent(),
+            arrayOf(playerName),
+        ).useCursor { cursor ->
+            while (cursor.moveToNext()) {
+                val weekStart = cursor.string("week_start")
+                weeks.getOrPut(weekStart) { MutablePlayerSeasonWeek(weekStart) }.memberWuxun =
+                    cursor.int("member_wuxun")
+            }
+        }
+        return weeks.values.sortedBy { it.weekStart }.map {
+            LocalPlayerSeasonWeek(it.weekStart, it.battles, it.wins, it.draws, it.memberWuxun)
+        }
+    }
+
+    fun researchDataQuality(
+        database: SQLiteDatabase = db(),
+        now: Long = System.currentTimeMillis(),
+    ): com.local.stzb.data.research.ResearchDataQuality {
+        val latestWorld = database.rawQuery(
+            "SELECT COALESCE(MAX(captured_at),0) AS latest FROM world_state_versions",
+            emptyArray(),
+        ).useCursor { cursor -> if (cursor.moveToFirst()) cursor.long("latest") else 0L }
+        val calendar = java.util.Calendar.getInstance(Locale.CHINA).apply {
+            timeInMillis = now
+            firstDayOfWeek = java.util.Calendar.MONDAY
+            set(java.util.Calendar.DAY_OF_WEEK, java.util.Calendar.MONDAY)
+            add(java.util.Calendar.DAY_OF_MONTH, -7)
+        }
+        val previousMonday = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).format(calendar.time)
+        val weeklyRows = database.rawQuery(
+            "SELECT COUNT(*) AS c FROM wuxun_weekly_snapshots WHERE week_start=?",
+            arrayOf(previousMonday),
+        ).useCursor { cursor -> if (cursor.moveToFirst()) cursor.int("c") else 0 }
+        return com.local.stzb.data.research.ResearchDataQuality(
+            worldStateStale = latestWorld <= 0L || now - latestWorld > 10 * 60 * 1000L,
+            weeklyWuxunMissing = weeklyRows == 0,
+        )
     }
 
     @Synchronized
@@ -1410,7 +1985,8 @@ object LocalStzbRepository {
             append(
                 """
                 SELECT uid,name,contribute_total,contribute_week,pos,wid,power,wuxun,group_name,
-                       hero_config_id,team_id,hero_skills,join_time,source_msg_id
+                       hero_config_id,team_id,hero_skills,head_id,head_frame,week_wuxun,total_wuxun,
+                       join_time,source_msg_id
                 FROM team_users
                 $whereSql
                 ORDER BY power DESC, wuxun DESC
@@ -2401,8 +2977,8 @@ object LocalStzbRepository {
                 COALESCE(ba.draws, 0) AS draws,
                 COALESCE(ba.city_battles, 0) AS city_battles,
                 COALESCE(ba.city_wins, 0) AS city_wins,
-                COALESCE(tu.wuxun, 0) AS total_gongxun,
-                COALESCE(tu.wuxun, 0) AS avg_gongxun,
+                COALESCE(ws.wuxun, tu.wuxun, 0) AS total_gongxun,
+                COALESCE(ws.wuxun, tu.wuxun, 0) AS avg_gongxun,
                 COALESCE(tu.power, 0) AS avg_power,
                 COALESCE(tu.power, 0) AS power,
                 CASE
@@ -2410,6 +2986,9 @@ object LocalStzbRepository {
                     ELSE 0
                 END AS win_rate
             FROM team_users tu
+            LEFT JOIN (
+                SELECT uid,SUM(wuxun) AS wuxun FROM wuxun_weekly_snapshots GROUP BY uid
+            ) ws ON ws.uid = tu.uid
             LEFT JOIN (
                 SELECT
                     bv.atk_name AS player_name,
@@ -2440,8 +3019,8 @@ object LocalStzbRepository {
                 COALESCE(SUM(ba.draws), 0) AS draws,
                 COALESCE(SUM(ba.city_battles), 0) AS city_battles,
                 COALESCE(SUM(ba.city_wins), 0) AS city_wins,
-                COALESCE(SUM(COALESCE(tu.wuxun, 0)), 0) AS total_gongxun,
-                ROUND(COALESCE(SUM(COALESCE(tu.wuxun, 0)), 0) * 1.0 / COUNT(*), 1) AS avg_gongxun,
+                COALESCE(SUM(COALESCE(ws.wuxun, tu.wuxun, 0)), 0) AS total_gongxun,
+                ROUND(COALESCE(SUM(COALESCE(ws.wuxun, tu.wuxun, 0)), 0) * 1.0 / COUNT(*), 1) AS avg_gongxun,
                 ROUND(COALESCE(SUM(COALESCE(tu.power, 0)), 0) * 1.0 / COUNT(*), 1) AS avg_power,
                 0 AS power,
                 CASE
@@ -2449,6 +3028,9 @@ object LocalStzbRepository {
                     ELSE 0
                 END AS win_rate
             FROM team_users tu
+            LEFT JOIN (
+                SELECT uid,SUM(wuxun) AS wuxun FROM wuxun_weekly_snapshots GROUP BY uid
+            ) ws ON ws.uid = tu.uid
             LEFT JOIN (
                 SELECT
                     bv.atk_name AS player_name,
@@ -3067,6 +3649,70 @@ object LocalStzbRepository {
         }
     }
 
+    fun scoreRules(): List<com.local.stzb.data.score.ScoreRuleVersion> = db().rawQuery(
+        "SELECT id,version,name,preset_key,config_json,status FROM score_rule_versions ORDER BY version DESC", emptyArray(),
+    ).useCursor { c -> buildList { while (c.moveToNext()) add(com.local.stzb.data.score.ScoreRuleVersion(
+        c.long("id"), c.int("version"), c.string("name"), c.string("preset_key"),
+        scoreRuleFromJson(c.string("config_json")),
+        runCatching { com.local.stzb.data.score.RuleStatus.valueOf(c.string("status")) }.getOrDefault(com.local.stzb.data.score.RuleStatus.DRAFT),
+    )) } }
+
+    fun createScoreRule(name: String, presetKey: String, config: com.local.stzb.data.score.ScoreRuleConfig): com.local.stzb.data.score.ScoreRuleVersion {
+        val valid = config.validate()
+        val version = db().rawQuery("SELECT COALESCE(MAX(version),0)+1 AS v FROM score_rule_versions", emptyArray()).useCursor { c -> c.moveToFirst(); c.int("v") }
+        val id = db().insert("score_rule_versions", null, ContentValues().apply {
+            put("version", version); put("name", name.trim().ifBlank { "积分规则 $version" }); put("preset_key", presetKey); put("config_json", scoreRuleJson(valid)); put("status", "DRAFT"); put("created_at", System.currentTimeMillis())
+        })
+        return scoreRules().first { it.id == id }
+    }
+
+    fun activateScoreRule(id: Long): com.local.stzb.data.score.ScoreRuleVersion {
+        require(scoreRules().any { it.id == id }) { "积分规则不存在" }
+        db().execSQL("UPDATE score_rule_versions SET status='RETIRED' WHERE status='ACTIVE'")
+        db().update("score_rule_versions", ContentValues().apply { put("status", "ACTIVE") }, "id=?", arrayOf(id.toString()))
+        return scoreRules().first { it.id == id }
+    }
+
+    fun scoreAdjustments(): List<com.local.stzb.data.score.ScoreAdjustment> = db().rawQuery(
+        "SELECT id,player_name,points,reason FROM score_adjustments ORDER BY created_at DESC,id DESC", emptyArray(),
+    ).useCursor { c -> buildList { while (c.moveToNext()) add(com.local.stzb.data.score.ScoreAdjustment(c.long("id"), c.string("player_name"), c.double("points"), c.string("reason"))) } }
+
+    fun addScoreAdjustment(playerName: String, points: Double, reason: String): com.local.stzb.data.score.ScoreAdjustment {
+        require(playerName.isNotBlank()) { "玩家名不能为空" }; require(points.isFinite() && points != 0.0) { "调整分必须是非零有限数值" }; require(reason.isNotBlank()) { "调整原因不能为空" }
+        val id = db().insert("score_adjustments", null, ContentValues().apply { put("player_name", playerName.trim()); put("points", points); put("reason", reason.trim()); put("created_at", System.currentTimeMillis()) })
+        return scoreAdjustments().first { it.id == id }
+    }
+
+    fun playerScoreMetrics(): List<com.local.stzb.data.score.PlayerScoreMetrics> = loadTeamReport("player", "all", "", 0).map { row ->
+        com.local.stzb.data.score.PlayerScoreMetrics(row.name, "", com.local.stzb.data.score.ScoreMetrics(
+            battles = row.battles, wins = row.wins, draws = row.draws, gongxunTotal = row.totalGongxun.toInt(),
+            mainCityCount = row.cityWins, tearCount = (row.cityBattles - row.cityWins).coerceAtLeast(0), attendanceCount = row.cityBattles,
+        ))
+    }
+
+    fun replaceCustomScores(ruleId: Long, rows: List<com.local.stzb.data.score.ScoreRow>) {
+        val database = db(); database.beginTransaction(); try {
+            database.delete("custom_scores", null, null)
+            rows.forEach { row -> database.insert("custom_scores", null, ContentValues().apply {
+                put("player_name", row.playerName); put("union_name", row.unionName); put("rank", row.rank); put("battles", row.metrics.battles); put("wins", row.metrics.wins); put("draws", row.metrics.draws); put("gongxun_total", row.metrics.gongxunTotal); put("main_city_cnt", row.metrics.mainCityCount); put("tear_cnt", row.metrics.tearCount); put("attendance_cnt", row.metrics.attendanceCount); put("battle_score", row.battleScore); put("siege_score", row.siegeScore); put("adjustment_score", row.adjustmentScore); put("score", row.score); put("rule_version_id", ruleId); put("updated_at", System.currentTimeMillis())
+            }) }; database.setTransactionSuccessful()
+        } finally { database.endTransaction() }
+    }
+
+    fun customScores(): List<com.local.stzb.data.score.ScoreRow> = db().rawQuery(
+        "SELECT * FROM custom_scores ORDER BY score DESC,player_name ASC", emptyArray(),
+    ).useCursor { c -> buildList { while (c.moveToNext()) add(com.local.stzb.data.score.ScoreRow(
+        c.int("rank"), c.string("player_name"), c.string("union_name"), c.double("battle_score"), c.double("siege_score"), c.double("adjustment_score"), c.double("score"),
+        com.local.stzb.data.score.ScoreMetrics(c.int("battles"), c.int("wins"), c.int("draws"), c.int("gongxun_total"), c.int("main_city_cnt"), c.int("tear_cnt"), c.int("attendance_cnt")),
+    )) } }
+
+    private fun scoreRuleJson(rule: com.local.stzb.data.score.ScoreRuleConfig) = org.json.JSONObject().apply {
+        put("battleWeight", rule.battleWeight); put("winWeight", rule.winWeight); put("drawWeight", rule.drawWeight); put("gongxunDivisor", rule.gongxunDivisor); put("mainCityWeight", rule.mainCityWeight); put("tearWeight", rule.tearWeight); put("attendanceWeight", rule.attendanceWeight)
+    }.toString()
+    private fun scoreRuleFromJson(raw: String): com.local.stzb.data.score.ScoreRuleConfig = runCatching { org.json.JSONObject(raw) }.getOrNull()?.let { obj ->
+        com.local.stzb.data.score.ScoreRuleConfig(obj.optDouble("battleWeight", 1.0), obj.optDouble("winWeight", 2.0), obj.optDouble("drawWeight", 0.5), obj.optDouble("gongxunDivisor", 1000.0), obj.optDouble("mainCityWeight", 5.0), obj.optDouble("tearWeight", 3.0), obj.optDouble("attendanceWeight", 1.0))
+    } ?: com.local.stzb.data.score.ScorePresets.ALLIANCE_CONTRIBUTION
+
     fun counts(): LocalDataCounts {
         val database = db()
         return LocalDataCounts(
@@ -3214,7 +3860,8 @@ object LocalStzbRepository {
         return db().rawQuery(
             """
             SELECT uid,name,contribute_total,contribute_week,pos,wid,power,wuxun,group_name,
-                   hero_config_id,team_id,hero_skills,join_time,source_msg_id,updated_at
+                   hero_config_id,team_id,hero_skills,head_id,head_frame,week_wuxun,total_wuxun,
+                   join_time,source_msg_id,updated_at
             FROM team_users
             $where
             ORDER BY power DESC, wuxun DESC, name ASC
@@ -3268,9 +3915,17 @@ object LocalStzbRepository {
                 .forEach { part ->
                     val segs = part.split(',').map { it.trim() }
                     val rawPos = segs.getOrNull(0)?.toIntOrNull() ?: return@forEach
-                    val side = if (rawPos in 1..3) "atk" else "def"
-                    val pos = if (side == "atk") rawPos - 1 else rawPos - 4
-                    if (pos !in 0..2) return@forEach
+                    val side: String
+                    val pos: Int
+                    if (rawPos in 1..3) {
+                        side = "atk"
+                        pos = BattlePositionMapping.attackerHeroIndexForSkillPosition(rawPos)
+                            ?: return@forEach
+                    } else {
+                        side = "def"
+                        pos = BattlePositionMapping.defenderHeroIndexForSkillPosition(rawPos)
+                            ?: return@forEach
+                    }
                     var index = 1
                     while (index < segs.size) {
                         val skillId = segs.getOrNull(index)?.toLongOrNull() ?: 0L
@@ -3296,6 +3951,7 @@ object LocalStzbRepository {
     private fun backfillBattleSkills(database: SQLiteDatabase) {
         database.beginTransaction()
         try {
+            database.delete("battle_skills", null, null)
             database.rawQuery(
                 """
                 SELECT battle_id, all_skill_info
@@ -3402,6 +4058,10 @@ object LocalStzbRepository {
             heroConfigId = int("hero_config_id"),
             teamId = int("team_id"),
             heroSkills = string("hero_skills"),
+            headId = int("head_id"),
+            headFrame = string("head_frame"),
+            weekWuxun = int("week_wuxun"),
+            totalWuxun = int("total_wuxun"),
             joinTime = long("join_time"),
             sourceMsgId = string("source_msg_id"),
         )
@@ -3655,6 +4315,10 @@ data class LocalTeamUser(
     val heroSkills: String,
     val joinTime: Long,
     val sourceMsgId: String,
+    val headId: Int = 0,
+    val headFrame: String = "",
+    val weekWuxun: Int = 0,
+    val totalWuxun: Int = 0,
 )
 
 data class LocalTeamStats(
@@ -4046,6 +4710,48 @@ data class LocalRecord(
     val subtitle: String,
     val rawJson: String,
     val sourceMsgId: String,
+)
+
+data class LocalWorldStateVersion(
+    val version: Long,
+    val sourceMsgId: String,
+    val marker: Int,
+    val completeness: String,
+    val blockMode: Int,
+    val blockId: Int,
+    val moveCount: Int,
+    val mapStateCount: Int,
+    val capturedAt: Long,
+)
+
+data class LocalWorldStateEvent(
+    val seq: Long,
+    val eventType: String,
+    val entityType: String,
+    val entityId: Int,
+    val evidenceJson: String,
+    val capturedAt: Long,
+)
+
+data class LocalWorldStateReplay(
+    val version: LocalWorldStateVersion,
+    val events: List<LocalWorldStateEvent>,
+)
+
+data class LocalPlayerSeasonWeek(
+    val weekStart: String,
+    val battles: Int,
+    val wins: Int,
+    val draws: Int,
+    val memberWuxun: Int,
+)
+
+private data class MutablePlayerSeasonWeek(
+    val weekStart: String,
+    var battles: Int = 0,
+    var wins: Int = 0,
+    var draws: Int = 0,
+    var memberWuxun: Int = 0,
 )
 
 data class LocalChatMessage(

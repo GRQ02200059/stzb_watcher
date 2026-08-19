@@ -5,8 +5,8 @@ from .repository import ScoreRepository
 from .service import ScoreCenterService
 
 
-def register_score_center_api(app, get_connection):
-    service = ScoreCenterService(get_connection)
+def register_score_center_api(app, get_connection, get_profile_id=None):
+    service = ScoreCenterService(get_connection, get_profile_id=get_profile_id)
 
     @app.route("/api/custom_scores")
     def score_center_list():

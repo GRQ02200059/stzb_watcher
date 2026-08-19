@@ -67,24 +67,24 @@ object LocalAuxiliaryParser {
                 PacketLogStore.add("90005 db_sync 专表入库：${rows.size} 条")
             }
         }
-        if (packet.msgId == "6314") {
-            val rows = parseBattleFieldRows(packet)
-            if (rows.isNotEmpty()) {
-                LocalStzbRepository.saveBattleFields(rows)
-                PacketLogStore.add("6314 攻城战场专表入库：${rows.size} 个")
-            }
-        }
         if (packet.msgId == "301") {
             parseMarchRow(packet)?.let {
                 LocalStzbRepository.saveMarchEvent(it)
                 PacketLogStore.add("301 玩家行军专表入库：wid=${it.wid} 队伍=${it.troopCount}")
             }
         }
-        val records = when (packet.msgId) {
+        val records = businessRecords(packet)
+        if (records.isNotEmpty()) {
+            LocalStzbRepository.saveRecords(records)
+            PacketLogStore.add("${packet.msgId} 本机业务记录入库：${records.size} 条 type=${records.first().type}")
+        }
+    }
+
+    internal fun businessRecords(packet: LocalStzbPacket): List<LocalRecord> = when (packet.msgId) {
             "103" -> parseTeamUsers(packet)
             "510" -> parsePlayerStats(packet)
             "5026" -> parseMapCells(packet)
-            "6314" -> parseBattleField(packet)
+            "6314" -> parseUnionBuildingHelp(packet)
             "301" -> parseMarch(packet)
             "700" -> parseRanks(packet)
             "780" -> parseAnnouncements(packet)
@@ -95,11 +95,6 @@ object LocalAuxiliaryParser {
             "10", "92" -> parseFullBattleRaw(packet)
             else -> emptyList()
         }
-        if (records.isNotEmpty()) {
-            LocalStzbRepository.saveRecords(records)
-            PacketLogStore.add("${packet.msgId} 本机业务记录入库：${records.size} 条 type=${records.first().type}")
-        }
-    }
 
     private fun parseTeamUsers(packet: LocalStzbPacket): List<LocalRecord> {
         val arr = jsonArray(packet.decodedText) ?: return emptyList()
@@ -120,7 +115,7 @@ object LocalAuxiliaryParser {
         }
     }
 
-    private fun parseTeamUserRows(packet: LocalStzbPacket): List<LocalTeamUser> {
+    internal fun parseTeamUserRows(packet: LocalStzbPacket): List<LocalTeamUser> {
         val arr = jsonArray(packet.decodedText) ?: return emptyList()
         return (0 until arr.length()).mapNotNull { idx ->
             val row = arr.optJSONArray(idx) ?: return@mapNotNull null
@@ -138,9 +133,13 @@ object LocalAuxiliaryParser {
                 power = row.optInt(8, 0),
                 wuxun = row.optInt(10, 0),
                 groupName = row.optString(13, ""),
-                heroConfigId = row.optInt(16, 0),
+                headId = row.optInt(16, 0),
+                headFrame = row.optString(17, ""),
+                weekWuxun = row.optInt(26, 0),
+                totalWuxun = row.optInt(27, 0),
+                heroConfigId = 0,
                 teamId = 0,
-                heroSkills = row.optString(17, ""),
+                heroSkills = "",
                 joinTime = row.optLong(30, 0L),
                 sourceMsgId = packet.msgId,
             )
@@ -317,36 +316,19 @@ object LocalAuxiliaryParser {
         val payload: JSONArray,
     )
 
-    private fun parseBattleField(packet: LocalStzbPacket): List<LocalRecord> {
+    private fun parseUnionBuildingHelp(packet: LocalStzbPacket): List<LocalRecord> {
         val arr = jsonArray(packet.decodedText) ?: return emptyList()
         return (0 until arr.length()).mapNotNull { idx ->
             val row = arr.optJSONArray(idx) ?: return@mapNotNull null
-            val wid = row.optInt(0, 0)
-            if (wid <= 0) return@mapNotNull null
-            val nearby = row.optString(2, "")
+            if (row.length() < 3) return@mapNotNull null
+            val recordId = row.optLong(0, 0L)
+            if (recordId <= 0L) return@mapNotNull null
             LocalRecord(
-                type = "battle_field",
-                key = wid.toString(),
-                title = "战场 $wid",
-                subtitle = "attacker=${row.optLong(1, 0L)} nearby=${nearby.split(',').count { it.isNotBlank() }}",
+                type = "union_building_help",
+                key = recordId.toString(),
+                title = "同盟建筑互助",
+                subtitle = "记录 $recordId · 互助数据已保留",
                 rawJson = row.toString(),
-                sourceMsgId = packet.msgId,
-            )
-        }
-    }
-
-    private fun parseBattleFieldRows(packet: LocalStzbPacket): List<LocalBattleField> {
-        val arr = jsonArray(packet.decodedText) ?: return emptyList()
-        return (0 until arr.length()).mapNotNull { idx ->
-            val row = arr.optJSONArray(idx) ?: return@mapNotNull null
-            val wid = row.optInt(0, 0)
-            if (wid <= 0) return@mapNotNull null
-            val nearby = row.optString(2, "")
-            LocalBattleField(
-                wid = wid,
-                attackerUid = row.optLong(1, 0L),
-                nearbyUids = nearby,
-                nearbyCount = nearby.split(',').count { it.trim().isNotEmpty() },
                 sourceMsgId = packet.msgId,
             )
         }

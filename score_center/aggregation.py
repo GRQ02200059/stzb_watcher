@@ -20,9 +20,10 @@ class AggregatedPlayer:
 
 
 class ScoreAggregator:
-    def __init__(self, connection, repository):
+    def __init__(self, connection, repository, profile_id=""):
         self.connection = connection
         self.repository = repository
+        self.profile_id = str(profile_id or "")
 
     def aggregate(
         self,
@@ -44,6 +45,23 @@ class ScoreAggregator:
         team_by_name = {
             str(row.get("name") or ""): row for row in team_rows
         }
+        snapshots = self.repository.cumulative_wuxun_snapshots(self.profile_id)
+        for team in team_rows:
+            name = str(team.get("name") or "")
+            uid = str(team.get("uid") or "")
+            snapshot = snapshots.get(uid) or snapshots.get(name)
+            if not name or snapshot is None:
+                continue
+            player = players.setdefault(
+                name,
+                _mutable_player(
+                    name,
+                    uid,
+                    str(team.get("union_name") or snapshot.get("union_name") or ""),
+                    str(team.get("group_name") or snapshot.get("group_name") or ""),
+                ),
+            )
+            player["gongxun_total"] = int(snapshot.get("wuxun") or 0)
         if has_battles:
             where = ["COALESCE(atk_name,'') != ''"]
             args = []
@@ -99,7 +117,11 @@ class ScoreAggregator:
                     player["wins"] += 1
                 elif result not in DEFENCE_WINS:
                     player["draws"] += 1
-                player["gongxun_total"] += int(row.get("atk_gongxun") or 0)
+                snapshot = snapshots.get(uid) or snapshots.get(name)
+                if snapshot is not None:
+                    player["gongxun_total"] = int(snapshot.get("wuxun") or 0)
+                elif "wuxun" in team:
+                    player["gongxun_total"] = int(team.get("wuxun") or 0)
                 player["power_total"] = max(
                     player["power_total"], int(row.get("atk_power") or 0)
                 )
@@ -120,14 +142,26 @@ class ScoreAggregator:
             elif end_time is not None and "time" in attendance_columns:
                 where.append("time<=?")
                 args.append(int(end_time))
+            identity_column = "battle_id" if "battle_id" in attendance_columns else "session_id"
+            session_column = (
+                "session_id" if "session_id" in attendance_columns else identity_column
+            )
+            attendance_scope = (
+                "fight_type IN (33,80) AND "
+                if "fight_type" in attendance_columns
+                else ""
+            )
+            if "profile_id" in attendance_columns and self.profile_id:
+                where.append("profile_id=?")
+                args.append(self.profile_id)
             rows = self.connection.execute(
                 f"""
-                SELECT DISTINCT session_id,player_name,
+                SELECT DISTINCT {session_column} AS session_id,{identity_column} AS attendance_identity,player_name,
                        COALESCE(player_uid,'') AS player_uid,
                        COALESCE(union_name,'') AS union_name,
                        COALESCE(role,'other') AS role
                 FROM attendance
-                WHERE {' AND '.join(where)}
+                WHERE {attendance_scope}{' AND '.join(where)}
                 """,
                 args,
             ).fetchall()
@@ -135,8 +169,9 @@ class ScoreAggregator:
             for raw in rows:
                 row = dict(raw)
                 key = (
-                    row.get("session_id"),
+                    row.get("attendance_identity") or row.get("session_id"),
                     row.get("player_name"),
+                    row.get("player_uid"),
                     row.get("role"),
                 )
                 if key in seen:
@@ -181,9 +216,8 @@ class ScoreAggregator:
         total_gongxun = sum(
             player["gongxun_total"] for player in players.values()
         )
-        gongxun_missing = (
-            not has_gongxun or (total_battles > 0 and total_gongxun == 0)
-        )
+        has_member_wuxun = "wuxun" in _columns(self.connection, "team_users")
+        gongxun_missing = not has_member_wuxun
         for player in players.values():
             if union_filter and union_filter not in player["union_name"]:
                 continue
@@ -223,14 +257,17 @@ class ScoreAggregator:
         columns = _columns(self.connection, "team_users")
         selected = [
             name
-            for name in ("uid", "name", "union_name", "group_name")
+            for name in ("uid", "name", "union_name", "group_name", "wuxun")
             if name in columns
         ]
         if "uid" not in selected or "name" not in selected:
             return []
-        rows = self.connection.execute(
-            f"SELECT {','.join(selected)} FROM team_users"
-        ).fetchall()
+        query = f"SELECT {','.join(selected)} FROM team_users"
+        args = ()
+        if "profile_id" in columns:
+            query += " WHERE profile_id=?"
+            args = (self.profile_id,)
+        rows = self.connection.execute(query, args).fetchall()
         return [dict(row) for row in rows]
 
 

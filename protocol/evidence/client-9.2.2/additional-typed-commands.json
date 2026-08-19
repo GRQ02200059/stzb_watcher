@@ -1,0 +1,40 @@
+{
+  "commands": [
+    {
+      "hexId": "00000015",
+      "decimalId": 21,
+      "names": ["GET_FIELD_INFO_CMD"],
+      "evidence": "CLIENT_CONFIRMED",
+      "webStatus": "typed",
+      "androidStatus": "typed",
+      "clientSources": [
+        {"file": "Game.Network/Tenth.Network/NetCommandDef.cs", "lines": [139, 146]}
+      ],
+      "fields": []
+    },
+    {
+      "hexId": "000018aa",
+      "decimalId": 6314,
+      "names": ["UNION_BUILDING_SPEED_UP_ADD"],
+      "evidence": "CLIENT_CONFIRMED",
+      "webStatus": "typed",
+      "androidStatus": "typed",
+      "clientSources": [
+        {"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [1598, 1612]}
+      ],
+      "fields": []
+    },
+    {
+      "hexId": "00015f95",
+      "decimalId": 90005,
+      "names": ["SYS_NOTIFY_DB_UPDATE_90005"],
+      "evidence": "CLIENT_CONFIRMED",
+      "webStatus": "typed",
+      "androidStatus": "typed",
+      "clientSources": [
+        {"file": "Game.Network/Tenth.Network/NetCommandDef.cs", "lines": [603, 610]}
+      ],
+      "fields": []
+    }
+  ]
+}

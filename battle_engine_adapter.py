@@ -4,6 +4,7 @@ import subprocess
 from pathlib import Path
 
 import sim_data
+from intelligence.hero_ids import normalize_hero_id
 
 _ENGINE_DIR = Path(__file__).resolve().parent / "battle-engine"
 _INSTALL_CLI = _ENGINE_DIR / "build" / "install" / "stzb-battle-engine" / "bin" / "stzb-battle-engine"
@@ -155,7 +156,9 @@ class BattleEngineAdapter:
     def _team(self, team):
         heroes = []
         for index, hero in enumerate(team.get("heros") or team.get("heroes") or []):
-            hero_id = int(hero.get("id") or hero.get("heroId"))
+            hero_id = normalize_hero_id(
+                hero.get("id") or hero.get("heroId")
+            )
             heroes.append(
                 {
                     "heroId": hero_id,
@@ -191,11 +194,10 @@ class BattleEngineAdapter:
 
     def _hero_details(self, snapshots):
         """把引擎逐将快照补全成 sim.js _renderSingleResult 需要的形状。"""
-        heroes = sim_data.hero_index()
         details = []
         for snap in snapshots or []:
-            hero_id = int(snap.get("heroId") or 0)
-            info = heroes.get(hero_id, {})
+            hero_id = normalize_hero_id(snap.get("heroId") or 0)
+            info = sim_data.hero_by_id(hero_id) or {}
             position = int(snap.get("position") or 0)
             details.append(
                 {
@@ -220,13 +222,13 @@ class BattleEngineAdapter:
             return first.get("textLog") or []
         if not all(isinstance(record, dict) for record in structured):
             return first.get("textLog") or []
-        heroes = sim_data.hero_index()
         skills = sim_data.skill_index()
 
         def who(ref):
             if not ref:
                 return "?"
-            info = heroes.get(int(ref.get("heroId") or 0), {})
+            hero_id = normalize_hero_id(ref.get("heroId") or 0)
+            info = sim_data.hero_by_id(hero_id) or {}
             name = info.get("name") or str(ref.get("heroId"))
             side = "攻方" if ref.get("side") == "ATTACKER" else "守方"
             pos = int(ref.get("position") or 0)

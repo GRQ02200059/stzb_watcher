@@ -1,0 +1,402 @@
+{
+  "clientVersion": "9.2.2",
+  "commands": [
+    {
+      "decimalId": 10,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "0000000a",
+      "names": [
+        "GET_ALL_BATTLE_REPORT_PROFILE_CMD"
+      ]
+    },
+    {
+      "decimalId": 21,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000015",
+      "names": [
+        "GET_FIELD_INFO_CMD"
+      ]
+    },
+    {
+      "decimalId": 92,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "0000005c",
+      "names": [
+        "GET_UNION_BATTLE_REPORT"
+      ]
+    },
+    {
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "names": [
+        "UNION_MEMBER_LIST"
+      ]
+    },
+    {
+      "decimalId": 510,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000001fe",
+      "names": [
+        "USER_GET_USER_SEASON_COURSE"
+      ]
+    },
+    {
+      "decimalId": 671,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "0000029f",
+      "names": [
+        "CARD_RECORD"
+      ]
+    },
+    {
+      "decimalId": 780,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "0000030c",
+      "names": [
+        "NOTICE_LIST"
+      ]
+    },
+    {
+      "decimalId": 2100,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000834",
+      "names": [
+        "NOTIFY_CHAT_MSG"
+      ]
+    },
+    {
+      "decimalId": 2200,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000898",
+      "names": [
+        "NOTIFY_SEND_NOTICE"
+      ]
+    },
+    {
+      "decimalId": 5026,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a2",
+      "names": [
+        "SEND_WORLD_SCENCE_FULL_INFO"
+      ]
+    },
+    {
+      "decimalId": 5028,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a4",
+      "names": [
+        "SEND_WORLD_SCENCE_CHANGE_INFO"
+      ]
+    },
+    {
+      "decimalId": 6314,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000018aa",
+      "names": [
+        "UNION_BUILDING_SPEED_UP_ADD"
+      ]
+    },
+    {
+      "decimalId": 90005,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00015f95",
+      "names": [
+        "SYS_NOTIFY_DB_UPDATE_90005"
+      ]
+    }
+  ],
+  "conventions": {
+    "heroId": "preserve_raw_and_normalized",
+    "timestamp": "unix_seconds_unless_field_declares_otherwise",
+    "wid": "x=wid/10000,y=wid%10000"
+  },
+  "fields": [
+    {
+      "businessApproved": true,
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "userId",
+      "nullable": false,
+      "path": "[][0]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "id"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "memberWuxun",
+      "nullable": true,
+      "path": "[][10]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "points"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "groupId",
+      "nullable": true,
+      "path": "[][12]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "id"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "groupName",
+      "nullable": false,
+      "path": "[][13]",
+      "rawTypes": [
+        "string"
+      ],
+      "unit": "text"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "userName",
+      "nullable": false,
+      "path": "[][1]",
+      "rawTypes": [
+        "string"
+      ],
+      "unit": "text"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "weekWuxun",
+      "nullable": true,
+      "path": "[][26]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "points"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "totalWuxun",
+      "nullable": true,
+      "path": "[][27]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "points"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "donate",
+      "nullable": false,
+      "path": "[][2]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "points"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "intoUnionTime",
+      "nullable": true,
+      "path": "[][30]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "unix_seconds"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "position",
+      "nullable": false,
+      "path": "[][3]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "enum"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "wid",
+      "nullable": false,
+      "path": "[][6]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "wid"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "donateWeekly",
+      "nullable": false,
+      "path": "[][7]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "points"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "roleForce",
+      "nullable": false,
+      "path": "[][8]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "points"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 5026,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a2",
+      "name": "worldChunks",
+      "nullable": false,
+      "path": "[14]",
+      "rawTypes": [
+        "object"
+      ],
+      "unit": "map"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 5026,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a2",
+      "name": "serverOrderId",
+      "nullable": false,
+      "path": "[18]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "sequence"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 5026,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a2",
+      "name": "realMarch",
+      "nullable": false,
+      "path": "[29]",
+      "rawTypes": [
+        "object"
+      ],
+      "unit": "map"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 5028,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a4",
+      "name": "worldChunkChanges",
+      "nullable": false,
+      "path": "[14]",
+      "rawTypes": [
+        "object"
+      ],
+      "unit": "map"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 5028,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a4",
+      "name": "clearChunks",
+      "nullable": false,
+      "path": "[15]",
+      "rawTypes": [
+        "object"
+      ],
+      "unit": "map"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 5028,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a4",
+      "name": "serverOrderId",
+      "nullable": false,
+      "path": "[18]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "sequence"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 5028,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a4",
+      "name": "blockInfo",
+      "nullable": true,
+      "path": "[20]",
+      "rawTypes": [
+        "array"
+      ],
+      "unit": "tuple"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 5028,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a4",
+      "name": "realMarch",
+      "nullable": false,
+      "path": "[29]",
+      "rawTypes": [
+        "object"
+      ],
+      "unit": "map"
+    },
+    {
+      "businessApproved": true,
+      "decimalId": 5028,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a4",
+      "name": "deletedArmies",
+      "nullable": false,
+      "path": "[7]",
+      "rawTypes": [
+        "array"
+      ],
+      "unit": "ids"
+    }
+  ]
+}

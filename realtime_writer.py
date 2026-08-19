@@ -118,24 +118,92 @@ def extract_team_id(idu):
     return int(first) if first.isdigit() else 0
 
 
+CITY_SIEGE_NORMAL_GUARD = 'normal_city_guard'
+CITY_SIEGE_LAST_GUARD = 'last_city_guard'
+CITY_SIEGE_OTHER = 'other'
+
+
+def _as_int(value, default=0):
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return default
+
+
+def _defender_hero_count(raw):
+    count = 0
+    for segment in str(raw or '').split(';'):
+        hero_id = segment.split(',', 1)[0].strip()
+        if hero_id.isdigit() and int(hero_id) > 0:
+            count += 1
+    return count
+
+
+def classify_city_siege_defense(battle):
+    """Classify a city NPC report as normal guard, final guard, or other."""
+    city_type = _as_int(battle.get('city_type'))
+    is_npc = _as_int(battle.get('is_npc', battle.get('npc', 0)))
+    if city_type != 8 or is_npc != 1:
+        return CITY_SIEGE_OTHER
+
+    parts = [part.strip() for part in str(battle.get('world_npc_army', '') or '').split(',')]
+    if len(parts) != 4:
+        return CITY_SIEGE_OTHER
+
+    recover_time = _as_int(parts[2])
+    remaining_hp = _as_int(parts[3])
+    defender_count = _defender_hero_count(battle.get('defend_all_hero_info', ''))
+    defender_hp = _as_int(battle.get('def_hp', battle.get('defend_hp', 0)))
+    if recover_time > 0 and remaining_hp > 0 and defender_count == 1 and defender_hp == remaining_hp:
+        return CITY_SIEGE_LAST_GUARD
+    if recover_time == 0 and remaining_hp == 0 and defender_count >= 2:
+        return CITY_SIEGE_NORMAL_GUARD
+    return CITY_SIEGE_OTHER
+
+
+def attendance_role_for_city_siege_defense(battle):
+    phase = classify_city_siege_defense(battle)
+    if phase == CITY_SIEGE_NORMAL_GUARD:
+        return 'main'
+    if phase == CITY_SIEGE_LAST_GUARD:
+        return 'tear'
+    return 'other'
+
+
 def ensure_battles_v2_team_columns(conn):
-    """确保 battles_v2 存在攻守双方队伍id字段"""
+    """Ensure team and city-siege classification columns exist."""
     cols = {r[1] for r in conn.execute('PRAGMA table_info(battles_v2)').fetchall()}
     changed = False
-    if 'atk_team_id' not in cols:
+    required = {
+        'atk_team_id': 'INTEGER DEFAULT 0',
+        'def_team_id': 'INTEGER DEFAULT 0',
+        'city_type': 'INTEGER DEFAULT 0',
+        'is_npc': 'INTEGER DEFAULT 0',
+        "world_npc_army": "TEXT DEFAULT ''",
+        "defend_all_hero_info": "TEXT DEFAULT ''",
+        'def_hp': 'INTEGER DEFAULT 0',
+        "defense_phase": "TEXT DEFAULT 'other'",
+    }
+    for column, definition in required.items():
+        if column in cols:
+            continue
         try:
-            conn.execute('ALTER TABLE battles_v2 ADD COLUMN atk_team_id INTEGER DEFAULT 0')
-            changed = True
-        except sqlite3.OperationalError:
-            pass
-    if 'def_team_id' not in cols:
-        try:
-            conn.execute('ALTER TABLE battles_v2 ADD COLUMN def_team_id INTEGER DEFAULT 0')
+            conn.execute(f'ALTER TABLE battles_v2 ADD COLUMN {column} {definition}')
             changed = True
         except sqlite3.OperationalError:
             pass
     if changed:
         conn.commit()
+
+
+def ensure_attendance_role_column(conn):
+    cols = {r[1] for r in conn.execute('PRAGMA table_info(attendance)').fetchall()}
+    if 'role' not in cols:
+        try:
+            conn.execute("ALTER TABLE attendance ADD COLUMN role TEXT DEFAULT 'other'")
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass
 
 
 def backfill_team_users_team_id(conn, player_name, team_id):
@@ -750,16 +818,26 @@ def upsert_battle_834(conn, b):
     exists = conn.execute('SELECT 1 FROM battles_v2 WHERE battle_id=?', (b['battle_id'],)).fetchone()
     if exists:
         return False
+    attacker_union = ''
+    try:
+        member = conn.execute(
+            'SELECT union_name FROM team_users WHERE uid=? ORDER BY updated_at DESC LIMIT 1',
+            (b.get('atk_uid', ''),),
+        ).fetchone()
+        if member:
+            attacker_union = str(member[0] or '')
+    except sqlite3.Error:
+        pass
     # battles_v2
     conn.execute('''
         INSERT OR IGNORE INTO battles_v2
             (battle_id, time, time_str, result, result_desc, fight_type, wid, wid_code,
-             atk_name, atk_uid, atk_gongxun, atk_power,
+             atk_name, atk_uid, atk_union, atk_gongxun, atk_power,
              def_name, def_union, def_level, def_gongxun, source_file, is_npc)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     ''', (b['battle_id'], b['time'], b['time_str'], b['result'], b['result_desc'],
           b['fight_type'], b['wid'], b['wid_code'],
-          b['atk_name'], b['atk_uid'], b['atk_gongxun'], b['atk_power'],
+          b['atk_name'], b['atk_uid'], attacker_union, b['atk_gongxun'], b['atk_power'],
           b['def_name'], b['def_union'], b['def_level'], b['def_gongxun'],
           b['source_file'], 1))
     # wuxun_log
@@ -768,7 +846,7 @@ def upsert_battle_834(conn, b):
             INSERT INTO wuxun_log (battle_id, time, atk_name, atk_union, atk_level,
                                    gongxun, fight_type, result, wid)
             VALUES (?,?,?,?,?,?,?,?,?)
-        ''', (b['battle_id'], b['time'], b['atk_name'], b['def_union'], b['def_level'],
+        ''', (b['battle_id'], b['time'], b['atk_name'], attacker_union, b['def_level'],
               b['atk_gongxun'], b['fight_type'], b['result'], b['wid']))
     # power_log
     if b['atk_power'] > 0:
@@ -776,7 +854,7 @@ def upsert_battle_834(conn, b):
             INSERT INTO power_log (battle_id, time, atk_name, atk_union, atk_level,
                                    power, fight_type, result, wid)
             VALUES (?,?,?,?,?,?,?,?,?)
-        ''', (b['battle_id'], b['time'], b['atk_name'], b['def_union'], b['def_level'],
+        ''', (b['battle_id'], b['time'], b['atk_name'], attacker_union, b['def_level'],
               b['atk_power'], b['fight_type'], b['result'], b['wid']))
     # attendance
     try:
@@ -789,7 +867,7 @@ def upsert_battle_834(conn, b):
             INSERT INTO attendance (battle_id, time, player_name, player_uid, union_name,
                                     fight_type, wid, gongxun, result, profile_id)
             VALUES (?,?,?,?,?,?,?,?,?,?)
-        ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], b['def_union'],
+        ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], attacker_union,
               b['fight_type'], b['wid'], b['atk_gongxun'], b['result'], _att_pid))
     except sqlite3.OperationalError as _e:
         if 'profile_id' in str(_e):
@@ -797,7 +875,7 @@ def upsert_battle_834(conn, b):
                 INSERT INTO attendance (battle_id, time, player_name, player_uid, union_name,
                                         fight_type, wid, gongxun, result)
                 VALUES (?,?,?,?,?,?,?,?,?)
-            ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], b['def_union'],
+            ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], attacker_union,
                   b['fight_type'], b['wid'], b['atk_gongxun'], b['result']))
         else:
             raise
@@ -1245,6 +1323,7 @@ def parse_battle_0a(data, fpath):
 def upsert_battle_0a(conn, b):
     """将 0000000a 战报写入 battles_v2 及相关表（照搬 stzbHelper Report struct 全字段）"""
     ensure_battles_v2_team_columns(conn)
+    ensure_attendance_role_column(conn)
     exists = conn.execute('SELECT 1 FROM battles_v2 WHERE battle_id=?', (b['battle_id'],)).fetchone()
     if exists:
         return False
@@ -1266,6 +1345,12 @@ def upsert_battle_0a(conn, b):
     placeholders = ','.join('?' * len(cols))
     col_list = ','.join(cols)
     conn.execute(f'INSERT OR IGNORE INTO battles_v2 ({col_list}) VALUES ({placeholders})', vals)
+    defense_phase = classify_city_siege_defense(b)
+    if 'defense_phase' in db_cols:
+        conn.execute(
+            'UPDATE battles_v2 SET defense_phase=? WHERE battle_id=?',
+            (defense_phase, b['battle_id']),
+        )
 
     # 不再把 team_id 回填到 team_users；队伍id属于战报队伍实体，不属于玩家主档
     # wuxun_log
@@ -1290,23 +1375,23 @@ def upsert_battle_0a(conn, b):
         _att_pid = _pm_att.get_current_profile_id()
     except:
         _att_pid = ''
+    attendance_role = attendance_role_for_city_siege_defense(b)
     try:
         conn.execute('''
             INSERT INTO attendance (battle_id, time, player_name, player_uid, union_name,
-                                    fight_type, wid, gongxun, result, profile_id)
+                                    fight_type, wid, gongxun, result, role, profile_id)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?)
+        ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], b['atk_union'],
+              b['fight_type'], b['wid'], b['atk_gongxun'], b['result'], attendance_role, _att_pid))
+    except sqlite3.OperationalError as _e:
+        if 'profile_id' not in str(_e):
+            raise
+        conn.execute('''
+            INSERT INTO attendance (battle_id, time, player_name, player_uid, union_name,
+                                    fight_type, wid, gongxun, result, role)
             VALUES (?,?,?,?,?,?,?,?,?,?)
         ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], b['atk_union'],
-              b['fight_type'], b['wid'], b['atk_gongxun'], b['result'], _att_pid))
-    except sqlite3.OperationalError as _e:
-        if 'profile_id' in str(_e):
-            conn.execute('''
-                INSERT INTO attendance (battle_id, time, player_name, player_uid, union_name,
-                                        fight_type, wid, gongxun, result)
-                VALUES (?,?,?,?,?,?,?,?,?)
-            ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], b['atk_union'],
-                  b['fight_type'], b['wid'], b['atk_gongxun'], b['result']))
-        else:
-            raise
+              b['fight_type'], b['wid'], b['atk_gongxun'], b['result'], attendance_role))
     # battle_heroes（兼容旧库无 star 列）
     bh_cols = {r[1] for r in conn.execute('PRAGMA table_info(battle_heroes)').fetchall()}
     has_star = 'star' in bh_cols
@@ -1351,7 +1436,8 @@ def upsert_battle_0a(conn, b):
 # ============================================================
 # 解析 00000067 同盟成员数据
 # 索引: [0]=uid [1]=名字 [2]=总贡献 [3]=职位 [6]=wid [7]=本周贡献
-#       [8]=势力 [10]=武勋 [13]=分组 [16]=武将配置ID [17]=技能 [30]=加入时间
+#       [8]=势力 [10]=武勋 [13]=分组 [16]=头像ID [17]=头像框
+#       [26]=本周武勋 [27]=累计武勋 [30]=加入时间
 # ============================================================
 def parse_team_users_67(fpath, data=None):
     import json as _json
@@ -1375,16 +1461,19 @@ def parse_team_users_67(fpath, data=None):
                 power = int(item[8]) if item[8] else 0
                 wu    = int(item[10]) if item[10] else 0
                 grp   = str(item[13]) if item[13] else ''
-                hero_cfg = int(item[16]) if item[16] else 0
-                skills   = str(item[17]) if item[17] else ''
+                head_id = int(item[16]) if item[16] else 0
+                head_frame = str(item[17]) if item[17] else ''
+                week_wuxun = int(item[26]) if item[26] else 0
+                total_wuxun = int(item[27]) if item[27] else 0
                 jt    = int(item[30]) if item[30] else 0
                 users.append({
                     'uid': uid, 'name': name,
                     'contribute_total': ct, 'contribute_week': cw,
                     'pos': pos, 'wid': wid, 'power': power, 'wuxun': wu,
-                    'group_name': grp, 'hero_config_id': hero_cfg,
-                    'team_id': 0,
-                    'hero_skills': skills, 'join_time': jt,
+                    'group_name': grp, 'head_id': head_id,
+                    'head_frame': head_frame, 'week_wuxun': week_wuxun,
+                    'total_wuxun': total_wuxun, 'team_id': 0,
+                    'join_time': jt,
                 })
             except:
                 continue
@@ -1402,24 +1491,45 @@ def upsert_team_users(conn, users, profile_id=''):
             conn.commit()
         except sqlite3.OperationalError:
             pass
+    for name, definition in (
+        ('head_id', 'INTEGER DEFAULT 0'),
+        ('head_frame', "TEXT DEFAULT ''"),
+        ('week_wuxun', 'INTEGER DEFAULT 0'),
+        ('total_wuxun', 'INTEGER DEFAULT 0'),
+    ):
+        if name not in cols:
+            try:
+                conn.execute(f'ALTER TABLE team_users ADD COLUMN {name} {definition}')
+            except sqlite3.OperationalError:
+                pass
     for u in users:
         conn.execute('''
             INSERT INTO team_users (uid,profile_id,name,contribute_total,contribute_week,pos,wid,
-                power,wuxun,group_name,hero_config_id,team_id,hero_skills,join_time,updated_at)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                power,wuxun,group_name,head_id,head_frame,week_wuxun,total_wuxun,team_id,join_time,updated_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             ON CONFLICT(uid,profile_id) DO UPDATE SET
                 name=excluded.name, contribute_total=excluded.contribute_total,
                 contribute_week=excluded.contribute_week, pos=excluded.pos,
                 wid=excluded.wid, power=excluded.power, wuxun=excluded.wuxun,
-                group_name=excluded.group_name, hero_config_id=excluded.hero_config_id,
-                team_id=excluded.team_id,
-                hero_skills=excluded.hero_skills, join_time=excluded.join_time,
+                group_name=excluded.group_name, head_id=excluded.head_id,
+                head_frame=excluded.head_frame, week_wuxun=excluded.week_wuxun,
+                total_wuxun=excluded.total_wuxun, team_id=excluded.team_id,
+                join_time=excluded.join_time,
                 updated_at=excluded.updated_at
         ''', (u['uid'], profile_id, u['name'], u['contribute_total'], u['contribute_week'],
               u['pos'], u['wid'], u['power'], u['wuxun'], u['group_name'],
-              u['hero_config_id'], u.get('team_id', 0), u['hero_skills'], u['join_time'], now))
+              u['head_id'], u['head_frame'], u['week_wuxun'], u['total_wuxun'],
+              u.get('team_id', 0), u['join_time'], now))
     if users:
         conn.commit()
+        if datetime.now().weekday() == 6:
+            try:
+                from score_center.repository import ScoreRepository
+                repository = ScoreRepository(conn)
+                repository.ensure_schema()
+                repository.capture_sunday_wuxun_snapshot(profile_id=profile_id)
+            except Exception as error:
+                print(f'[team_users] 周日武勋快照失败: {error}')
 
 
 # ============================================================
@@ -1668,6 +1778,107 @@ def parse_battle_5c(data, fpath):
         except Exception:
             continue
     return results
+
+
+def backfill_city_siege_defense(conn, capture_roots):
+    """Backfill only existing full reports from locally captured 0a/5c files.
+
+    Older databases did not retain the defender fields required to distinguish
+    the normal city guard from the final guard.  This routine never creates
+    reports or deletes data: it only updates an already stored battle when the
+    original local capture supplies a strict classification.
+    """
+    try:
+        existing_ids = {
+            int(row[0])
+            for row in conn.execute('SELECT battle_id FROM battles_v2').fetchall()
+        }
+    except sqlite3.OperationalError:
+        return 0
+    if not existing_ids:
+        return 0
+
+    ensure_battles_v2_team_columns(conn)
+    try:
+        ensure_attendance_role_column(conn)
+    except sqlite3.OperationalError:
+        pass
+
+    roots = []
+    for root in capture_roots or []:
+        root = os.path.abspath(str(root or ''))
+        if root and root not in roots and os.path.isdir(root):
+            roots.append(root)
+
+    updated_ids = set()
+    for root in roots:
+        for msg_type, parser in (
+            ('0000000a', parse_battle_0a),
+            ('0000005c', parse_battle_5c),
+        ):
+            packet_dir = os.path.join(root, msg_type)
+            if not os.path.isdir(packet_dir):
+                continue
+            for filename in os.listdir(packet_dir):
+                if not filename.endswith('.json'):
+                    continue
+                path = os.path.join(packet_dir, filename)
+                try:
+                    with open(path, 'r', encoding='utf-8') as handle:
+                        packets = json.load(handle)
+                    battles = parser(packets, path)
+                except Exception:
+                    continue
+                for battle in battles:
+                    battle_id = _as_int(battle.get('battle_id'))
+                    if battle_id not in existing_ids or battle_id in updated_ids:
+                        continue
+                    phase = classify_city_siege_defense(battle)
+                    if phase == CITY_SIEGE_OTHER:
+                        continue
+                    role = attendance_role_for_city_siege_defense(battle)
+                    conn.execute(
+                        '''UPDATE battles_v2
+                           SET city_type=?, is_npc=?, world_npc_army=?,
+                               defend_all_hero_info=?, def_hp=?, defense_phase=?
+                           WHERE battle_id=?''',
+                        (
+                            _as_int(battle.get('city_type')),
+                            _as_int(battle.get('is_npc', battle.get('npc', 0))),
+                            str(battle.get('world_npc_army', '') or ''),
+                            str(battle.get('defend_all_hero_info', '') or ''),
+                            _as_int(battle.get('def_hp', battle.get('defend_hp', 0))),
+                            phase,
+                            battle_id,
+                        ),
+                    )
+                    try:
+                        conn.execute(
+                            'UPDATE attendance SET role=? WHERE battle_id=?',
+                            (role, battle_id),
+                        )
+                    except sqlite3.OperationalError:
+                        pass
+                    updated_ids.add(battle_id)
+
+    if updated_ids:
+        conn.commit()
+    try:
+        # Attendance rows created before defender-phase classification defaulted
+        # to main.  Anything still unclassified must not contribute to either
+        # the main-city or tear-city score.
+        conn.execute(
+            '''UPDATE attendance
+               SET role='other'
+               WHERE battle_id IN (
+                   SELECT battle_id FROM battles_v2
+                   WHERE COALESCE(defense_phase, 'other')='other'
+               )'''
+        )
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass
+    return len(updated_ids)
 
 
 # ============================================================

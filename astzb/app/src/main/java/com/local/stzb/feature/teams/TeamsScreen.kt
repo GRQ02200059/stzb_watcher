@@ -1,6 +1,5 @@
 package com.local.stzb.feature.teams
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,8 +12,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,6 +29,7 @@ import com.local.stzb.core.ui.EmptyPanel
 import com.local.stzb.core.ui.ErrorPanel
 import com.local.stzb.core.ui.LoadingPanel
 import com.local.stzb.core.ui.GlassCard
+import com.local.stzb.core.ui.MacGlassHeader
 import com.local.stzb.domain.battlefield.BattlefieldHero
 import com.local.stzb.domain.teams.PlayerTeam
 import com.local.stzb.feature.battlefield.BattlefieldHeroPortrait
@@ -39,35 +37,37 @@ import com.local.stzb.feature.battlefield.BattlefieldHeroPortrait
 @Composable
 fun TeamsScreen(state: TeamsUiState, onIntent: (TeamsIntent) -> Unit, modifier: Modifier = Modifier, onBack: (() -> Unit)? = null) {
     Column(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (onBack != null) {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "返回工具")
-                }
-            }
-            Text("全服玩家队伍", style = MaterialTheme.typography.headlineMedium)
-        }
         val players = state.allTeams.map { it.player }.distinct().size
-        Text("队伍 ${state.allTeams.size} · 玩家 $players", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        OutlinedTextField(
-            value = state.query,
-            onValueChange = { onIntent(TeamsIntent.QueryChanged(it)) },
-            label = { Text("搜索玩家、同盟、武将或战法") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
+        MacGlassHeader(
+            title = "全服玩家队伍",
+            subtitle = "队伍 ${state.allTeams.size} · 玩家 $players",
+            leading = {
+                if (onBack != null) {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "返回工具")
+                    }
+                }
+            },
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TeamSide.entries.forEach { side ->
-                FilterChip(
-                    selected = state.side == side,
-                    onClick = { onIntent(TeamsIntent.SideChanged(side)) },
-                    label = { Text(side.label) },
-                    modifier = Modifier.heightIn(min = 48.dp),
+        GlassCard(modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(
+                    value = state.query,
+                    onValueChange = { onIntent(TeamsIntent.QueryChanged(it)) },
+                    label = { Text("搜索玩家、同盟、武将或战法") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
                 )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TeamSide.entries.forEach { side ->
+                        FilterChip(
+                            selected = state.side == side,
+                            onClick = { onIntent(TeamsIntent.SideChanged(side)) },
+                            label = { Text(side.label) },
+                            modifier = Modifier.heightIn(min = 48.dp),
+                        )
+                    }
+                }
             }
         }
         when {

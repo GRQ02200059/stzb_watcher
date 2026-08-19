@@ -325,6 +325,32 @@ class DashboardCssStructureTest(unittest.TestCase):
         for deprecated_positioning in ("PoC", "精简版", "部分迁移", "附属端"):
             self.assertNotIn(deprecated_positioning, readme)
 
+    def test_android_beta_docs_match_current_navigation_and_capture_gate(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        guide = (ROOT / "docs/USER_GUIDE.md").read_text(encoding="utf-8")
+        android_readme = (ROOT / "astzb/README.md").read_text(encoding="utf-8")
+        combined = "\n".join((readme, guide, android_readme))
+
+        for token in (
+            "独立抓包与核心分析 Beta",
+            "战场 / 战报 / 同盟 / 工具",
+            "Native 组件",
+            "VPN 通道",
+            "SOCKS 连接",
+            "已知协议",
+            "本地入库",
+            "停止与网络恢复",
+            "原生",
+            "经典兼容",
+            "Web 独有",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, combined)
+
+        self.assertNotIn("底部有五个一级入口", guide)
+        self.assertNotIn("`6314`：攻城战场动态", android_readme)
+        self.assertNotIn("`6318`：攻城队列", android_readme)
+
 
 if __name__ == "__main__":
     unittest.main()

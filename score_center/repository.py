@@ -1,6 +1,6 @@
 import json
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from .models import ScoreRule
 
@@ -23,6 +23,55 @@ class ScoreRepository:
         self.connection.row_factory = __import__("sqlite3").Row
 
     def ensure_schema(self):
+        self.connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS wuxun_weekly_snapshots (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                profile_id TEXT NOT NULL DEFAULT '',
+                week_start TEXT NOT NULL,
+                uid TEXT NOT NULL DEFAULT '',
+                player_name TEXT NOT NULL,
+                union_name TEXT NOT NULL DEFAULT '',
+                group_name TEXT NOT NULL DEFAULT '',
+                wuxun INTEGER NOT NULL DEFAULT 0,
+                captured_at TEXT NOT NULL,
+                UNIQUE(profile_id, week_start, uid, player_name)
+            )
+            """
+        )
+        self.connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_wuxun_weekly_player "
+            "ON wuxun_weekly_snapshots(week_start, player_name)"
+        )
+        snapshot_columns = _columns(self.connection, "wuxun_weekly_snapshots")
+        if snapshot_columns and "profile_id" not in snapshot_columns:
+            self.connection.execute("ALTER TABLE wuxun_weekly_snapshots RENAME TO wuxun_weekly_snapshots_legacy")
+            self.connection.execute(
+                """
+                CREATE TABLE wuxun_weekly_snapshots (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    profile_id TEXT NOT NULL DEFAULT '',
+                    week_start TEXT NOT NULL,
+                    uid TEXT NOT NULL DEFAULT '',
+                    player_name TEXT NOT NULL,
+                    union_name TEXT NOT NULL DEFAULT '',
+                    group_name TEXT NOT NULL DEFAULT '',
+                    wuxun INTEGER NOT NULL DEFAULT 0,
+                    captured_at TEXT NOT NULL,
+                    UNIQUE(profile_id, week_start, uid, player_name)
+                )
+                """
+            )
+            self.connection.execute(
+                """
+                INSERT INTO wuxun_weekly_snapshots(
+                    id,profile_id,week_start,uid,player_name,union_name,group_name,wuxun,captured_at
+                )
+                SELECT id,'',week_start,uid,player_name,union_name,group_name,wuxun,captured_at
+                FROM wuxun_weekly_snapshots_legacy
+                """
+            )
+            self.connection.execute("DROP TABLE wuxun_weekly_snapshots_legacy")
         self.connection.executescript(
             """
             CREATE TABLE IF NOT EXISTS score_rule_versions(
@@ -94,6 +143,71 @@ class ScoreRepository:
         )
         self.connection.commit()
         return self.get_rule(cursor.lastrowid)
+
+    def capture_sunday_wuxun_snapshot(self, now=None, profile_id=''):
+        """Save the alliance-member wuxun before the weekly reset."""
+        now = now or datetime.now()
+        if now.weekday() != 6 or not _table_exists(self.connection, "team_users"):
+            return 0
+        columns = _columns(self.connection, "team_users")
+        if not {"uid", "name", "wuxun"}.issubset(columns):
+            return 0
+        week_start = (now - timedelta(days=6)).date().isoformat()
+        captured_at = now.isoformat(timespec="seconds")
+        profile_id = str(profile_id or '')
+        selected = ["uid", "name", "wuxun"] + [
+            name for name in ("union_name", "group_name") if name in columns
+        ]
+        query = f"SELECT {','.join(selected)} FROM team_users"
+        args = ()
+        if "profile_id" in columns:
+            query += " WHERE profile_id=?"
+            args = (profile_id,)
+        rows = self.connection.execute(query, args).fetchall()
+        for row in rows:
+            player_name = str(row["name"] or "")
+            if not player_name:
+                continue
+            self.connection.execute(
+                """
+                INSERT INTO wuxun_weekly_snapshots(
+                    profile_id,week_start,uid,player_name,union_name,group_name,wuxun,captured_at
+                ) VALUES(?,?,?,?,?,?,?,?)
+                ON CONFLICT(profile_id,week_start,uid,player_name) DO UPDATE SET
+                    union_name=excluded.union_name,
+                    group_name=excluded.group_name,
+                    wuxun=MAX(wuxun, excluded.wuxun),
+                    captured_at=excluded.captured_at
+                """,
+                (
+                    profile_id,
+                    week_start,
+                    str(row["uid"] or ""),
+                    player_name,
+                    str(row["union_name"] or "") if "union_name" in columns else "",
+                    str(row["group_name"] or "") if "group_name" in columns else "",
+                    int(row["wuxun"] or 0),
+                    captured_at,
+                ),
+            )
+        self.connection.commit()
+        return len(rows)
+
+    def cumulative_wuxun_snapshots(self, now=None, profile_id=''):
+        now = now or datetime.now()
+        week_start = (now - timedelta(days=now.weekday())).date().isoformat()
+        rows = self.connection.execute(
+            "SELECT uid,player_name,MAX(union_name) AS union_name,"
+            "MAX(group_name) AS group_name,SUM(wuxun) AS wuxun "
+            "FROM wuxun_weekly_snapshots WHERE profile_id=? AND week_start<=? "
+            "GROUP BY uid,player_name",
+            (str(profile_id or ''), week_start),
+        ).fetchall()
+        result = {}
+        for row in rows:
+            key = str(row["uid"] or row["player_name"] or "")
+            result[key] = dict(row)
+        return result
 
     def get_rule(self, rule_id):
         row = self.connection.execute(
@@ -294,3 +408,19 @@ def _score_row(row):
 
 def _now():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def _table_exists(connection, table):
+    return connection.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+        (table,),
+    ).fetchone() is not None
+
+
+def _columns(connection, table):
+    if not _table_exists(connection, table):
+        return set()
+    return {
+        row["name"]
+        for row in connection.execute(f"PRAGMA table_info({table})").fetchall()
+    }

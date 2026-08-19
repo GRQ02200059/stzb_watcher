@@ -11,6 +11,8 @@ import json
 import os
 from functools import lru_cache
 
+from intelligence.hero_ids import normalize_hero_id
+
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 _CONFIG_DIR = os.path.join(
     _BASE_DIR, "battle-engine", "src", "main", "resources", "battle-config"
@@ -141,6 +143,11 @@ def load_skills():
 def hero_index():
     """{hero_id: hero_dict}，供 adapter 把 heroId 补全成 name/camp/army。"""
     return {h["id"]: h for h in load_heroes()}
+
+
+def hero_by_id(hero_id):
+    """按基础武将 ID 查找，兼容 13xxxx/14xxxx 赛季武将 ID。"""
+    return hero_index().get(normalize_hero_id(hero_id))
 
 
 def skill_index():

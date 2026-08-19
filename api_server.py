@@ -5,7 +5,7 @@
 """
 from flask import Flask, jsonify, request, Response, stream_with_context
 from flask_cors import CORS
-import sqlite3, json, os, time, threading, ast, sys, hmac
+import sqlite3, json, os, time, threading, ast, sys, hmac, urllib.error, urllib.request
 from datetime import datetime
 from pathlib import Path
 from realtime_writer import (start_writer_thread, event_queue, recent_events, _event_lock,
@@ -59,10 +59,47 @@ _current_db_path = DEFAULT_DB
 _db_lock         = threading.Lock()
 _initialized_dbs = set()
 _table_info_cache = {}
+AUTH_SERVICE_BASE_URL = os.environ.get(
+    'STZB_AUTH_SERVICE_URL', 'http://152.136.236.184:9080'
+).rstrip('/')
+AUTH_CLIENT_VERSION = os.environ.get('STZB_AUTH_CLIENT_VERSION', '1.0.2')
+
+
+def _auth_service_request(path, payload):
+    body = json.dumps(payload, ensure_ascii=False).encode('utf-8')
+    request_obj = urllib.request.Request(
+        f'{AUTH_SERVICE_BASE_URL}/v1/{path.lstrip("/")}',
+        data=body,
+        headers={
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store',
+        },
+        method='POST',
+    )
+    try:
+        with urllib.request.urlopen(request_obj, timeout=10) as response:
+            raw = response.read().decode('utf-8')
+            return json.loads(raw), response.status
+    except urllib.error.HTTPError as error:
+        try:
+            payload = json.loads(error.read().decode('utf-8'))
+        except (ValueError, UnicodeDecodeError):
+            payload = {'ok': False, 'error': {'code': 'TRANSPORT_UNAVAILABLE', 'message': '认证服务返回异常'}}
+        return payload, error.code
+    except (urllib.error.URLError, TimeoutError, ValueError, json.JSONDecodeError):
+        return {
+            'ok': False,
+            'error': {
+                'code': 'TRANSPORT_UNAVAILABLE',
+                'message': '认证服务器暂时无法连接',
+            },
+        }, 503
 
 REQUIRED_BV2_COLUMNS = {
     'wid_name': 'TEXT DEFAULT ""',
     'is_npc': 'INTEGER DEFAULT 0',
+    'city_type': 'INTEGER DEFAULT 0',
+    "world_npc_army": "TEXT DEFAULT ''",
     'is_ai': 'INTEGER DEFAULT 0',
     'weather': 'INTEGER DEFAULT 0',
     'in_night': 'INTEGER DEFAULT 0',
@@ -115,6 +152,7 @@ REQUIRED_BV2_COLUMNS = {
     'def_hero1_star': 'INTEGER DEFAULT 0',
     'def_hero2_star': 'INTEGER DEFAULT 0',
     'def_hero3_star': 'INTEGER DEFAULT 0',
+    "defense_phase": "TEXT DEFAULT 'other'",
 }
 
 
@@ -424,6 +462,10 @@ def ensure_all_tables(db_path):
                 wid INTEGER DEFAULT 0,
                 hero_config_id INTEGER DEFAULT 0,
                 hero_skills TEXT DEFAULT \'\',
+                head_id INTEGER DEFAULT 0,
+                head_frame TEXT DEFAULT \'\',
+                week_wuxun INTEGER DEFAULT 0,
+                total_wuxun INTEGER DEFAULT 0,
                 account_id TEXT DEFAULT \'\',
                 updated_at TEXT,
                 PRIMARY KEY (uid, profile_id)
@@ -480,6 +522,21 @@ def ensure_all_tables(db_path):
         _ensure_task_tables(conn)
     except Exception as e:
         print(f'[init] ensure task tables: {e}')
+    try:
+        from realtime_writer import backfill_city_siege_defense
+        capture_roots = [os.path.join(BASE_DIR, 'capture_new')]
+        try:
+            with open(PROFILE_FILE, 'r', encoding='utf-8') as profile_file:
+                profile = json.load(profile_file)
+            if profile.get('cap_dir'):
+                capture_roots.append(profile['cap_dir'])
+        except Exception:
+            pass
+        repaired = backfill_city_siege_defense(conn, capture_roots)
+        if repaired:
+            print(f'[init] 回填城池守军阶段: {repaired} 条')
+    except Exception as e:
+        print(f'[init] backfill city siege defense: {e}')
     try:
         # 10. 可配置赛季积分中心
         ScoreRepository(conn).ensure_schema()
@@ -566,7 +623,7 @@ register_query_agent_api(
     intelligence_root=_intelligence_snapshot_root,
     research_repository=_intelligence_research_repository,
 )
-register_score_center_api(app, get_db)
+register_score_center_api(app, get_db, lambda: get_current_pid())
 
 def get_bv2_cols(conn):
     """缓存 battles_v2 列信息，避免接口里频繁 PRAGMA table_info。"""
@@ -903,15 +960,15 @@ def api_battles():
         params.append(int(result))
     where_str = ' AND '.join(where)
     conn = get_db()
-    total = conn.execute(f'SELECT COUNT(*) FROM battles WHERE {where_str}', params).fetchone()[0]
-    rows = conn.execute(f'SELECT * FROM battles WHERE {where_str} ORDER BY time DESC LIMIT ? OFFSET ?', params + [size, offset]).fetchall()
+    total = conn.execute(f'SELECT COUNT(*) FROM battles_v2 WHERE {where_str}', params).fetchone()[0]
+    rows = conn.execute(f'SELECT * FROM battles_v2 WHERE {where_str} ORDER BY time DESC LIMIT ? OFFSET ?', params + [size, offset]).fetchall()
     conn.close()
     return jsonify({'total': total, 'page': page, 'size': size, 'data': rows_to_list(rows)})
 
 @app.route('/api/battles/<int:bid>')
 def api_battle_detail(bid):
     conn = get_db()
-    battle = conn.execute('SELECT * FROM battles WHERE battle_id=?', (bid,)).fetchone()
+    battle = conn.execute('SELECT * FROM battles_v2 WHERE battle_id=?', (bid,)).fetchone()
     heroes = conn.execute('SELECT * FROM battle_heroes WHERE battle_id=? ORDER BY side,pos', (bid,)).fetchall()
     skills = conn.execute('SELECT * FROM battle_skills WHERE battle_id=? ORDER BY side,pos', (bid,)).fetchall()
     conn.close()
@@ -923,9 +980,9 @@ def api_battle_detail(bid):
 @app.route('/api/battle_stats')
 def api_battle_stats():
     conn = get_db()
-    total = conn.execute('SELECT COUNT(*) FROM battles').fetchone()[0]
-    result_dist = rows_to_list(conn.execute('SELECT result_desc, COUNT(*) as cnt FROM battles GROUP BY result_desc ORDER BY cnt DESC').fetchall())
-    city_dist = rows_to_list(conn.execute('SELECT city_type, COUNT(*) as cnt FROM battles GROUP BY city_type ORDER BY cnt DESC').fetchall())
+    total = conn.execute('SELECT COUNT(*) FROM battles_v2').fetchone()[0]
+    result_dist = rows_to_list(conn.execute('SELECT result_desc, COUNT(*) as cnt FROM battles_v2 GROUP BY result_desc ORDER BY cnt DESC').fetchall())
+    city_dist = rows_to_list(conn.execute('SELECT city_type, COUNT(*) as cnt FROM battles_v2 GROUP BY city_type ORDER BY cnt DESC').fetchall())
     hero_freq = rows_to_list(conn.execute('SELECT hero_name, COUNT(*) as cnt FROM battle_heroes WHERE hero_name NOT LIKE \'武将%\' GROUP BY hero_name ORDER BY cnt DESC LIMIT 50').fetchall())
     combo_freq = rows_to_list(conn.execute('''
         SELECT hero_name as combo, COUNT(*) as cnt
@@ -943,11 +1000,11 @@ def api_battle_stats():
         SELECT u, uname, total, wins, ROUND(wins*100.0/total,1) as win_rate FROM (
             SELECT atk_unionid as u, atk_union as uname, COUNT(*) as total,
                    SUM(CASE WHEN result=1 THEN 1 ELSE 0 END) as wins
-            FROM battles WHERE atk_union != '' GROUP BY atk_unionid
+            FROM battles_v2 WHERE atk_union != '' GROUP BY atk_unionid
             UNION ALL
             SELECT def_unionid, def_union, COUNT(*),
                    SUM(CASE WHEN result IN (2,6) THEN 1 ELSE 0 END)
-            FROM battles WHERE def_union != '' GROUP BY def_unionid
+            FROM battles_v2 WHERE def_union != '' GROUP BY def_unionid
         ) GROUP BY u ORDER BY total DESC LIMIT 20
     ''').fetchall())
     conn.close()
@@ -1049,26 +1106,85 @@ def api_hero_combo_winrate():
 # ===== 玩家 =====
 @app.route('/api/players')
 def api_players():
+    season = request.args.get('season', 'current')
     conn = get_db()
     rows = conn.execute('''
-        SELECT player_name, union_name, period, battle_count, atk_count, def_count,
-               win_count, wuxun_total, custom_score,
-               ROUND(win_count*100.0/MAX(battle_count,1),1) as win_rate
-        FROM scores WHERE period=\'all\' ORDER BY battle_count DESC
-    ''').fetchall()
+        SELECT player_name,union_name,'all' AS period,battles AS battle_count,
+               battles AS atk_count,0 AS def_count,wins AS win_count,
+               gongxun_total AS wuxun_total,score AS custom_score,
+               ROUND(wins*100.0/MAX(battles,1),1) AS win_rate
+        FROM custom_scores WHERE season_id=? ORDER BY battles DESC,score DESC
+    ''', (season,)).fetchall()
     conn.close()
     return jsonify(rows_to_list(rows))
 
 @app.route('/api/players/<player_name>')
 def api_player_detail(player_name):
+    season = request.args.get('season', 'current')
     conn = get_db()
-    score = conn.execute('SELECT * FROM scores WHERE player_name=? AND period=\'all\'', (player_name,)).fetchone()
+    score = conn.execute('SELECT * FROM custom_scores WHERE season_id=? AND player_name=?', (season, player_name)).fetchone()
     teams = conn.execute('SELECT * FROM player_teams WHERE player_name=? ORDER BY side,used_count DESC', (player_name,)).fetchall()
-    battles = conn.execute('SELECT * FROM battles WHERE atk_name=? OR def_name=? ORDER BY time DESC LIMIT 30', (player_name, player_name)).fetchall()
-    wx = conn.execute('SELECT SUM(gongxun) as total, COUNT(*) as cnt FROM wuxun WHERE player_name=?', (player_name,)).fetchone()
+    battles = conn.execute('SELECT * FROM battles_v2 WHERE atk_name=? OR def_name=? ORDER BY time DESC LIMIT 30', (player_name, player_name)).fetchall()
+    wx = conn.execute('SELECT COALESCE(SUM(wuxun),0) as total,COUNT(*) as cnt FROM wuxun_weekly_snapshots WHERE player_name=?', (player_name,)).fetchone()
     conn.close()
     return jsonify({'score': dict(score) if score else {}, 'teams': rows_to_list(teams),
                     'battles': rows_to_list(battles), 'wuxun': dict(wx) if wx else {}})
+
+@app.route('/api/players/<player_name>/season-trend')
+def api_player_season_trend(player_name):
+    season = request.args.get('season', 'current')
+    conn = get_db()
+    battle_rows = conn.execute(
+        '''SELECT time,result FROM battles_v2
+           WHERE atk_name=? ORDER BY time''',
+        (player_name,),
+    ).fetchall()
+    snapshot_rows = conn.execute(
+        '''SELECT week_start,MAX(union_name) AS union_name,MAX(group_name) AS group_name,
+                  MAX(wuxun) AS member_wuxun
+           FROM wuxun_weekly_snapshots WHERE player_name=?
+           GROUP BY week_start ORDER BY week_start''',
+        (player_name,),
+    ).fetchall()
+    score = conn.execute(
+        'SELECT * FROM custom_scores WHERE season_id=? AND player_name=?',
+        (season, player_name),
+    ).fetchone()
+    conn.close()
+    from datetime import datetime as _dt, timedelta as _td
+    weekly = {}
+    for row in battle_rows:
+        day = _dt.fromtimestamp(int(row['time'])).date()
+        week_start = (day - _td(days=day.weekday())).isoformat()
+        item = weekly.setdefault(week_start, {
+            'weekStart': week_start, 'battles': 0, 'wins': 0, 'draws': 0,
+            'memberWuxun': 0, 'unionName': '', 'groupName': '',
+        })
+        item['battles'] += 1
+        result = int(row['result'] or 0)
+        if result in (1, 7, 11):
+            item['wins'] += 1
+        elif result not in (2, 6, 12):
+            item['draws'] += 1
+    for row in snapshot_rows:
+        week_start = str(row['week_start'])
+        item = weekly.setdefault(week_start, {
+            'weekStart': week_start, 'battles': 0, 'wins': 0, 'draws': 0,
+            'memberWuxun': 0, 'unionName': '', 'groupName': '',
+        })
+        item['memberWuxun'] = int(row['member_wuxun'] or 0)
+        item['unionName'] = str(row['union_name'] or '')
+        item['groupName'] = str(row['group_name'] or '')
+    trend = [weekly[key] for key in sorted(weekly)]
+    for item in trend:
+        item['winRate'] = round(
+            (item['wins'] + item['draws'] * 0.5) * 100.0 / max(item['battles'], 1), 1
+        )
+    return jsonify({
+        'playerName': player_name, 'seasonId': season,
+        'score': dict(score) if score else {}, 'trend': trend,
+        'wuxunSource': '00000067[][10]',
+    })
 
 # ===== 武勋统计 =====
 @app.route('/api/wuxun')
@@ -1077,15 +1193,15 @@ def api_wuxun():
     conn = get_db()
     if group == 'union':
         rows = conn.execute('''
-            SELECT union_name, SUM(gongxun) as total_wx, COUNT(*) as battles,
+            SELECT union_name, SUM(wuxun) as total_wx, COUNT(*) as battles,
                    COUNT(DISTINCT player_name) as players
-            FROM wuxun WHERE union_name != '' GROUP BY union_name ORDER BY total_wx DESC
+            FROM wuxun_weekly_snapshots WHERE union_name != '' GROUP BY union_name ORDER BY total_wx DESC
         ''').fetchall()
     else:
         rows = conn.execute('''
-            SELECT player_name, union_name, SUM(gongxun) as total_wx,
-                   COUNT(*) as battles, AVG(gongxun) as avg_wx
-            FROM wuxun WHERE player_name != '' GROUP BY player_name ORDER BY total_wx DESC LIMIT 50
+            SELECT player_name,MAX(union_name) AS union_name,SUM(wuxun) as total_wx,
+                   COUNT(*) as battles,AVG(wuxun) as avg_wx
+            FROM wuxun_weekly_snapshots WHERE player_name != '' GROUP BY player_name ORDER BY total_wx DESC LIMIT 50
         ''').fetchall()
     conn.close()
     return jsonify(rows_to_list(rows))
@@ -1094,12 +1210,18 @@ def api_wuxun():
 @app.route('/api/scores')
 def api_scores():
     union = request.args.get('union', '')
+    season = request.args.get('season', 'current')
     conn = get_db()
-    where = '' if not union else f"WHERE union_name LIKE '%{union}%'"
+    where = ['season_id=?']
+    params = [season]
+    if union:
+        where.append('union_name LIKE ?')
+        params.append(f'%{union}%')
     rows = conn.execute(f'''
-        SELECT *, ROUND(win_count*100.0/MAX(battle_count,1),1) as win_rate
-        FROM scores {where} ORDER BY custom_score DESC
-    ''').fetchall()
+        SELECT *,battles AS battle_count,wins AS win_count,score AS custom_score,
+               ROUND(wins*100.0/MAX(battles,1),1) as win_rate
+        FROM custom_scores WHERE {' AND '.join(where)} ORDER BY score DESC
+    ''', params).fetchall()
     conn.close()
     return jsonify(rows_to_list(rows))
 
@@ -1111,7 +1233,7 @@ def api_union_matrix():
         SELECT atk_union, def_union,
                COUNT(*) as total,
                SUM(CASE WHEN result=1 THEN 1 ELSE 0 END) as atk_wins
-        FROM battles
+        FROM battles_v2
         WHERE atk_union != '' AND def_union != '' AND atk_union != def_union
         GROUP BY atk_union, def_union
         ORDER BY total DESC LIMIT 200
@@ -1321,14 +1443,14 @@ def api_profile_switch():
 def api_status():
     conn = get_db()
     stats = {}
-    for tbl in ['battles','unions','player_teams','wuxun','scores',
+    for tbl in ['battles_v2','unions','player_teams','wuxun_weekly_snapshots','custom_scores',
                'player_locations','player_heroes','union_cities','hero_unlock','db_sync']:
         try:
             stats[tbl] = conn.execute(f'SELECT COUNT(*) FROM {tbl}').fetchone()[0]
         except:
             stats[tbl] = 0
     try:
-        last = conn.execute('SELECT time_str FROM battles ORDER BY time DESC LIMIT 1').fetchone()
+        last = conn.execute('SELECT time_str FROM battles_v2 ORDER BY time DESC LIMIT 1').fetchone()
         stats['last_battle'] = last[0] if last else ''
     except:
         stats['last_battle'] = ''
@@ -1425,6 +1547,67 @@ def _command_center_alerts(armies, writer_stats=None, latest_battle_time=0, now=
     return alerts[:20]
 
 
+def _data_quality_snapshot(conn, now=None):
+    now = int(time.time()) if now is None else int(now)
+    latest_world_ms = _cc_scalar(
+        conn, 'SELECT MAX(observed_at_ms) FROM world_state_versions', default=0
+    )
+    latest_world_at = int(latest_world_ms // 1000) if latest_world_ms else 0
+    from datetime import datetime as _dt, timedelta as _td
+    today = _dt.fromtimestamp(now).date()
+    current_monday = today - _td(days=today.weekday())
+    previous_monday = (current_monday - _td(days=7)).isoformat()
+    weekly_rows = _cc_scalar(
+        conn,
+        'SELECT COUNT(*) FROM wuxun_weekly_snapshots WHERE week_start=?',
+        (previous_monday,),
+        default=0,
+    )
+    manifest_path = Path(BASE_DIR) / 'data/protocol/client-9.2.2/manifest.json'
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        manifest = {}
+    return {
+        'latestWorldAt': latest_world_at,
+        'worldStateStale': not latest_world_at or now - latest_world_at > 600,
+        'previousWeekStart': previous_monday,
+        'weeklyWuxunRows': int(weekly_rows or 0),
+        'weeklyWuxunMissing': int(weekly_rows or 0) == 0,
+        'protocolManifestOk': manifest.get('commandCount') == 94,
+        'protocolManifest': manifest,
+    }
+
+
+def _data_quality_alerts(quality):
+    alerts = []
+    if quality.get('worldStateStale'):
+        alerts.append({
+            'id': f"world_state_stale:{quality.get('latestWorldAt', 0)}",
+            'kind': 'world_state_stale', 'level': 'warning',
+            'title': '世界状态已停止更新',
+            'message': '最近一次 5026/5028 世界状态超过 10 分钟，请检查抓包链路',
+            'entityType': 'system', 'entityId': 'world_state',
+            'lastUpdatedAt': quality.get('latestWorldAt', 0),
+        })
+    if quality.get('weeklyWuxunMissing'):
+        alerts.append({
+            'id': f"weekly_wuxun_missing:{quality.get('previousWeekStart', '')}",
+            'kind': 'weekly_wuxun_missing', 'level': 'warning',
+            'title': '上周武勋快照缺失',
+            'message': f"未找到 {quality.get('previousWeekStart', '')} 周的周日成员武勋快照",
+            'entityType': 'system', 'entityId': 'weekly_wuxun',
+        })
+    if not quality.get('protocolManifestOk'):
+        alerts.append({
+            'id': 'protocol_contract_invalid', 'kind': 'protocol_contract_invalid',
+            'level': 'danger', 'title': '协议契约产物异常',
+            'message': '协议目录缺失或命令覆盖数不是 94，请重新生成协议证据',
+            'entityType': 'system', 'entityId': 'protocol_contract',
+        })
+    return alerts
+
+
 @app.route('/api/command-center/overview')
 def api_command_center_overview():
     """桌面指挥中心的只读聚合数据；任一可选表缺失都不影响其他模块。"""
@@ -1479,6 +1662,7 @@ def api_command_center_overview():
             default=0,
         )
         writer_stats = dict(getattr(_writer, 'stats', {}) or {})
+        quality = _data_quality_snapshot(conn, now)
         return jsonify({
             'ok': True,
             'profile': {
@@ -1490,17 +1674,18 @@ def api_command_center_overview():
             'metrics': metrics,
             'battles': battles,
             'armies': armies,
-            'alerts': _command_center_alerts(
+            'alerts': (_command_center_alerts(
                 armies,
                 writer_stats=writer_stats,
                 latest_battle_time=latest_battle_time,
                 now=now,
-            ),
+            ) + _data_quality_alerts(quality))[:20],
             'freshness': {
                 'generatedAt': now,
                 'latestBattleAt': latest_battle_time,
                 'latestArmyArrivalAt': latest_army_time,
                 'writer': writer_stats,
+                'dataQuality': quality,
             },
         })
     finally:
@@ -2082,6 +2267,9 @@ def api_battles_all():
     ftype  = request.args.get('fight_type', '')
     period = request.args.get('period', '')
     wid    = request.args.get('wid', '')
+    start_time = request.args.get('start_time', '')
+    end_time = request.args.get('end_time', '')
+    city_siege = request.args.get('city_siege', '') == '1'
     if request.method == 'POST':
         body = request.get_json(silent=True) or {}
         members = body.get('members', request.args.get('members', ''))
@@ -2104,6 +2292,15 @@ def api_battles_all():
     if wid:
         try: where.append('wid=?'); params.append(int(wid))
         except: pass
+    if start_time:
+        try: where.append('time>=?'); params.append(int(start_time))
+        except: pass
+    if end_time:
+        try: where.append('time<?'); params.append(int(end_time))
+        except: pass
+    if city_siege:
+        where.append('city_type=8')
+        where.append('COALESCE(is_npc,0)=1')
     if members:
         names = [m.strip() for m in members.split(',') if m.strip()]
         if names:
@@ -2116,13 +2313,19 @@ def api_battles_all():
         where.append(f'time >= {int(__import__("time").time())-7*86400}')
     w = ' AND '.join(where)
     conn = get_db()
+    bv_cols = get_bv2_cols(conn)
+    defense_phase_col = (
+        "COALESCE(defense_phase, 'other') AS defense_phase"
+        if 'defense_phase' in bv_cols
+        else "'other' AS defense_phase"
+    )
     total = conn.execute(f'SELECT COUNT(*) FROM battles_v2 WHERE {w}', params).fetchone()[0]
     rows  = conn.execute(
         f'''SELECT battle_id, time, time_str, result, fight_type,
                    atk_name, atk_union, def_name, def_union,
                    atk_hero1_id, atk_hero2_id, atk_hero3_id,
                    def_hero1_id, def_hero2_id, def_hero3_id,
-                   garrison
+                   garrison, {defense_phase_col}
             FROM battles_v2
             WHERE {w}
             ORDER BY time DESC
@@ -2426,7 +2629,10 @@ def api_player_battle_teams():
                 heroes_ids = '+'.join(str(x) for x in [dh1,dh2,dh3] if x)
             if heroes_ids:
                 stars = parse_advance_stars(def_advance)
-                skills = parse_skill_info(skill_info, [4,5,6])
+                # The protocol stores defender battle-skill slots in reverse
+                # battle order: 6, 5, 4 correspond to the three defender
+                # heroes from left to right.
+                skills = parse_skill_info(skill_info, [6,5,4])
                 k = (def_name.strip(), '', heroes_ids)
                 d = team_map[k]
                 d['cnt'] += 1
@@ -3013,6 +3219,12 @@ def api_hud_health():
         'hero-portraits',
         'manifest.json',
     )
+    conn = get_db()
+    try:
+        quality = _data_quality_snapshot(conn)
+    finally:
+        conn.close()
+    protocol_manifest = quality.get('protocolManifest') or {}
     components = {
         'backend': _health_component('live', '后端', 'Flask API 可用'),
         'writer': _health_component(
@@ -3030,6 +3242,27 @@ def api_hud_health():
             'live' if os.path.isfile(portrait_manifest) else 'unknown',
             '画像资源',
             portrait_manifest,
+        ),
+        'protocolContract': _health_component(
+            'live' if quality['protocolManifestOk'] else 'degraded',
+            '协议契约',
+            f"commands={protocol_manifest.get('commandCount', 0)} typed={protocol_manifest.get('webStatusCounts', {}).get('typed', 0)}",
+            commandCount=int(protocol_manifest.get('commandCount') or 0),
+            typedCount=int(protocol_manifest.get('webStatusCounts', {}).get('typed') or 0),
+            rawCount=int(protocol_manifest.get('webStatusCounts', {}).get('raw') or 0),
+        ),
+        'worldState': _health_component(
+            'degraded' if quality['worldStateStale'] else 'live',
+            '世界状态',
+            '超过 10 分钟未更新' if quality['worldStateStale'] else '5026/5028 持续更新',
+            latestAt=quality['latestWorldAt'],
+        ),
+        'weeklyWuxun': _health_component(
+            'degraded' if quality['weeklyWuxunMissing'] else 'live',
+            '周武勋快照',
+            f"{quality['previousWeekStart']} rows={quality['weeklyWuxunRows']}",
+            weekStart=quality['previousWeekStart'],
+            rows=quality['weeklyWuxunRows'],
         ),
     }
     statuses = {component['status'] for component in components.values()}
@@ -3191,7 +3424,7 @@ def api_task_report_count(tid):
 
 @app.route('/api/tasks/<int:tid>/statistics', methods=['POST'])
 def api_task_statistics(tid):
-    """统计考勤：按 battles_v2 中匹配 wid/pos 的战报统计每人出战次数"""
+    """统计攻城考勤，按守方阶段归类主力与拆迁。"""
     conn = get_db()
     task = conn.execute('SELECT * FROM tasks WHERE id=?', (tid,)).fetchone()
     if not task:
@@ -3204,60 +3437,78 @@ def api_task_statistics(tid):
     try: user_list = json.loads(d['user_list'])
     except: user_list = {}
 
+    # 任务时刻起的一个标准攻城阶段（2 小时）内，按守方阶段统计。
+    # 这与客户端 UNION_SIEGE_DURATION_TIME=7200 的攻城时长保持一致。
+    task_start = int(d.get('time') or 0)
+    task_end = task_start + 7200 if task_start > 0 else 0
+
     # 兼容不同库结构
     bv_cols = {r[1] for r in conn.execute("PRAGMA table_info(battles_v2)").fetchall()}
-    has_garrison = 'garrison' in bv_cols
     has_atk_hero1 = 'atk_hero1_id' in bv_cols
+    has_phase = 'defense_phase' in bv_cols
+
+    role_ids_by_uid = {}
+    for table, uid_col in (('zone_players', 'uid'), ('player_power_rank', 'user_id')):
+        exists = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+            (table,),
+        ).fetchone()
+        if not exists:
+            continue
+        try:
+            for row in conn.execute(
+                f"SELECT {uid_col}, role_id FROM {table} WHERE role_id IS NOT NULL AND role_id != ''"
+            ).fetchall():
+                role_ids_by_uid.setdefault(str(row[0]), set()).add(str(row[1]))
+        except sqlite3.OperationalError:
+            continue
+
+    def statistics_for_member(member_uid, member):
+        params = [pos]
+        where = ['wid=?', 'city_type=8', 'COALESCE(is_npc,0)=1']
+        if task_start > 0:
+            where.append('time>=?')
+            params.append(task_start)
+        if task_end > 0:
+            where.append('time<?')
+            params.append(task_end)
+
+        mapped_role_ids = sorted(role_ids_by_uid.get(str(member_uid), set()))
+        if mapped_role_ids:
+            placeholders = ','.join('?' * len(mapped_role_ids))
+            where.append(f'atk_uid IN ({placeholders})')
+            params.extend(mapped_role_ids)
+        else:
+            # 00000067 only supplies numeric user ids.  Until a role-id
+            # snapshot is captured, retain name matching as a safe fallback.
+            where.append('atk_name=?')
+            params.append(member.get('name', ''))
+
+        phase_expr = "COALESCE(defense_phase, 'other')" if has_phase else "'other'"
+        sql = f'''
+            SELECT
+                SUM(CASE WHEN {phase_expr}='normal_city_guard' THEN 1 ELSE 0 END) AS main_count,
+                SUM(CASE WHEN {phase_expr}='last_city_guard' THEN 1 ELSE 0 END) AS tear_count,
+                COUNT(DISTINCT CASE WHEN {phase_expr}='normal_city_guard'
+                    AND atk_hero1_id IS NOT NULL AND atk_hero1_id != 0
+                    THEN atk_hero1_id END) AS main_teams,
+                COUNT(DISTINCT CASE WHEN {phase_expr}='last_city_guard'
+                    AND atk_hero1_id IS NOT NULL AND atk_hero1_id != 0
+                    THEN atk_hero1_id END) AS tear_teams
+            FROM battles_v2
+            WHERE {' AND '.join(where)}
+        '''
+        row = conn.execute(sql, params).fetchone()
+        return (
+            int(row['main_count'] or 0),
+            int(row['tear_count'] or 0),
+            int(row['main_teams'] or 0) if has_atk_hero1 else 0,
+            int(row['tear_teams'] or 0) if has_atk_hero1 else 0,
+        )
 
     complete = 0
     for uid, u in user_list.items():
-        name = u['name']
-        if has_garrison:
-            # 主力次数（garrison=0，攻方出战）
-            atk_num = conn.execute(
-                'SELECT COUNT(*) FROM battles_v2 WHERE wid=? AND atk_name=? AND garrison=0',
-                (pos, name)
-            ).fetchone()[0]
-            # 拆迁次数（garrison=1，攻方出战）
-            dis_num = conn.execute(
-                'SELECT COUNT(*) FROM battles_v2 WHERE wid=? AND atk_name=? AND garrison=1',
-                (pos, name)
-            ).fetchone()[0]
-        else:
-            # 老/精简库没有 garrison，统一按总出战统计
-            atk_num = conn.execute(
-                'SELECT COUNT(*) FROM battles_v2 WHERE wid=? AND atk_name=?',
-                (pos, name)
-            ).fetchone()[0]
-            dis_num = 0
-
-        if has_garrison and has_atk_hero1:
-            # 主力队伍数（按主将ID去重，不同主将算不同队伍）
-            atk_team_num = conn.execute(
-                'SELECT COUNT(DISTINCT atk_hero1_id) FROM battles_v2 WHERE wid=? AND atk_name=? AND garrison=0 AND atk_hero1_id IS NOT NULL AND atk_hero1_id != 0',
-                (pos, name)
-            ).fetchone()[0]
-            # 拆迁队伍数
-            dis_team_num = conn.execute(
-                'SELECT COUNT(DISTINCT atk_hero1_id) FROM battles_v2 WHERE wid=? AND atk_name=? AND garrison=1 AND atk_hero1_id IS NOT NULL AND atk_hero1_id != 0',
-                (pos, name)
-            ).fetchone()[0]
-        elif has_atk_hero1:
-            atk_team_num = conn.execute(
-                'SELECT COUNT(DISTINCT atk_hero1_id) FROM battles_v2 WHERE wid=? AND atk_name=? AND atk_hero1_id IS NOT NULL AND atk_hero1_id != 0',
-                (pos, name)
-            ).fetchone()[0]
-            dis_team_num = 0
-        else:
-            # 没有 atk_hero1_id 时，从 battle_heroes 侧按 pos=0 去重
-            atk_team_num = conn.execute(
-                '''SELECT COUNT(DISTINCT bh.hero_id)
-                   FROM battle_heroes bh
-                   JOIN battles_v2 bv ON bv.battle_id = bh.battle_id
-                   WHERE bv.wid=? AND bv.atk_name=? AND bh.side='atk' AND bh.pos=0 AND bh.hero_id IS NOT NULL AND bh.hero_id != 0''',
-                (pos, name)
-            ).fetchone()[0]
-            dis_team_num = 0
+        atk_num, dis_num, atk_team_num, dis_team_num = statistics_for_member(uid, u)
         user_list[uid]['atk_num'] = atk_num
         user_list[uid]['dis_num'] = dis_num
         user_list[uid]['atk_team_num'] = atk_team_num
@@ -3717,6 +3968,49 @@ def add_no_cache_headers(resp):
 
 
 # ===== 静态文件 =====
+@app.route('/api/local-auth/login', methods=['POST'])
+def api_local_auth_login():
+    payload = request.get_json(silent=True) or {}
+    username = str(payload.get('username') or '').strip()
+    password = payload.get('password')
+    if not username or not isinstance(password, str) or not password:
+        return jsonify({'ok': False, 'error': {'code': 'INVALID_INPUT', 'message': '请输入用户名和密码'}}), 400
+    result, status = _auth_service_request('login', {
+        'username': username,
+        'password': password,
+        'clientVersion': AUTH_CLIENT_VERSION,
+    })
+    return jsonify(result), status
+
+
+@app.route('/api/local-auth/register', methods=['POST'])
+def api_local_auth_register():
+    payload = request.get_json(silent=True) or {}
+    username = str(payload.get('username') or '').strip()
+    password = payload.get('password')
+    if not username or not isinstance(password, str) or not password:
+        return jsonify({'ok': False, 'error': {'code': 'INVALID_INPUT', 'message': '请输入用户名和密码'}}), 400
+    result, status = _auth_service_request('register', {
+        'username': username,
+        'password': password,
+        'clientVersion': AUTH_CLIENT_VERSION,
+    })
+    return jsonify(result), status
+
+
+@app.route('/api/local-auth/verify', methods=['POST'])
+def api_local_auth_verify():
+    payload = request.get_json(silent=True) or {}
+    token = payload.get('token')
+    if not isinstance(token, str) or not token.strip():
+        return jsonify({'ok': False, 'error': {'code': 'SESSION_INVALID', 'message': '登录状态无效'}}), 401
+    result, status = _auth_service_request('session/verify', {
+        'token': token,
+        'clientVersion': AUTH_CLIENT_VERSION,
+    })
+    return jsonify(result), status
+
+
 @app.route('/')
 def index():
     dashboard_path = os.path.join(RESOURCE_DIR, 'static', 'dashboard.html')

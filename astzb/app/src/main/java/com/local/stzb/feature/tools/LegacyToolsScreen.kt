@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
@@ -23,6 +24,11 @@ import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.Leaderboard
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Science
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Route
+import androidx.compose.material.icons.outlined.EventAvailable
+import androidx.compose.material.icons.outlined.Calculate
+import androidx.compose.material.icons.outlined.AutoGraph
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +40,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.testTag
+import com.local.stzb.core.designsystem.AstzbColors
 import com.local.stzb.core.ui.GlassCard
 import com.local.stzb.core.ui.GlassToolbar
 
@@ -47,12 +55,17 @@ fun LegacyToolsScreen(
     openTeams: () -> Unit,
     openTeamReport: () -> Unit,
     openSimulator: () -> Unit,
+    openProfiles: () -> Unit,
+    openLiveArmies: () -> Unit,
+    openAttendance: () -> Unit,
+    openScores: () -> Unit,
+    openResearch: () -> Unit,
     onLogout: () -> Unit = {},
     onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().testTag("tools-list"),
         contentPadding = PaddingValues(start = 16.dp, top = 14.dp, end = 16.dp, bottom = 28.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -62,8 +75,8 @@ fun LegacyToolsScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (onBack != null) {
@@ -77,13 +90,17 @@ fun LegacyToolsScreen(
         }
         item {
             ToolSection("战斗与队伍") {
+                ToolActionCard(Icons.Outlined.EventAvailable, "攻城考勤", openAttendance)
+                ToolActionCard(Icons.Outlined.Calculate, "自定义积分", openScores)
                 ToolActionCard(Icons.Outlined.Groups, "队伍", openTeams)
                 ToolActionCard(Icons.Outlined.Groups, "团队报表", openTeamReport)
-                ToolActionCard(Icons.Outlined.Science, "模拟器", openSimulator)
+                ToolActionCard(Icons.Outlined.Science, "战术演练", openSimulator)
+                ToolActionCard(Icons.Outlined.AutoGraph, "阵容战法研究", openResearch)
             }
         }
         item {
             ToolSection("情报与榜单") {
+                ToolActionCard(Icons.Outlined.Route, "实时部队", openLiveArmies)
                 ToolActionCard(Icons.Outlined.Map, "地图与城池", openMap)
                 ToolActionCard(Icons.Outlined.Campaign, "游戏公告", openAnnouncements)
                 ToolActionCard(Icons.Outlined.Leaderboard, "排行榜", openRankings)
@@ -97,6 +114,7 @@ fun LegacyToolsScreen(
         }
         item {
             ToolSection("账号") {
+                ToolActionCard(Icons.Outlined.AccountCircle, "账号与区服", openProfiles)
                 ToolActionCard(Icons.AutoMirrored.Outlined.Logout, "退出登录", onLogout)
             }
         }
@@ -105,16 +123,18 @@ fun LegacyToolsScreen(
 
 @Composable
 private fun ToolSection(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        content()
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            content()
+        }
     }
 }
 
@@ -131,9 +151,10 @@ private fun ToolActionCard(icon: ImageVector, label: String, onClick: () -> Unit
         ) {
             Surface(
                 modifier = Modifier.size(40.dp),
-                shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(15.dp),
+                color = AstzbColors.PrimaryContainer,
                 contentColor = MaterialTheme.colorScheme.primary,
+                shadowElevation = 4.dp,
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(icon, contentDescription = null, modifier = Modifier.size(21.dp))

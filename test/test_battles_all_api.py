@@ -32,7 +32,8 @@ class BattlesAllApiTest(unittest.TestCase):
                 def_hero2_id INTEGER,
                 def_hero3_id INTEGER,
                 garrison INTEGER,
-                is_npc INTEGER
+                is_npc INTEGER,
+                defense_phase TEXT
             );
             CREATE TABLE battle_heroes(
                 battle_id INTEGER,
@@ -43,7 +44,8 @@ class BattlesAllApiTest(unittest.TestCase):
             INSERT INTO battles_v2 VALUES(
                 101, 1700000000, '2023-11-14 22:13:20', 2, '守方胜', 0,
                 '一别西风', '诸丨天地', '小股流寇营地', '',
-                100013, 102016, 100020, 100752, 100126, 0, 0, 1
+                100013, 102016, 100020, 100752, 100126, 0, 0, 1,
+                'last_city_guard'
             );
             """
         )
@@ -71,6 +73,77 @@ class BattlesAllApiTest(unittest.TestCase):
         body = response.get_json()
         self.assertEqual(body["total"], 1)
         self.assertEqual(body["data"][0]["battle_id"], 101)
+        self.assertEqual(body["data"][0]["defense_phase"], "last_city_guard")
+
+    def test_battles_all_filters_city_siege_details_to_the_task_window(self):
+        conn = self._connect()
+        conn.execute(
+            "ALTER TABLE battles_v2 ADD COLUMN city_type INTEGER DEFAULT 0"
+        )
+        conn.execute(
+            "UPDATE battles_v2 SET city_type=8, is_npc=1 WHERE battle_id=101"
+        )
+        conn.execute(
+            """
+            INSERT INTO battles_v2(
+                battle_id,time,time_str,result,result_desc,fight_type,atk_name,atk_union,
+                def_name,def_union,garrison,is_npc,defense_phase,city_type
+            ) VALUES(
+                102,1690000000,'2023-07-22 04:26:40',1,'攻方胜',0,'一别西风','诸丨天地',
+                '历史野战','',0,0,'other',0
+            )
+            """
+        )
+        conn.commit()
+        conn.close()
+
+        with patch("api_server.get_db", self._connect):
+            response = api_server.app.test_client().get(
+                "/api/battles_all?page=1&size=10&start_time=1699999999&end_time=1700000001&city_siege=1"
+            )
+
+        self.assertEqual(response.status_code, 200)
+        body = response.get_json()
+        self.assertEqual(body["total"], 1)
+        self.assertEqual(body["data"][0]["battle_id"], 101)
+
+    def test_player_battle_teams_maps_defender_skills_in_6_5_4_order(self):
+        conn = self._connect()
+        conn.execute(
+            """
+            ALTER TABLE battles_v2 ADD COLUMN all_skill_info TEXT DEFAULT ''
+            """
+        )
+        conn.execute(
+            """
+            ALTER TABLE battles_v2 ADD COLUMN defend_all_hero_info TEXT DEFAULT ''
+            """
+        )
+        conn.execute(
+            """
+            UPDATE battles_v2
+            SET def_name = '守方玩家',
+                def_union = '守方同盟',
+                is_npc = 0,
+                all_skill_info = '4,4004,1;5,4005,1;6,4006,1',
+                defend_all_hero_info =
+                    '100001,40,100,100,0;100002,40,100,100,0;100003,40,100,100,0'
+            WHERE battle_id = 101
+            """
+        )
+        conn.commit()
+        conn.close()
+
+        with patch("api_server.get_db", self._connect):
+            response = api_server.app.test_client().get(
+                "/api/player_battle_teams?side=def&player=%E5%AE%88%E6%96%B9%E7%8E%A9%E5%AE%B6&debug=1"
+            )
+
+        self.assertEqual(response.status_code, 200)
+        rows = response.get_json()["data"]
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["player_name"], "守方玩家")
+        self.assertEqual(rows[0]["skills"], "4006,4005,4004")
 
 
 if __name__ == "__main__":

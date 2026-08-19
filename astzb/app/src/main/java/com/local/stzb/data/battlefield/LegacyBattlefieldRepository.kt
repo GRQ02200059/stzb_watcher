@@ -77,7 +77,9 @@ class LegacyBattlefieldRepository(
     override fun observeSnapshot(): Flow<BattlefieldSnapshot> = state.asStateFlow()
 
     override suspend fun refresh() = refreshMutex.withLock {
-        val data = withContext(ioDispatcher) { source.read() }.normalizeTimestamps()
+        val data = withContext(ioDispatcher) { source.read() }
+            .withoutMisclassifiedUnionBuildingHelp()
+            .normalizeTimestamps()
         val incoming = buildList {
             addAll(data.moves.map { move -> BattlefieldEventMapper.fromMove(move, data.teamInsights[move.teamId] ?: Local13A2TeamInsight.empty()) })
             addAll(data.battles.map(BattlefieldEventMapper::fromBattle))
@@ -229,6 +231,10 @@ class AndroidLegacyBattlefieldSource(
         const val SIEGE_LIMIT = 80
     }
 }
+
+private fun LegacyBattlefieldData.withoutMisclassifiedUnionBuildingHelp(): LegacyBattlefieldData = copy(
+    sieges = sieges.filterNot { it.sourceMsgId == "6314" },
+)
 
 private fun LegacyBattlefieldData.normalizeTimestamps(): LegacyBattlefieldData = copy(
     lastEventAt = lastEventAt?.let(::normalizeEpochSeconds),

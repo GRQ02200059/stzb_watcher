@@ -29,6 +29,11 @@ class IntelligenceConfigRepositoryTest(unittest.TestCase):
         self.assertEqual(result["datasetVersion"], "client-9.2.2")
         self.assertIsNotNone(result["initialSkill"])
 
+    def test_hero_detail_accepts_season_hero_id(self):
+        result = self.repo.hero_detail(130497)
+        self.assertIsNotNone(result)
+        self.assertEqual(100497, result["hero"]["heroid"])
+
     def test_skill_detail_joins_details_and_effects(self):
         result = self.repo.skill_detail(200027)
         self.assertEqual(result["skill"]["name"], "其疾如风")

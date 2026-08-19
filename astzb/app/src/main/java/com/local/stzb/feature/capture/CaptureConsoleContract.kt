@@ -12,9 +12,18 @@ data class CaptureRuntime(
     val packetCount: Int = 0,
     val targetPackage: String = "",
     val logs: List<String> = emptyList(),
+    val evidence: CaptureEvidence = CaptureEvidence.from(
+        nativeReady = true,
+        vpnEstablished = false,
+        socksConnections = 0,
+        protocolCounts = emptyMap(),
+        databaseRowDelta = 0,
+        stopped = false,
+        networkRestored = false,
+    ),
 )
 
-enum class CaptureExportKind { STZB, DATABASE, DIAGNOSTICS }
+enum class CaptureExportKind { STZB, DATABASE, DIAGNOSTICS, EVIDENCE }
 
 data class CaptureExport(val name: String, val mimeType: String, val bytes: ByteArray)
 
@@ -40,6 +49,15 @@ data class CaptureConsoleUiState(
     val requestVpnPermission: Boolean = false,
     val message: String? = null,
     val busy: Boolean = false,
+    val evidence: CaptureEvidence = CaptureEvidence.from(
+        nativeReady = true,
+        vpnEstablished = false,
+        socksConnections = 0,
+        protocolCounts = emptyMap(),
+        databaseRowDelta = 0,
+        stopped = false,
+        networkRestored = false,
+    ),
 )
 
 sealed interface CaptureConsoleIntent {

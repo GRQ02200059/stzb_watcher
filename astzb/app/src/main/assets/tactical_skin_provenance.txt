@@ -1,0 +1,15 @@
+Android tactical drill skin assets
+
+Source repository: https://github.com/zzbChina/BorderHelper
+Source revision: ddcde6d30e78cacd738035d8a493ace172ed823f
+Authorization: repository owner authorized reuse for the Android ST assistant in this conversation.
+
+Imported files:
+- img/bg.1ed14adf.png -> res/drawable-nodpi/tactical_battlefield_bg.png
+- img/border_long_golden.cff429de.png -> res/drawable-nodpi/tactical_frame_gold.png
+- img/border_long_red.1d0e2de2.png -> res/drawable-nodpi/tactical_frame_red.png
+- img/border_new.ed8e45ac.png -> res/drawable-nodpi/tactical_frame_compact.png
+- img/ui6.9d75b138.webp -> res/drawable-nodpi/tactical_battle_emblem.webp
+
+No BorderHelper hero-card collection is imported. Hero cards remain mapped by
+the ST assistant's existing online iconId loader with its local text fallback.

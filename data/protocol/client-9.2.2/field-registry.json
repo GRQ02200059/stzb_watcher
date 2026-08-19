@@ -1,0 +1,621 @@
+{
+  "clientVersion": "9.2.2",
+  "fields": [
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs",
+          "lines": [
+            425,
+            435
+          ]
+        }
+      ],
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "userId",
+      "nullable": false,
+      "path": "[][0]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "id"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs",
+          "lines": [
+            439,
+            446
+          ]
+        }
+      ],
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "memberWuxun",
+      "nullable": true,
+      "path": "[][10]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "points"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs",
+          "lines": [
+            441,
+            447
+          ]
+        }
+      ],
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "groupId",
+      "nullable": true,
+      "path": "[][12]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "id"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs",
+          "lines": [
+            442,
+            448
+          ]
+        }
+      ],
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "groupName",
+      "nullable": false,
+      "path": "[][13]",
+      "rawTypes": [
+        "string"
+      ],
+      "unit": "text"
+    },
+    {
+      "businessApproved": false,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs",
+          "lines": [
+            445,
+            451
+          ]
+        }
+      ],
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "headId",
+      "nullable": true,
+      "path": "[][16]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "id"
+    },
+    {
+      "businessApproved": false,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs",
+          "lines": [
+            446,
+            452
+          ]
+        }
+      ],
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "headFrame",
+      "nullable": true,
+      "path": "[][17]",
+      "rawTypes": [
+        "string"
+      ],
+      "unit": "text"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs",
+          "lines": [
+            431,
+            436
+          ]
+        }
+      ],
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "userName",
+      "nullable": false,
+      "path": "[][1]",
+      "rawTypes": [
+        "string"
+      ],
+      "unit": "text"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs",
+          "lines": [
+            455,
+            463
+          ]
+        }
+      ],
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "weekWuxun",
+      "nullable": true,
+      "path": "[][26]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "points"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs",
+          "lines": [
+            456,
+            464
+          ]
+        }
+      ],
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "totalWuxun",
+      "nullable": true,
+      "path": "[][27]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "points"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs",
+          "lines": [
+            432,
+            437
+          ]
+        }
+      ],
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "donate",
+      "nullable": false,
+      "path": "[][2]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "points"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs",
+          "lines": [
+            459,
+            466
+          ]
+        }
+      ],
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "intoUnionTime",
+      "nullable": true,
+      "path": "[][30]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "unix_seconds"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs",
+          "lines": [
+            433,
+            438
+          ]
+        }
+      ],
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "position",
+      "nullable": false,
+      "path": "[][3]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "enum"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs",
+          "lines": [
+            436,
+            441
+          ]
+        }
+      ],
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "wid",
+      "nullable": false,
+      "path": "[][6]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "wid"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs",
+          "lines": [
+            437,
+            442
+          ]
+        }
+      ],
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "donateWeekly",
+      "nullable": false,
+      "path": "[][7]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "points"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs",
+          "lines": [
+            438,
+            443
+          ]
+        }
+      ],
+      "decimalId": 103,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000067",
+      "name": "roleForce",
+      "nullable": false,
+      "path": "[][8]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "points"
+    },
+    {
+      "businessApproved": false,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionGroupData.cs",
+          "lines": [
+            310,
+            320
+          ]
+        }
+      ],
+      "decimalId": 143,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "0000008f",
+      "name": "memberId",
+      "nullable": false,
+      "path": "[][0]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "id"
+    },
+    {
+      "businessApproved": false,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionGroupData.cs",
+          "lines": [
+            314,
+            324
+          ]
+        }
+      ],
+      "decimalId": 143,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "0000008f",
+      "name": "groupId",
+      "nullable": false,
+      "path": "[][1]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "id"
+    },
+    {
+      "businessApproved": false,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionGroupData.cs",
+          "lines": [
+            315,
+            325
+          ]
+        }
+      ],
+      "decimalId": 143,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "0000008f",
+      "name": "groupName",
+      "nullable": false,
+      "path": "[][2]",
+      "rawTypes": [
+        "string"
+      ],
+      "unit": "text"
+    },
+    {
+      "businessApproved": false,
+      "clientSources": [
+        {
+          "file": "Game.UI.GamePlay.Systems/Tenth.UI/RollingNoticeManager.cs",
+          "lines": [
+            128,
+            155
+          ]
+        }
+      ],
+      "decimalId": 2200,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000898",
+      "name": "noticeType",
+      "nullable": false,
+      "path": "[0]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "enum"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs",
+          "lines": [
+            3189,
+            3218
+          ]
+        }
+      ],
+      "decimalId": 5026,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a2",
+      "name": "worldChunks",
+      "nullable": false,
+      "path": "[14]",
+      "rawTypes": [
+        "object"
+      ],
+      "unit": "map"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs",
+          "lines": [
+            3208,
+            3218
+          ]
+        }
+      ],
+      "decimalId": 5026,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a2",
+      "name": "serverOrderId",
+      "nullable": false,
+      "path": "[18]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "sequence"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs",
+          "lines": [
+            3200,
+            3217
+          ]
+        }
+      ],
+      "decimalId": 5026,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a2",
+      "name": "realMarch",
+      "nullable": false,
+      "path": "[29]",
+      "rawTypes": [
+        "object"
+      ],
+      "unit": "map"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs",
+          "lines": [
+            3317,
+            3348
+          ]
+        }
+      ],
+      "decimalId": 5028,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a4",
+      "name": "worldChunkChanges",
+      "nullable": false,
+      "path": "[14]",
+      "rawTypes": [
+        "object"
+      ],
+      "unit": "map"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs",
+          "lines": [
+            3318,
+            3358
+          ]
+        }
+      ],
+      "decimalId": 5028,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a4",
+      "name": "clearChunks",
+      "nullable": false,
+      "path": "[15]",
+      "rawTypes": [
+        "object"
+      ],
+      "unit": "map"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs",
+          "lines": [
+            3304,
+            3310
+          ]
+        }
+      ],
+      "decimalId": 5028,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a4",
+      "name": "serverOrderId",
+      "nullable": false,
+      "path": "[18]",
+      "rawTypes": [
+        "integer"
+      ],
+      "unit": "sequence"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs",
+          "lines": [
+            3318,
+            3345
+          ]
+        }
+      ],
+      "decimalId": 5028,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a4",
+      "name": "blockInfo",
+      "nullable": true,
+      "path": "[20]",
+      "rawTypes": [
+        "array"
+      ],
+      "unit": "tuple"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs",
+          "lines": [
+            3324,
+            3338
+          ]
+        }
+      ],
+      "decimalId": 5028,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a4",
+      "name": "realMarch",
+      "nullable": false,
+      "path": "[29]",
+      "rawTypes": [
+        "object"
+      ],
+      "unit": "map"
+    },
+    {
+      "businessApproved": true,
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs",
+          "lines": [
+            3310,
+            3345
+          ]
+        }
+      ],
+      "decimalId": 5028,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000013a4",
+      "name": "deletedArmies",
+      "nullable": false,
+      "path": "[7]",
+      "rawTypes": [
+        "array"
+      ],
+      "unit": "ids"
+    }
+  ]
+}

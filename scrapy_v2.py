@@ -431,42 +431,51 @@ def process_packet(packet):
     if not (packet.haslayer(TCP) and packet.haslayer(Raw)):
         return
 
-    from scapy.layers.inet import IP
-    tcp     = packet[TCP]
-    payload = bytes(packet[Raw].load)
+    tcp = packet[TCP]
+    key = None
+    try:
+        from scapy.layers.inet import IP
+        payload = bytes(packet[Raw].load)
 
-    # 已绑定时：只处理绑定的那对 IP:port
-    with _bind_lock:
-        bound_src = _bound_src_ip
-        bound_dst = _bound_dst_ip
-    if bound_src and bound_dst:
-        if packet.haslayer(IP):
-            ip_layer = packet[IP]
-            src = f'{ip_layer.src}:{tcp.sport}'
-            dst = f'{ip_layer.dst}:{tcp.dport}'
-            if src != bound_src or dst != bound_dst:
-                return
+        # 已绑定时：只处理绑定的那对 IP:port
+        with _bind_lock:
+            bound_src = _bound_src_ip
+            bound_dst = _bound_dst_ip
+        if bound_src and bound_dst:
+            if packet.haslayer(IP):
+                ip_layer = packet[IP]
+                src = f'{ip_layer.src}:{tcp.sport}'
+                dst = f'{ip_layer.dst}:{tcp.dport}'
+                if src != bound_src or dst != bound_dst:
+                    return
 
-    key = (packet[IP].src if packet.haslayer(IP) else '?', tcp.sport, tcp.dport)
-    buf = stream_bufs[key]
-    buf.extend(payload)
+        key = (packet[IP].src if packet.haslayer(IP) else '?', tcp.sport, tcp.dport)
+        buf = stream_bufs[key]
+        buf.extend(payload)
 
-    # 循环提取完整数据包
-    while len(buf) >= MIN_PKT_LEN:
-        consumed = process_one_packet(buf, key)
-        if consumed == 0:
-            break
-        elif consumed > 0:
-            # 持续尝试从包中获取账号信息（包括账号切换）
-            try_bind_from_packet(packet, buf)
-            del buf[:consumed]
-        else:
-            del buf[:1]
+        # 循环提取完整数据包
+        while len(buf) >= MIN_PKT_LEN:
+            consumed = process_one_packet(buf, key)
+            if consumed == 0:
+                break
+            elif consumed > 0:
+                # 持续尝试从包中获取账号信息（包括账号切换）
+                try_bind_from_packet(packet, buf)
+                del buf[:consumed]
+            else:
+                del buf[:1]
 
-    # 缓冲区过大时清空（防内存泄漏）
-    if len(buf) > 5 * 1024 * 1024:
-        print(f'[WARN] 流 {key} 缓冲区过大 ({len(buf)}B)，清空')
-        buf.clear()
+        # 缓冲区过大时清空（防内存泄漏）
+        if len(buf) > 5 * 1024 * 1024:
+            print(f'[WARN] 流 {key} 缓冲区过大 ({len(buf)}B)，清空')
+            buf.clear()
+    except Exception as error:
+        # 单个报文的解析、落盘或写库异常不能逃出 Scapy 回调；
+        # 清理当前流，避免同一坏缓冲区在后续报文上反复触发异常。
+        err_stats['packet_callback'] += 1
+        print(f'[ERR-packet] stream={key} error={type(error).__name__}: {error}')
+        if key is not None:
+            stream_bufs.pop(key, None)
 
 
 def print_statistics():

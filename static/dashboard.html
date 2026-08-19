@@ -1071,6 +1071,7 @@ td.num,th.num{font-family:var(--font-mono);}
 }
 </style>
 <link rel="stylesheet" href="/static/dashboard-design-system.css">
+<link rel="stylesheet" href="/static/local-auth.css">
 <link rel="stylesheet" href="/static/intelligence-center.css">
 <link rel="stylesheet" href="/static/intelligence-research.css">
 <link rel="stylesheet" href="/static/score-center.css">
@@ -1083,6 +1084,27 @@ td.num,th.num{font-family:var(--font-mono);}
 <link rel="modulepreload" href="/static/simulator-analysis.mjs">
 </head>
 <body class="stzb-console">
+<section id="local-auth-gate" class="local-auth-gate" aria-labelledby="local-auth-title">
+  <div class="local-auth-card">
+    <div class="local-auth-kicker">STZB LOCAL ACCESS</div>
+    <h2 id="local-auth-title">登录率土战场指挥台</h2>
+    <div class="local-auth-hero-support">
+      <strong>喜欢这个免费项目？请支持一下</strong>
+      <span>给项目点 Star 和 Fork，帮助项目持续维护。</span>
+      <div><a class="local-auth-support-primary" href="https://github.com/GRQ02200059/stzb_watcher" target="_blank" rel="noreferrer">★ 点 Star</a><a class="local-auth-support-secondary" href="https://github.com/GRQ02200059/stzb_watcher/fork" target="_blank" rel="noreferrer">Fork 项目</a></div>
+    </div>
+    <p class="local-auth-copy">启动时仅校验一次账号状态。校验通过后，本地控制台独立运行，认证服务关闭不会影响当前使用。</p>
+    <form id="local-auth-form">
+      <label>用户名<input id="local-auth-username" autocomplete="username" required></label>
+      <label>密码<input id="local-auth-password" type="password" autocomplete="current-password" required></label>
+      <button id="local-auth-submit" class="btn btn-primary" type="submit">登录</button>
+    </form>
+    <button id="local-auth-register-toggle" class="local-auth-link" type="button">没有账号？注册</button>
+    <p id="local-auth-message" class="local-auth-message" role="alert"></p>
+    <div class="local-auth-community"><strong>喜欢这个免费项目吗？</strong><span>请在 GitHub 点 Star 和 Fork，帮助项目持续维护。</span><div><a href="https://github.com/GRQ02200059/stzb_watcher" target="_blank" rel="noreferrer">GitHub Star</a><a href="https://github.com/GRQ02200059/stzb_watcher/fork" target="_blank" rel="noreferrer">Fork 项目</a></div></div>
+    <small class="local-auth-license">本项目完全免费，仅供学习和内部使用，禁止倒卖。</small>
+  </div>
+</section>
 <header aria-label="全局状态栏">
   <h1>率土战场指挥台</h1>
   <div class='hdr-right'>
@@ -2562,4 +2584,5 @@ td.num,th.num{font-family:var(--font-mono);}
   <span class='gb-star'>★</span>
   求 Star
 </a>
+<script src="/static/local-auth.js"></script>
 </body></html>

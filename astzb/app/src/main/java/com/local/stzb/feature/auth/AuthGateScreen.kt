@@ -1,6 +1,5 @@
 package com.local.stzb.feature.auth
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +30,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -45,9 +43,10 @@ import com.local.stzb.auth.AuthGateUiState
 import com.local.stzb.core.designsystem.AstzbColors
 import com.local.stzb.core.ui.GlassCard
 import com.local.stzb.core.ui.GlassSurface
+import com.local.stzb.core.ui.MacGlassBackground
 
 private const val GITHUB_GUIDANCE =
-    "去 https://github.com/GRQ02200059/stzb_watcher 点 Star 和 Fork 后再注册。"
+    "注册前请先到 GitHub 项目页点 Star 和 Fork。"
 
 @Composable
 fun AuthGateScreen(
@@ -65,34 +64,31 @@ fun AuthGateScreen(
         uiState.username.isNotBlank() &&
         uiState.password.isNotBlank()
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Brush.verticalGradient(listOf(AstzbColors.BackgroundTop, AstzbColors.BackgroundBottom))),
-    ) {
+    MacGlassBackground(modifier = modifier) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .imePadding()
-                .padding(horizontal = 18.dp, vertical = 32.dp),
+                .padding(horizontal = 18.dp, vertical = 30.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             GlassSurface(modifier = Modifier.fillMaxWidth()) {
                 Column(
-                    modifier = Modifier.padding(18.dp),
+                    modifier = Modifier.padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Surface(
-                        modifier = Modifier.size(52.dp),
+                        modifier = Modifier.size(58.dp),
                         shape = MaterialTheme.shapes.large,
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.primary,
+                        color = AstzbColors.Primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        shadowElevation = 12.dp,
                     ) {
                         Box(contentAlignment = Alignment.Center) {
-                            Icon(Icons.Outlined.Shield, contentDescription = null, modifier = Modifier.size(28.dp))
+                            Icon(Icons.Outlined.Shield, contentDescription = null, modifier = Modifier.size(30.dp))
                         }
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -101,6 +97,11 @@ fun AuthGateScreen(
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            text = "独立抓包与核心分析 Beta",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
                         )
                         Text(
                             text = "登录后进入战场、抓包和工具中心",
@@ -122,12 +123,15 @@ fun AuthGateScreen(
                         icon = Icons.Outlined.Lock,
                         text = "密码无法找回，请自行妥善保存。",
                     )
-                    Text(
-                        text = "当前版本通过 HTTP 明文连接认证服务器，请仅在可信网络中使用。",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center,
-                    )
+                    GlassCard(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = "当前版本通过 HTTP 明文连接认证服务器，请仅在可信网络中使用。",
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
 
                     when (val state = uiState.state) {
                         AuthGateState.CheckingSession -> CheckingSession()

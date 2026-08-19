@@ -1,6 +1,5 @@
 package com.local.stzb.feature.capture
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import com.local.stzb.core.ui.GlassCard
 
 @Composable
 fun CaptureConsoleScreen(
@@ -44,6 +44,9 @@ fun CaptureConsoleScreen(
             ) {
                 StatusCard(state)
             }
+        }
+        item {
+            CaptureEvidenceCard(state.evidence)
         }
         item {
             GlassGroupCard(
@@ -88,12 +91,7 @@ fun CaptureConsoleScreen(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                    shape = MaterialTheme.shapes.medium,
-                ) {
+                GlassCard(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         state.visibleLogs.takeLast(40).joinToString("\n").ifBlank { "等待 STZB 业务包解析…" },
                         fontFamily = FontFamily.Monospace,
@@ -112,6 +110,7 @@ fun CaptureConsoleScreen(
                 ExportButton("导出解析包") { onExport(CaptureExportKind.STZB) }
                 ExportButton("导出数据库") { onExport(CaptureExportKind.DATABASE) }
                 ExportButton("导出诊断") { onExport(CaptureExportKind.DIAGNOSTICS) }
+                ExportButton("导出抓包证据") { onExport(CaptureExportKind.EVIDENCE) }
                 TextButton(onClick = onOpenLegacy, Modifier.fillMaxWidth()) { Text("打开旧控制台") }
             }
         }
@@ -120,10 +119,35 @@ fun CaptureConsoleScreen(
     }
 }
 
+@Composable
+private fun CaptureEvidenceCard(evidence: CaptureEvidence) {
+    GlassGroupCard(
+        title = "真实抓包闭环",
+        supporting = if (evidence.complete) "六阶段验证通过" else "下一步：${evidence.nextRequiredStage?.label ?: "等待验证"}",
+    ) {
+        CaptureEvidenceStage.entries.forEach { stage ->
+            val passed = evidence.stagePassed(stage)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(stage.label, color = MaterialTheme.colorScheme.onSurface)
+                Text(
+                    if (passed) "已通过" else "待验证",
+                    color = if (passed) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+        }
+        if (!evidence.complete) {
+            Text(
+                "完整通过必须在安装率土的真实设备上启动游戏，命中 5026/5028/10/92 等已知协议并产生本地入库增量，最后停止 VPN 并确认网络恢复。",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
 @Composable private fun StatusCard(state: CaptureConsoleUiState) {
-    Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
-        containerColor = if (state.running) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-    )) { Column(Modifier.padding(16.dp), Arrangement.spacedBy(6.dp)) {
+    GlassCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), Arrangement.spacedBy(6.dp)) {
         Text(
             if (state.running) "抓包运行中" else "抓包未启动",
             style = MaterialTheme.typography.titleLarge,
@@ -162,12 +186,7 @@ private fun GlassGroupCard(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-    ) {
+    GlassCard(modifier = modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)

@@ -146,6 +146,20 @@ class LegacyBattlefieldRepositoryTest {
         assertEquals(2, repository.observeSnapshot().first().events.size)
     }
 
+    @Test
+    fun legacy6314RowsNeverAppearAsSiegeEventsOrMetrics() = runBlocking {
+        val source = FakeBattlefieldSource().apply {
+            sieges = listOf(siege(wid = 100020, sourceId = "6314"))
+        }
+        val repository = LegacyBattlefieldRepository(source, Dispatchers.Unconfined)
+
+        repository.refresh()
+        val snapshot = repository.observeSnapshot().first()
+
+        assertTrue(snapshot.events.none { it.category == EventCategory.SIEGE })
+        assertEquals(0, snapshot.metrics.siegeEvents)
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun emptyFilterIsRejected() {
         LegacyBattlefieldRepository(FakeBattlefieldSource(), Dispatchers.Unconfined)

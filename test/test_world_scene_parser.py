@@ -21,6 +21,14 @@ def world_payload(
     block_armies=None,
     block_ships=None,
     block_assist_armies=None,
+    strategies=None,
+    nation_strategies=None,
+    ext_garrison=None,
+    manor_family=None,
+    career_support_add=None,
+    career_support_remove=None,
+    clear_hunter=None,
+    clear_strategy=None,
 ):
     slots = [{} for _ in range(31)]
     slots[0] = visual_field or {}
@@ -54,6 +62,8 @@ def world_payload(
         ]
     }
     slots[3] = {"1005": [1005, 0, "同盟"]}
+    slots[4] = strategies or {}
+    slots[5] = nation_strategies or {}
     slots[6] = armies or {}
     slots[7] = block_deleted or []
     slots[8] = war_ships or {}
@@ -64,18 +74,18 @@ def world_payload(
     slots[13] = short_messages or {}
     slots[14] = chunks or {}
     slots[15] = clear_chunks or {}
-    slots[16] = {}
+    slots[16] = ext_garrison or {}
     slots[17] = None
     slots[18] = marker
-    slots[19] = {}
+    slots[19] = manor_family or {}
     slots[20] = None
     slots[21] = block_armies or {}
     slots[22] = block_ships or {}
     slots[23] = block_assist_armies or {}
-    slots[24] = {}
-    slots[25] = []
-    slots[26] = []
-    slots[27] = []
+    slots[24] = career_support_add or {}
+    slots[25] = career_support_remove or []
+    slots[26] = clear_hunter or []
+    slots[27] = clear_strategy or []
     slots[28] = []
     slots[29] = real_march or {}
     slots[30] = None
@@ -90,6 +100,34 @@ def world_city(name):
 
 
 class WorldSceneParserTest(unittest.TestCase):
+    def test_preserves_remaining_documented_entities_and_delete_ids(self):
+        packet = parse_world_scene_packet(
+            5028,
+            repr(
+                world_payload(
+                    marker=90,
+                    strategies={"101": [1, 42]},
+                    nation_strategies={"102": [2, 42]},
+                    ext_garrison={"103": [3, 42]},
+                    manor_family={"104": ["family"]},
+                    career_support_add={"105": [5, 42]},
+                    career_support_remove=[106],
+                    clear_hunter=[107],
+                    clear_strategy=[101],
+                )
+            ),
+            "fixture",
+            1000,
+        )
+        self.assertIn(101, packet.entities["strategy"])
+        self.assertIn(102, packet.entities["nation_strategy"])
+        self.assertIn(103, packet.entities["ext_garrison"])
+        self.assertIn(104, packet.entities["manor_family"])
+        self.assertIn(105, packet.entities["career_support"])
+        self.assertEqual((106,), packet.removed_career_support_ids)
+        self.assertEqual((107,), packet.cleared_hunter_ids)
+        self.assertEqual((101,), packet.cleared_strategy_ids)
+
     def test_parses_ship_and_assist_membership_fields(self):
         payload = world_payload(
             marker=90,

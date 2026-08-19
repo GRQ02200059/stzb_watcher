@@ -124,6 +124,9 @@ class WorldScenePacket:
     tile_chunks: Dict[int, Dict[str, Any]] = field(default_factory=dict)
     tiles: Dict[int, WorldTile] = field(default_factory=dict)
     clear_chunks: Dict[int, Tuple[str, ...]] = field(default_factory=dict)
+    removed_career_support_ids: Tuple[int, ...] = ()
+    cleared_hunter_ids: Tuple[int, ...] = ()
+    cleared_strategy_ids: Tuple[int, ...] = ()
     real_marches: Dict[int, WorldRealMarch] = field(default_factory=dict)
     entities: Dict[str, Dict[int, WorldSceneEntity]] = field(default_factory=dict)
     observed_area: Optional[ObservedArea] = None

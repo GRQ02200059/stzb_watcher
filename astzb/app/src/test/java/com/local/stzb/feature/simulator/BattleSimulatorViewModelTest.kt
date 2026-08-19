@@ -124,6 +124,41 @@ class BattleSimulatorViewModelTest {
         assertFalse(vm.state.value.running)
     }
 
+    @Test fun researchLineupPrefillsThreeHeroesAndRejectsInvalidInput() = runTest(dispatcher) {
+        val vm = BattleSimulatorViewModel(FakeEngine(), dispatcher) { 1 }
+        advanceUntilIdle()
+        vm.onIntent(BattleSimulatorIntent.Run(1))
+        advanceUntilIdle()
+        assertNotNull(vm.state.value.result)
+
+        vm.onIntent(BattleSimulatorIntent.ApplyResearchLineup(SimulatorCamp.BLUE, listOf(7L, 8L, 9L)))
+
+        assertEquals(listOf(7L, 8L, 9L), vm.state.value.config!!.blue.heroes.map { it.heroId })
+        assertEquals(null, vm.state.value.result)
+        assertEquals(listOf(40, 40, 40), vm.state.value.config!!.blue.heroes.map { it.level })
+
+        vm.onIntent(BattleSimulatorIntent.ApplyResearchLineup(SimulatorCamp.RED, listOf(7L, 7L, 9L)))
+        assertEquals("研究阵容需要三名不重复武将", vm.state.value.error)
+    }
+
+    @Test fun singleRunIsSavedAsSelectableTacticalReportButAggregateRunIsNot() = runTest(dispatcher) {
+        val vm = BattleSimulatorViewModel(FakeEngine(), dispatcher) { 99 }
+        advanceUntilIdle()
+
+        vm.onIntent(BattleSimulatorIntent.Run(1))
+        advanceUntilIdle()
+
+        assertEquals(1, vm.state.value.reports.size)
+        assertEquals(vm.state.value.reports.single().id, vm.state.value.selectedReportId)
+        vm.onIntent(BattleSimulatorIntent.SelectReport(vm.state.value.reports.single().id))
+        vm.onIntent(BattleSimulatorIntent.SelectEvent(0))
+        assertEquals(0, vm.state.value.selectedEventIndex)
+
+        vm.onIntent(BattleSimulatorIntent.Run(100))
+        advanceUntilIdle()
+        assertEquals(1, vm.state.value.reports.size)
+    }
+
     private class FakeEngine : BattleSimulatorEngine {
         val defaultConfig = LocalSimulationConfig(
             blue = LocalSimTeamConfig(90, listOf(hero(1), hero(2), hero(3))),

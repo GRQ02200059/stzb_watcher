@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -20,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.local.stzb.core.ui.LoadingPanel
 import com.local.stzb.core.ui.GlassCard
+import com.local.stzb.core.ui.MacGlassHeader
 import com.local.stzb.domain.battles.BattleSide
 
 @Composable
@@ -28,12 +28,19 @@ fun BattleDetailScreen(state: BattlesUiState, onBack: () -> Unit, modifier: Modi
     if (detail == null) { LoadingPanel(modifier); return }
     LazyColumn(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item {
-            Row(Modifier.fillMaxWidth()) {
-                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "返回战报列表") }
-                Column { Text(detail.summary.outcomeLabel, color = MaterialTheme.colorScheme.primary); Text(detail.summary.title, style = MaterialTheme.typography.headlineSmall) }
+            MacGlassHeader(
+                title = detail.summary.title,
+                subtitle = detail.summary.outcomeLabel,
+                leading = {
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "返回战报列表") }
+                },
+            )
+        }
+        item {
+            GlassCard(Modifier.fillMaxWidth()) {
+                Text(detail.summary.locationAndType, Modifier.padding(14.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        item { Text(detail.summary.locationAndType) }
         item { SideCard(detail.attacker) }
         item { SideCard(detail.defender) }
         item { Text("天气 ${detail.weather} · 夜战 ${if (detail.nightBattle) "是" else "否"}") }

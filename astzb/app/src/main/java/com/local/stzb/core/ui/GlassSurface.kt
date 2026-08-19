@@ -4,8 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -25,40 +31,119 @@ import androidx.compose.ui.unit.dp
 import com.local.stzb.core.designsystem.AstzbColors
 
 /**
+ * App 全局 macOS 毛玻璃背景。
+ *
+ * Jetpack Compose 在普通 Android View 层没有稳定的全屏实时 backdrop blur，
+ * 所以这里用“浅雾渐变 + 彩色环境光斑”提供玻璃可透出的底色。
+ */
+@Composable
+fun MacGlassBackground(
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        AstzbColors.BackgroundTop,
+                        AstzbColors.BackgroundMiddle,
+                        AstzbColors.BackgroundBottom,
+                    ),
+                ),
+            ),
+    ) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(AstzbColors.AuroraBlue, Color.Transparent),
+                        radius = 620f,
+                        center = androidx.compose.ui.geometry.Offset(120f, 150f),
+                    ),
+                ),
+        )
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(AstzbColors.AuroraViolet, Color.Transparent),
+                        radius = 690f,
+                        center = androidx.compose.ui.geometry.Offset(900f, 220f),
+                    ),
+                ),
+        )
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(AstzbColors.AuroraMint, Color.Transparent),
+                        radius = 660f,
+                        center = androidx.compose.ui.geometry.Offset(760f, 1850f),
+                    ),
+                ),
+        )
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(AstzbColors.AuroraPeach, Color.Transparent),
+                        radius = 560f,
+                        center = androidx.compose.ui.geometry.Offset(80f, 1850f),
+                    ),
+                ),
+        )
+        content()
+    }
+}
+
+/**
  * 玻璃表面基础容器（一级）。
- * 雾白半透表面 + 细描边 + 柔和阴影。不依赖系统实时模糊。
+ * 半透明雾白 + 白色高光边 + 蓝灰阴影，模拟 macOS 浮层玻璃厚度。
  */
 @Composable
 fun GlassSurface(
     modifier: Modifier = Modifier,
+    shape: RoundedCornerShape = RoundedCornerShape(28.dp),
     content: @Composable BoxScope.() -> Unit,
 ) {
     Box(
         modifier
             .shadow(
-                elevation = 2.dp,
-                shape = RoundedCornerShape(20.dp),
-                ambientColor = Color(0x14000000),
-                spotColor = Color(0x14000000),
+                elevation = 18.dp,
+                shape = shape,
+                ambientColor = Color(0x24325A8A),
+                spotColor = Color(0x24325A8A),
             )
-            .clip(RoundedCornerShape(20.dp))
+            .clip(shape)
             .background(
                 brush = Brush.linearGradient(
-                    colors = listOf(AstzbColors.GlassMedium, AstzbColors.GlassLow),
+                    colors = listOf(
+                        AstzbColors.GlassFloating,
+                        AstzbColors.GlassFrost,
+                        AstzbColors.GlassVeil,
+                    ),
                 ),
-                shape = RoundedCornerShape(20.dp),
+                shape = shape,
             )
             .border(
                 width = 1.dp,
                 color = AstzbColors.Outline,
-                shape = RoundedCornerShape(20.dp),
+                shape = shape,
             ),
-        content = content,
-    )
+    ) {
+        GlassInnerHighlight(shape)
+        content()
+    }
 }
 
 /**
- * 玻璃卡片（二级，16dp 圆角，较浅描边）。
+ * 玻璃卡片（二级）。
  */
 @Composable
 fun GlassCard(
@@ -66,18 +151,20 @@ fun GlassCard(
     onClick: (() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    val shape = RoundedCornerShape(16.dp)
+    val shape = RoundedCornerShape(24.dp)
     Box(
         modifier.then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .shadow(
-                elevation = 1.dp,
+                elevation = 10.dp,
                 shape = shape,
-                ambientColor = Color(0x0D000000),
-                spotColor = Color(0x0D000000),
+                ambientColor = Color(0x17325A8A),
+                spotColor = Color(0x17325A8A),
             )
             .clip(shape)
             .background(
-                color = AstzbColors.GlassLow,
+                brush = Brush.linearGradient(
+                    colors = listOf(AstzbColors.GlassFrost, AstzbColors.GlassVeil),
+                ),
                 shape = shape,
             )
             .border(
@@ -85,8 +172,10 @@ fun GlassCard(
                 color = AstzbColors.OutlineLow,
                 shape = shape,
             ),
-        content = content,
-    )
+    ) {
+        GlassInnerHighlight(shape)
+        content()
+    }
 }
 
 /**
@@ -100,8 +189,8 @@ fun GlassSection(
 ) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = AstzbColors.GlassLow),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = AstzbColors.GlassVeil),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         androidx.compose.foundation.layout.Column(
@@ -129,12 +218,76 @@ fun GlassToolbar(
     },
 ) {
     GlassSurface(
-        modifier = modifier.semantics {
-            if (title != null) contentDescription = "工具栏：$title"
-        },
+        modifier = modifier
+            .semantics {
+                if (title != null) contentDescription = "工具栏：$title"
+            },
+        shape = RoundedCornerShape(30.dp),
     ) {
         content()
     }
+}
+
+/**
+ * 页面顶部标题玻璃条。
+ */
+@Composable
+fun MacGlassHeader(
+    title: String,
+    subtitle: String? = null,
+    modifier: Modifier = Modifier,
+    leading: @Composable RowScope.() -> Unit = {},
+    trailing: @Composable RowScope.() -> Unit = {},
+) {
+    GlassSurface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(30.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            leading()
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                if (!subtitle.isNullOrBlank()) {
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            trailing()
+        }
+    }
+}
+
+@Composable
+private fun BoxScope.GlassInnerHighlight(shape: RoundedCornerShape) {
+    Box(
+        Modifier
+            .matchParentSize()
+            .border(
+                width = 1.dp,
+                brush = Brush.verticalGradient(
+                    listOf(
+                        AstzbColors.GlassHighlight,
+                        Color.Transparent,
+                        Color(0x1A426AD2),
+                    ),
+                ),
+                shape = shape,
+            ),
+    )
 }
 
 /**

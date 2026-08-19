@@ -4,14 +4,20 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
 import com.local.stzb.core.designsystem.AstzbTheme
 import com.local.stzb.domain.battlefield.BattlefieldMetrics
 import com.local.stzb.domain.battlefield.BattlefieldRepository
 import com.local.stzb.domain.battlefield.BattlefieldSnapshot
 import com.local.stzb.domain.battlefield.CaptureStatus
 import com.local.stzb.domain.battlefield.EventCategory
+import com.local.stzb.domain.battlefield.EventPriority
+import com.local.stzb.domain.battlefield.EventTarget
+import com.local.stzb.domain.battlefield.BattlefieldEvent
 import com.local.stzb.domain.battles.BattleDetail
 import com.local.stzb.domain.battles.BattleFilters
 import com.local.stzb.domain.battles.BattleRepository
@@ -150,6 +156,64 @@ class StzbNavigationTest {
         rule.onNodeWithContentDescription("返回工具").assertIsDisplayed()
         rule.onNodeWithContentDescription("返回工具").performClick()
         rule.onNodeWithText("工具中心").assertIsDisplayed()
+    }
+
+    @Test
+    fun battlefieldEventClickOpensDetailAndCanReturn() {
+        val event = BattlefieldEvent(
+            id = "march:42:1700000600",
+            occurredAt = 1_700_000_600L,
+            category = EventCategory.MARCH,
+            priority = EventPriority.NORMAL,
+            title = "测试行军",
+            summary = "10,10 → 10,20",
+            details = listOf("行动：行军"),
+            target = EventTarget.Team(42),
+        )
+        val repository = FakeBattlefieldRepository(
+            BattlefieldSnapshot(
+                capture = CaptureStatus(true, "抓包运行中", event.occurredAt),
+                metrics = BattlefieldMetrics(1, 0, 0, 0),
+                events = listOf(event),
+            ),
+        )
+        rule.setContent {
+            AstzbTheme {
+                StzbApp(repository, EmptyTeamsRepository, EmptyBattleRepository, EmptyAllianceRepository, EmptyIntelRepository, EmptyRankingRepository, EmptyCaptureController, openLegacyDashboard = {}, openCaptureConsole = {})
+            }
+        }
+
+        rule.onNodeWithText("测试行军").performClick()
+        rule.onNodeWithText("事件详情").assertIsDisplayed()
+        rule.onNodeWithText("10,10 → 10,20").assertIsDisplayed()
+        rule.onNodeWithContentDescription("返回战场").performClick()
+        rule.onNodeWithText("实时战场").assertIsDisplayed()
+    }
+
+    @Test
+    fun migratedAdvancedToolsAreReachableFromTools() {
+        val repository = FakeBattlefieldRepository(BattlefieldSnapshot(CaptureStatus(false, "抓包未启动", null), BattlefieldMetrics(0, 0, 0, 0), emptyList()))
+        rule.setContent { AstzbTheme { StzbApp(repository, EmptyTeamsRepository, EmptyBattleRepository, EmptyAllianceRepository, EmptyIntelRepository, EmptyRankingRepository, EmptyCaptureController, openLegacyDashboard = {}, openCaptureConsole = {}) } }
+
+        rule.onNodeWithText("工具").performClick()
+        listOf("实时部队", "攻城考勤", "自定义积分", "阵容战法研究").forEach { label ->
+            rule.onNodeWithText(label).performScrollTo().assertIsDisplayed()
+        }
+        rule.onNodeWithText("实时部队").performScrollTo().performClick()
+        rule.onNodeWithText("没有匹配的实时部队，请先完成 5028 抓包").assertIsDisplayed()
+        rule.onNodeWithContentDescription("返回工具").performClick()
+        rule.onNodeWithText("攻城考勤").performScrollTo().performClick()
+        rule.onNodeWithText("新建任务").assertIsDisplayed()
+        rule.onNodeWithContentDescription("返回").performClick()
+        rule.onNodeWithText("自定义积分").performScrollTo().performClick()
+        rule.onNodeWithText("规则预设").assertIsDisplayed()
+        rule.onNodeWithContentDescription("返回工具").performClick()
+        rule.onNodeWithText("阵容战法研究").performScrollTo().performClick()
+        rule.onNodeWithText("配置事实 / 历史证据 / 模拟验证").assertIsDisplayed()
+        rule.onNodeWithContentDescription("返回工具").performClick()
+        rule.onNodeWithTag("tools-list").performScrollToIndex(4)
+        rule.onNodeWithText("账号与区服").performScrollTo().performClick()
+        rule.onNodeWithText("新增档案").assertIsDisplayed()
     }
 
     private object EmptyTeamsRepository : TeamsRepository { override fun loadTeams() = emptyList<com.local.stzb.domain.teams.PlayerTeam>() }
