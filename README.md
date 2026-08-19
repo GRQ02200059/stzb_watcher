@@ -4,6 +4,40 @@
 
 ## 问题反馈：QQ群 `1063894809`
 
+## 产品预览
+
+### Web 端
+
+![Web 战场情报](docs/assets/screenshots/overview-intelligence.webp)
+
+Web 端用于查看战场情报、实时部队、队伍分析、积分和战术推演。
+
+### Web 功能示例
+
+| 实时部队 | 战斗模拟 |
+|---|---|
+| ![Web 实时部队](docs/assets/screenshots/gallery-live-army.webp) | ![Web 战斗模拟](docs/assets/screenshots/gallery-simulator.webp) |
+
+| 阵容战法研究 | 自定义积分 |
+|---|---|
+| ![Web 阵容战法研究](docs/assets/screenshots/gallery-research.webp) | ![Web 自定义积分](docs/assets/screenshots/gallery-score.webp) |
+
+| 打城考勤 | 玩家队伍 |
+|---|---|
+| ![Web 打城考勤](docs/assets/screenshots/gallery-attendance.webp) | ![Web 玩家队伍](docs/assets/screenshots/gallery-player-teams.webp) |
+
+### Android 端
+
+| 战场 | 战报 |
+|---|---|
+| ![Android 战场](docs/assets/screenshots/android-battlefield.webp) | ![Android 战报](docs/assets/screenshots/android-teams.webp) |
+
+| 工具中心 | 战术演练 |
+|---|---|
+| ![Android 工具中心](docs/assets/screenshots/android-simulator.webp) | ![Android 战术演练](docs/assets/screenshots/android-tactical-drill.webp) |
+
+移动端支持战场查看、战报浏览、工具操作和战术演练。
+
 ## Windows 版
 
 ### 下载
