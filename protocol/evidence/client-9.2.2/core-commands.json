@@ -1,0 +1,147 @@
+{
+  "commands": [
+    {
+      "hexId": "0000000a",
+      "decimalId": 10,
+      "names": ["GET_ALL_BATTLE_REPORT_PROFILE_CMD"],
+      "evidence": "CLIENT_CONFIRMED",
+      "webStatus": "typed",
+      "androidStatus": "typed",
+      "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/ReportProfileData.cs", "lines": [70, 90]}],
+      "fields": []
+    },
+    {
+      "hexId": "0000005c",
+      "decimalId": 92,
+      "names": ["GET_UNION_BATTLE_REPORT"],
+      "evidence": "CLIENT_CONFIRMED",
+      "webStatus": "typed",
+      "androidStatus": "typed",
+      "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/ReportProfileData.cs", "lines": [70, 90]}],
+      "fields": []
+    },
+    {
+      "hexId": "00000067",
+      "decimalId": 103,
+      "names": ["UNION_MEMBER_LIST"],
+      "evidence": "CLIENT_CONFIRMED",
+      "webStatus": "typed",
+      "androidStatus": "typed",
+      "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [411, 470]}],
+      "fields": [
+        {"path": "[][0]", "name": "userId", "rawTypes": ["integer"], "nullable": false, "unit": "id", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [425, 435]}]},
+        {"path": "[][1]", "name": "userName", "rawTypes": ["string"], "nullable": false, "unit": "text", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [431, 436]}]},
+        {"path": "[][2]", "name": "donate", "rawTypes": ["integer"], "nullable": false, "unit": "points", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [432, 437]}]},
+        {"path": "[][3]", "name": "position", "rawTypes": ["integer"], "nullable": false, "unit": "enum", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [433, 438]}]},
+        {"path": "[][6]", "name": "wid", "rawTypes": ["integer"], "nullable": false, "unit": "wid", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [436, 441]}]},
+        {"path": "[][7]", "name": "donateWeekly", "rawTypes": ["integer"], "nullable": false, "unit": "points", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [437, 442]}]},
+        {"path": "[][8]", "name": "roleForce", "rawTypes": ["integer"], "nullable": false, "unit": "points", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [438, 443]}]},
+        {"path": "[][10]", "name": "memberWuxun", "rawTypes": ["integer"], "nullable": true, "unit": "points", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [439, 446]}]},
+        {"path": "[][12]", "name": "groupId", "rawTypes": ["integer"], "nullable": true, "unit": "id", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [441, 447]}]},
+        {"path": "[][13]", "name": "groupName", "rawTypes": ["string"], "nullable": false, "unit": "text", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [442, 448]}]},
+        {"path": "[][16]", "name": "headId", "rawTypes": ["integer"], "nullable": true, "unit": "id", "evidence": "CLIENT_CONFIRMED", "businessApproved": false, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [445, 451]}]},
+        {"path": "[][17]", "name": "headFrame", "rawTypes": ["string"], "nullable": true, "unit": "text", "evidence": "CLIENT_CONFIRMED", "businessApproved": false, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [446, 452]}]},
+        {"path": "[][26]", "name": "weekWuxun", "rawTypes": ["integer"], "nullable": true, "unit": "points", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [455, 463]}]},
+        {"path": "[][27]", "name": "totalWuxun", "rawTypes": ["integer"], "nullable": true, "unit": "points", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [456, 464]}]},
+        {"path": "[][30]", "name": "intoUnionTime", "rawTypes": ["integer"], "nullable": true, "unit": "unix_seconds", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs", "lines": [459, 466]}]}
+      ]
+    },
+    {
+      "hexId": "0000008f",
+      "decimalId": 143,
+      "names": ["UNION_GET_ALL_MEMBER_LIST_FOR_CHAT"],
+      "evidence": "CLIENT_CONFIRMED",
+      "webStatus": "raw",
+      "androidStatus": "raw",
+      "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionGroupData.cs", "lines": [298, 330]}],
+      "fields": [
+        {"path": "[][0]", "name": "memberId", "rawTypes": ["integer"], "nullable": false, "unit": "id", "evidence": "CLIENT_CONFIRMED", "businessApproved": false, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionGroupData.cs", "lines": [310, 320]}]},
+        {"path": "[][1]", "name": "groupId", "rawTypes": ["integer"], "nullable": false, "unit": "id", "evidence": "CLIENT_CONFIRMED", "businessApproved": false, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionGroupData.cs", "lines": [314, 324]}]},
+        {"path": "[][2]", "name": "groupName", "rawTypes": ["string"], "nullable": false, "unit": "text", "evidence": "CLIENT_CONFIRMED", "businessApproved": false, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/UnionGroupData.cs", "lines": [315, 325]}]}
+      ]
+    },
+    {
+      "hexId": "000001fe",
+      "decimalId": 510,
+      "names": ["USER_GET_USER_SEASON_COURSE"],
+      "evidence": "CLIENT_CONFIRMED",
+      "webStatus": "typed",
+      "androidStatus": "typed",
+      "clientSources": [{"file": "Game.UI.GamePlay.Systems/Tenth.Data/RoleSeasonCourseData.cs", "lines": [15, 30]}],
+      "fields": []
+    },
+    {
+      "hexId": "0000029f",
+      "decimalId": 671,
+      "names": ["CARD_RECORD"],
+      "evidence": "CLIENT_CONFIRMED",
+      "webStatus": "typed",
+      "androidStatus": "typed",
+      "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/CardRecordData.cs", "lines": [25, 45]}],
+      "fields": []
+    },
+    {
+      "hexId": "0000030c",
+      "decimalId": 780,
+      "names": ["NOTICE_LIST"],
+      "evidence": "CLIENT_CONFIRMED",
+      "webStatus": "typed",
+      "androidStatus": "typed",
+      "clientSources": [{"file": "Game.UI.GamePlay/Tenth.UI/UiDailyBulletin.cs", "lines": [40, 60]}],
+      "fields": []
+    },
+    {
+      "hexId": "00000834",
+      "decimalId": 2100,
+      "names": ["NOTIFY_CHAT_MSG"],
+      "evidence": "CLIENT_CONFIRMED",
+      "webStatus": "typed",
+      "androidStatus": "typed",
+      "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/FriendChatData.cs", "lines": [175, 200]}],
+      "fields": []
+    },
+    {
+      "hexId": "00000898",
+      "decimalId": 2200,
+      "names": ["NOTIFY_SEND_NOTICE"],
+      "evidence": "CLIENT_CONFIRMED",
+      "webStatus": "raw",
+      "androidStatus": "typed",
+      "clientSources": [{"file": "Game.UI.GamePlay.Systems/Tenth.UI/RollingNoticeManager.cs", "lines": [50, 75]}],
+      "fields": [
+        {"path": "[0]", "name": "noticeType", "rawTypes": ["integer"], "nullable": false, "unit": "enum", "evidence": "CLIENT_CONFIRMED", "businessApproved": false, "clientSources": [{"file": "Game.UI.GamePlay.Systems/Tenth.UI/RollingNoticeManager.cs", "lines": [128, 155]}]}
+      ]
+    },
+    {
+      "hexId": "000013a2",
+      "decimalId": 5026,
+      "names": ["SEND_WORLD_SCENCE_FULL_INFO"],
+      "evidence": "CLIENT_CONFIRMED",
+      "webStatus": "typed",
+      "androidStatus": "typed",
+      "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs", "lines": [3177, 3218]}],
+      "fields": [
+        {"path": "[14]", "name": "worldChunks", "rawTypes": ["object"], "nullable": false, "unit": "map", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs", "lines": [3189, 3218]}]},
+        {"path": "[18]", "name": "serverOrderId", "rawTypes": ["integer"], "nullable": false, "unit": "sequence", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs", "lines": [3208, 3218]}]},
+        {"path": "[29]", "name": "realMarch", "rawTypes": ["object"], "nullable": false, "unit": "map", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs", "lines": [3200, 3217]}]}
+      ]
+    },
+    {
+      "hexId": "000013a4",
+      "decimalId": 5028,
+      "names": ["SEND_WORLD_SCENCE_CHANGE_INFO"],
+      "evidence": "CLIENT_CONFIRMED",
+      "webStatus": "typed",
+      "androidStatus": "typed",
+      "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs", "lines": [3298, 3362]}],
+      "fields": [
+        {"path": "[7]", "name": "deletedArmies", "rawTypes": ["array"], "nullable": false, "unit": "ids", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs", "lines": [3310, 3345]}]},
+        {"path": "[14]", "name": "worldChunkChanges", "rawTypes": ["object"], "nullable": false, "unit": "map", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs", "lines": [3317, 3348]}]},
+        {"path": "[15]", "name": "clearChunks", "rawTypes": ["object"], "nullable": false, "unit": "map", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs", "lines": [3318, 3358]}]},
+        {"path": "[18]", "name": "serverOrderId", "rawTypes": ["integer"], "nullable": false, "unit": "sequence", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs", "lines": [3304, 3310]}]},
+        {"path": "[20]", "name": "blockInfo", "rawTypes": ["array"], "nullable": true, "unit": "tuple", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs", "lines": [3318, 3345]}]},
+        {"path": "[29]", "name": "realMarch", "rawTypes": ["object"], "nullable": false, "unit": "map", "evidence": "CLIENT_CONFIRMED", "businessApproved": true, "clientSources": [{"file": "Game.Data.GamePlay/Tenth.Data/MapDataCommon.cs", "lines": [3324, 3338]}]}
+      ]
+    }
+  ]
+}
