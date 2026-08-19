@@ -1436,7 +1436,8 @@ def upsert_battle_0a(conn, b):
 # ============================================================
 # 解析 00000067 同盟成员数据
 # 索引: [0]=uid [1]=名字 [2]=总贡献 [3]=职位 [6]=wid [7]=本周贡献
-#       [8]=势力 [10]=武勋 [13]=分组 [16]=武将配置ID [17]=技能 [30]=加入时间
+#       [8]=势力 [10]=武勋 [13]=分组 [16]=头像ID [17]=头像框
+#       [26]=本周武勋 [27]=累计武勋 [30]=加入时间
 # ============================================================
 def parse_team_users_67(fpath, data=None):
     import json as _json
@@ -1460,16 +1461,19 @@ def parse_team_users_67(fpath, data=None):
                 power = int(item[8]) if item[8] else 0
                 wu    = int(item[10]) if item[10] else 0
                 grp   = str(item[13]) if item[13] else ''
-                hero_cfg = int(item[16]) if item[16] else 0
-                skills   = str(item[17]) if item[17] else ''
+                head_id = int(item[16]) if item[16] else 0
+                head_frame = str(item[17]) if item[17] else ''
+                week_wuxun = int(item[26]) if item[26] else 0
+                total_wuxun = int(item[27]) if item[27] else 0
                 jt    = int(item[30]) if item[30] else 0
                 users.append({
                     'uid': uid, 'name': name,
                     'contribute_total': ct, 'contribute_week': cw,
                     'pos': pos, 'wid': wid, 'power': power, 'wuxun': wu,
-                    'group_name': grp, 'hero_config_id': hero_cfg,
-                    'team_id': 0,
-                    'hero_skills': skills, 'join_time': jt,
+                    'group_name': grp, 'head_id': head_id,
+                    'head_frame': head_frame, 'week_wuxun': week_wuxun,
+                    'total_wuxun': total_wuxun, 'team_id': 0,
+                    'join_time': jt,
                 })
             except:
                 continue
@@ -1487,22 +1491,35 @@ def upsert_team_users(conn, users, profile_id=''):
             conn.commit()
         except sqlite3.OperationalError:
             pass
+    for name, definition in (
+        ('head_id', 'INTEGER DEFAULT 0'),
+        ('head_frame', "TEXT DEFAULT ''"),
+        ('week_wuxun', 'INTEGER DEFAULT 0'),
+        ('total_wuxun', 'INTEGER DEFAULT 0'),
+    ):
+        if name not in cols:
+            try:
+                conn.execute(f'ALTER TABLE team_users ADD COLUMN {name} {definition}')
+            except sqlite3.OperationalError:
+                pass
     for u in users:
         conn.execute('''
             INSERT INTO team_users (uid,profile_id,name,contribute_total,contribute_week,pos,wid,
-                power,wuxun,group_name,hero_config_id,team_id,hero_skills,join_time,updated_at)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                power,wuxun,group_name,head_id,head_frame,week_wuxun,total_wuxun,team_id,join_time,updated_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             ON CONFLICT(uid,profile_id) DO UPDATE SET
                 name=excluded.name, contribute_total=excluded.contribute_total,
                 contribute_week=excluded.contribute_week, pos=excluded.pos,
                 wid=excluded.wid, power=excluded.power, wuxun=excluded.wuxun,
-                group_name=excluded.group_name, hero_config_id=excluded.hero_config_id,
-                team_id=excluded.team_id,
-                hero_skills=excluded.hero_skills, join_time=excluded.join_time,
+                group_name=excluded.group_name, head_id=excluded.head_id,
+                head_frame=excluded.head_frame, week_wuxun=excluded.week_wuxun,
+                total_wuxun=excluded.total_wuxun, team_id=excluded.team_id,
+                join_time=excluded.join_time,
                 updated_at=excluded.updated_at
         ''', (u['uid'], profile_id, u['name'], u['contribute_total'], u['contribute_week'],
               u['pos'], u['wid'], u['power'], u['wuxun'], u['group_name'],
-              u['hero_config_id'], u.get('team_id', 0), u['hero_skills'], u['join_time'], now))
+              u['head_id'], u['head_frame'], u['week_wuxun'], u['total_wuxun'],
+              u.get('team_id', 0), u['join_time'], now))
     if users:
         conn.commit()
         if datetime.now().weekday() == 6:

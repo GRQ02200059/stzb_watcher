@@ -80,6 +80,32 @@ def build_connection(with_attendance=True):
 
 
 class ScoreCenterAggregationTest(unittest.TestCase):
+    def test_attendance_with_battle_id_and_no_session_id_uses_battle_identity(self):
+        connection, repository = build_connection(with_attendance=False)
+        connection.executescript(
+            """
+            CREATE TABLE attendance(
+                id INTEGER PRIMARY KEY AUTOINCREMENT, battle_id INTEGER,
+                player_name TEXT, player_uid TEXT, union_name TEXT, role TEXT,
+                fight_type INTEGER, time INTEGER
+            );
+            INSERT INTO attendance(
+                battle_id,player_name,player_uid,union_name,role,fight_type,time
+            ) VALUES
+                (7001,'玩家甲','1','甲盟','main',33,1000),
+                (7001,'玩家甲','1','甲盟','main',33,1001),
+                (7002,'玩家甲','1','甲盟','main',80,1100);
+            """
+        )
+        try:
+            player = next(
+                row for row in ScoreAggregator(connection, repository).aggregate("current")
+                if row.player_name == "玩家甲"
+            )
+            self.assertEqual(player.metrics.main_city_cnt, 2)
+        finally:
+            connection.close()
+
     def test_sunday_snapshot_preserves_member_wuxun_after_weekly_reset(self):
         connection, repository = build_connection()
         connection.execute("UPDATE team_users SET wuxun=1234 WHERE uid='1'")
@@ -100,6 +126,22 @@ class ScoreCenterAggregationTest(unittest.TestCase):
         rows = ScoreAggregator(connection, repository).aggregate("current")
         player = next(row for row in rows if row.player_name == "玩家甲")
         self.assertEqual(3579, player.metrics.gongxun_total)
+        connection.close()
+
+    def test_later_sunday_sample_keeps_the_weekly_maximum(self):
+        connection, repository = build_connection()
+        connection.execute("UPDATE team_users SET wuxun=1234 WHERE uid='1'")
+        sunday = datetime(2026, 8, 16, 12, 0, 0)
+        repository.capture_sunday_wuxun_snapshot(sunday)
+        connection.execute("UPDATE team_users SET wuxun=2345 WHERE uid='1'")
+        repository.capture_sunday_wuxun_snapshot(datetime(2026, 8, 16, 23, 0, 0))
+        connection.execute("UPDATE team_users SET wuxun=0 WHERE uid='1'")
+
+        player = next(
+            row for row in ScoreAggregator(connection, repository).aggregate("current")
+            if row.player_name == "玩家甲"
+        )
+        self.assertEqual(2345, player.metrics.gongxun_total)
         connection.close()
 
     def test_aggregates_attack_identity_results_and_attendance(self):

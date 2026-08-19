@@ -203,6 +203,10 @@ class LocalStzbDatabase(
                 hero_config_id INTEGER DEFAULT 0,
                 team_id INTEGER DEFAULT 0,
                 hero_skills TEXT,
+                head_id INTEGER DEFAULT 0,
+                head_frame TEXT,
+                week_wuxun INTEGER DEFAULT 0,
+                total_wuxun INTEGER DEFAULT 0,
                 join_time INTEGER DEFAULT 0,
                 source_msg_id TEXT,
                 updated_at INTEGER NOT NULL
@@ -223,6 +227,19 @@ class LocalStzbDatabase(
                 parent_wid INTEGER DEFAULT 0,
                 source_msg_id TEXT,
                 updated_at INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS wuxun_weekly_snapshots (
+                week_start TEXT NOT NULL,
+                uid INTEGER NOT NULL,
+                player_name TEXT NOT NULL,
+                group_name TEXT,
+                wuxun INTEGER NOT NULL DEFAULT 0,
+                captured_at INTEGER NOT NULL,
+                PRIMARY KEY(week_start, uid)
             )
             """.trimIndent()
         )
@@ -715,11 +732,17 @@ class LocalStzbDatabase(
             // Rebuild battle-skill links with the corrected defender 6/5/4 order.
             db.execSQL("DELETE FROM battle_skills")
         }
+        if (oldVersion < 20) {
+            db.execSQL("ALTER TABLE team_users ADD COLUMN head_id INTEGER DEFAULT 0")
+            db.execSQL("ALTER TABLE team_users ADD COLUMN head_frame TEXT")
+            db.execSQL("ALTER TABLE team_users ADD COLUMN week_wuxun INTEGER DEFAULT 0")
+            db.execSQL("ALTER TABLE team_users ADD COLUMN total_wuxun INTEGER DEFAULT 0")
+        }
     }
 
     companion object {
         const val DEFAULT_DATABASE_NAME = "astzb_local.db"
-        private const val DB_VERSION = 19
+        private const val DB_VERSION = 20
     }
 }
 
@@ -1115,6 +1138,10 @@ object LocalStzbRepository {
                         put("hero_config_id", user.heroConfigId)
                         put("team_id", user.teamId)
                         put("hero_skills", user.heroSkills)
+                        put("head_id", user.headId)
+                        put("head_frame", user.headFrame)
+                        put("week_wuxun", user.weekWuxun)
+                        put("total_wuxun", user.totalWuxun)
                         put("join_time", user.joinTime)
                         put("source_msg_id", user.sourceMsgId)
                         put("updated_at", now)
@@ -1126,7 +1153,52 @@ object LocalStzbRepository {
         } finally {
             database.endTransaction()
         }
+        captureSundayWuxunSnapshot(database, now)
     }
+
+    internal fun captureSundayWuxunSnapshot(
+        database: SQLiteDatabase = db(),
+        now: Long = System.currentTimeMillis(),
+    ): Int {
+        val calendar = java.util.Calendar.getInstance(Locale.CHINA).apply { timeInMillis = now }
+        if (calendar.get(java.util.Calendar.DAY_OF_WEEK) != java.util.Calendar.SUNDAY) return 0
+        calendar.add(java.util.Calendar.DAY_OF_MONTH, -6)
+        val weekStart = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).format(calendar.time)
+        val rows = database.rawQuery(
+            "SELECT uid,name,group_name,wuxun FROM team_users WHERE COALESCE(name,'') != ''",
+            emptyArray(),
+        ).useCursor { cursor ->
+            buildList {
+                while (cursor.moveToNext()) {
+                    add(arrayOf(
+                        cursor.long("uid"), cursor.string("name"),
+                        cursor.string("group_name"), cursor.int("wuxun"),
+                    ))
+                }
+            }
+        }
+        rows.forEach { row ->
+            database.execSQL(
+                """
+                INSERT INTO wuxun_weekly_snapshots(week_start,uid,player_name,group_name,wuxun,captured_at)
+                VALUES(?,?,?,?,?,?)
+                ON CONFLICT(week_start,uid) DO UPDATE SET
+                    player_name=excluded.player_name, group_name=excluded.group_name,
+                    wuxun=MAX(wuxun,excluded.wuxun), captured_at=excluded.captured_at
+                """.trimIndent(),
+                arrayOf(weekStart, row[0], row[1], row[2], row[3], now),
+            )
+        }
+        return rows.size
+    }
+
+    internal fun cumulativeWuxun(
+        database: SQLiteDatabase = db(),
+        uid: Long,
+    ): Int = database.rawQuery(
+        "SELECT COALESCE(SUM(wuxun),0) AS total FROM wuxun_weekly_snapshots WHERE uid=?",
+        arrayOf(uid.toString()),
+    ).useCursor { cursor -> if (cursor.moveToFirst()) cursor.int("total") else 0 }
 
     @Synchronized
     fun saveMapCells(cells: List<LocalMapCell>) {
@@ -1721,7 +1793,8 @@ object LocalStzbRepository {
             append(
                 """
                 SELECT uid,name,contribute_total,contribute_week,pos,wid,power,wuxun,group_name,
-                       hero_config_id,team_id,hero_skills,join_time,source_msg_id
+                       hero_config_id,team_id,hero_skills,head_id,head_frame,week_wuxun,total_wuxun,
+                       join_time,source_msg_id
                 FROM team_users
                 $whereSql
                 ORDER BY power DESC, wuxun DESC
@@ -2712,8 +2785,8 @@ object LocalStzbRepository {
                 COALESCE(ba.draws, 0) AS draws,
                 COALESCE(ba.city_battles, 0) AS city_battles,
                 COALESCE(ba.city_wins, 0) AS city_wins,
-                COALESCE(tu.wuxun, 0) AS total_gongxun,
-                COALESCE(tu.wuxun, 0) AS avg_gongxun,
+                COALESCE(ws.wuxun, tu.wuxun, 0) AS total_gongxun,
+                COALESCE(ws.wuxun, tu.wuxun, 0) AS avg_gongxun,
                 COALESCE(tu.power, 0) AS avg_power,
                 COALESCE(tu.power, 0) AS power,
                 CASE
@@ -2721,6 +2794,9 @@ object LocalStzbRepository {
                     ELSE 0
                 END AS win_rate
             FROM team_users tu
+            LEFT JOIN (
+                SELECT uid,SUM(wuxun) AS wuxun FROM wuxun_weekly_snapshots GROUP BY uid
+            ) ws ON ws.uid = tu.uid
             LEFT JOIN (
                 SELECT
                     bv.atk_name AS player_name,
@@ -2751,8 +2827,8 @@ object LocalStzbRepository {
                 COALESCE(SUM(ba.draws), 0) AS draws,
                 COALESCE(SUM(ba.city_battles), 0) AS city_battles,
                 COALESCE(SUM(ba.city_wins), 0) AS city_wins,
-                COALESCE(SUM(COALESCE(tu.wuxun, 0)), 0) AS total_gongxun,
-                ROUND(COALESCE(SUM(COALESCE(tu.wuxun, 0)), 0) * 1.0 / COUNT(*), 1) AS avg_gongxun,
+                COALESCE(SUM(COALESCE(ws.wuxun, tu.wuxun, 0)), 0) AS total_gongxun,
+                ROUND(COALESCE(SUM(COALESCE(ws.wuxun, tu.wuxun, 0)), 0) * 1.0 / COUNT(*), 1) AS avg_gongxun,
                 ROUND(COALESCE(SUM(COALESCE(tu.power, 0)), 0) * 1.0 / COUNT(*), 1) AS avg_power,
                 0 AS power,
                 CASE
@@ -2760,6 +2836,9 @@ object LocalStzbRepository {
                     ELSE 0
                 END AS win_rate
             FROM team_users tu
+            LEFT JOIN (
+                SELECT uid,SUM(wuxun) AS wuxun FROM wuxun_weekly_snapshots GROUP BY uid
+            ) ws ON ws.uid = tu.uid
             LEFT JOIN (
                 SELECT
                     bv.atk_name AS player_name,
@@ -3589,7 +3668,8 @@ object LocalStzbRepository {
         return db().rawQuery(
             """
             SELECT uid,name,contribute_total,contribute_week,pos,wid,power,wuxun,group_name,
-                   hero_config_id,team_id,hero_skills,join_time,source_msg_id,updated_at
+                   hero_config_id,team_id,hero_skills,head_id,head_frame,week_wuxun,total_wuxun,
+                   join_time,source_msg_id,updated_at
             FROM team_users
             $where
             ORDER BY power DESC, wuxun DESC, name ASC
@@ -3786,6 +3866,10 @@ object LocalStzbRepository {
             heroConfigId = int("hero_config_id"),
             teamId = int("team_id"),
             heroSkills = string("hero_skills"),
+            headId = int("head_id"),
+            headFrame = string("head_frame"),
+            weekWuxun = int("week_wuxun"),
+            totalWuxun = int("total_wuxun"),
             joinTime = long("join_time"),
             sourceMsgId = string("source_msg_id"),
         )
@@ -4039,6 +4123,10 @@ data class LocalTeamUser(
     val heroSkills: String,
     val joinTime: Long,
     val sourceMsgId: String,
+    val headId: Int = 0,
+    val headFrame: String = "",
+    val weekWuxun: Int = 0,
+    val totalWuxun: Int = 0,
 )
 
 data class LocalTeamStats(

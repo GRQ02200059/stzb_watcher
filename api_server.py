@@ -427,6 +427,10 @@ def ensure_all_tables(db_path):
                 wid INTEGER DEFAULT 0,
                 hero_config_id INTEGER DEFAULT 0,
                 hero_skills TEXT DEFAULT \'\',
+                head_id INTEGER DEFAULT 0,
+                head_frame TEXT DEFAULT \'\',
+                week_wuxun INTEGER DEFAULT 0,
+                total_wuxun INTEGER DEFAULT 0,
                 account_id TEXT DEFAULT \'\',
                 updated_at TEXT,
                 PRIMARY KEY (uid, profile_id)

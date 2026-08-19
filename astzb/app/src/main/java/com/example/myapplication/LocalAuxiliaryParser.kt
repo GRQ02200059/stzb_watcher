@@ -115,7 +115,7 @@ object LocalAuxiliaryParser {
         }
     }
 
-    private fun parseTeamUserRows(packet: LocalStzbPacket): List<LocalTeamUser> {
+    internal fun parseTeamUserRows(packet: LocalStzbPacket): List<LocalTeamUser> {
         val arr = jsonArray(packet.decodedText) ?: return emptyList()
         return (0 until arr.length()).mapNotNull { idx ->
             val row = arr.optJSONArray(idx) ?: return@mapNotNull null
@@ -133,9 +133,13 @@ object LocalAuxiliaryParser {
                 power = row.optInt(8, 0),
                 wuxun = row.optInt(10, 0),
                 groupName = row.optString(13, ""),
-                heroConfigId = row.optInt(16, 0),
+                headId = row.optInt(16, 0),
+                headFrame = row.optString(17, ""),
+                weekWuxun = row.optInt(26, 0),
+                totalWuxun = row.optInt(27, 0),
+                heroConfigId = 0,
                 teamId = 0,
-                heroSkills = row.optString(17, ""),
+                heroSkills = "",
                 joinTime = row.optLong(30, 0L),
                 sourceMsgId = packet.msgId,
             )

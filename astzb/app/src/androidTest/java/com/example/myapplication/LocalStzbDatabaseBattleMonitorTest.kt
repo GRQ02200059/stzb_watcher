@@ -91,6 +91,31 @@ class LocalStzbDatabaseBattleMonitorTest {
     }
 
     @Test
+    fun sundayWuxunSnapshotsKeepWeeklyMaximumAndAccumulateAcrossWeeks() {
+        withDatabase { database ->
+            database.writableDatabase.execSQL(
+                "INSERT INTO team_users(uid,name,wuxun,updated_at) VALUES(42,'玩家甲',1200,1)",
+            )
+            assertEquals(1, LocalStzbRepository.captureSundayWuxunSnapshot(
+                database.writableDatabase, 1770544800000L,
+            ))
+            database.writableDatabase.execSQL("UPDATE team_users SET wuxun=900 WHERE uid=42")
+            LocalStzbRepository.captureSundayWuxunSnapshot(
+                database.writableDatabase, 1770548400000L,
+            )
+            database.writableDatabase.execSQL("UPDATE team_users SET wuxun=2300 WHERE uid=42")
+            LocalStzbRepository.captureSundayWuxunSnapshot(
+                database.writableDatabase, 1771149600000L,
+            )
+            database.writableDatabase.execSQL("UPDATE team_users SET wuxun=0 WHERE uid=42")
+
+            assertEquals(3500, LocalStzbRepository.cumulativeWuxun(
+                database.readableDatabase, 42,
+            ))
+        }
+    }
+
+    @Test
     fun savingCurrentSnapshotRemovesRowsMissingFromIt() {
         withDatabase { database ->
             LocalStzbRepository.syncBattleMonitor(database.writableDatabase, snapshot(1, 2), 1)

@@ -143,6 +143,9 @@ class ScoreAggregator:
                 where.append("time<=?")
                 args.append(int(end_time))
             identity_column = "battle_id" if "battle_id" in attendance_columns else "session_id"
+            session_column = (
+                "session_id" if "session_id" in attendance_columns else identity_column
+            )
             attendance_scope = (
                 "fight_type IN (33,80) AND "
                 if "fight_type" in attendance_columns
@@ -153,7 +156,7 @@ class ScoreAggregator:
                 args.append(self.profile_id)
             rows = self.connection.execute(
                 f"""
-                SELECT DISTINCT session_id,{identity_column} AS attendance_identity,player_name,
+                SELECT DISTINCT {session_column} AS session_id,{identity_column} AS attendance_identity,player_name,
                        COALESCE(player_uid,'') AS player_uid,
                        COALESCE(union_name,'') AS union_name,
                        COALESCE(role,'other') AS role
@@ -166,7 +169,7 @@ class ScoreAggregator:
             for raw in rows:
                 row = dict(raw)
                 key = (
-                    row.get("session_id") or row.get("attendance_identity"),
+                    row.get("attendance_identity") or row.get("session_id"),
                     row.get("player_name"),
                     row.get("player_uid"),
                     row.get("role"),

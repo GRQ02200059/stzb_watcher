@@ -176,7 +176,7 @@ class ScoreRepository:
                 ON CONFLICT(profile_id,week_start,uid,player_name) DO UPDATE SET
                     union_name=excluded.union_name,
                     group_name=excluded.group_name,
-                    wuxun=CASE WHEN wuxun > 0 THEN wuxun ELSE excluded.wuxun END,
+                    wuxun=MAX(wuxun, excluded.wuxun),
                     captured_at=excluded.captured_at
                 """,
                 (
