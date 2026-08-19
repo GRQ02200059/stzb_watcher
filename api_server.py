@@ -925,15 +925,15 @@ def api_battles():
         params.append(int(result))
     where_str = ' AND '.join(where)
     conn = get_db()
-    total = conn.execute(f'SELECT COUNT(*) FROM battles WHERE {where_str}', params).fetchone()[0]
-    rows = conn.execute(f'SELECT * FROM battles WHERE {where_str} ORDER BY time DESC LIMIT ? OFFSET ?', params + [size, offset]).fetchall()
+    total = conn.execute(f'SELECT COUNT(*) FROM battles_v2 WHERE {where_str}', params).fetchone()[0]
+    rows = conn.execute(f'SELECT * FROM battles_v2 WHERE {where_str} ORDER BY time DESC LIMIT ? OFFSET ?', params + [size, offset]).fetchall()
     conn.close()
     return jsonify({'total': total, 'page': page, 'size': size, 'data': rows_to_list(rows)})
 
 @app.route('/api/battles/<int:bid>')
 def api_battle_detail(bid):
     conn = get_db()
-    battle = conn.execute('SELECT * FROM battles WHERE battle_id=?', (bid,)).fetchone()
+    battle = conn.execute('SELECT * FROM battles_v2 WHERE battle_id=?', (bid,)).fetchone()
     heroes = conn.execute('SELECT * FROM battle_heroes WHERE battle_id=? ORDER BY side,pos', (bid,)).fetchall()
     skills = conn.execute('SELECT * FROM battle_skills WHERE battle_id=? ORDER BY side,pos', (bid,)).fetchall()
     conn.close()
@@ -945,9 +945,9 @@ def api_battle_detail(bid):
 @app.route('/api/battle_stats')
 def api_battle_stats():
     conn = get_db()
-    total = conn.execute('SELECT COUNT(*) FROM battles').fetchone()[0]
-    result_dist = rows_to_list(conn.execute('SELECT result_desc, COUNT(*) as cnt FROM battles GROUP BY result_desc ORDER BY cnt DESC').fetchall())
-    city_dist = rows_to_list(conn.execute('SELECT city_type, COUNT(*) as cnt FROM battles GROUP BY city_type ORDER BY cnt DESC').fetchall())
+    total = conn.execute('SELECT COUNT(*) FROM battles_v2').fetchone()[0]
+    result_dist = rows_to_list(conn.execute('SELECT result_desc, COUNT(*) as cnt FROM battles_v2 GROUP BY result_desc ORDER BY cnt DESC').fetchall())
+    city_dist = rows_to_list(conn.execute('SELECT city_type, COUNT(*) as cnt FROM battles_v2 GROUP BY city_type ORDER BY cnt DESC').fetchall())
     hero_freq = rows_to_list(conn.execute('SELECT hero_name, COUNT(*) as cnt FROM battle_heroes WHERE hero_name NOT LIKE \'武将%\' GROUP BY hero_name ORDER BY cnt DESC LIMIT 50').fetchall())
     combo_freq = rows_to_list(conn.execute('''
         SELECT hero_name as combo, COUNT(*) as cnt
@@ -965,11 +965,11 @@ def api_battle_stats():
         SELECT u, uname, total, wins, ROUND(wins*100.0/total,1) as win_rate FROM (
             SELECT atk_unionid as u, atk_union as uname, COUNT(*) as total,
                    SUM(CASE WHEN result=1 THEN 1 ELSE 0 END) as wins
-            FROM battles WHERE atk_union != '' GROUP BY atk_unionid
+            FROM battles_v2 WHERE atk_union != '' GROUP BY atk_unionid
             UNION ALL
             SELECT def_unionid, def_union, COUNT(*),
                    SUM(CASE WHEN result IN (2,6) THEN 1 ELSE 0 END)
-            FROM battles WHERE def_union != '' GROUP BY def_unionid
+            FROM battles_v2 WHERE def_union != '' GROUP BY def_unionid
         ) GROUP BY u ORDER BY total DESC LIMIT 20
     ''').fetchall())
     conn.close()
@@ -1071,26 +1071,85 @@ def api_hero_combo_winrate():
 # ===== 玩家 =====
 @app.route('/api/players')
 def api_players():
+    season = request.args.get('season', 'current')
     conn = get_db()
     rows = conn.execute('''
-        SELECT player_name, union_name, period, battle_count, atk_count, def_count,
-               win_count, wuxun_total, custom_score,
-               ROUND(win_count*100.0/MAX(battle_count,1),1) as win_rate
-        FROM scores WHERE period=\'all\' ORDER BY battle_count DESC
-    ''').fetchall()
+        SELECT player_name,union_name,'all' AS period,battles AS battle_count,
+               battles AS atk_count,0 AS def_count,wins AS win_count,
+               gongxun_total AS wuxun_total,score AS custom_score,
+               ROUND(wins*100.0/MAX(battles,1),1) AS win_rate
+        FROM custom_scores WHERE season_id=? ORDER BY battles DESC,score DESC
+    ''', (season,)).fetchall()
     conn.close()
     return jsonify(rows_to_list(rows))
 
 @app.route('/api/players/<player_name>')
 def api_player_detail(player_name):
+    season = request.args.get('season', 'current')
     conn = get_db()
-    score = conn.execute('SELECT * FROM scores WHERE player_name=? AND period=\'all\'', (player_name,)).fetchone()
+    score = conn.execute('SELECT * FROM custom_scores WHERE season_id=? AND player_name=?', (season, player_name)).fetchone()
     teams = conn.execute('SELECT * FROM player_teams WHERE player_name=? ORDER BY side,used_count DESC', (player_name,)).fetchall()
-    battles = conn.execute('SELECT * FROM battles WHERE atk_name=? OR def_name=? ORDER BY time DESC LIMIT 30', (player_name, player_name)).fetchall()
-    wx = conn.execute('SELECT SUM(gongxun) as total, COUNT(*) as cnt FROM wuxun WHERE player_name=?', (player_name,)).fetchone()
+    battles = conn.execute('SELECT * FROM battles_v2 WHERE atk_name=? OR def_name=? ORDER BY time DESC LIMIT 30', (player_name, player_name)).fetchall()
+    wx = conn.execute('SELECT COALESCE(SUM(wuxun),0) as total,COUNT(*) as cnt FROM wuxun_weekly_snapshots WHERE player_name=?', (player_name,)).fetchone()
     conn.close()
     return jsonify({'score': dict(score) if score else {}, 'teams': rows_to_list(teams),
                     'battles': rows_to_list(battles), 'wuxun': dict(wx) if wx else {}})
+
+@app.route('/api/players/<player_name>/season-trend')
+def api_player_season_trend(player_name):
+    season = request.args.get('season', 'current')
+    conn = get_db()
+    battle_rows = conn.execute(
+        '''SELECT time,result FROM battles_v2
+           WHERE atk_name=? ORDER BY time''',
+        (player_name,),
+    ).fetchall()
+    snapshot_rows = conn.execute(
+        '''SELECT week_start,MAX(union_name) AS union_name,MAX(group_name) AS group_name,
+                  MAX(wuxun) AS member_wuxun
+           FROM wuxun_weekly_snapshots WHERE player_name=?
+           GROUP BY week_start ORDER BY week_start''',
+        (player_name,),
+    ).fetchall()
+    score = conn.execute(
+        'SELECT * FROM custom_scores WHERE season_id=? AND player_name=?',
+        (season, player_name),
+    ).fetchone()
+    conn.close()
+    from datetime import datetime as _dt, timedelta as _td
+    weekly = {}
+    for row in battle_rows:
+        day = _dt.fromtimestamp(int(row['time'])).date()
+        week_start = (day - _td(days=day.weekday())).isoformat()
+        item = weekly.setdefault(week_start, {
+            'weekStart': week_start, 'battles': 0, 'wins': 0, 'draws': 0,
+            'memberWuxun': 0, 'unionName': '', 'groupName': '',
+        })
+        item['battles'] += 1
+        result = int(row['result'] or 0)
+        if result in (1, 7, 11):
+            item['wins'] += 1
+        elif result not in (2, 6, 12):
+            item['draws'] += 1
+    for row in snapshot_rows:
+        week_start = str(row['week_start'])
+        item = weekly.setdefault(week_start, {
+            'weekStart': week_start, 'battles': 0, 'wins': 0, 'draws': 0,
+            'memberWuxun': 0, 'unionName': '', 'groupName': '',
+        })
+        item['memberWuxun'] = int(row['member_wuxun'] or 0)
+        item['unionName'] = str(row['union_name'] or '')
+        item['groupName'] = str(row['group_name'] or '')
+    trend = [weekly[key] for key in sorted(weekly)]
+    for item in trend:
+        item['winRate'] = round(
+            (item['wins'] + item['draws'] * 0.5) * 100.0 / max(item['battles'], 1), 1
+        )
+    return jsonify({
+        'playerName': player_name, 'seasonId': season,
+        'score': dict(score) if score else {}, 'trend': trend,
+        'wuxunSource': '00000067[][10]',
+    })
 
 # ===== 武勋统计 =====
 @app.route('/api/wuxun')
@@ -1099,15 +1158,15 @@ def api_wuxun():
     conn = get_db()
     if group == 'union':
         rows = conn.execute('''
-            SELECT union_name, SUM(gongxun) as total_wx, COUNT(*) as battles,
+            SELECT union_name, SUM(wuxun) as total_wx, COUNT(*) as battles,
                    COUNT(DISTINCT player_name) as players
-            FROM wuxun WHERE union_name != '' GROUP BY union_name ORDER BY total_wx DESC
+            FROM wuxun_weekly_snapshots WHERE union_name != '' GROUP BY union_name ORDER BY total_wx DESC
         ''').fetchall()
     else:
         rows = conn.execute('''
-            SELECT player_name, union_name, SUM(gongxun) as total_wx,
-                   COUNT(*) as battles, AVG(gongxun) as avg_wx
-            FROM wuxun WHERE player_name != '' GROUP BY player_name ORDER BY total_wx DESC LIMIT 50
+            SELECT player_name,MAX(union_name) AS union_name,SUM(wuxun) as total_wx,
+                   COUNT(*) as battles,AVG(wuxun) as avg_wx
+            FROM wuxun_weekly_snapshots WHERE player_name != '' GROUP BY player_name ORDER BY total_wx DESC LIMIT 50
         ''').fetchall()
     conn.close()
     return jsonify(rows_to_list(rows))
@@ -1116,12 +1175,18 @@ def api_wuxun():
 @app.route('/api/scores')
 def api_scores():
     union = request.args.get('union', '')
+    season = request.args.get('season', 'current')
     conn = get_db()
-    where = '' if not union else f"WHERE union_name LIKE '%{union}%'"
+    where = ['season_id=?']
+    params = [season]
+    if union:
+        where.append('union_name LIKE ?')
+        params.append(f'%{union}%')
     rows = conn.execute(f'''
-        SELECT *, ROUND(win_count*100.0/MAX(battle_count,1),1) as win_rate
-        FROM scores {where} ORDER BY custom_score DESC
-    ''').fetchall()
+        SELECT *,battles AS battle_count,wins AS win_count,score AS custom_score,
+               ROUND(wins*100.0/MAX(battles,1),1) as win_rate
+        FROM custom_scores WHERE {' AND '.join(where)} ORDER BY score DESC
+    ''', params).fetchall()
     conn.close()
     return jsonify(rows_to_list(rows))
 
@@ -1133,7 +1198,7 @@ def api_union_matrix():
         SELECT atk_union, def_union,
                COUNT(*) as total,
                SUM(CASE WHEN result=1 THEN 1 ELSE 0 END) as atk_wins
-        FROM battles
+        FROM battles_v2
         WHERE atk_union != '' AND def_union != '' AND atk_union != def_union
         GROUP BY atk_union, def_union
         ORDER BY total DESC LIMIT 200
@@ -1343,14 +1408,14 @@ def api_profile_switch():
 def api_status():
     conn = get_db()
     stats = {}
-    for tbl in ['battles','unions','player_teams','wuxun','scores',
+    for tbl in ['battles_v2','unions','player_teams','wuxun_weekly_snapshots','custom_scores',
                'player_locations','player_heroes','union_cities','hero_unlock','db_sync']:
         try:
             stats[tbl] = conn.execute(f'SELECT COUNT(*) FROM {tbl}').fetchone()[0]
         except:
             stats[tbl] = 0
     try:
-        last = conn.execute('SELECT time_str FROM battles ORDER BY time DESC LIMIT 1').fetchone()
+        last = conn.execute('SELECT time_str FROM battles_v2 ORDER BY time DESC LIMIT 1').fetchone()
         stats['last_battle'] = last[0] if last else ''
     except:
         stats['last_battle'] = ''

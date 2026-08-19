@@ -1200,6 +1200,49 @@ object LocalStzbRepository {
         arrayOf(uid.toString()),
     ).useCursor { cursor -> if (cursor.moveToFirst()) cursor.int("total") else 0 }
 
+    internal fun loadPlayerSeasonTrend(
+        database: SQLiteDatabase = db(),
+        playerName: String,
+    ): List<LocalPlayerSeasonWeek> {
+        val weeks = linkedMapOf<String, MutablePlayerSeasonWeek>()
+        database.rawQuery(
+            "SELECT time,result FROM battles_v2 WHERE atk_name=? ORDER BY time",
+            arrayOf(playerName),
+        ).useCursor { cursor ->
+            while (cursor.moveToNext()) {
+                val calendar = java.util.Calendar.getInstance(Locale.CHINA).apply {
+                    timeInMillis = cursor.long("time") * 1000L
+                    firstDayOfWeek = java.util.Calendar.MONDAY
+                    set(java.util.Calendar.DAY_OF_WEEK, java.util.Calendar.MONDAY)
+                }
+                val weekStart = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).format(calendar.time)
+                val week = weeks.getOrPut(weekStart) { MutablePlayerSeasonWeek(weekStart) }
+                week.battles += 1
+                when (cursor.int("result")) {
+                    1, 7, 11 -> week.wins += 1
+                    2, 6, 12 -> Unit
+                    else -> week.draws += 1
+                }
+            }
+        }
+        database.rawQuery(
+            """
+            SELECT week_start,MAX(wuxun) AS member_wuxun
+            FROM wuxun_weekly_snapshots WHERE player_name=? GROUP BY week_start
+            """.trimIndent(),
+            arrayOf(playerName),
+        ).useCursor { cursor ->
+            while (cursor.moveToNext()) {
+                val weekStart = cursor.string("week_start")
+                weeks.getOrPut(weekStart) { MutablePlayerSeasonWeek(weekStart) }.memberWuxun =
+                    cursor.int("member_wuxun")
+            }
+        }
+        return weeks.values.sortedBy { it.weekStart }.map {
+            LocalPlayerSeasonWeek(it.weekStart, it.battles, it.wins, it.draws, it.memberWuxun)
+        }
+    }
+
     @Synchronized
     fun saveMapCells(cells: List<LocalMapCell>) {
         if (cells.isEmpty()) return
@@ -4544,6 +4587,22 @@ data class LocalWorldStateEvent(
 data class LocalWorldStateReplay(
     val version: LocalWorldStateVersion,
     val events: List<LocalWorldStateEvent>,
+)
+
+data class LocalPlayerSeasonWeek(
+    val weekStart: String,
+    val battles: Int,
+    val wins: Int,
+    val draws: Int,
+    val memberWuxun: Int,
+)
+
+private data class MutablePlayerSeasonWeek(
+    val weekStart: String,
+    var battles: Int = 0,
+    var wins: Int = 0,
+    var draws: Int = 0,
+    var memberWuxun: Int = 0,
 )
 
 data class LocalChatMessage(

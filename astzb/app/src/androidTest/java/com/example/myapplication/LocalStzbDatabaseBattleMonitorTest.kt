@@ -116,6 +116,32 @@ class LocalStzbDatabaseBattleMonitorTest {
     }
 
     @Test
+    fun personalSeasonTrendUsesBattleFactsAndMemberWuxunSnapshots() {
+        withDatabase { database ->
+            database.writableDatabase.execSQL(
+                "INSERT INTO battles_v2(battle_id,time,result,atk_name,captured_at) VALUES(1,1786287600,1,'玩家甲',1)",
+            )
+            database.writableDatabase.execSQL(
+                "INSERT INTO battles_v2(battle_id,time,result,atk_name,captured_at) VALUES(2,1786374000,2,'玩家甲',1)",
+            )
+            database.writableDatabase.execSQL(
+                "INSERT INTO wuxun_weekly_snapshots VALUES('2026-08-03',42,'玩家甲','一团',1200,1)",
+            )
+            database.writableDatabase.execSQL(
+                "INSERT INTO wuxun_weekly_snapshots VALUES('2026-08-10',42,'玩家甲','一团',2300,2)",
+            )
+
+            val trend = LocalStzbRepository.loadPlayerSeasonTrend(
+                database.readableDatabase, "玩家甲",
+            )
+
+            assertEquals(listOf("2026-08-03", "2026-08-10"), trend.map { it.weekStart })
+            assertEquals(listOf(1, 1), trend.map { it.battles })
+            assertEquals(listOf(1200, 2300), trend.map { it.memberWuxun })
+        }
+    }
+
+    @Test
     fun savingCurrentSnapshotRemovesRowsMissingFromIt() {
         withDatabase { database ->
             LocalStzbRepository.syncBattleMonitor(database.writableDatabase, snapshot(1, 2), 1)
