@@ -15,6 +15,7 @@ class ProtocolEvidenceBuildTest(unittest.TestCase):
         self.evidence = self.root / "evidence"
         self.output = self.root / "output"
         self.report = self.root / "coverage.md"
+        self.android_contract = self.root / "protocol_contract.json"
         (self.capture / "00000067").mkdir(parents=True)
         (self.capture / "00000067" / "cap_1_00000067_zlib.json").write_text(
             json.dumps([[1, "fixture-secret", 2]]), encoding="utf-8"
@@ -61,18 +62,19 @@ class ProtocolEvidenceBuildTest(unittest.TestCase):
             self.output,
             self.report,
             client_version="9.2.2",
+            android_contract_path=self.android_contract,
         )
 
     def test_two_builds_are_byte_identical_and_private(self):
         self.build()
         first = {
             path.relative_to(self.root).as_posix(): path.read_bytes()
-            for path in sorted([*self.output.glob("*"), self.report])
+            for path in sorted([*self.output.glob("*"), self.report, self.android_contract])
         }
         self.build()
         second = {
             path.relative_to(self.root).as_posix(): path.read_bytes()
-            for path in sorted([*self.output.glob("*"), self.report])
+            for path in sorted([*self.output.glob("*"), self.report, self.android_contract])
         }
         self.assertEqual(first, second)
         encoded = b"\n".join(first.values()).decode("utf-8")
@@ -102,6 +104,7 @@ class ProtocolEvidenceBuildTest(unittest.TestCase):
             self.output,
             self.report,
             client_version="9.2.2",
+            android_contract_path=self.android_contract,
         )
         (self.output / "command-catalog.json").write_text("{}\n", encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "out of date"):
@@ -112,7 +115,21 @@ class ProtocolEvidenceBuildTest(unittest.TestCase):
                 self.output,
                 self.report,
                 client_version="9.2.2",
+                android_contract_path=self.android_contract,
             )
+
+    def test_android_contract_is_minimal_and_deterministic(self):
+        self.build()
+        first = self.android_contract.read_bytes()
+        self.build()
+        self.assertEqual(first, self.android_contract.read_bytes())
+        contract = json.loads(first)
+        self.assertEqual("9.2.2", contract["clientVersion"])
+        self.assertEqual("x=wid/10000,y=wid%10000", contract["conventions"]["wid"])
+        self.assertEqual([103], [row["decimalId"] for row in contract["commands"]])
+        encoded = first.decode("utf-8")
+        self.assertNotIn("samplePaths", encoded)
+        self.assertNotIn("clientSources", encoded)
 
 
 if __name__ == "__main__":

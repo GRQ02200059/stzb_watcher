@@ -18,6 +18,7 @@ def main(argv=None):
     parser.add_argument("--output-root", required=True)
     parser.add_argument("--report", required=True)
     parser.add_argument("--client-version", default="9.2.2")
+    parser.add_argument("--android-contract")
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
     function = check_protocol_evidence if args.check else build_protocol_evidence
@@ -28,6 +29,9 @@ def main(argv=None):
         Path(args.output_root),
         Path(args.report),
         client_version=args.client_version,
+        android_contract_path=(
+            Path(args.android_contract) if args.android_contract else None
+        ),
     )
     if args.check:
         print("protocol evidence is current")

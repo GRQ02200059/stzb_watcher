@@ -121,6 +121,39 @@ def _build_outputs(
                     }
                 )
     fields.sort(key=lambda value: (value["decimalId"], value["path"]))
+    approved_android_fields = [
+        {
+            key: field[key]
+            for key in (
+                "hexId", "decimalId", "path", "name", "rawTypes",
+                "nullable", "unit", "evidence", "businessApproved",
+            )
+        }
+        for field in fields
+        if field["businessApproved"]
+    ]
+    android_commands = [
+        {
+            "hexId": row["hexId"],
+            "decimalId": row["decimalId"],
+            "names": row["names"],
+            "evidence": row["evidence"],
+        }
+        for row in rows
+        if row["androidStatus"] == "typed"
+    ]
+    android_bytes = _json_bytes(
+        {
+            "clientVersion": client_version,
+            "conventions": {
+                "wid": "x=wid/10000,y=wid%10000",
+                "timestamp": "unix_seconds_unless_field_declares_otherwise",
+                "heroId": "preserve_raw_and_normalized",
+            },
+            "commands": android_commands,
+            "fields": approved_android_fields,
+        }
+    )
     web_counts = _status_counts(rows, "webStatus")
     android_counts = _status_counts(rows, "androidStatus")
     catalog_bytes = _json_bytes(
@@ -150,6 +183,10 @@ def _build_outputs(
                 "sha256": _sha256(report_bytes),
                 "size": len(report_bytes),
             },
+            "protocol_contract_client_9_2_2.json": {
+                "sha256": _sha256(android_bytes),
+                "size": len(android_bytes),
+            },
         },
     }
     return {
@@ -157,6 +194,7 @@ def _build_outputs(
         "field-registry.json": fields_bytes,
         "manifest.json": _json_bytes(manifest),
         "report": report_bytes,
+        "android": android_bytes,
         "summary": manifest,
     }
 
@@ -168,6 +206,7 @@ def build_protocol_evidence(
     output_root,
     report_path,
     client_version="9.2.2",
+    android_contract_path=None,
 ):
     outputs = _build_outputs(
         capture_root, client_root, evidence_root, client_version
@@ -176,6 +215,8 @@ def build_protocol_evidence(
     for name in ("command-catalog.json", "field-registry.json", "manifest.json"):
         _write(output_root / name, outputs[name])
     _write(Path(report_path), outputs["report"])
+    if android_contract_path is not None:
+        _write(Path(android_contract_path), outputs["android"])
     return outputs["summary"]
 
 
@@ -186,6 +227,7 @@ def check_protocol_evidence(
     output_root,
     report_path,
     client_version="9.2.2",
+    android_contract_path=None,
 ):
     outputs = _build_outputs(
         capture_root, client_root, evidence_root, client_version
@@ -196,6 +238,8 @@ def check_protocol_evidence(
         Path(output_root) / "manifest.json": outputs["manifest.json"],
         Path(report_path): outputs["report"],
     }
+    if android_contract_path is not None:
+        expected[Path(android_contract_path)] = outputs["android"]
     stale = [
         str(path)
         for path, data in expected.items()

@@ -19,6 +19,10 @@
     "protocol-coverage-client-9.2.2.md": {
       "sha256": "aad9a45a623fc726e70a5e096207ba36414b0339cd86e7577fb4a8305a9519e2",
       "size": 8855
+    },
+    "protocol_contract_client_9_2_2.json": {
+      "sha256": "9045937ad0b06221644c6a0f3d72c72958f75fdd610f8d0a3a838602eddc8f0a",
+      "size": 7951
     }
   },
   "generatorVersion": 1,
