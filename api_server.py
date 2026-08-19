@@ -63,6 +63,8 @@ _table_info_cache = {}
 REQUIRED_BV2_COLUMNS = {
     'wid_name': 'TEXT DEFAULT ""',
     'is_npc': 'INTEGER DEFAULT 0',
+    'city_type': 'INTEGER DEFAULT 0',
+    "world_npc_army": "TEXT DEFAULT ''",
     'is_ai': 'INTEGER DEFAULT 0',
     'weather': 'INTEGER DEFAULT 0',
     'in_night': 'INTEGER DEFAULT 0',
@@ -115,6 +117,7 @@ REQUIRED_BV2_COLUMNS = {
     'def_hero1_star': 'INTEGER DEFAULT 0',
     'def_hero2_star': 'INTEGER DEFAULT 0',
     'def_hero3_star': 'INTEGER DEFAULT 0',
+    "defense_phase": "TEXT DEFAULT 'other'",
 }
 
 
@@ -480,6 +483,21 @@ def ensure_all_tables(db_path):
         _ensure_task_tables(conn)
     except Exception as e:
         print(f'[init] ensure task tables: {e}')
+    try:
+        from realtime_writer import backfill_city_siege_defense
+        capture_roots = [os.path.join(BASE_DIR, 'capture_new')]
+        try:
+            with open(PROFILE_FILE, 'r', encoding='utf-8') as profile_file:
+                profile = json.load(profile_file)
+            if profile.get('cap_dir'):
+                capture_roots.append(profile['cap_dir'])
+        except Exception:
+            pass
+        repaired = backfill_city_siege_defense(conn, capture_roots)
+        if repaired:
+            print(f'[init] 回填城池守军阶段: {repaired} 条')
+    except Exception as e:
+        print(f'[init] backfill city siege defense: {e}')
     try:
         # 10. 可配置赛季积分中心
         ScoreRepository(conn).ensure_schema()
@@ -2082,6 +2100,9 @@ def api_battles_all():
     ftype  = request.args.get('fight_type', '')
     period = request.args.get('period', '')
     wid    = request.args.get('wid', '')
+    start_time = request.args.get('start_time', '')
+    end_time = request.args.get('end_time', '')
+    city_siege = request.args.get('city_siege', '') == '1'
     if request.method == 'POST':
         body = request.get_json(silent=True) or {}
         members = body.get('members', request.args.get('members', ''))
@@ -2104,6 +2125,15 @@ def api_battles_all():
     if wid:
         try: where.append('wid=?'); params.append(int(wid))
         except: pass
+    if start_time:
+        try: where.append('time>=?'); params.append(int(start_time))
+        except: pass
+    if end_time:
+        try: where.append('time<?'); params.append(int(end_time))
+        except: pass
+    if city_siege:
+        where.append('city_type=8')
+        where.append('COALESCE(is_npc,0)=1')
     if members:
         names = [m.strip() for m in members.split(',') if m.strip()]
         if names:
@@ -2116,13 +2146,19 @@ def api_battles_all():
         where.append(f'time >= {int(__import__("time").time())-7*86400}')
     w = ' AND '.join(where)
     conn = get_db()
+    bv_cols = get_bv2_cols(conn)
+    defense_phase_col = (
+        "COALESCE(defense_phase, 'other') AS defense_phase"
+        if 'defense_phase' in bv_cols
+        else "'other' AS defense_phase"
+    )
     total = conn.execute(f'SELECT COUNT(*) FROM battles_v2 WHERE {w}', params).fetchone()[0]
     rows  = conn.execute(
         f'''SELECT battle_id, time, time_str, result, fight_type,
                    atk_name, atk_union, def_name, def_union,
                    atk_hero1_id, atk_hero2_id, atk_hero3_id,
                    def_hero1_id, def_hero2_id, def_hero3_id,
-                   garrison
+                   garrison, {defense_phase_col}
             FROM battles_v2
             WHERE {w}
             ORDER BY time DESC
@@ -3194,7 +3230,7 @@ def api_task_report_count(tid):
 
 @app.route('/api/tasks/<int:tid>/statistics', methods=['POST'])
 def api_task_statistics(tid):
-    """统计考勤：按 battles_v2 中匹配 wid/pos 的战报统计每人出战次数"""
+    """统计攻城考勤，按守方阶段归类主力与拆迁。"""
     conn = get_db()
     task = conn.execute('SELECT * FROM tasks WHERE id=?', (tid,)).fetchone()
     if not task:
@@ -3207,60 +3243,78 @@ def api_task_statistics(tid):
     try: user_list = json.loads(d['user_list'])
     except: user_list = {}
 
+    # 任务时刻起的一个标准攻城阶段（2 小时）内，按守方阶段统计。
+    # 这与客户端 UNION_SIEGE_DURATION_TIME=7200 的攻城时长保持一致。
+    task_start = int(d.get('time') or 0)
+    task_end = task_start + 7200 if task_start > 0 else 0
+
     # 兼容不同库结构
     bv_cols = {r[1] for r in conn.execute("PRAGMA table_info(battles_v2)").fetchall()}
-    has_garrison = 'garrison' in bv_cols
     has_atk_hero1 = 'atk_hero1_id' in bv_cols
+    has_phase = 'defense_phase' in bv_cols
+
+    role_ids_by_uid = {}
+    for table, uid_col in (('zone_players', 'uid'), ('player_power_rank', 'user_id')):
+        exists = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+            (table,),
+        ).fetchone()
+        if not exists:
+            continue
+        try:
+            for row in conn.execute(
+                f"SELECT {uid_col}, role_id FROM {table} WHERE role_id IS NOT NULL AND role_id != ''"
+            ).fetchall():
+                role_ids_by_uid.setdefault(str(row[0]), set()).add(str(row[1]))
+        except sqlite3.OperationalError:
+            continue
+
+    def statistics_for_member(member_uid, member):
+        params = [pos]
+        where = ['wid=?', 'city_type=8', 'COALESCE(is_npc,0)=1']
+        if task_start > 0:
+            where.append('time>=?')
+            params.append(task_start)
+        if task_end > 0:
+            where.append('time<?')
+            params.append(task_end)
+
+        mapped_role_ids = sorted(role_ids_by_uid.get(str(member_uid), set()))
+        if mapped_role_ids:
+            placeholders = ','.join('?' * len(mapped_role_ids))
+            where.append(f'atk_uid IN ({placeholders})')
+            params.extend(mapped_role_ids)
+        else:
+            # 00000067 only supplies numeric user ids.  Until a role-id
+            # snapshot is captured, retain name matching as a safe fallback.
+            where.append('atk_name=?')
+            params.append(member.get('name', ''))
+
+        phase_expr = "COALESCE(defense_phase, 'other')" if has_phase else "'other'"
+        sql = f'''
+            SELECT
+                SUM(CASE WHEN {phase_expr}='normal_city_guard' THEN 1 ELSE 0 END) AS main_count,
+                SUM(CASE WHEN {phase_expr}='last_city_guard' THEN 1 ELSE 0 END) AS tear_count,
+                COUNT(DISTINCT CASE WHEN {phase_expr}='normal_city_guard'
+                    AND atk_hero1_id IS NOT NULL AND atk_hero1_id != 0
+                    THEN atk_hero1_id END) AS main_teams,
+                COUNT(DISTINCT CASE WHEN {phase_expr}='last_city_guard'
+                    AND atk_hero1_id IS NOT NULL AND atk_hero1_id != 0
+                    THEN atk_hero1_id END) AS tear_teams
+            FROM battles_v2
+            WHERE {' AND '.join(where)}
+        '''
+        row = conn.execute(sql, params).fetchone()
+        return (
+            int(row['main_count'] or 0),
+            int(row['tear_count'] or 0),
+            int(row['main_teams'] or 0) if has_atk_hero1 else 0,
+            int(row['tear_teams'] or 0) if has_atk_hero1 else 0,
+        )
 
     complete = 0
     for uid, u in user_list.items():
-        name = u['name']
-        if has_garrison:
-            # 主力次数（garrison=0，攻方出战）
-            atk_num = conn.execute(
-                'SELECT COUNT(*) FROM battles_v2 WHERE wid=? AND atk_name=? AND garrison=0',
-                (pos, name)
-            ).fetchone()[0]
-            # 拆迁次数（garrison=1，攻方出战）
-            dis_num = conn.execute(
-                'SELECT COUNT(*) FROM battles_v2 WHERE wid=? AND atk_name=? AND garrison=1',
-                (pos, name)
-            ).fetchone()[0]
-        else:
-            # 老/精简库没有 garrison，统一按总出战统计
-            atk_num = conn.execute(
-                'SELECT COUNT(*) FROM battles_v2 WHERE wid=? AND atk_name=?',
-                (pos, name)
-            ).fetchone()[0]
-            dis_num = 0
-
-        if has_garrison and has_atk_hero1:
-            # 主力队伍数（按主将ID去重，不同主将算不同队伍）
-            atk_team_num = conn.execute(
-                'SELECT COUNT(DISTINCT atk_hero1_id) FROM battles_v2 WHERE wid=? AND atk_name=? AND garrison=0 AND atk_hero1_id IS NOT NULL AND atk_hero1_id != 0',
-                (pos, name)
-            ).fetchone()[0]
-            # 拆迁队伍数
-            dis_team_num = conn.execute(
-                'SELECT COUNT(DISTINCT atk_hero1_id) FROM battles_v2 WHERE wid=? AND atk_name=? AND garrison=1 AND atk_hero1_id IS NOT NULL AND atk_hero1_id != 0',
-                (pos, name)
-            ).fetchone()[0]
-        elif has_atk_hero1:
-            atk_team_num = conn.execute(
-                'SELECT COUNT(DISTINCT atk_hero1_id) FROM battles_v2 WHERE wid=? AND atk_name=? AND atk_hero1_id IS NOT NULL AND atk_hero1_id != 0',
-                (pos, name)
-            ).fetchone()[0]
-            dis_team_num = 0
-        else:
-            # 没有 atk_hero1_id 时，从 battle_heroes 侧按 pos=0 去重
-            atk_team_num = conn.execute(
-                '''SELECT COUNT(DISTINCT bh.hero_id)
-                   FROM battle_heroes bh
-                   JOIN battles_v2 bv ON bv.battle_id = bh.battle_id
-                   WHERE bv.wid=? AND bv.atk_name=? AND bh.side='atk' AND bh.pos=0 AND bh.hero_id IS NOT NULL AND bh.hero_id != 0''',
-                (pos, name)
-            ).fetchone()[0]
-            dis_team_num = 0
+        atk_num, dis_num, atk_team_num, dis_team_num = statistics_for_member(uid, u)
         user_list[uid]['atk_num'] = atk_num
         user_list[uid]['dis_num'] = dis_num
         user_list[uid]['atk_team_num'] = atk_team_num

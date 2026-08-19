@@ -2171,7 +2171,9 @@ async function loadTaskBattles(){
   wrap.classList.remove('is-hidden');
   b.innerHTML=`<tr><td colspan=5 style='color:var(--cyan);text-align:center;padding:12px'>⏳ 加载中...</td></tr>`;
   const membersParam = names.join(',');
-  const data = await apiFetch(`/api/battles_all?wid=${pos}&size=200&page=1`, {
+  const taskStart = Number(_currentTaskDetail.time||0);
+  const taskWindow = taskStart ? `&start_time=${taskStart}&end_time=${taskStart+7200}&city_siege=1` : '&city_siege=1';
+  const data = await apiFetch(`/api/battles_all?wid=${pos}&size=200&page=1${taskWindow}`, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({members: membersParam})
@@ -2189,7 +2191,11 @@ async function loadTaskBattles(){
     const timeStr = r.time_str||new Date(r.time*1000).toLocaleTimeString('zh-CN',{hour12:false});
     const res = RESULT_MAP[r.result]||r.result;
     const resColor = (r.result===1||r.result===6)?'var(--green)':r.result===2?'var(--red)':'var(--text2)';
-    const garrison = r.garrison===1?`<span style='color:var(--cyan);font-size:.68rem'>拆迁</span>`:`<span style='color:var(--gold);font-size:.68rem'>主力</span>`;
+    const phaseLabel = r.defense_phase==='last_city_guard'
+      ? `<span style='color:var(--cyan);font-size:.68rem'>拆迁</span>`
+      : r.defense_phase==='normal_city_guard'
+        ? `<span style='color:var(--gold);font-size:.68rem'>主力</span>`
+        : `<span style='color:var(--text2);font-size:.68rem'>待识别</span>`;
     // 武将名
     const heroes = [r.atk_hero1_id,r.atk_hero2_id,r.atk_hero3_id].filter(Boolean).map(hid=>{
       if(typeof HERO_CFG!=='undefined'&&HERO_CFG[hid]) return HERO_CFG[hid].name||hid;
@@ -2198,7 +2204,7 @@ async function loadTaskBattles(){
     b.innerHTML+=`<tr>
       <td style='font-size:.68rem;color:var(--text2);white-space:nowrap'>${esc(timeStr)}</td>
       <td><b>${esc(r.atk_name||'')}</b><br><span style='font-size:.65rem;color:var(--text2)'>${esc(r.atk_union||'')}</span></td>
-      <td>${garrison}</td>
+      <td>${phaseLabel}</td>
       <td style='color:${resColor};font-weight:600'>${res}</td>
       <td style='font-size:.68rem;color:var(--text2)'>${esc(heroes)}</td>
     </tr>`;
