@@ -70,6 +70,21 @@ class BattlefieldWorldStateTest {
         assertEquals(listOf(1, 2), LocalBattleMonitorStore.latest()!!.moves.map { it.teamId })
     }
 
+    @Test fun parsesClearChunksAndRealMarchFromSharedWorldContractSlots() {
+        val payload = packet(
+            army(1),
+            marker = 11,
+            clearChunks = "{\"10004\":[\"0\",\"4\"]}",
+            realMarch = "{\"9001\":[10001,10002,3,10003,4,5,6,7,8,9,1,80,10,11]}",
+        )
+
+        val snapshot = parse(payload)
+
+        assertEquals(listOf("0", "4"), snapshot.clearChunks[10004])
+        assertEquals(10003, snapshot.realMarches.single().nextWid)
+        assertEquals(9001, snapshot.realMarches.single().id)
+    }
+
     private fun parse(payload: String) = checkNotNull(LocalBattleMonitorParser.parse(payload))
 
     private fun army(id: Int, morale: Int = 80) =
@@ -81,5 +96,7 @@ class BattlefieldWorldStateTest {
         deleted: String = "[]",
         blockInfo: String = "null",
         blockArmies: String = "{}",
-    ) = """[{}, {"7":["玩家",9,1,0,0,0,0,0,0,0,0,0,[1,0,"同盟"],null,null,0,0,0,0,0,0,"","",0,0]}, {}, {}, {}, {}, {$armies}, $deleted, {}, [], {}, [], {}, {}, {}, {}, {}, null, $marker, {}, $blockInfo, $blockArmies, {}, {}, {}, [], [], [], [], {}, null]"""
+        clearChunks: String = "{}",
+        realMarch: String = "{}",
+    ) = """[{}, {"7":["玩家",9,1,0,0,0,0,0,0,0,0,0,[1,0,"同盟"],null,null,0,0,0,0,0,0,"","",0,0]}, {}, {}, {}, {}, {$armies}, $deleted, {}, [], {}, [], {}, {}, {}, $clearChunks, {}, null, $marker, {}, $blockInfo, $blockArmies, {}, {}, {}, [], [], [], [], $realMarch, null]"""
 }

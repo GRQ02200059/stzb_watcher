@@ -17,7 +17,7 @@ object LocalBattleMonitorParser {
         }
         LocalBattleMonitorStore.update(parsed, packet.msgId)
         if (packet.msgId == "5028" || parsed.marker > 0) {
-            LocalBattleMonitorStore.latest()?.let(LocalStzbRepository::saveBattleMonitor)
+            LocalBattleMonitorStore.latest()?.let { LocalStzbRepository.saveBattleMonitor(it, packet.msgId) }
         }
         PacketLogStore.add(
             "${packet.msgId} 本机监控：teams=${parsed.teamIds.size} moves=${parsed.moves.size} users=${parsed.subjects.size} deleted=${parsed.deletedTeamIds.size} marker=${parsed.marker}"
@@ -49,7 +49,9 @@ object LocalBattleMonitorParser {
 
         data.optJSONObject(WORLD_CHUNKS_SLOT)?.let { chunks ->
             forEachEntry(chunks) { wid, value ->
-                if (value is JSONObject) mapStates[wid] = LocalMapState(wid, value.length(), WORLD_CHUNKS_SLOT)
+                if (value is JSONObject) {
+                    mapStates[wid] = LocalMapState(wid, value.length(), WORLD_CHUNKS_SLOT, value.toString())
+                }
             }
         }
 
@@ -137,6 +139,44 @@ object LocalBattleMonitorParser {
                     }
                 }
             }.orEmpty(),
+            clearChunks = data.optJSONObject(CLEAR_CHUNKS_SLOT)?.let { chunks ->
+                buildMap {
+                    forEachEntry(chunks) { wid, value ->
+                        val chunkTypes = value as? JSONArray ?: return@forEachEntry
+                        put(wid, buildList {
+                            for (index in 0 until chunkTypes.length()) {
+                                chunkTypes.optString(index).takeIf(String::isNotBlank)?.let(::add)
+                            }
+                        })
+                    }
+                }
+            }.orEmpty(),
+            realMarches = data.optJSONObject(REAL_MARCH_SLOT)?.let { marches ->
+                buildList {
+                    forEachEntry(marches) { id, value ->
+                        if (value is JSONArray && value.length() >= 14) {
+                            add(LocalRealMarch(
+                                id = id,
+                                lastWid = value.optInt(0),
+                                currentWid = value.optInt(1),
+                                currentArriveTime = value.optLong(2),
+                                nextWid = value.optInt(3),
+                                nextBeginTime = value.optLong(4),
+                                nextNeedTime = value.optLong(5),
+                                nextSpendTime = value.optLong(6),
+                                pathId = value.optInt(7),
+                                unitTimeCost = value.optInt(8),
+                                marchType = value.optInt(9),
+                                belongId = value.optInt(10),
+                                morale = value.optInt(11),
+                                moraleStayLastCalcTime = value.optLong(12),
+                                moraleHungryLastCalcTime = value.optLong(13),
+                            ))
+                        }
+                    }
+                }
+            }.orEmpty(),
+            changedTeamIds = moves.map { it.teamId },
         )
     }
 
@@ -167,8 +207,10 @@ object LocalBattleMonitorParser {
     private const val ARMIES_SLOT = 6
     private const val DELETED_ARMIES_SLOT = 7
     private const val WORLD_CHUNKS_SLOT = 14
+    private const val CLEAR_CHUNKS_SLOT = 15
     private const val BLOCK_INFO_SLOT = 20
     private const val BLOCK_ARMIES_SLOT = 21
+    private const val REAL_MARCH_SLOT = 29
 }
 
 data class LocalBattleMonitorSnapshot(
@@ -185,7 +227,29 @@ data class LocalBattleMonitorSnapshot(
     val blockMode: Int = 0,
     val blockId: Int = 0,
     val blockArmyIds: Map<Int, List<Int>> = emptyMap(),
+    val clearChunks: Map<Int, List<String>> = emptyMap(),
+    val realMarches: List<LocalRealMarch> = emptyList(),
+    val changedTeamIds: List<Int> = moves.map { it.teamId },
+    val sourceMessageId: String = "",
     val capturedAt: Long = System.currentTimeMillis(),
+)
+
+data class LocalRealMarch(
+    val id: Int,
+    val lastWid: Int,
+    val currentWid: Int,
+    val currentArriveTime: Long,
+    val nextWid: Int,
+    val nextBeginTime: Long,
+    val nextNeedTime: Long,
+    val nextSpendTime: Long,
+    val pathId: Int,
+    val unitTimeCost: Int,
+    val marchType: Int,
+    val belongId: Int,
+    val morale: Int,
+    val moraleStayLastCalcTime: Long,
+    val moraleHungryLastCalcTime: Long,
 )
 
 data class LocalTeamMove(
@@ -239,6 +303,7 @@ data class LocalMapState(
     val wid: Int,
     val stateCount: Int,
     val blockIndex: Int,
+    val chunksJson: String = "{}",
 )
 
 object LocalBattleMonitorStore {
@@ -292,7 +357,12 @@ object LocalBattleMonitorStore {
         snapshot.moves.forEach { move ->
             currentMoves[move.teamId] = move.withSubject(currentSubjects)
         }
-        latest = snapshot.copy(moves = currentMoves.values.toList(), teamIds = currentMoves.keys.toList(), subjects = currentSubjects.values.toList())
+        latest = snapshot.copy(
+            moves = currentMoves.values.toList(),
+            teamIds = currentMoves.keys.toList(),
+            subjects = currentSubjects.values.toList(),
+            sourceMessageId = sourceMessageId,
+        )
         val merged = checkNotNull(latest)
         val last = history.firstOrNull()
         if (last == null || last.marker != merged.marker || last.rawLength != merged.rawLength || last.teamIds != merged.teamIds || last.moves != merged.moves) {

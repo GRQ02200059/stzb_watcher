@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -104,6 +105,71 @@ class LocalStzbDatabase(
                 state_id INTEGER,
                 marker INTEGER,
                 captured_at INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS world_state_versions (
+                version INTEGER PRIMARY KEY AUTOINCREMENT,
+                source_msg_id TEXT NOT NULL,
+                marker INTEGER NOT NULL,
+                raw_length INTEGER NOT NULL,
+                completeness TEXT NOT NULL,
+                block_mode INTEGER DEFAULT 0,
+                block_id INTEGER DEFAULT 0,
+                move_count INTEGER DEFAULT 0,
+                map_state_count INTEGER DEFAULT 0,
+                captured_at INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS world_state_events (
+                seq INTEGER PRIMARY KEY AUTOINCREMENT,
+                state_version INTEGER NOT NULL,
+                source_msg_id TEXT NOT NULL,
+                event_type TEXT NOT NULL,
+                entity_type TEXT,
+                entity_id INTEGER,
+                evidence_json TEXT NOT NULL,
+                captured_at INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS world_real_marches (
+                real_march_id INTEGER PRIMARY KEY,
+                last_wid INTEGER, current_wid INTEGER, current_arrive_time INTEGER,
+                next_wid INTEGER, next_begin_time INTEGER, next_need_time INTEGER,
+                next_spend_time INTEGER, path_id INTEGER, unit_time_cost INTEGER,
+                march_type INTEGER, belong_id INTEGER, morale INTEGER,
+                morale_stay_last_calc_time INTEGER, morale_hungry_last_calc_time INTEGER,
+                source_version INTEGER NOT NULL, updated_at INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS world_tile_chunks (
+                wid INTEGER NOT NULL,
+                chunk_type TEXT NOT NULL,
+                raw_json TEXT NOT NULL,
+                source_version INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL,
+                PRIMARY KEY(wid, chunk_type)
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS world_army_blocks (
+                block_id INTEGER NOT NULL,
+                army_id INTEGER NOT NULL,
+                source_version INTEGER NOT NULL,
+                PRIMARY KEY(block_id, army_id)
             )
             """.trimIndent()
         )
@@ -533,6 +599,8 @@ class LocalStzbDatabase(
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_packets_time ON stzb_packets(captured_at)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_battle_time ON battle_notices(time)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_monitor_arrive ON battle_monitor_moves(arrive_time)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_world_versions_marker ON world_state_versions(marker)")
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_world_events_version ON world_state_events(state_version)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_local_records_type ON local_records(record_type)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_battles_time ON battles_v2(time)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_battles_atk ON battles_v2(atk_name)")
@@ -651,7 +719,7 @@ class LocalStzbDatabase(
 
     companion object {
         const val DEFAULT_DATABASE_NAME = "astzb_local.db"
-        private const val DB_VERSION = 18
+        private const val DB_VERSION = 19
     }
 }
 
@@ -754,13 +822,18 @@ object LocalStzbRepository {
     }
 
     @Synchronized
-    fun saveBattleMonitor(snapshot: LocalBattleMonitorSnapshot) {
+    fun saveBattleMonitor(snapshot: LocalBattleMonitorSnapshot, sourceMessageId: String = snapshot.sourceMessageId) {
         val database = db()
         val now = System.currentTimeMillis()
-        syncBattleMonitor(database, snapshot, now)
+        syncBattleMonitor(database, snapshot, now, sourceMessageId)
     }
 
-    internal fun syncBattleMonitor(database: SQLiteDatabase, snapshot: LocalBattleMonitorSnapshot, now: Long) {
+    internal fun syncBattleMonitor(
+        database: SQLiteDatabase,
+        snapshot: LocalBattleMonitorSnapshot,
+        now: Long,
+        sourceMessageId: String = snapshot.sourceMessageId.ifBlank { "unknown" },
+    ) {
         database.beginTransaction()
         try {
             database.delete("battle_monitor_moves", null, null)
@@ -796,6 +869,107 @@ object LocalStzbRepository {
                         put("captured_at", now)
                     },
                     SQLiteDatabase.CONFLICT_REPLACE,
+                )
+            }
+            val version = database.insertOrThrow(
+                "world_state_versions",
+                null,
+                ContentValues().apply {
+                    put("source_msg_id", sourceMessageId.ifBlank { "unknown" })
+                    put("marker", snapshot.marker)
+                    put("raw_length", snapshot.rawLength)
+                    put("completeness", if (sourceMessageId == "5026") "baseline" else "delta")
+                    put("block_mode", snapshot.blockMode)
+                    put("block_id", snapshot.blockId)
+                    put("move_count", snapshot.moves.size)
+                    put("map_state_count", snapshot.mapStates.size)
+                    put("captured_at", now)
+                },
+            )
+            fun event(type: String, entityType: String, entityId: Int, evidence: JSONObject) {
+                database.insertOrThrow(
+                    "world_state_events",
+                    null,
+                    ContentValues().apply {
+                        put("state_version", version)
+                        put("source_msg_id", sourceMessageId.ifBlank { "unknown" })
+                        put("event_type", type)
+                        put("entity_type", entityType)
+                        put("entity_id", entityId)
+                        put("evidence_json", evidence.toString())
+                        put("captured_at", now)
+                    },
+                )
+            }
+            val baseEvidence = JSONObject().put("marker", snapshot.marker).put("blockId", snapshot.blockId)
+            snapshot.changedTeamIds.distinct().forEach { event("entity_upserted", "army", it, baseEvidence) }
+            (snapshot.directDeletedTeamIds + snapshot.deletedTeamIds).distinct().forEach {
+                event("entity_deleted", "army", it, baseEvidence)
+            }
+            snapshot.clearChunks.forEach { (wid, types) ->
+                types.forEach { type ->
+                    event("chunk_cleared", "tile_chunk", wid, JSONObject(baseEvidence.toString()).put("chunkType", type))
+                }
+            }
+            if (sourceMessageId == "5026") {
+                database.delete("world_real_marches", null, null)
+                database.delete("world_tile_chunks", null, null)
+                database.delete("world_army_blocks", null, null)
+            }
+            snapshot.mapStates.forEach { state ->
+                val chunks = runCatching { JSONObject(state.chunksJson) }.getOrNull() ?: JSONObject()
+                val keys = chunks.keys()
+                while (keys.hasNext()) {
+                    val chunkType = keys.next()
+                    database.insertWithOnConflict(
+                        "world_tile_chunks", null, ContentValues().apply {
+                            put("wid", state.wid); put("chunk_type", chunkType)
+                            put("raw_json", chunks.opt(chunkType)?.toString() ?: "null")
+                            put("source_version", version); put("updated_at", now)
+                        }, SQLiteDatabase.CONFLICT_REPLACE,
+                    )
+                }
+            }
+            snapshot.clearChunks.forEach { (wid, types) ->
+                types.forEach { chunkType ->
+                    database.delete("world_tile_chunks", "wid = ? AND chunk_type = ?", arrayOf(wid.toString(), chunkType))
+                }
+            }
+            snapshot.blockArmyIds.forEach { (blockId, armyIds) ->
+                database.delete("world_army_blocks", "block_id = ?", arrayOf(blockId.toString()))
+                armyIds.distinct().forEach { armyId ->
+                    database.insertOrThrow(
+                        "world_army_blocks", null, ContentValues().apply {
+                            put("block_id", blockId); put("army_id", armyId); put("source_version", version)
+                        },
+                    )
+                }
+            }
+            snapshot.directDeletedTeamIds.distinct().forEach { armyId ->
+                database.delete("world_army_blocks", "army_id = ?", arrayOf(armyId.toString()))
+            }
+            if (snapshot.blockMode == 2 && snapshot.blockId > 0) {
+                snapshot.deletedTeamIds.distinct().forEach { armyId ->
+                    database.delete(
+                        "world_army_blocks",
+                        "block_id = ? AND army_id = ?",
+                        arrayOf(snapshot.blockId.toString(), armyId.toString()),
+                    )
+                }
+            }
+            snapshot.realMarches.forEach { march ->
+                database.insertWithOnConflict(
+                    "world_real_marches", null, ContentValues().apply {
+                        put("real_march_id", march.id); put("last_wid", march.lastWid)
+                        put("current_wid", march.currentWid); put("current_arrive_time", march.currentArriveTime)
+                        put("next_wid", march.nextWid); put("next_begin_time", march.nextBeginTime)
+                        put("next_need_time", march.nextNeedTime); put("next_spend_time", march.nextSpendTime)
+                        put("path_id", march.pathId); put("unit_time_cost", march.unitTimeCost)
+                        put("march_type", march.marchType); put("belong_id", march.belongId)
+                        put("morale", march.morale); put("morale_stay_last_calc_time", march.moraleStayLastCalcTime)
+                        put("morale_hungry_last_calc_time", march.moraleHungryLastCalcTime)
+                        put("source_version", version); put("updated_at", now)
+                    }, SQLiteDatabase.CONFLICT_REPLACE,
                 )
             }
             database.setTransactionSuccessful()
