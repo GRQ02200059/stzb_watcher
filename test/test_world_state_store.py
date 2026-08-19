@@ -244,6 +244,41 @@ class WorldStateStoreTest(unittest.TestCase):
         ).fetchall()
         self.assertEqual([row["chunk_type"] for row in rows], ["0", "8"])
 
+    def test_delta_clears_strategy_hunter_and_career_support_entities(self):
+        baseline = world_payload(
+            marker=10,
+            strategies={"101": [1]},
+            short_messages={"107": ["hunter"]},
+            career_support_add={"106": [1]},
+        )
+        self.store.apply_baseline(self.packet(5026, baseline))
+
+        delta = world_payload(
+            marker=11,
+            career_support_remove=[106],
+            clear_hunter=[107],
+            clear_strategy=[101],
+        )
+        result = self.store.apply_delta(self.packet(5028, delta, observed=2000))
+
+        rows = self.conn.execute(
+            """
+            SELECT category,entity_id,deleted_at_seq
+            FROM world_scene_entities
+            WHERE category IN ('strategy','short_message','career_support')
+            ORDER BY category
+            """
+        ).fetchall()
+        self.assertEqual(3, len(rows))
+        self.assertTrue(all(row["deleted_at_seq"] is not None for row in rows))
+        events = self.conn.execute(
+            "SELECT event_type,entity_type,entity_id FROM world_state_events "
+            "WHERE state_version=? ORDER BY seq",
+            (result.state_version,),
+        ).fetchall()
+        self.assertIn(("entity_deleted", "strategy", "101"), [tuple(row) for row in events])
+        self.assertIn(("entity_deleted", "career_support", "106"), [tuple(row) for row in events])
+
 
 if __name__ == "__main__":
     unittest.main()

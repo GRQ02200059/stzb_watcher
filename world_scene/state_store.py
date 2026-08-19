@@ -181,6 +181,13 @@ class WorldStateStore:
         packet_seq = self.projection.apply_packet(
             _without_block_deleted_armies(packet)
         )
+        removed_entities = {
+            "career_support": packet.removed_career_support_ids,
+            "short_message": packet.cleared_hunter_ids,
+            "strategy": packet.cleared_strategy_ids,
+        }
+        for category, entity_ids in removed_entities.items():
+            self._mark_entities_deleted(category, entity_ids, packet_seq)
         self._apply_tile_chunks(packet, packet_seq)
         self._apply_delta_memberships(packet, packet_seq)
         version = self._record_version(
@@ -204,8 +211,21 @@ class WorldStateStore:
             packet,
             {"blockInfo": packet.block_info},
         )
+        event_count = 1
+        for category, entity_ids in removed_entities.items():
+            for entity_id in entity_ids:
+                self._record_event(
+                    version,
+                    packet_seq,
+                    "entity_deleted",
+                    category,
+                    str(entity_id),
+                    packet,
+                    {"source": "5028_clear_slot"},
+                )
+                event_count += 1
         self.conn.commit()
-        return WorldStateChangeSet(version, packet_seq, "delta", 1)
+        return WorldStateChangeSet(version, packet_seq, "delta", event_count)
 
     def _replace_baseline_memberships(
         self, packet: WorldScenePacket, packet_seq: int

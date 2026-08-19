@@ -193,10 +193,15 @@ def parse_world_scene_packet(
         block_info = (_as_int(payload[20][0]), _as_int(payload[20][1]))
 
     entities = {
+        "strategy": _generic_entities("strategy", payload[4]),
+        "nation_strategy": _generic_entities("nation_strategy", payload[5]),
         "war_ship": _generic_entities("war_ship", payload[8]),
         "assist_army": _generic_entities("assist_army", payload[10]),
         "army_group": _generic_entities("army_group", payload[12]),
         "short_message": _generic_entities("short_message", payload[13]),
+        "ext_garrison": _generic_entities("ext_garrison", payload[16]),
+        "manor_family": _generic_entities("manor_family", payload[19]),
+        "career_support": _generic_entities("career_support", payload[24]),
         "block_ship": _generic_entities("block_ship", payload[22]),
         "block_assist_army": _generic_entities("block_assist_army", payload[23]),
     }
@@ -250,6 +255,21 @@ def parse_world_scene_packet(
             for wid, values in _entries(payload[15])
             if isinstance(values, list)
         },
+        removed_career_support_ids=tuple(
+            _as_int(value)
+            for value in payload[25]
+            if isinstance(payload[25], list) and _as_int(value) > 0
+        ),
+        cleared_hunter_ids=tuple(
+            _as_int(value)
+            for value in payload[26]
+            if isinstance(payload[26], list) and _as_int(value) > 0
+        ),
+        cleared_strategy_ids=tuple(
+            _as_int(value)
+            for value in payload[27]
+            if isinstance(payload[27], list) and _as_int(value) > 0
+        ),
         real_marches=real_marches,
         entities=entities,
         observed_area=observed_area,
@@ -316,6 +336,15 @@ def _merge_5026_packets(packets: list[WorldScenePacket]) -> WorldScenePacket:
         tile_chunks=_merge_nested_dicts(packets, "tile_chunks"),
         tiles=_merge_dicts(packets, "tiles"),
         clear_chunks=_merge_dicts(packets, "clear_chunks"),
+        removed_career_support_ids=tuple(
+            value for packet in packets for value in packet.removed_career_support_ids
+        ),
+        cleared_hunter_ids=tuple(
+            value for packet in packets for value in packet.cleared_hunter_ids
+        ),
+        cleared_strategy_ids=tuple(
+            value for packet in packets for value in packet.cleared_strategy_ids
+        ),
         real_marches=_merge_dicts(packets, "real_marches"),
         entities={
             category: {
