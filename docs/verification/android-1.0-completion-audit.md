@@ -9,7 +9,7 @@
 | Android Beta 定位 | README、用户指南、登录页、版本号 | `1.0.0-beta.1`，登录页显示 Beta | 已完成 |
 | 6314/6318 语义修复 | `LocalAuxiliaryParser`、DB v17、Repository 过滤 | 协议测试、升级测试、真实抓包 DB：`union_building_help=17`、`battle_field=0` | 已完成 |
 | 战场点击详情 | `BattlefieldEventDetailScreen`、导航 | 模拟器导航测试通过 | 已完成 |
-| 真实游戏抓包闭环 | 六阶段证据、真实目标 App integration test | Android 16 模拟器 + 率土 9.2.6，`complete=true`、5 SOCKS、已知协议、17 行增量、网络恢复 | 已完成（单环境） |
+| 真实游戏抓包闭环 | 六阶段证据、真实目标 App integration test | 当前只有 Android 16 模拟器证据；没有安装目标游戏的实体 Android 13+ 设备证据 | 未完成 |
 | 文档导航同步 | README、USER_GUIDE、Android README、契约测试 | 四入口和功能矩阵测试通过 | 已完成 |
 | 多账号/区服 | ProfileManager、独立 DB/抓包目录、原生页 | 单元测试 + 双 DB instrumentation | 已完成 |
 | 实时部队 | Repository、ViewModel、Compose、战场定位 | 新鲜度/状态/位置/阵容/搜索测试 | 已完成 |
@@ -21,7 +21,7 @@
 
 ## 真实抓包证据
 
-测试设备：Pixel_6 AVD，Android 16。目标 App：率土之滨 9.2.6，已有 6683 区角色。
+已有验证环境：Pixel_6 AVD，Android 16。该环境只能证明 APK 安装、界面、VPN/native 组件和模拟数据链路，不能替代实体设备上的目标游戏抓包闭环。
 
 脱敏结果：
 
@@ -44,4 +44,4 @@ network_restored=true
 2. 将仍在经典页的州郡、战区玩家、深度诊断迁移或明确保留为兼容工具。
 3. 物理设备矩阵通过后，将版本从 `1.0.0-beta.1` 提升为正式 1.0。
 
-因此当前可以作为“独立抓包与核心分析 Beta”交付，但不能将整个目标标记为正式 1.0 完成。
+因此当前可以作为“独立抓包与核心分析 Beta”交付；实体 Android 13/14/15 设备验收和 Windows 桌面安装包仍未完成，不能将整个目标标记为正式 1.0 完成。

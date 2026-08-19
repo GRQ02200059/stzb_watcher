@@ -193,22 +193,16 @@ Android 状态定义：
 
 ### Windows 普通用户
 
-如果你使用 Windows，不需要安装 Python 或配置开发环境，可以直接使用 Release 中的 EXE：
+Windows 桌面壳和一键安装包目前仍在独立开发分支，当前主线尚未交付可下载的 EXE。不要把源码压缩包当作安装程序。
 
-1. 打开项目的 [Releases 页面](https://github.com/GRQ02200059/stzb_watcher/releases)。
-2. 进入最新版本，展开 `Assets`。
-3. 下载文件名以 `.exe` 结尾的 Windows 程序。
-4. 如果下载的是压缩包，先完整解压到本地文件夹。
-5. 双击运行 EXE；如果 Windows Defender 弹出提示，请确认文件来源后选择允许运行。
-6. 如果程序没有自动打开浏览器，手动访问 [http://127.0.0.1:8080](http://127.0.0.1:8080)。
+当前可以使用源码启动 Web 端；Windows 一键 EXE 需要后续在 Windows 10/11 x64 构建机完成打包、安装和干净环境验收。
 
 使用时请保持 EXE 进程运行。关闭程序窗口或结束进程后，本地 Web 服务也会停止。首次运行建议把程序放在具有读写权限的普通文件夹中，不要直接放在需要管理员权限的系统目录。
 
 下载时请注意：
 
-- Windows 用户下载 `Assets` 中的 `.exe` 文件，不要下载 `Source code` 源码压缩包；
-- 如果 Release 同时提供多个 EXE，优先选择标注为 Windows、release 或正式版本的文件；
-- Windows 版和 Android APK 是两种不同的安装包，不要把 `.exe` 文件传到手机安装。
+- Windows 桌面版当前属于未交付目标；完成后再从 Releases 下载 `.exe`。
+- 当前主线 Web 端仍可通过 `python api_server.py` 启动。
 
 ### Web 普通用户（源码启动）
 
@@ -346,8 +340,7 @@ Android 在 `工具 → 抓包启动台 → 导出` 中支持：
 常见问题：
 
 - **APK 下载哪个？** 下载 Release 页面 `Assets` 中的 `app-release.apk`，不要下载源码压缩包。
-- **Windows 下载哪个？** 下载 Release 页面 `Assets` 中以 `.exe` 结尾的 Windows 程序。
-- **Windows EXE 启动后怎么看页面？** 优先等待程序自动打开浏览器；如果没有打开，访问 `http://127.0.0.1:8080`。
+- **Windows EXE 下载哪个？** 当前主线尚未交付 EXE；请等待 Windows 构建验收完成。
 - **Android 安装失败？** 确认设备是 Android 13+，且 APK 与 ARM ABI 匹配。
 - **Android 没有数据？** 检查目标 App、VPN 授权、抓包状态，并在游戏中执行联网操作。
 - **Web 打不开？** 确认已运行 `python api_server.py`，然后访问 `http://127.0.0.1:8080`。
