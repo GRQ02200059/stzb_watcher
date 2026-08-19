@@ -8,7 +8,10 @@ plugins {
 }
 
 val ndkVersionName = "26.3.11579264"
-val ndkDir = File(System.getProperty("user.home"), "Library/Android/sdk/ndk/$ndkVersionName")
+val androidSdkRoot = System.getenv("ANDROID_SDK_ROOT")
+    ?: System.getenv("ANDROID_HOME")
+    ?: File(System.getProperty("user.home"), "Library/Android/sdk").absolutePath
+val ndkDir = File(androidSdkRoot, "ndk/$ndkVersionName")
 val hasUsableNdk = File(ndkDir, "source.properties").exists()
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties().apply {
@@ -106,6 +109,7 @@ android {
 
 dependencies {
 
+    implementation(project(":battle-engine-android"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

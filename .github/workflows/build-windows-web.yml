@@ -13,6 +13,14 @@ on:
         required: true
         default: false
         type: boolean
+      android_variant:
+        description: 'Android 构建类型：正式 release 需要签名 Secrets，debug 仅用于测试'
+        required: true
+        default: release
+        type: choice
+        options:
+          - release
+          - debug
   push:
     paths:
       - 'run_web_exe.py'
@@ -60,6 +68,81 @@ jobs:
           path: dist/STZB助手-Web.exe
           if-no-files-found: error
 
+      - name: Set up Java for Android
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK components
+        shell: pwsh
+        run: |
+          sdkmanager "platforms;android-35" "build-tools;35.0.1" "ndk;26.3.11579264"
+          sdkmanager --licenses | Out-Null
+
+      - name: Check Android release signing secrets
+        if: ${{ inputs.android_variant == 'release' }}
+        shell: pwsh
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:ANDROID_KEYSTORE_BASE64) -or
+              [string]::IsNullOrWhiteSpace($env:ANDROID_KEYSTORE_PASSWORD) -or
+              [string]::IsNullOrWhiteSpace($env:ANDROID_KEY_ALIAS) -or
+              [string]::IsNullOrWhiteSpace($env:ANDROID_KEY_PASSWORD)) {
+            throw "正式 Android Release 需要配置 ANDROID_KEYSTORE_BASE64、ANDROID_KEYSTORE_PASSWORD、ANDROID_KEY_ALIAS、ANDROID_KEY_PASSWORD 四个 Secrets。"
+          }
+
+      - name: Prepare Android release signing
+        if: ${{ inputs.android_variant == 'release' }}
+        shell: pwsh
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          $keystore = Join-Path $env:GITHUB_WORKSPACE 'release-keystore.jks'
+          [IO.File]::WriteAllBytes($keystore, [Convert]::FromBase64String($env:ANDROID_KEYSTORE_BASE64))
+          @"
+          storeFile=$keystore
+          storePassword=$env:ANDROID_KEYSTORE_PASSWORD
+          keyAlias=$env:ANDROID_KEY_ALIAS
+          keyPassword=$env:ANDROID_KEY_PASSWORD
+          "@ | Set-Content -Path (Join-Path $env:GITHUB_WORKSPACE 'astzb/keystore.properties') -Encoding UTF8
+
+      - name: Build Android APK
+        shell: pwsh
+        working-directory: astzb
+        run: |
+          if ('${{ inputs.android_variant }}' -eq 'release') {
+            .\gradlew.bat :app:assembleRelease --no-daemon
+          } else {
+            .\gradlew.bat :app:assembleDebug --no-daemon
+          }
+
+      - name: Upload Android release artifact
+        if: ${{ inputs.android_variant == 'release' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: STZB-Android-Release
+          path: astzb/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+
+      - name: Upload Android debug artifact
+        if: ${{ inputs.android_variant == 'debug' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: STZB-Android-Debug
+          path: astzb/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
       - name: Publish GitHub Release
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_release == true }}
         uses: softprops/action-gh-release@v2
@@ -67,4 +150,6 @@ jobs:
           tag_name: ${{ inputs.release_tag }}
           name: STZB Web ${{ inputs.release_tag }}
           generate_release_notes: true
-          files: dist/STZB助手-Web.exe
+          files: |
+            dist/STZB助手-Web.exe
+            astzb/app/build/outputs/apk/${{ inputs.android_variant == 'release' && 'release/app-release.apk' || 'debug/app-debug.apk' }}
