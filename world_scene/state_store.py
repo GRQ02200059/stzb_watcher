@@ -28,6 +28,7 @@ class WorldStateStore:
                 version INTEGER PRIMARY KEY AUTOINCREMENT,
                 packet_seq INTEGER NOT NULL,
                 source_cmd INTEGER NOT NULL,
+                server_order_id INTEGER NOT NULL DEFAULT 0,
                 latest_baseline_order_id INTEGER NOT NULL,
                 observed_at_ms INTEGER NOT NULL,
                 completeness TEXT NOT NULL,
@@ -80,6 +81,14 @@ class WorldStateStore:
             );
             """
         )
+        columns = {
+            row["name"]
+            for row in self.conn.execute("PRAGMA table_info(world_state_versions)")
+        }
+        if "server_order_id" not in columns:
+            self.conn.execute(
+                "ALTER TABLE world_state_versions ADD COLUMN server_order_id INTEGER NOT NULL DEFAULT 0"
+            )
         self.conn.commit()
 
     def current_version(self) -> dict:
@@ -109,6 +118,66 @@ class WorldStateStore:
             item.pop("change_summary_json") or "{}"
         )
         return item
+
+    def history(self, limit: int = 50) -> list[dict]:
+        self.ensure_schema()
+        rows = self.conn.execute(
+            """
+            SELECT version, source_cmd, server_order_id, latest_baseline_order_id,
+                   observed_at_ms, completeness, coverage_json, change_summary_json
+            FROM world_state_versions ORDER BY version DESC LIMIT ?
+            """,
+            (max(1, min(limit, 500)),),
+        ).fetchall()
+        return [self._history_version(row) for row in rows]
+
+    def replay(self, version: int) -> dict | None:
+        self.ensure_schema()
+        row = self.conn.execute(
+            """
+            SELECT version, source_cmd, server_order_id, latest_baseline_order_id,
+                   observed_at_ms, completeness, coverage_json, change_summary_json
+            FROM world_state_versions WHERE version=?
+            """,
+            (version,),
+        ).fetchone()
+        if row is None:
+            return None
+        events = []
+        for event in self.conn.execute(
+            """
+            SELECT seq,event_type,entity_type,entity_id,observed_at_ms,evidence_json,diff_json
+            FROM world_state_events WHERE state_version=? ORDER BY seq
+            """,
+            (version,),
+        ).fetchall():
+            item = dict(event)
+            events.append(
+                {
+                    "seq": item["seq"],
+                    "eventType": item["event_type"],
+                    "entityType": item["entity_type"],
+                    "entityId": item["entity_id"],
+                    "observedAtMs": item["observed_at_ms"],
+                    "evidence": json.loads(item["evidence_json"] or "{}"),
+                    "diff": json.loads(item["diff_json"] or "{}"),
+                }
+            )
+        return {"version": self._history_version(row), "events": events}
+
+    @staticmethod
+    def _history_version(row) -> dict:
+        item = dict(row)
+        return {
+            "version": item["version"],
+            "sourceMsgId": str(item["source_cmd"]),
+            "marker": item["server_order_id"],
+            "latestBaselineMarker": item["latest_baseline_order_id"],
+            "observedAtMs": item["observed_at_ms"],
+            "completeness": item["completeness"],
+            "coverage": json.loads(item["coverage_json"] or "null"),
+            "changeSummary": json.loads(item["change_summary_json"] or "{}"),
+        }
 
     def apply_baseline(self, packet: WorldScenePacket) -> WorldStateChangeSet:
         if packet.cmd_id != 5026 or packet.server_order_id <= 0:
@@ -452,13 +521,14 @@ class WorldStateStore:
         cur = self.conn.execute(
             """
             INSERT INTO world_state_versions(
-                packet_seq,source_cmd,latest_baseline_order_id,observed_at_ms,
+                packet_seq,source_cmd,server_order_id,latest_baseline_order_id,observed_at_ms,
                 completeness,coverage_json,change_summary_json
-            ) VALUES(?,?,?,?,?,?,?)
+            ) VALUES(?,?,?,?,?,?,?,?)
             """,
             (
                 packet_seq,
                 packet.cmd_id,
+                packet.server_order_id,
                 baseline_order,
                 packet.observed_at_ms,
                 completeness,

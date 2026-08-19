@@ -978,6 +978,73 @@ object LocalStzbRepository {
         }
     }
 
+    internal fun loadWorldStateHistory(
+        database: SQLiteDatabase = db(),
+        limit: Int = 50,
+    ): List<LocalWorldStateVersion> = database.rawQuery(
+        """
+        SELECT version,source_msg_id,marker,completeness,block_mode,block_id,
+               move_count,map_state_count,captured_at
+        FROM world_state_versions ORDER BY version DESC LIMIT ?
+        """.trimIndent(),
+        arrayOf(limit.coerceIn(1, 500).toString()),
+    ).useCursor { cursor ->
+        buildList {
+            while (cursor.moveToNext()) {
+                add(cursor.toWorldStateVersion())
+            }
+        }
+    }
+
+    internal fun loadWorldStateReplay(
+        database: SQLiteDatabase = db(),
+        version: Long,
+    ): LocalWorldStateReplay? {
+        val stateVersion = database.rawQuery(
+            """
+            SELECT version,source_msg_id,marker,completeness,block_mode,block_id,
+                   move_count,map_state_count,captured_at
+            FROM world_state_versions WHERE version=?
+            """.trimIndent(),
+            arrayOf(version.toString()),
+        ).useCursor { cursor ->
+            if (cursor.moveToFirst()) cursor.toWorldStateVersion() else null
+        } ?: return null
+        val events = database.rawQuery(
+            """
+            SELECT seq,event_type,entity_type,entity_id,evidence_json,captured_at
+            FROM world_state_events WHERE state_version=? ORDER BY seq
+            """.trimIndent(),
+            arrayOf(version.toString()),
+        ).useCursor { cursor ->
+            buildList {
+                while (cursor.moveToNext()) {
+                    add(LocalWorldStateEvent(
+                        seq = cursor.long("seq"),
+                        eventType = cursor.string("event_type"),
+                        entityType = cursor.string("entity_type"),
+                        entityId = cursor.int("entity_id"),
+                        evidenceJson = cursor.string("evidence_json"),
+                        capturedAt = cursor.long("captured_at"),
+                    ))
+                }
+            }
+        }
+        return LocalWorldStateReplay(stateVersion, events)
+    }
+
+    private fun Cursor.toWorldStateVersion() = LocalWorldStateVersion(
+        version = long("version"),
+        sourceMsgId = string("source_msg_id"),
+        marker = int("marker"),
+        completeness = string("completeness"),
+        blockMode = int("block_mode"),
+        blockId = int("block_id"),
+        moveCount = int("move_count"),
+        mapStateCount = int("map_state_count"),
+        capturedAt = long("captured_at"),
+    )
+
     @Synchronized
     fun saveRecord(record: LocalRecord) {
         db().insertWithOnConflict(
@@ -4363,6 +4430,32 @@ data class LocalRecord(
     val subtitle: String,
     val rawJson: String,
     val sourceMsgId: String,
+)
+
+data class LocalWorldStateVersion(
+    val version: Long,
+    val sourceMsgId: String,
+    val marker: Int,
+    val completeness: String,
+    val blockMode: Int,
+    val blockId: Int,
+    val moveCount: Int,
+    val mapStateCount: Int,
+    val capturedAt: Long,
+)
+
+data class LocalWorldStateEvent(
+    val seq: Long,
+    val eventType: String,
+    val entityType: String,
+    val entityId: Int,
+    val evidenceJson: String,
+    val capturedAt: Long,
+)
+
+data class LocalWorldStateReplay(
+    val version: LocalWorldStateVersion,
+    val events: List<LocalWorldStateEvent>,
 )
 
 data class LocalChatMessage(

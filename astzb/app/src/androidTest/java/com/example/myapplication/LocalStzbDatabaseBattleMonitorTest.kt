@@ -43,6 +43,16 @@ class LocalStzbDatabaseBattleMonitorTest {
             assertTrue(database.stringColumn(
                 "SELECT evidence_json FROM world_state_events WHERE event_type = 'entity_deleted'",
             ).single().contains("\"blockId\":40"))
+
+            val history = LocalStzbRepository.loadWorldStateHistory(database.readableDatabase, 10)
+            assertEquals(listOf(11, 10), history.map { it.marker })
+            assertEquals("5028", history.first().sourceMsgId)
+            val replay = LocalStzbRepository.loadWorldStateReplay(
+                database.readableDatabase,
+                history.first().version,
+            )!!
+            assertEquals(11, replay.version.marker)
+            assertEquals("entity_deleted", replay.events.single { it.entityId == 1 }.eventType)
         }
     }
 
