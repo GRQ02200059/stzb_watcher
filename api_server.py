@@ -1512,6 +1512,67 @@ def _command_center_alerts(armies, writer_stats=None, latest_battle_time=0, now=
     return alerts[:20]
 
 
+def _data_quality_snapshot(conn, now=None):
+    now = int(time.time()) if now is None else int(now)
+    latest_world_ms = _cc_scalar(
+        conn, 'SELECT MAX(observed_at_ms) FROM world_state_versions', default=0
+    )
+    latest_world_at = int(latest_world_ms // 1000) if latest_world_ms else 0
+    from datetime import datetime as _dt, timedelta as _td
+    today = _dt.fromtimestamp(now).date()
+    current_monday = today - _td(days=today.weekday())
+    previous_monday = (current_monday - _td(days=7)).isoformat()
+    weekly_rows = _cc_scalar(
+        conn,
+        'SELECT COUNT(*) FROM wuxun_weekly_snapshots WHERE week_start=?',
+        (previous_monday,),
+        default=0,
+    )
+    manifest_path = Path(BASE_DIR) / 'data/protocol/client-9.2.2/manifest.json'
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        manifest = {}
+    return {
+        'latestWorldAt': latest_world_at,
+        'worldStateStale': not latest_world_at or now - latest_world_at > 600,
+        'previousWeekStart': previous_monday,
+        'weeklyWuxunRows': int(weekly_rows or 0),
+        'weeklyWuxunMissing': int(weekly_rows or 0) == 0,
+        'protocolManifestOk': manifest.get('commandCount') == 94,
+        'protocolManifest': manifest,
+    }
+
+
+def _data_quality_alerts(quality):
+    alerts = []
+    if quality.get('worldStateStale'):
+        alerts.append({
+            'id': f"world_state_stale:{quality.get('latestWorldAt', 0)}",
+            'kind': 'world_state_stale', 'level': 'warning',
+            'title': '世界状态已停止更新',
+            'message': '最近一次 5026/5028 世界状态超过 10 分钟，请检查抓包链路',
+            'entityType': 'system', 'entityId': 'world_state',
+            'lastUpdatedAt': quality.get('latestWorldAt', 0),
+        })
+    if quality.get('weeklyWuxunMissing'):
+        alerts.append({
+            'id': f"weekly_wuxun_missing:{quality.get('previousWeekStart', '')}",
+            'kind': 'weekly_wuxun_missing', 'level': 'warning',
+            'title': '上周武勋快照缺失',
+            'message': f"未找到 {quality.get('previousWeekStart', '')} 周的周日成员武勋快照",
+            'entityType': 'system', 'entityId': 'weekly_wuxun',
+        })
+    if not quality.get('protocolManifestOk'):
+        alerts.append({
+            'id': 'protocol_contract_invalid', 'kind': 'protocol_contract_invalid',
+            'level': 'danger', 'title': '协议契约产物异常',
+            'message': '协议目录缺失或命令覆盖数不是 94，请重新生成协议证据',
+            'entityType': 'system', 'entityId': 'protocol_contract',
+        })
+    return alerts
+
+
 @app.route('/api/command-center/overview')
 def api_command_center_overview():
     """桌面指挥中心的只读聚合数据；任一可选表缺失都不影响其他模块。"""
@@ -1566,6 +1627,7 @@ def api_command_center_overview():
             default=0,
         )
         writer_stats = dict(getattr(_writer, 'stats', {}) or {})
+        quality = _data_quality_snapshot(conn, now)
         return jsonify({
             'ok': True,
             'profile': {
@@ -1577,17 +1639,18 @@ def api_command_center_overview():
             'metrics': metrics,
             'battles': battles,
             'armies': armies,
-            'alerts': _command_center_alerts(
+            'alerts': (_command_center_alerts(
                 armies,
                 writer_stats=writer_stats,
                 latest_battle_time=latest_battle_time,
                 now=now,
-            ),
+            ) + _data_quality_alerts(quality))[:20],
             'freshness': {
                 'generatedAt': now,
                 'latestBattleAt': latest_battle_time,
                 'latestArmyArrivalAt': latest_army_time,
                 'writer': writer_stats,
+                'dataQuality': quality,
             },
         })
     finally:
@@ -3121,6 +3184,12 @@ def api_hud_health():
         'hero-portraits',
         'manifest.json',
     )
+    conn = get_db()
+    try:
+        quality = _data_quality_snapshot(conn)
+    finally:
+        conn.close()
+    protocol_manifest = quality.get('protocolManifest') or {}
     components = {
         'backend': _health_component('live', '后端', 'Flask API 可用'),
         'writer': _health_component(
@@ -3138,6 +3207,27 @@ def api_hud_health():
             'live' if os.path.isfile(portrait_manifest) else 'unknown',
             '画像资源',
             portrait_manifest,
+        ),
+        'protocolContract': _health_component(
+            'live' if quality['protocolManifestOk'] else 'degraded',
+            '协议契约',
+            f"commands={protocol_manifest.get('commandCount', 0)} typed={protocol_manifest.get('webStatusCounts', {}).get('typed', 0)}",
+            commandCount=int(protocol_manifest.get('commandCount') or 0),
+            typedCount=int(protocol_manifest.get('webStatusCounts', {}).get('typed') or 0),
+            rawCount=int(protocol_manifest.get('webStatusCounts', {}).get('raw') or 0),
+        ),
+        'worldState': _health_component(
+            'degraded' if quality['worldStateStale'] else 'live',
+            '世界状态',
+            '超过 10 分钟未更新' if quality['worldStateStale'] else '5026/5028 持续更新',
+            latestAt=quality['latestWorldAt'],
+        ),
+        'weeklyWuxun': _health_component(
+            'degraded' if quality['weeklyWuxunMissing'] else 'live',
+            '周武勋快照',
+            f"{quality['previousWeekStart']} rows={quality['weeklyWuxunRows']}",
+            weekStart=quality['previousWeekStart'],
+            rows=quality['weeklyWuxunRows'],
         ),
     }
     statuses = {component['status'] for component in components.values()}

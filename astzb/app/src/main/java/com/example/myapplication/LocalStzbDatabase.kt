@@ -1243,6 +1243,31 @@ object LocalStzbRepository {
         }
     }
 
+    fun researchDataQuality(
+        database: SQLiteDatabase = db(),
+        now: Long = System.currentTimeMillis(),
+    ): com.local.stzb.data.research.ResearchDataQuality {
+        val latestWorld = database.rawQuery(
+            "SELECT COALESCE(MAX(captured_at),0) AS latest FROM world_state_versions",
+            emptyArray(),
+        ).useCursor { cursor -> if (cursor.moveToFirst()) cursor.long("latest") else 0L }
+        val calendar = java.util.Calendar.getInstance(Locale.CHINA).apply {
+            timeInMillis = now
+            firstDayOfWeek = java.util.Calendar.MONDAY
+            set(java.util.Calendar.DAY_OF_WEEK, java.util.Calendar.MONDAY)
+            add(java.util.Calendar.DAY_OF_MONTH, -7)
+        }
+        val previousMonday = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).format(calendar.time)
+        val weeklyRows = database.rawQuery(
+            "SELECT COUNT(*) AS c FROM wuxun_weekly_snapshots WHERE week_start=?",
+            arrayOf(previousMonday),
+        ).useCursor { cursor -> if (cursor.moveToFirst()) cursor.int("c") else 0 }
+        return com.local.stzb.data.research.ResearchDataQuality(
+            worldStateStale = latestWorld <= 0L || now - latestWorld > 10 * 60 * 1000L,
+            weeklyWuxunMissing = weeklyRows == 0,
+        )
+    }
+
     @Synchronized
     fun saveMapCells(cells: List<LocalMapCell>) {
         if (cells.isEmpty()) return

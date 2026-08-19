@@ -38,8 +38,21 @@ fun LineupResearchScreen(
 ) {
     var query by remember { mutableStateOf("") }
     val rows = remember(query) { repository.load(query) }
+    val quality = remember { repository.quality() }
     Column(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         MacGlassHeader("阵容战法研究", "配置事实 / 历史证据 / 模拟验证", leading = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "返回工具") } })
+        GlassCard(Modifier.fillMaxWidth()) {
+            Column(Modifier.fillMaxWidth().padding(12.dp), Arrangement.spacedBy(4.dp)) {
+                Text("数据状态", fontWeight = FontWeight.SemiBold)
+                Text(
+                    "协议 94 条 · 已解析 ${quality.typedCommandCount} · 原始保留 ${quality.rawCommandCount}",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                quality.warnings.forEach { warning ->
+                    Text(warning, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
+                }
+            }
+        }
         GlassCard(Modifier.fillMaxWidth()) { OutlinedTextField(query, { query = it }, label = { Text("搜索武将或组合") }, modifier = Modifier.fillMaxWidth().padding(12.dp), singleLine = true) }
         if (rows.isEmpty()) EmptyPanel("本机还没有可研究的三人组合，请先采集完整战报", null, {}, Modifier.weight(1f))
         else LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) { items(rows, key = { it.heroNames.joinToString("+") }) { ResearchCard(it, onOpenSimulator) } }

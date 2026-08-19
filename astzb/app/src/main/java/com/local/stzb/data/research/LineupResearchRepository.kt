@@ -8,6 +8,17 @@ import com.example.myapplication.LocalStzbRepository
 
 enum class EvidenceKind { CONFIG_FACT, HISTORICAL, SIMULATION }
 data class ResearchEvidence(val kind: EvidenceKind, val label: String, val text: String)
+data class ResearchDataQuality(
+    val protocolCommandCount: Int = 94,
+    val typedCommandCount: Int = 13,
+    val rawCommandCount: Int = 81,
+    val worldStateStale: Boolean = false,
+    val weeklyWuxunMissing: Boolean = false,
+    val warnings: List<String> = buildList {
+        if (worldStateStale) add("世界状态超过 10 分钟未更新")
+        if (weeklyWuxunMissing) add("上周日成员武勋快照缺失")
+    },
+)
 data class LineupResearchRow(
     val heroNames: List<String>, val heroIds: List<Long>, val total: Int, val wins: Int, val losses: Int, val draws: Int, val winRate: Double,
     val configEvidence: ResearchEvidence, val historicalEvidence: ResearchEvidence, val simulationEvidence: ResearchEvidence,
@@ -18,14 +29,17 @@ interface LineupResearchSource {
     fun combos(): List<LocalHeroComboWinRate>
     fun usages(): List<LocalHeroUsage>
     fun heroes(): List<LocalSimHeroOption>
+    fun quality(): ResearchDataQuality = ResearchDataQuality()
 }
 object AndroidLineupResearchSource : LineupResearchSource {
     override fun combos() = LocalStzbRepository.loadHeroComboWinRates(minCount = 1, limit = 200)
     override fun usages() = LocalStzbRepository.loadHeroUsage("atk", 200)
     override fun heroes() = LocalBattleSimulator.selectableHeroes(1000)
+    override fun quality() = LocalStzbRepository.researchDataQuality()
 }
 
 class LineupResearchRepository(private val source: LineupResearchSource = AndroidLineupResearchSource) {
+    fun quality(): ResearchDataQuality = source.quality()
     fun load(query: String = ""): List<LineupResearchRow> {
         val heroByName = source.heroes().groupBy(LocalSimHeroOption::name).mapValues { (_, rows) -> rows.minByOrNull(LocalSimHeroOption::id)!! }
         val usageByName = source.usages().associateBy(LocalHeroUsage::heroName)

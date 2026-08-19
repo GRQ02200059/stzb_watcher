@@ -142,6 +142,27 @@ class LocalStzbDatabaseBattleMonitorTest {
     }
 
     @Test
+    fun researchQualityWarnsForStaleWorldAndMissingWeeklySnapshot() {
+        withDatabase { database ->
+            val now = 1771401600000L
+            database.writableDatabase.execSQL(
+                "INSERT INTO world_state_versions(source_msg_id,marker,raw_length,completeness,captured_at) " +
+                    "VALUES('5028',1,31,'delta',1)",
+            )
+
+            val quality = LocalStzbRepository.researchDataQuality(
+                database.readableDatabase, now,
+            )
+
+            assertTrue(quality.worldStateStale)
+            assertTrue(quality.weeklyWuxunMissing)
+            assertEquals(94, quality.protocolCommandCount)
+            assertEquals(81, quality.rawCommandCount)
+            assertEquals(2, quality.warnings.size)
+        }
+    }
+
+    @Test
     fun savingCurrentSnapshotRemovesRowsMissingFromIt() {
         withDatabase { database ->
             LocalStzbRepository.syncBattleMonitor(database.writableDatabase, snapshot(1, 2), 1)
