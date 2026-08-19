@@ -36,8 +36,8 @@ android {
         applicationId = "com.local.stzb.random"
         minSdk = 33
         targetSdk = 35
-        versionCode = 10001
-        versionName = "1.0.0"
+        versionCode = 10004
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -128,6 +128,7 @@ dependencies {
     testImplementation(libs.mockwebserver)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.uiautomator)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)

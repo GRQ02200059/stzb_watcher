@@ -22,6 +22,7 @@ import com.local.stzb.core.ui.EmptyPanel
 import com.local.stzb.core.ui.ErrorPanel
 import com.local.stzb.core.ui.LoadingPanel
 import com.local.stzb.core.ui.GlassCard
+import com.local.stzb.core.ui.MacGlassHeader
 import com.local.stzb.domain.rankings.*
 
 @Composable
@@ -36,28 +37,31 @@ fun TeamReportScreen(state: TeamReportUiState, viewModel: TeamReportViewModel, m
         }
     }
     Column(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Row(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+        MacGlassHeader(
+            title = "团队报表",
+            subtitle = "团队战绩、武勋与成员统计",
+            leading = {
                 if (onBack != null) {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "返回工具")
                     }
                 }
-                Text("团队报表", style = MaterialTheme.typography.headlineMedium)
+            },
+            trailing = {
+                OutlinedButton(
+                    onClick = { exporter.launch("团队报表_${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"))}.csv") },
+                    enabled = !report?.rows.isNullOrEmpty(),
+                ) { Text("导出 CSV") }
+            },
+        )
+        GlassCard(Modifier.fillMaxWidth()) {
+            Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                ChipRow(ReportPeriod.entries, state.period, { it.label }, viewModel::setPeriod)
+                ChipRow(ReportDimension.entries, state.dimension, { it.label }, viewModel::setDimension)
+                if (state.dimension == ReportDimension.PLAYER) {
+                    ChipRow(listOf("") + state.report?.groups.orEmpty(), state.group, { it.ifBlank { "全部分组" } }, viewModel::setGroup)
+                }
             }
-            OutlinedButton(
-                onClick = { exporter.launch("团队报表_${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"))}.csv") },
-                enabled = !report?.rows.isNullOrEmpty(),
-            ) { Text("导出 CSV") }
-        }
-        ChipRow(ReportPeriod.entries, state.period, { it.label }, viewModel::setPeriod)
-        ChipRow(ReportDimension.entries, state.dimension, { it.label }, viewModel::setDimension)
-        if (state.dimension == ReportDimension.PLAYER) {
-            ChipRow(listOf("") + state.report?.groups.orEmpty(), state.group, { it.ifBlank { "全部分组" } }, viewModel::setGroup)
         }
         when {
             state.loading -> LoadingPanel(Modifier.weight(1f))

@@ -28,27 +28,34 @@ import com.local.stzb.core.ui.EmptyPanel
 import com.local.stzb.core.ui.ErrorPanel
 import com.local.stzb.core.ui.LoadingPanel
 import com.local.stzb.core.ui.GlassCard
+import com.local.stzb.core.ui.MacGlassHeader
 import com.local.stzb.domain.alliance.AllianceMember
 
 @Composable
 fun AllianceScreen(state: AllianceUiState, viewModel: AllianceViewModel, onBack: (() -> Unit)? = null, modifier: Modifier = Modifier) {
     Column(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(Modifier.fillMaxWidth()) {
-            if (onBack != null) IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "返回更多") }
-            Text("同盟中心", style = MaterialTheme.typography.headlineMedium)
-        }
         val snapshot = state.snapshot
-        if (snapshot != null) Text("成员 ${snapshot.totalMembers} · 分组 ${snapshot.groups.size}")
-        OutlinedTextField(state.query, viewModel::setQuery, label = { Text("搜索成员") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-        if (snapshot != null) {
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("") .plus(snapshot.groups.map { it.name }).distinct().forEach { group ->
-                    FilterChip(
-                        selected = state.group == group,
-                        onClick = { viewModel.setGroup(group) },
-                        label = { Text(group.ifBlank { "全部分组" }) },
-                        modifier = Modifier.heightIn(min = 48.dp),
-                    )
+        MacGlassHeader(
+            title = "同盟中心",
+            subtitle = snapshot?.let { "成员 ${it.totalMembers} · 分组 ${it.groups.size}" } ?: "同盟成员与分组",
+            leading = {
+                if (onBack != null) IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "返回更多") }
+            },
+        )
+        GlassCard(Modifier.fillMaxWidth()) {
+            Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(state.query, viewModel::setQuery, label = { Text("搜索成员") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                if (snapshot != null) {
+                    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("") .plus(snapshot.groups.map { it.name }).distinct().forEach { group ->
+                            FilterChip(
+                                selected = state.group == group,
+                                onClick = { viewModel.setGroup(group) },
+                                label = { Text(group.ifBlank { "全部分组" }) },
+                                modifier = Modifier.heightIn(min = 48.dp),
+                            )
+                        }
+                    }
                 }
             }
         }

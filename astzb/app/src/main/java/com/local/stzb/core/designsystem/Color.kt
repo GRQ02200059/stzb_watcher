@@ -3,32 +3,46 @@ package com.local.stzb.core.designsystem
 import androidx.compose.ui.graphics.Color
 
 /**
- * D 冰川银蓝 设计色板
- * 参考设计文档：astzb/docs/superpowers/specs/2026-08-17-ice-glass-android-ui-design.md
+ * macOS Liquid Glass 方向色板。
+ *
+ * 重点不是“蓝白卡片”，而是浅雾背景 + 彩色环境光 + 半透明玻璃厚度。
  */
 object AstzbColors {
-    // 页面背景：雾白 → 冰川蓝渐变
-    val BackgroundTop = Color(0xFFF7FAFF)
-    val BackgroundBottom = Color(0xFFE5EDF8)
+    // 页面背景：接近 macOS 桌面雾白，给玻璃留下可透出的底色。
+    val BackgroundTop = Color(0xFFFBFCFF)
+    val BackgroundMiddle = Color(0xFFF1F6FF)
+    val BackgroundBottom = Color(0xFFE9F1FC)
 
-    // 玻璃表面：半透明白（层级）
-    val GlassLow = Color(0x8FFFFFFFF)       // 58% 透明白
-    val GlassMedium = Color(0xCCFFFFFF)     // 80% 透明白
-    val GlassHigh = Color(0xD1FFFFFF)        // 82% 透明白
+    // 环境光斑：模拟 macOS 壁纸穿过玻璃后的蓝 / 紫 / 青色泛光。
+    val AuroraBlue = Color(0x668CC8FF)
+    val AuroraViolet = Color(0x66C99BFF)
+    val AuroraMint = Color(0x5272E4D6)
+    val AuroraPeach = Color(0x3DFFD2B8)
+
+    // 玻璃表面：半透明白（层级）。保留旧名兼容现有页面。
+    val GlassFrost = Color(0xB8FFFFFF)
+    val GlassFloating = Color(0xD9FFFFFF)
+    val GlassVeil = Color(0x73FFFFFF)
+    val GlassLow = GlassVeil
+    val GlassMedium = GlassFrost
+    val GlassHigh = GlassFloating
+    val GlassHighlight = Color(0xD9FFFFFF)
 
     // 主色
-    val Primary = Color(0xFF5275CF)
-    val PrimaryContainer = Color(0xFFDCE6F6)
+    val Primary = Color(0xFF426AD2)
+    val PrimaryContainer = Color(0xFFEAF1FF)
     val OnPrimary = Color(0xFFFFFFFF)
-    val Secondary = Color(0xFF64738C)
+    val Secondary = Color(0xFF65748D)
+    val Tertiary = Color(0xFF25A88E)
 
     // 深蓝文字
-    val TextPrimary = Color(0xFF16243D)
-    val TextSecondary = Color(0xFF64738C)
+    val TextPrimary = Color(0xFF14223A)
+    val TextSecondary = Color(0xFF60708B)
 
-    // 线框：蓝灰 10–16%
-    val Outline = Color(0x295275CF)          // ~16% primary
-    val OutlineLow = Color(0x1A5275CF)       // ~10% primary
+    // 线框：外层白色高光 + 低透明蓝灰线。
+    val Outline = Color(0xBFFFFFFF)
+    val OutlineLow = Color(0x8CFFFFFF)
+    val OutlineBlue = Color(0x24426AD2)
 
     // 语义色
     val Success = Color(0xFF1E9B83)

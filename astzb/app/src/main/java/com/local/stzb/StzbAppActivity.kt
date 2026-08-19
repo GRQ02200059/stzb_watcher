@@ -51,6 +51,11 @@ class StzbAppActivity : ComponentActivity() {
                         captureController = app.captureConsoleController,
                         openLegacyDashboard = ::openLegacyDashboard,
                         openCaptureConsole = ::openCaptureConsole,
+                        profileSnapshot = app.profileSnapshot(),
+                        onRegisterProfile = app::registerLocalProfile,
+                        onSwitchProfile = { profileId ->
+                            app.switchLocalProfile(profileId).onSuccess { recreate() }
+                        },
                         onLogout = ::logout,
                     )
                 } else {

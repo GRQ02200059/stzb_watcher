@@ -6,6 +6,7 @@ import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.Socket
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.concurrent.thread
 
 object LocalSocksCaptureServer {
@@ -13,6 +14,7 @@ object LocalSocksCaptureServer {
     private const val GAME_PORT = 8001
 
     private val running = AtomicBoolean(false)
+    private val acceptedConnections = AtomicLong(0)
     private var serverSocket: ServerSocket? = null
 
     @JvmStatic
@@ -38,6 +40,9 @@ object LocalSocksCaptureServer {
 
     @JvmStatic
     fun isRunning(): Boolean = running.get()
+
+    @JvmStatic
+    fun acceptedConnectionCount(): Long = acceptedConnections.get()
 
     private fun acceptLoop(socket: ServerSocket) {
         while (running.get()) {
@@ -80,6 +85,7 @@ object LocalSocksCaptureServer {
             }
 
             writeSocksReply(output, 0x00)
+            acceptedConnections.incrementAndGet()
             PacketLogStore.add("SOCKS 转发：$host:$port")
 
             remote.use { r ->

@@ -1,6 +1,5 @@
 package com.local.stzb.feature.battles
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -16,8 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,6 +30,7 @@ import com.local.stzb.core.ui.EmptyPanel
 import com.local.stzb.core.ui.ErrorPanel
 import com.local.stzb.core.ui.LoadingPanel
 import com.local.stzb.core.ui.GlassCard
+import com.local.stzb.core.ui.MacGlassHeader
 import com.local.stzb.domain.battles.BattleOutcome
 import com.local.stzb.domain.battles.BattleSummary
 import java.time.Instant
@@ -42,28 +40,35 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun BattlesScreen(state: BattlesUiState, onIntent: (BattlesIntent) -> Unit, onBack: (() -> Unit)? = null, modifier: Modifier = Modifier) {
     Column(modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Row {
+        MacGlassHeader(
+            title = "本机战报",
+            subtitle = "来自 battles_v2",
+            leading = {
                 if (onBack != null) IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "返回更多") }
-                Column { Text("本机战报", style = MaterialTheme.typography.headlineMedium); Text("来自 battles_v2") }
-            }
-            IconButton(onClick = { onIntent(BattlesIntent.Refresh) }) { Icon(Icons.Outlined.Refresh, "刷新战报") }
-        }
-        OutlinedTextField(
-            value = state.filters.query,
-            onValueChange = { onIntent(BattlesIntent.SetQuery(it)) },
-            label = { Text("搜索玩家") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
+            },
+            trailing = {
+                IconButton(onClick = { onIntent(BattlesIntent.Refresh) }) { Icon(Icons.Outlined.Refresh, "刷新战报") }
+            },
         )
-        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            QuickBattleFilter.entries.forEach { filter ->
-                FilterChip(
-                    selected = filter.matches(state),
-                    onClick = { onIntent(BattlesIntent.SetQuickFilter(filter)) },
-                    label = { Text(filter.label) },
-                    modifier = Modifier.heightIn(min = 48.dp),
+        GlassCard(Modifier.fillMaxWidth()) {
+            Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(
+                    value = state.filters.query,
+                    onValueChange = { onIntent(BattlesIntent.SetQuery(it)) },
+                    label = { Text("搜索玩家") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
                 )
+                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    QuickBattleFilter.entries.forEach { filter ->
+                        FilterChip(
+                            selected = filter.matches(state),
+                            onClick = { onIntent(BattlesIntent.SetQuickFilter(filter)) },
+                            label = { Text(filter.label) },
+                            modifier = Modifier.heightIn(min = 48.dp),
+                        )
+                    }
+                }
             }
         }
         when {

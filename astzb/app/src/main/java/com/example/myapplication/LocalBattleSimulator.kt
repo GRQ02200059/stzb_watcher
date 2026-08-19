@@ -176,20 +176,30 @@ object LocalBattleSimulator {
     ) {
         private val random = Random(seed)
         private val records = mutableListOf<String>()
+        private val events = mutableListOf<LocalSimulationEvent>()
         private val blue = config.blue.heroes.mapIndexedNotNull { idx, cfg -> createHero(cfg, "攻方", idx) }
         private val red = config.red.heroes.mapIndexedNotNull { idx, cfg -> createHero(cfg, "守方", idx) }
         private val all = blue + red
 
         fun run(): LocalSimulationRun {
+            val entryBlue = blue.map { it.snapshot() }
+            val entryRed = red.map { it.snapshot() }
             records += "【攻方阵容】"
             blue.forEach { records += "(${it.positionName}) ${it.name} Lv.${it.level} 兵力=${it.arms} 攻=${it.attack.round1()} 防=${it.defense.round1()} 谋=${it.strategy.round1()} 速=${it.speed.round1()}" }
             records += "【守方阵容】"
             red.forEach { records += "(${it.positionName}) ${it.name} Lv.${it.level} 兵力=${it.arms} 攻=${it.attack.round1()} 防=${it.defense.round1()} 谋=${it.strategy.round1()} 速=${it.speed.round1()}" }
 
             applyPreparationSkills()
+            var roundsPlayed = 0
             for (round in 1..8) {
                 if (isOver()) break
+                roundsPlayed = round
                 records += "第${round}回合"
+                events += LocalSimulationEvent(
+                    round = round,
+                    kind = LocalSimulationEventKind.ROUND_START,
+                    description = "第${round}回合开始",
+                )
                 all.filter { it.alive }.sortedByDescending { it.speed }.forEach { actor ->
                     if (!actor.alive || isOver()) return@forEach
                     actorTurn(actor, round)
@@ -207,11 +217,27 @@ object LocalBattleSimulator {
                 else -> "平局"
             }
             records += "战斗结束：$winner 胜负判定，攻方剩余=$blueArms 守方剩余=$redArms"
+            events += LocalSimulationEvent(
+                round = roundsPlayed,
+                kind = LocalSimulationEventKind.RESULT,
+                sourceName = winner,
+                amount = blueArms - redArms,
+                description = "战斗结束：$winner，攻方剩余=$blueArms，守方剩余=$redArms",
+            )
             return LocalSimulationRun(
                 winner = winner,
                 blueRemain = blueArms,
                 redRemain = redArms,
                 records = records.take(240),
+                attackerHeroes = entryBlue.mapIndexed { index, hero ->
+                    hero.copy(remainingTroops = blue.getOrNull(index)?.arms ?: 0)
+                },
+                defenderHeroes = entryRed.mapIndexed { index, hero ->
+                    hero.copy(remainingTroops = red.getOrNull(index)?.arms ?: 0)
+                },
+                events = events.toList(),
+                roundsPlayed = roundsPlayed,
+                seed = config.seed,
             )
         }
 
@@ -234,6 +260,7 @@ object LocalBattleSimulator {
                 camp = camp,
                 positionName = positionName(index),
                 level = level,
+                advance = config.advance,
                 distance = res.distance,
                 arms = 5000 + level * 100 + config.advance * 200,
                 maxArms = 5000 + level * 100 + config.advance * 200,
@@ -256,23 +283,40 @@ object LocalBattleSimulator {
                         skill.desc.contains("速度属性提高") -> hero.speed += value * 0.35
                     }
                     records += "${hero.name} 执行${skill.type}战法【${skill.name}】"
+                    events += LocalSimulationEvent(
+                        round = 0,
+                        kind = LocalSimulationEventKind.PREPARATION,
+                        sourceName = hero.name,
+                        targetName = hero.name,
+                        skillName = skill.name,
+                        targetRemaining = hero.arms,
+                        description = "${hero.name} 执行${skill.type}战法【${skill.name}】",
+                    )
                 }
             }
         }
 
         private fun actorTurn(actor: SimBattleHero, round: Int) {
             records += "${actor.name} 行动开始，兵力=${actor.arms}"
+            events += LocalSimulationEvent(
+                round = round,
+                kind = LocalSimulationEventKind.ACTION,
+                sourceName = actor.name,
+                targetName = actor.name,
+                targetRemaining = actor.arms,
+                description = "${actor.name} 行动开始，兵力=${actor.arms}",
+            )
             actor.skillIds.mapNotNull { skills[it] }.filter { it.type == "主动" }.forEach { skill ->
-                if (roll(skill.probability)) castSkill(actor, skill)
+                if (roll(skill.probability)) castSkill(actor, skill, round)
             }
             val target = chooseTarget(actor) ?: return
-            doAttack(actor, target, rate = 100.0, source = "普通攻击")
+            doAttack(actor, target, rate = 100.0, source = "普通攻击", round = round)
             actor.skillIds.mapNotNull { skills[it] }.filter { it.type == "追击" }.forEach { skill ->
-                if (roll(skill.probability)) castSkill(actor, skill)
+                if (roll(skill.probability)) castSkill(actor, skill, round)
             }
         }
 
-        private fun castSkill(actor: SimBattleHero, skill: SimSkillResource) {
+        private fun castSkill(actor: SimBattleHero, skill: SimSkillResource, round: Int) {
             val target = chooseTarget(actor) ?: return
             val rate = extractDamageRate(skill.desc).ifNaN { 120.0 }
             when {
@@ -281,42 +325,71 @@ object LocalBattleSimulator {
                     val before = actor.arms
                     actor.arms = min(actor.maxArms, actor.arms + heal)
                     records += "${actor.name} 发动【${skill.name}】恢复 ${actor.arms - before} 兵力"
+                    events += LocalSimulationEvent(
+                        round = round,
+                        kind = LocalSimulationEventKind.RECOVERY,
+                        sourceName = actor.name,
+                        targetName = actor.name,
+                        skillName = skill.name,
+                        amount = actor.arms - before,
+                        targetRemaining = actor.arms,
+                        description = "${actor.name} 发动【${skill.name}】恢复 ${actor.arms - before} 兵力",
+                    )
                 }
                 skill.desc.contains("策略") || skill.desc.contains("谋略") || skill.effect.contains("恐慌") || skill.effect.contains("燃烧") -> {
-                    doStrategyDamage(actor, target, rate, "战法【${skill.name}】")
+                    doStrategyDamage(actor, target, rate, "战法【${skill.name}】", round)
                 }
                 skill.desc.contains("伤害") || skill.desc.contains("攻击") -> {
-                    doAttack(actor, target, rate, "战法【${skill.name}】")
+                    doAttack(actor, target, rate, "战法【${skill.name}】", round)
                 }
                 else -> {
                     records += "${actor.name} 发动【${skill.name}】，当前通用内核按状态战法记录处理"
+                    events += LocalSimulationEvent(
+                        round = round,
+                        kind = LocalSimulationEventKind.STATUS,
+                        sourceName = actor.name,
+                        targetName = target.name,
+                        skillName = skill.name,
+                        targetRemaining = target.arms,
+                        description = "${actor.name} 发动【${skill.name}】，当前通用内核按状态战法记录处理",
+                    )
                 }
             }
         }
 
-        private fun doAttack(actor: SimBattleHero, target: SimBattleHero, rate: Double, source: String) {
+        private fun doAttack(actor: SimBattleHero, target: SimBattleHero, rate: Double, source: String, round: Int) {
             val armsDamage = (actor.arms * 373.0) / (7700.0 + actor.arms)
             val baseDamage = actor.attack * random.nextDouble(0.30, 0.40) * (rate / 100.0)
             val diffFactor = calcAttackDefenseDiff(actor.attack, target.defense)
             val mainDamage = ((300.0 * actor.arms) / (3500.0 + actor.arms)) * (rate / 100.0) * diffFactor
             val damage = max(1, (armsDamage + baseDamage + mainDamage).roundToInt())
-            applyDamage(actor, target, damage, source)
+            applyDamage(actor, target, damage, source, round)
         }
 
-        private fun doStrategyDamage(actor: SimBattleHero, target: SimBattleHero, rate: Double, source: String) {
+        private fun doStrategyDamage(actor: SimBattleHero, target: SimBattleHero, rate: Double, source: String, round: Int) {
             val armsDamage = (actor.arms * 178.0) / (6459.0 + actor.arms)
             val strategyEffect = calcStrategyEffect(target.strategy)
             val baseDamage = actor.strategy * 0.5 * strategyEffect
             val mainDamage = ((300.0 * actor.arms) / (3500.0 + actor.arms)) * (rate / 100.0) * strategyEffect
             val damage = max(1, (armsDamage + baseDamage + mainDamage).roundToInt())
-            applyDamage(actor, target, damage, source)
+            applyDamage(actor, target, damage, source, round)
         }
 
-        private fun applyDamage(actor: SimBattleHero, target: SimBattleHero, damage: Int, source: String) {
+        private fun applyDamage(actor: SimBattleHero, target: SimBattleHero, damage: Int, source: String, round: Int) {
             val realDamage = min(target.arms, damage)
             target.arms -= realDamage
             target.hurtArms += (realDamage * 0.35).roundToInt()
             records += "${actor.name} 对 ${target.name} 造成 $realDamage 伤害（$source），${target.name}剩余=${target.arms}"
+            events += LocalSimulationEvent(
+                round = round,
+                kind = LocalSimulationEventKind.DAMAGE,
+                sourceName = actor.name,
+                targetName = target.name,
+                skillName = source,
+                amount = realDamage,
+                targetRemaining = target.arms,
+                description = "${actor.name} 对 ${target.name} 造成 $realDamage 伤害（$source）",
+            )
         }
 
         private fun decayWounded(hero: SimBattleHero) {
@@ -414,7 +487,45 @@ data class LocalSimulationRun(
     val blueRemain: Int,
     val redRemain: Int,
     val records: List<String>,
+    val attackerHeroes: List<LocalSimulationHeroSnapshot> = emptyList(),
+    val defenderHeroes: List<LocalSimulationHeroSnapshot> = emptyList(),
+    val events: List<LocalSimulationEvent> = emptyList(),
+    val roundsPlayed: Int = 0,
+    val seed: Int = 0,
 )
+
+enum class LocalSimulationEventKind {
+    PREPARATION,
+    ROUND_START,
+    ACTION,
+    DAMAGE,
+    RECOVERY,
+    STATUS,
+    RESULT,
+}
+
+data class LocalSimulationEvent(
+    val round: Int,
+    val kind: LocalSimulationEventKind,
+    val sourceName: String = "",
+    val targetName: String = "",
+    val skillName: String = "",
+    val amount: Int = 0,
+    val targetRemaining: Int = 0,
+    val description: String = "",
+)
+
+data class LocalSimulationHeroSnapshot(
+    val heroId: Long,
+    val name: String,
+    val positionName: String,
+    val initialTroops: Int,
+    val remainingTroops: Int,
+    val level: Int,
+    val advance: Int,
+) {
+    val alive: Boolean get() = remainingTroops > 0
+}
 
 private data class SimHeroResource(
     val id: Long,
@@ -476,6 +587,7 @@ private data class SimBattleHero(
     val camp: String,
     val positionName: String,
     val level: Int,
+    val advance: Int,
     val distance: Int,
     var arms: Int,
     val maxArms: Int,
@@ -492,4 +604,14 @@ private data class SimBattleHero(
         "中军" -> 1
         else -> 2
     }
+
+    fun snapshot() = LocalSimulationHeroSnapshot(
+        heroId = id,
+        name = name,
+        positionName = positionName,
+        initialTroops = maxArms,
+        remainingTroops = arms,
+        level = level,
+        advance = advance,
+    )
 }

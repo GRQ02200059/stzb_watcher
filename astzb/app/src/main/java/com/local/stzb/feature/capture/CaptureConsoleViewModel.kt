@@ -32,6 +32,7 @@ class CaptureConsoleViewModel(
                     packetCount = runtime.packetCount,
                     selectedApp = current.selectedApp ?: runtime.targetPackage.takeIf(String::isNotBlank)?.let { InstalledApp(it, it) },
                     visibleLogs = filterParsedLogs(runtime.logs, current.protocolFilter),
+                    evidence = runtime.evidence,
                 )
             }
         }

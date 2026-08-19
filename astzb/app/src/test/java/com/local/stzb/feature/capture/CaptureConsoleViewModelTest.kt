@@ -25,19 +25,29 @@ class CaptureConsoleViewModelTest {
     @After fun tearDown() = Dispatchers.resetMain()
 
     @Test fun mapsRuntimeAndFiltersWholeProtocolIds() = runTest {
+        val evidence = CaptureEvidence.from(
+            nativeReady = true,
+            vpnEstablished = true,
+            socksConnections = 1,
+            protocolCounts = mapOf("5028" to 1),
+            databaseRowDelta = 1,
+            stopped = false,
+            networkRestored = false,
+        )
         val controller = FakeCaptureController().apply {
             runtime.value = CaptureRuntime(true, true, "127.0.0.1", 1080, 7, "com.netease.stzb.netease", listOf(
                 "STZB 5026 行军专表入库",
                 "STZB 15026 不应匹配",
                 "STZB 5028 战场专表入库",
                 "SOCKS 转发 5026",
-            ))
+            ), evidence)
         }
         val viewModel = viewModel(controller)
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value.running)
         assertEquals(7, viewModel.state.value.packetCount)
+        assertEquals(evidence, viewModel.state.value.evidence)
         viewModel.onIntent(CaptureConsoleIntent.SetProtocolFilter("5026, 5028"))
         assertEquals(listOf("STZB 5026 行军专表入库", "STZB 5028 战场专表入库"), viewModel.state.value.visibleLogs)
     }

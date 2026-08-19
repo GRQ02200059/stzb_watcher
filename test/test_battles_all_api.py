@@ -72,6 +72,44 @@ class BattlesAllApiTest(unittest.TestCase):
         self.assertEqual(body["total"], 1)
         self.assertEqual(body["data"][0]["battle_id"], 101)
 
+    def test_player_battle_teams_maps_defender_skills_in_6_5_4_order(self):
+        conn = self._connect()
+        conn.execute(
+            """
+            ALTER TABLE battles_v2 ADD COLUMN all_skill_info TEXT DEFAULT ''
+            """
+        )
+        conn.execute(
+            """
+            ALTER TABLE battles_v2 ADD COLUMN defend_all_hero_info TEXT DEFAULT ''
+            """
+        )
+        conn.execute(
+            """
+            UPDATE battles_v2
+            SET def_name = '守方玩家',
+                def_union = '守方同盟',
+                is_npc = 0,
+                all_skill_info = '4,4004,1;5,4005,1;6,4006,1',
+                defend_all_hero_info =
+                    '100001,40,100,100,0;100002,40,100,100,0;100003,40,100,100,0'
+            WHERE battle_id = 101
+            """
+        )
+        conn.commit()
+        conn.close()
+
+        with patch("api_server.get_db", self._connect):
+            response = api_server.app.test_client().get(
+                "/api/player_battle_teams?side=def&player=%E5%AE%88%E6%96%B9%E7%8E%A9%E5%AE%B6&debug=1"
+            )
+
+        self.assertEqual(response.status_code, 200)
+        rows = response.get_json()["data"]
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["player_name"], "守方玩家")
+        self.assertEqual(rows[0]["skills"], "4006,4005,4004")
+
 
 if __name__ == "__main__":
     unittest.main()

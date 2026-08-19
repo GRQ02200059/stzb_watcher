@@ -21,19 +21,13 @@ fun RankingsScreen(state: RankingsUiState, viewModel: RankingsViewModel, onBack:
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        GlassToolbar(title = "排行与团队报表") {
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
+        MacGlassHeader(
+            title = "排行与团队报表",
+            subtitle = "排行榜、周期报表与团队维度",
+            leading = {
                 OutlinedButton(onBack, Modifier.heightIn(min = 48.dp)) { Text("返回") }
-                Text(
-                    "排行与团队报表",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(top = 10.dp),
-                )
-            }
-        }
+            },
+        )
 
         GlassCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {

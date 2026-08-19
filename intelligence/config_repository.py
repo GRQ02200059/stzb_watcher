@@ -2,6 +2,8 @@ import csv
 import json
 from pathlib import Path
 
+from .hero_ids import normalize_hero_id
+
 
 class IntelligenceConfigRepository:
     def __init__(self, root: Path) -> None:
@@ -63,7 +65,7 @@ class IntelligenceConfigRepository:
         return _page(rows, page, size, self.dataset_version)
 
     def hero_detail(self, hero_id):
-        hero = self.hero_by_id.get(int(hero_id))
+        hero = self.hero_by_id.get(normalize_hero_id(hero_id))
         if hero is None:
             return None
         skill_id = _int(hero.get("skill_init"))

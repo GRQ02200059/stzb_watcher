@@ -8,6 +8,7 @@ import java.util.Locale
 
 object LocalStzbCaptureWriter {
     private var appContext: Context? = null
+    private var profileDirectory: String = "default"
     private val timestampFormat = SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.US)
 
     @Synchronized
@@ -16,9 +17,14 @@ object LocalStzbCaptureWriter {
     }
 
     @Synchronized
+    fun selectProfile(profileId: String) {
+        profileDirectory = profileId.filter { it.isLetterOrDigit() || it == '_' || it == '-' }.ifBlank { "default" }
+    }
+
+    @Synchronized
     fun save(packet: LocalStzbPacket) {
         val context = appContext ?: return
-        val dir = File(context.filesDir, "capture_new/${packet.msgId}")
+        val dir = File(context.filesDir, "capture_new/$profileDirectory/${packet.msgId}")
         if (!dir.exists()) dir.mkdirs()
 
         val ts = timestampFormat.format(Date())
@@ -67,5 +73,5 @@ object LocalStzbCaptureWriter {
         return file
     }
 
-    fun captureRoot(context: Context): File = File(context.filesDir, "capture_new")
+    fun captureRoot(context: Context): File = File(context.filesDir, "capture_new/$profileDirectory")
 }

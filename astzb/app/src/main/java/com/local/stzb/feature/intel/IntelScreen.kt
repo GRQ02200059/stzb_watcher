@@ -10,8 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.local.stzb.core.ui.EmptyPanel
+import com.local.stzb.core.ui.GlassCard
 import com.local.stzb.domain.intel.IntelSnapshot
 
 enum class IntelPage { MAP, ANNOUNCEMENTS }
@@ -75,10 +74,7 @@ fun IntelScreen(page: IntelPage, initial: IntelSnapshot, onBack: () -> Unit, onS
                 ) {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         items(snapshot.cells, key = { it.wid }) { cell ->
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                            ) {
+                            GlassCard(modifier = Modifier.fillMaxWidth()) {
                                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                     Text(cell.cityName.ifBlank { cell.typeName }, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                                     Text("坐标 ${cell.coordinates} · WID ${cell.wid}")
@@ -102,10 +98,7 @@ fun IntelScreen(page: IntelPage, initial: IntelSnapshot, onBack: () -> Unit, onS
                 ) {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         items(snapshot.announcements, key = { it.id }) { item ->
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                            ) {
+                            GlassCard(modifier = Modifier.fillMaxWidth()) {
                                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                     Text(item.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                                     Text(item.content.take(300), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -126,11 +119,7 @@ private fun GlassGroupCard(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        shape = MaterialTheme.shapes.large,
-    ) {
+    GlassCard(modifier = modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)

@@ -1,6 +1,5 @@
 package com.local.stzb.feature.battlefield
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -22,6 +19,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.local.stzb.core.ui.GlassCard
 import com.local.stzb.domain.battlefield.BattlefieldEvent
 import com.local.stzb.domain.battlefield.BattlefieldHero
 
@@ -33,12 +31,10 @@ internal fun BattlefieldTeamCard(
     modifier: Modifier = Modifier,
 ) {
     val team = requireNotNull(event.teamPresentation)
-    Card(
+    GlassCard(
         modifier = modifier
             .fillMaxWidth()
             .clickable(role = Role.Button, onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, accent.copy(alpha = 0.5f)),
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(14.dp),
@@ -119,8 +115,7 @@ private fun BattlefieldHeroTile(hero: BattlefieldHero, modifier: Modifier = Modi
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
         Column(
             modifier = Modifier.padding(7.dp),

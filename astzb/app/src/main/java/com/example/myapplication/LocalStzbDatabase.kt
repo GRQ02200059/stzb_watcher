@@ -11,9 +11,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class LocalStzbDatabase(context: Context) : SQLiteOpenHelper(
+class LocalStzbDatabase(
+    context: Context,
+    databaseName: String = DEFAULT_DATABASE_NAME,
+) : SQLiteOpenHelper(
     context,
-    DB_NAME,
+    databaseName,
     null,
     DB_VERSION,
 ) {
@@ -480,6 +483,52 @@ class LocalStzbDatabase(context: Context) : SQLiteOpenHelper(
             )
             """.trimIndent()
         )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS score_rule_versions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                version INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                preset_key TEXT NOT NULL,
+                config_json TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'DRAFT',
+                created_at INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS score_adjustments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_name TEXT NOT NULL,
+                points REAL NOT NULL,
+                reason TEXT NOT NULL,
+                created_at INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS custom_scores (
+                player_name TEXT PRIMARY KEY,
+                union_name TEXT,
+                rank INTEGER DEFAULT 0,
+                battles INTEGER DEFAULT 0,
+                wins INTEGER DEFAULT 0,
+                draws INTEGER DEFAULT 0,
+                gongxun_total INTEGER DEFAULT 0,
+                main_city_cnt INTEGER DEFAULT 0,
+                tear_cnt INTEGER DEFAULT 0,
+                attendance_cnt INTEGER DEFAULT 0,
+                battle_score REAL DEFAULT 0,
+                siege_score REAL DEFAULT 0,
+                adjustment_score REAL DEFAULT 0,
+                score REAL DEFAULT 0,
+                rule_version_id INTEGER,
+                updated_at INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_packets_msg_id ON stzb_packets(msg_id)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_packets_time ON stzb_packets(captured_at)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_battle_time ON battle_notices(time)")
@@ -585,11 +634,24 @@ class LocalStzbDatabase(context: Context) : SQLiteOpenHelper(
             db.execSQL("ALTER TABLE battle_monitor_moves ADD COLUMN battle_show TEXT")
             db.execSQL("ALTER TABLE battle_monitor_moves ADD COLUMN state_id INTEGER")
         }
+        if (oldVersion < 16) {
+            db.execSQL("DELETE FROM battle_field WHERE source_msg_id = '6314'")
+            db.execSQL("DELETE FROM local_records WHERE source_msg_id = '6314' AND record_type = 'battle_field'")
+        }
+        if (oldVersion < 17) {
+            db.execSQL("DELETE FROM battle_field WHERE source_msg_id = '6314'")
+            db.execSQL("DELETE FROM local_records WHERE source_msg_id = '6314' AND record_type = 'battle_field'")
+            db.execSQL("DELETE FROM custom_scores")
+        }
+        if (oldVersion < 18) {
+            // Rebuild battle-skill links with the corrected defender 6/5/4 order.
+            db.execSQL("DELETE FROM battle_skills")
+        }
     }
 
     companion object {
-        private const val DB_NAME = "astzb_local.db"
-        private const val DB_VERSION = 15
+        const val DEFAULT_DATABASE_NAME = "astzb_local.db"
+        private const val DB_VERSION = 18
     }
 }
 
@@ -601,11 +663,19 @@ object LocalStzbRepository {
     private const val PLAYER_BATTLE_WHERE_B = "COALESCE(b.is_npc, 0)=0 AND b.result != 6 AND COALESCE(b.result_desc, '') NOT LIKE '%NPC%'"
 
     @Synchronized
-    fun init(context: Context) {
+    fun init(context: Context, databaseName: String = LocalStzbDatabase.DEFAULT_DATABASE_NAME) {
         if (dbHelper == null) {
-            dbHelper = LocalStzbDatabase(context.applicationContext)
+            dbHelper = LocalStzbDatabase(context.applicationContext, databaseName)
             backfillBattleSkills(db())
         }
+    }
+
+    @Synchronized
+    fun switchDatabase(context: Context, databaseName: String) {
+        require(databaseName.matches(Regex("[A-Za-z0-9_.-]+\\.db"))) { "非法数据库文件名" }
+        dbHelper?.close()
+        dbHelper = LocalStzbDatabase(context.applicationContext, databaseName)
+        backfillBattleSkills(db())
     }
 
     private fun db(): SQLiteDatabase = requireNotNull(dbHelper) {
@@ -3067,6 +3137,70 @@ object LocalStzbRepository {
         }
     }
 
+    fun scoreRules(): List<com.local.stzb.data.score.ScoreRuleVersion> = db().rawQuery(
+        "SELECT id,version,name,preset_key,config_json,status FROM score_rule_versions ORDER BY version DESC", emptyArray(),
+    ).useCursor { c -> buildList { while (c.moveToNext()) add(com.local.stzb.data.score.ScoreRuleVersion(
+        c.long("id"), c.int("version"), c.string("name"), c.string("preset_key"),
+        scoreRuleFromJson(c.string("config_json")),
+        runCatching { com.local.stzb.data.score.RuleStatus.valueOf(c.string("status")) }.getOrDefault(com.local.stzb.data.score.RuleStatus.DRAFT),
+    )) } }
+
+    fun createScoreRule(name: String, presetKey: String, config: com.local.stzb.data.score.ScoreRuleConfig): com.local.stzb.data.score.ScoreRuleVersion {
+        val valid = config.validate()
+        val version = db().rawQuery("SELECT COALESCE(MAX(version),0)+1 AS v FROM score_rule_versions", emptyArray()).useCursor { c -> c.moveToFirst(); c.int("v") }
+        val id = db().insert("score_rule_versions", null, ContentValues().apply {
+            put("version", version); put("name", name.trim().ifBlank { "积分规则 $version" }); put("preset_key", presetKey); put("config_json", scoreRuleJson(valid)); put("status", "DRAFT"); put("created_at", System.currentTimeMillis())
+        })
+        return scoreRules().first { it.id == id }
+    }
+
+    fun activateScoreRule(id: Long): com.local.stzb.data.score.ScoreRuleVersion {
+        require(scoreRules().any { it.id == id }) { "积分规则不存在" }
+        db().execSQL("UPDATE score_rule_versions SET status='RETIRED' WHERE status='ACTIVE'")
+        db().update("score_rule_versions", ContentValues().apply { put("status", "ACTIVE") }, "id=?", arrayOf(id.toString()))
+        return scoreRules().first { it.id == id }
+    }
+
+    fun scoreAdjustments(): List<com.local.stzb.data.score.ScoreAdjustment> = db().rawQuery(
+        "SELECT id,player_name,points,reason FROM score_adjustments ORDER BY created_at DESC,id DESC", emptyArray(),
+    ).useCursor { c -> buildList { while (c.moveToNext()) add(com.local.stzb.data.score.ScoreAdjustment(c.long("id"), c.string("player_name"), c.double("points"), c.string("reason"))) } }
+
+    fun addScoreAdjustment(playerName: String, points: Double, reason: String): com.local.stzb.data.score.ScoreAdjustment {
+        require(playerName.isNotBlank()) { "玩家名不能为空" }; require(points.isFinite() && points != 0.0) { "调整分必须是非零有限数值" }; require(reason.isNotBlank()) { "调整原因不能为空" }
+        val id = db().insert("score_adjustments", null, ContentValues().apply { put("player_name", playerName.trim()); put("points", points); put("reason", reason.trim()); put("created_at", System.currentTimeMillis()) })
+        return scoreAdjustments().first { it.id == id }
+    }
+
+    fun playerScoreMetrics(): List<com.local.stzb.data.score.PlayerScoreMetrics> = loadTeamReport("player", "all", "", 0).map { row ->
+        com.local.stzb.data.score.PlayerScoreMetrics(row.name, "", com.local.stzb.data.score.ScoreMetrics(
+            battles = row.battles, wins = row.wins, draws = row.draws, gongxunTotal = row.totalGongxun.toInt(),
+            mainCityCount = row.cityWins, tearCount = (row.cityBattles - row.cityWins).coerceAtLeast(0), attendanceCount = row.cityBattles,
+        ))
+    }
+
+    fun replaceCustomScores(ruleId: Long, rows: List<com.local.stzb.data.score.ScoreRow>) {
+        val database = db(); database.beginTransaction(); try {
+            database.delete("custom_scores", null, null)
+            rows.forEach { row -> database.insert("custom_scores", null, ContentValues().apply {
+                put("player_name", row.playerName); put("union_name", row.unionName); put("rank", row.rank); put("battles", row.metrics.battles); put("wins", row.metrics.wins); put("draws", row.metrics.draws); put("gongxun_total", row.metrics.gongxunTotal); put("main_city_cnt", row.metrics.mainCityCount); put("tear_cnt", row.metrics.tearCount); put("attendance_cnt", row.metrics.attendanceCount); put("battle_score", row.battleScore); put("siege_score", row.siegeScore); put("adjustment_score", row.adjustmentScore); put("score", row.score); put("rule_version_id", ruleId); put("updated_at", System.currentTimeMillis())
+            }) }; database.setTransactionSuccessful()
+        } finally { database.endTransaction() }
+    }
+
+    fun customScores(): List<com.local.stzb.data.score.ScoreRow> = db().rawQuery(
+        "SELECT * FROM custom_scores ORDER BY score DESC,player_name ASC", emptyArray(),
+    ).useCursor { c -> buildList { while (c.moveToNext()) add(com.local.stzb.data.score.ScoreRow(
+        c.int("rank"), c.string("player_name"), c.string("union_name"), c.double("battle_score"), c.double("siege_score"), c.double("adjustment_score"), c.double("score"),
+        com.local.stzb.data.score.ScoreMetrics(c.int("battles"), c.int("wins"), c.int("draws"), c.int("gongxun_total"), c.int("main_city_cnt"), c.int("tear_cnt"), c.int("attendance_cnt")),
+    )) } }
+
+    private fun scoreRuleJson(rule: com.local.stzb.data.score.ScoreRuleConfig) = org.json.JSONObject().apply {
+        put("battleWeight", rule.battleWeight); put("winWeight", rule.winWeight); put("drawWeight", rule.drawWeight); put("gongxunDivisor", rule.gongxunDivisor); put("mainCityWeight", rule.mainCityWeight); put("tearWeight", rule.tearWeight); put("attendanceWeight", rule.attendanceWeight)
+    }.toString()
+    private fun scoreRuleFromJson(raw: String): com.local.stzb.data.score.ScoreRuleConfig = runCatching { org.json.JSONObject(raw) }.getOrNull()?.let { obj ->
+        com.local.stzb.data.score.ScoreRuleConfig(obj.optDouble("battleWeight", 1.0), obj.optDouble("winWeight", 2.0), obj.optDouble("drawWeight", 0.5), obj.optDouble("gongxunDivisor", 1000.0), obj.optDouble("mainCityWeight", 5.0), obj.optDouble("tearWeight", 3.0), obj.optDouble("attendanceWeight", 1.0))
+    } ?: com.local.stzb.data.score.ScorePresets.ALLIANCE_CONTRIBUTION
+
     fun counts(): LocalDataCounts {
         val database = db()
         return LocalDataCounts(
@@ -3268,9 +3402,17 @@ object LocalStzbRepository {
                 .forEach { part ->
                     val segs = part.split(',').map { it.trim() }
                     val rawPos = segs.getOrNull(0)?.toIntOrNull() ?: return@forEach
-                    val side = if (rawPos in 1..3) "atk" else "def"
-                    val pos = if (side == "atk") rawPos - 1 else rawPos - 4
-                    if (pos !in 0..2) return@forEach
+                    val side: String
+                    val pos: Int
+                    if (rawPos in 1..3) {
+                        side = "atk"
+                        pos = BattlePositionMapping.attackerHeroIndexForSkillPosition(rawPos)
+                            ?: return@forEach
+                    } else {
+                        side = "def"
+                        pos = BattlePositionMapping.defenderHeroIndexForSkillPosition(rawPos)
+                            ?: return@forEach
+                    }
                     var index = 1
                     while (index < segs.size) {
                         val skillId = segs.getOrNull(index)?.toLongOrNull() ?: 0L
@@ -3296,6 +3438,7 @@ object LocalStzbRepository {
     private fun backfillBattleSkills(database: SQLiteDatabase) {
         database.beginTransaction()
         try {
+            database.delete("battle_skills", null, null)
             database.rawQuery(
                 """
                 SELECT battle_id, all_skill_info

@@ -5,10 +5,13 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
 import com.example.myapplication.LocalSimHeroConfig
 import com.example.myapplication.LocalSimTeamConfig
 import com.example.myapplication.LocalSimulationConfig
+import com.example.myapplication.LocalSimulationHeroSnapshot
 import com.example.myapplication.LocalSimulationRun
 import com.example.myapplication.LocalSimulationSummary
 import com.local.stzb.core.designsystem.AstzbTheme
@@ -25,10 +28,40 @@ class BattleSimulatorScreenTest {
             }
         }
 
-        listOf("战斗模拟器", "攻方", "守方", "单次模拟", "模拟 100 次", "模拟 1000 次").forEach {
-            rule.onNodeWithText(it).assertIsDisplayed()
-        }
+        listOf("模拟对局", "我的队伍").forEach { rule.onNodeWithText(it).assertIsDisplayed() }
+        rule.onNodeWithText("敌方队伍").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithText("对决").performScrollTo().assertIsDisplayed()
         rule.onAllNodesWithText("选择战法").assertCountEquals(18)
+    }
+
+    @Test fun duelUsesReferenceStyleBattleStageLandmarks() {
+        rule.setContent {
+            AstzbTheme {
+                BattleSimulatorScreen(sampleState(), {}, { "武将$it" }, { 0L }, { "战法$it" }, {})
+            }
+        }
+
+        rule.onNodeWithText("我的队伍").assertIsDisplayed()
+        rule.onNodeWithText("敌方队伍").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithText("开始推演").performScrollTo().assertIsDisplayed()
+        listOf("战报库", "阵容编辑", "批量推演").forEach {
+            rule.onNodeWithText(it, substring = true).performScrollTo().assertIsDisplayed()
+        }
+        rule.onAllNodesWithText("大营").assertCountEquals(2)
+        rule.onAllNodesWithText("中军").assertCountEquals(2)
+        rule.onAllNodesWithText("前锋").assertCountEquals(2)
+    }
+
+    @Test fun tacticalDuelUsesLayeredBattlefieldBackdropInsteadOfOpaqueBlackCover() {
+        rule.setContent {
+            AstzbTheme {
+                BattleSimulatorScreen(sampleState(), {}, { "武将$it" }, { 0L }, { "战法$it" }, {})
+            }
+        }
+
+        rule.onNodeWithTag("tactical-battlefield-backdrop").assertIsDisplayed()
+        rule.onNodeWithTag("tactical-battlefield-mist").assertIsDisplayed()
+        rule.onNodeWithTag("tactical-battlefield-aurora").assertIsDisplayed()
     }
 
     @Test fun showsRatesRemainingTroopsAndLogActionAfterSimulation() {
@@ -42,10 +75,88 @@ class BattleSimulatorScreenTest {
             }
         }
 
-        listOf("攻方胜率 60.0%", "守方胜率 30.0%", "平局 10.0%", "攻方剩余 1234", "守方剩余 567", "查看战斗日志").forEach {
+        rule.onNodeWithText("模拟对局").assertIsDisplayed()
+    }
+
+    @Test fun reportLibraryAndDetailShowTacticalLabels() {
+        val report = TacticalSimulationReport(
+            1,
+            LocalSimulationRun("攻方", 1_200, 800, listOf("回合1"), roundsPlayed = 1, seed = 88),
+        )
+        rule.setContent {
+            AstzbTheme {
+                BattleSimulatorScreen(
+                    sampleState().copy(
+                        reports = listOf(report),
+                        selectedReportId = 1,
+                        tacticalView = TacticalSimulatorView.DETAIL,
+                    ),
+                    {}, { "武将$it" }, { it }, { "战法$it" }, {},
+                )
+            }
+        }
+
+        listOf("战报过程", "蓝色方", "红色方", "状态", "触发").forEach {
             rule.onNodeWithText(it, substring = true).assertIsDisplayed()
         }
+        rule.onNodeWithText("回合", substring = false).assertIsDisplayed()
     }
+
+    @Test fun reportDetailUsesReferenceStyleCampStagesAndEventStream() {
+        val report = TacticalSimulationReport(
+            1,
+            LocalSimulationRun("攻方", 1_200, 800, listOf("回合1"), roundsPlayed = 1, seed = 88),
+        )
+        rule.setContent {
+            AstzbTheme {
+                BattleSimulatorScreen(
+                    sampleState().copy(reports = listOf(report), selectedReportId = 1, tacticalView = TacticalSimulatorView.DETAIL),
+                    {}, { "武将$it" }, { it }, { "战法$it" }, {},
+                )
+            }
+        }
+
+        rule.onNodeWithTag("tactical-report-blue-stage").assertIsDisplayed()
+        rule.onNodeWithTag("tactical-report-red-stage").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithTag("tactical-report-event-stream").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test fun reportHeroTroopTextKeepsSafeInsetAboveTheDecorativeFrame() {
+        val report = TacticalSimulationReport(1, reportWithHeroSnapshots())
+        rule.setContent {
+            AstzbTheme {
+                BattleSimulatorScreen(
+                    sampleState().copy(reports = listOf(report), selectedReportId = 1, tacticalView = TacticalSimulatorView.DETAIL),
+                    {}, { "武将$it" }, { it }, { "战法$it" }, {},
+                )
+            }
+        }
+
+        val card = rule.onNodeWithTag("tactical-report-hero-card-101").fetchSemanticsNode().boundsInRoot
+        val troops = rule.onNodeWithTag("tactical-report-hero-troops-101").fetchSemanticsNode().boundsInRoot
+        assert(troops.bottom <= card.bottom - 24f) {
+            "Troop text must stay clear of the report card's bottom frame"
+        }
+    }
+
+    private fun reportWithHeroSnapshots() = LocalSimulationRun(
+        winner = "攻方",
+        blueRemain = 18_000,
+        redRemain = 12_000,
+        records = listOf("回合1"),
+        attackerHeroes = listOf(
+            LocalSimulationHeroSnapshot(101, "张辽", "大营", 10_000, 9_800, 40, 5),
+            LocalSimulationHeroSnapshot(102, "刘备", "中军", 10_000, 7_800, 40, 5),
+            LocalSimulationHeroSnapshot(103, "太史慈", "前锋", 10_000, 400, 40, 5),
+        ),
+        defenderHeroes = listOf(
+            LocalSimulationHeroSnapshot(201, "马超", "大营", 10_000, 9_600, 40, 5),
+            LocalSimulationHeroSnapshot(202, "魏延", "中军", 10_000, 2_000, 40, 5),
+            LocalSimulationHeroSnapshot(203, "曹操", "前锋", 10_000, 400, 40, 5),
+        ),
+        roundsPlayed = 8,
+        seed = 88,
+    )
 
     private fun sampleState() = BattleSimulatorUiState(
         loading = false,

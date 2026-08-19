@@ -20,6 +20,7 @@ class BattleSimulatorViewModel(
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(BattleSimulatorUiState())
     val state: StateFlow<BattleSimulatorUiState> = mutableState.asStateFlow()
+    private var nextReportId = 1L
 
     init {
         viewModelScope.launch {
@@ -67,6 +68,19 @@ class BattleSimulatorViewModel(
             is BattleSimulatorIntent.SelectSkill -> selectSkill(intent.skillId)
             BattleSimulatorIntent.ClosePicker -> mutableState.value = mutableState.value.copy(picker = null)
             is BattleSimulatorIntent.Run -> runSimulation(intent.repeat)
+            is BattleSimulatorIntent.SelectTacticalView -> mutableState.value = mutableState.value.copy(
+                tacticalView = intent.view,
+                selectedEventIndex = null,
+            )
+            is BattleSimulatorIntent.SelectReportTab -> mutableState.value = mutableState.value.copy(
+                reportTab = intent.tab,
+                selectedEventIndex = null,
+            )
+            is BattleSimulatorIntent.SelectReport -> selectReport(intent.reportId)
+            is BattleSimulatorIntent.SelectEvent -> mutableState.value = mutableState.value.copy(
+                selectedEventIndex = intent.index,
+            )
+            is BattleSimulatorIntent.ApplyResearchLineup -> applyResearchLineup(intent.camp, intent.heroIds)
             BattleSimulatorIntent.DismissError -> mutableState.value = mutableState.value.copy(error = null)
         }
     }
@@ -137,12 +151,51 @@ class BattleSimulatorViewModel(
         mutableState.value = mutableState.value.copy(running = true, error = null)
         viewModelScope.launch {
             runCatching { withContext(io) { engine.simulate(runConfig) } }
-                .onSuccess { result -> mutableState.value = mutableState.value.copy(running = false, result = result) }
+                .onSuccess { result ->
+                    val report = if (repeat == 1) TacticalSimulationReport(nextReportId++, result.firstRun) else null
+                    val current = mutableState.value
+                    mutableState.value = current.copy(
+                        running = false,
+                        result = result,
+                        reports = if (report == null) current.reports else listOf(report) + current.reports,
+                        selectedReportId = report?.id ?: current.selectedReportId,
+                        selectedEventIndex = null,
+                        tacticalView = if (report == null) current.tacticalView else TacticalSimulatorView.DETAIL,
+                    )
+                }
                 .onFailure { error -> mutableState.value = mutableState.value.copy(
                     running = false,
                     error = "模拟失败：${error.message ?: "未知错误"}",
                 ) }
         }
+    }
+
+    private fun selectReport(reportId: Long) {
+        if (mutableState.value.reports.none { it.id == reportId }) return
+        mutableState.value = mutableState.value.copy(
+            selectedReportId = reportId,
+            selectedEventIndex = null,
+            tacticalView = TacticalSimulatorView.DETAIL,
+        )
+    }
+
+    private fun applyResearchLineup(camp: SimulatorCamp, heroIds: List<Long>) {
+        val ids = heroIds.filter { it > 0 }
+        if (ids.size != 3 || ids.distinct().size != 3) {
+            mutableState.value = mutableState.value.copy(error = "研究阵容需要三名不重复武将")
+            return
+        }
+        val available = mutableState.value.heroOptions.map { it.id }.toSet()
+        if (!available.containsAll(ids)) {
+            mutableState.value = mutableState.value.copy(error = "研究阵容包含模拟器未收录的武将")
+            return
+        }
+        updateConfig { config ->
+            config.updateTeam(camp) { team ->
+                team.copy(heroes = ids.map { id -> LocalSimHeroConfig(heroId = id, level = 40, advance = 5) })
+            }
+        }
+        mutableState.value = mutableState.value.copy(error = null, picker = null, result = null)
     }
 
     private companion object {
