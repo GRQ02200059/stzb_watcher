@@ -2,6 +2,17 @@ name: Build Windows Web EXE
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release 标签，例如 v1.0.0-web'
+        required: true
+        default: 'v1.0.0-web'
+        type: string
+      publish_release:
+        description: '构建成功后发布到 GitHub Releases'
+        required: true
+        default: false
+        type: boolean
   push:
     paths:
       - 'run_web_exe.py'
@@ -13,7 +24,7 @@ on:
       - '.github/workflows/build-windows-web.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -48,3 +59,12 @@ jobs:
           name: STZB-Web-Windows
           path: dist/STZB助手-Web.exe
           if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_release == true }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          name: STZB Web ${{ inputs.release_tag }}
+          generate_release_notes: true
+          files: dist/STZB助手-Web.exe

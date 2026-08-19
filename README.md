@@ -197,6 +197,8 @@ Windows 桌面壳和一键安装包目前仍在独立开发分支，当前主线
 
 当前可以使用源码启动 Web 端；Windows 一键 EXE 需要后续在 Windows 10/11 x64 构建机完成打包、安装和干净环境验收。
 
+Windows Web EXE 的 GitHub Actions 工作流已经配置：进入仓库的 `Actions → Build Windows Web EXE → Run workflow`，填写 Release 标签并打开“构建成功后发布到 GitHub Releases”，构建成功后会自动上传 `STZB助手-Web.exe`。
+
 使用时请保持 EXE 进程运行。关闭程序窗口或结束进程后，本地 Web 服务也会停止。首次运行建议把程序放在具有读写权限的普通文件夹中，不要直接放在需要管理员权限的系统目录。
 
 下载时请注意：
