@@ -5,7 +5,7 @@
 """
 from flask import Flask, jsonify, request, Response, stream_with_context
 from flask_cors import CORS
-import sqlite3, json, os, time, threading, ast, sys, hmac
+import sqlite3, json, os, time, threading, ast, sys, hmac, urllib.error, urllib.request
 from datetime import datetime
 from pathlib import Path
 from realtime_writer import (start_writer_thread, event_queue, recent_events, _event_lock,
@@ -59,6 +59,41 @@ _current_db_path = DEFAULT_DB
 _db_lock         = threading.Lock()
 _initialized_dbs = set()
 _table_info_cache = {}
+AUTH_SERVICE_BASE_URL = os.environ.get(
+    'STZB_AUTH_SERVICE_URL', 'http://152.136.236.184:9080'
+).rstrip('/')
+AUTH_CLIENT_VERSION = os.environ.get('STZB_AUTH_CLIENT_VERSION', '1.0.2')
+
+
+def _auth_service_request(path, payload):
+    body = json.dumps(payload, ensure_ascii=False).encode('utf-8')
+    request_obj = urllib.request.Request(
+        f'{AUTH_SERVICE_BASE_URL}/v1/{path.lstrip("/")}',
+        data=body,
+        headers={
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store',
+        },
+        method='POST',
+    )
+    try:
+        with urllib.request.urlopen(request_obj, timeout=10) as response:
+            raw = response.read().decode('utf-8')
+            return json.loads(raw), response.status
+    except urllib.error.HTTPError as error:
+        try:
+            payload = json.loads(error.read().decode('utf-8'))
+        except (ValueError, UnicodeDecodeError):
+            payload = {'ok': False, 'error': {'code': 'TRANSPORT_UNAVAILABLE', 'message': '认证服务返回异常'}}
+        return payload, error.code
+    except (urllib.error.URLError, TimeoutError, ValueError, json.JSONDecodeError):
+        return {
+            'ok': False,
+            'error': {
+                'code': 'TRANSPORT_UNAVAILABLE',
+                'message': '认证服务器暂时无法连接',
+            },
+        }, 503
 
 REQUIRED_BV2_COLUMNS = {
     'wid_name': 'TEXT DEFAULT ""',
@@ -3933,6 +3968,49 @@ def add_no_cache_headers(resp):
 
 
 # ===== 静态文件 =====
+@app.route('/api/local-auth/login', methods=['POST'])
+def api_local_auth_login():
+    payload = request.get_json(silent=True) or {}
+    username = str(payload.get('username') or '').strip()
+    password = payload.get('password')
+    if not username or not isinstance(password, str) or not password:
+        return jsonify({'ok': False, 'error': {'code': 'INVALID_INPUT', 'message': '请输入用户名和密码'}}), 400
+    result, status = _auth_service_request('login', {
+        'username': username,
+        'password': password,
+        'clientVersion': AUTH_CLIENT_VERSION,
+    })
+    return jsonify(result), status
+
+
+@app.route('/api/local-auth/register', methods=['POST'])
+def api_local_auth_register():
+    payload = request.get_json(silent=True) or {}
+    username = str(payload.get('username') or '').strip()
+    password = payload.get('password')
+    if not username or not isinstance(password, str) or not password:
+        return jsonify({'ok': False, 'error': {'code': 'INVALID_INPUT', 'message': '请输入用户名和密码'}}), 400
+    result, status = _auth_service_request('register', {
+        'username': username,
+        'password': password,
+        'clientVersion': AUTH_CLIENT_VERSION,
+    })
+    return jsonify(result), status
+
+
+@app.route('/api/local-auth/verify', methods=['POST'])
+def api_local_auth_verify():
+    payload = request.get_json(silent=True) or {}
+    token = payload.get('token')
+    if not isinstance(token, str) or not token.strip():
+        return jsonify({'ok': False, 'error': {'code': 'SESSION_INVALID', 'message': '登录状态无效'}}), 401
+    result, status = _auth_service_request('session/verify', {
+        'token': token,
+        'clientVersion': AUTH_CLIENT_VERSION,
+    })
+    return jsonify(result), status
+
+
 @app.route('/')
 def index():
     dashboard_path = os.path.join(RESOURCE_DIR, 'static', 'dashboard.html')

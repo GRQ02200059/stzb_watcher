@@ -1,0 +1,23 @@
+.local-auth-gate { display:none; min-height:100vh; align-items:center; justify-content:center; padding:24px; background:radial-gradient(circle at 20% 10%, rgba(45,117,255,.2), transparent 42%), #071126; color:#eef5ff; }
+.local-auth-gate:not([hidden]) { display:flex; }
+.local-auth-card { width:min(440px,100%); padding:32px; border:1px solid rgba(130,170,255,.28); border-radius:20px; background:rgba(10,25,55,.92); box-shadow:0 22px 70px rgba(0,0,0,.35); }
+.local-auth-kicker { color:#74b5ff; font:700 11px/1.4 ui-monospace,monospace; letter-spacing:.16em; }
+.local-auth-card h2 { margin:8px 0; font-size:26px; }
+.local-auth-hero-support { display:grid; gap:6px; margin:18px 0 20px; padding:16px; border:1px solid rgba(61,190,255,.52); border-radius:13px; background:linear-gradient(135deg,rgba(35,105,255,.28),rgba(36,211,170,.18)); box-shadow:0 0 24px rgba(41,145,255,.16); }
+.local-auth-hero-support strong { color:#fff; font-size:16px; }
+.local-auth-hero-support span { color:#c8dcff; font-size:13px; }
+.local-auth-hero-support a { display:inline-block; margin:7px 8px 0 0; padding:9px 14px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:700; }
+.local-auth-support-primary { color:#06132b; background:#48d5ad; }
+.local-auth-support-secondary { color:#e8f3ff; border:1px solid rgba(164,207,255,.7); background:rgba(5,19,46,.38); }
+.local-auth-copy,.local-auth-community span { display:block; color:#a8b9d8; line-height:1.6; font-size:13px; }
+.local-auth-card form { display:grid; gap:14px; margin-top:22px; }
+.local-auth-card label { display:grid; gap:6px; color:#d7e5ff; font-size:13px; }
+.local-auth-card input { box-sizing:border-box; width:100%; padding:11px 12px; border:1px solid #29456f; border-radius:9px; background:#081731; color:#fff; }
+.local-auth-card button { cursor:pointer; }
+.local-auth-link { margin:14px 0 0; border:0; background:none; color:#8dc5ff; }
+.local-auth-message { min-height:20px; margin:12px 0 0; color:#86d9b5; font-size:13px; }
+.local-auth-message[data-error="true"] { color:#ff9caa; }
+.local-auth-community { display:grid; gap:5px; margin-top:22px; padding-top:18px; border-top:1px solid rgba(130,170,255,.18); }
+.local-auth-community a { display:inline-block; margin:10px 10px 0 0; padding:7px 10px; border:1px solid #315788; border-radius:8px; color:#b9d9ff; text-decoration:none; font-size:12px; }
+.local-auth-license { display:block; margin-top:20px; color:#8192b1; font-size:11px; }
+body.local-auth-required > :not(#local-auth-gate) { display:none !important; }
