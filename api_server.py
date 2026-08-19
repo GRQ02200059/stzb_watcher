@@ -584,7 +584,7 @@ register_query_agent_api(
     intelligence_root=_intelligence_snapshot_root,
     research_repository=_intelligence_research_repository,
 )
-register_score_center_api(app, get_db)
+register_score_center_api(app, get_db, lambda: get_current_pid())
 
 def get_bv2_cols(conn):
     """缓存 battles_v2 列信息，避免接口里频繁 PRAGMA table_info。"""

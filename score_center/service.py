@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from .aggregation import ScoreAggregator
 from .calculator import PRESETS, calculate_score
 from .models import ScoreRule
+from .protocol_contract import require_score_protocol_contract
 from .repository import ScoreRepository
 
 
@@ -14,24 +15,32 @@ class ScoreCenterService:
     def __init__(
         self,
         get_connection,
+        get_profile_id=None,
         preview_ttl_seconds=900,
         preview_limit=100,
         now=None,
+        protocol_registry=None,
     ):
         self.get_connection = get_connection
+        self.get_profile_id = get_profile_id or (lambda: "")
         self.preview_ttl_seconds = int(preview_ttl_seconds)
         self.preview_limit = int(preview_limit)
         self.now = now or time.time
         self._previews = {}
+        self.member_wuxun_field = require_score_protocol_contract(
+            protocol_registry
+        )
 
     def preview(self, request):
         normalized = normalize_score_request(request)
         connection = self.get_connection()
         repository = ScoreRepository(connection)
         repository.ensure_schema()
+        profile_id = str(self.get_profile_id() or "")
+        repository.capture_sunday_wuxun_snapshot(profile_id=profile_id)
         rule_row = self._resolve_rule(repository, normalized)
         rule = ScoreRule.from_mapping(rule_row["config"])
-        aggregated = ScoreAggregator(connection, repository).aggregate(
+        aggregated = ScoreAggregator(connection, repository, profile_id=profile_id).aggregate(
             normalized["season"],
             start_time=normalized["startTime"],
             end_time_exclusive=normalized["endTimeExclusive"],

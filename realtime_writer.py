@@ -818,16 +818,26 @@ def upsert_battle_834(conn, b):
     exists = conn.execute('SELECT 1 FROM battles_v2 WHERE battle_id=?', (b['battle_id'],)).fetchone()
     if exists:
         return False
+    attacker_union = ''
+    try:
+        member = conn.execute(
+            'SELECT union_name FROM team_users WHERE uid=? ORDER BY updated_at DESC LIMIT 1',
+            (b.get('atk_uid', ''),),
+        ).fetchone()
+        if member:
+            attacker_union = str(member[0] or '')
+    except sqlite3.Error:
+        pass
     # battles_v2
     conn.execute('''
         INSERT OR IGNORE INTO battles_v2
             (battle_id, time, time_str, result, result_desc, fight_type, wid, wid_code,
-             atk_name, atk_uid, atk_gongxun, atk_power,
+             atk_name, atk_uid, atk_union, atk_gongxun, atk_power,
              def_name, def_union, def_level, def_gongxun, source_file, is_npc)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     ''', (b['battle_id'], b['time'], b['time_str'], b['result'], b['result_desc'],
           b['fight_type'], b['wid'], b['wid_code'],
-          b['atk_name'], b['atk_uid'], b['atk_gongxun'], b['atk_power'],
+          b['atk_name'], b['atk_uid'], attacker_union, b['atk_gongxun'], b['atk_power'],
           b['def_name'], b['def_union'], b['def_level'], b['def_gongxun'],
           b['source_file'], 1))
     # wuxun_log
@@ -836,7 +846,7 @@ def upsert_battle_834(conn, b):
             INSERT INTO wuxun_log (battle_id, time, atk_name, atk_union, atk_level,
                                    gongxun, fight_type, result, wid)
             VALUES (?,?,?,?,?,?,?,?,?)
-        ''', (b['battle_id'], b['time'], b['atk_name'], b['def_union'], b['def_level'],
+        ''', (b['battle_id'], b['time'], b['atk_name'], attacker_union, b['def_level'],
               b['atk_gongxun'], b['fight_type'], b['result'], b['wid']))
     # power_log
     if b['atk_power'] > 0:
@@ -844,7 +854,7 @@ def upsert_battle_834(conn, b):
             INSERT INTO power_log (battle_id, time, atk_name, atk_union, atk_level,
                                    power, fight_type, result, wid)
             VALUES (?,?,?,?,?,?,?,?,?)
-        ''', (b['battle_id'], b['time'], b['atk_name'], b['def_union'], b['def_level'],
+        ''', (b['battle_id'], b['time'], b['atk_name'], attacker_union, b['def_level'],
               b['atk_power'], b['fight_type'], b['result'], b['wid']))
     # attendance
     try:
@@ -857,7 +867,7 @@ def upsert_battle_834(conn, b):
             INSERT INTO attendance (battle_id, time, player_name, player_uid, union_name,
                                     fight_type, wid, gongxun, result, profile_id)
             VALUES (?,?,?,?,?,?,?,?,?,?)
-        ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], b['def_union'],
+        ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], attacker_union,
               b['fight_type'], b['wid'], b['atk_gongxun'], b['result'], _att_pid))
     except sqlite3.OperationalError as _e:
         if 'profile_id' in str(_e):
@@ -865,7 +875,7 @@ def upsert_battle_834(conn, b):
                 INSERT INTO attendance (battle_id, time, player_name, player_uid, union_name,
                                         fight_type, wid, gongxun, result)
                 VALUES (?,?,?,?,?,?,?,?,?)
-            ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], b['def_union'],
+            ''', (b['battle_id'], b['time'], b['atk_name'], b['atk_uid'], attacker_union,
                   b['fight_type'], b['wid'], b['atk_gongxun'], b['result']))
         else:
             raise
@@ -1500,7 +1510,7 @@ def upsert_team_users(conn, users, profile_id=''):
                 from score_center.repository import ScoreRepository
                 repository = ScoreRepository(conn)
                 repository.ensure_schema()
-                repository.capture_sunday_wuxun_snapshot()
+                repository.capture_sunday_wuxun_snapshot(profile_id=profile_id)
             except Exception as error:
                 print(f'[team_users] 周日武勋快照失败: {error}')
 

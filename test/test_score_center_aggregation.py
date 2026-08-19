@@ -1,5 +1,6 @@
 import sqlite3
 import unittest
+from datetime import datetime
 
 from score_center.aggregation import ScoreAggregator
 from score_center.repository import ScoreRepository
@@ -31,9 +32,10 @@ def build_connection(with_attendance=True):
             uid TEXT,
             name TEXT,
             union_name TEXT,
-            group_name TEXT
+            group_name TEXT,
+            wuxun INTEGER DEFAULT 0
         );
-        INSERT INTO team_users VALUES('1','玩家甲','甲盟回退','一团');
+        INSERT INTO team_users VALUES('1','玩家甲','甲盟回退','一团',1234);
         CREATE TABLE custom_scores(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             season_id TEXT,
@@ -78,6 +80,28 @@ def build_connection(with_attendance=True):
 
 
 class ScoreCenterAggregationTest(unittest.TestCase):
+    def test_sunday_snapshot_preserves_member_wuxun_after_weekly_reset(self):
+        connection, repository = build_connection()
+        connection.execute("UPDATE team_users SET wuxun=1234 WHERE uid='1'")
+        repository.capture_sunday_wuxun_snapshot(datetime(2026, 8, 16, 20, 0, 0))
+        connection.execute("UPDATE team_users SET wuxun=0 WHERE uid='1'")
+        rows = ScoreAggregator(connection, repository).aggregate("current")
+        player = next(row for row in rows if row.player_name == "玩家甲")
+        self.assertEqual(1234, player.metrics.gongxun_total)
+        connection.close()
+
+    def test_sunday_snapshots_accumulate_across_weeks(self):
+        connection, repository = build_connection()
+        connection.execute("UPDATE team_users SET wuxun=1234 WHERE uid='1'")
+        repository.capture_sunday_wuxun_snapshot(datetime(2026, 8, 9, 20, 0, 0))
+        connection.execute("UPDATE team_users SET wuxun=2345 WHERE uid='1'")
+        repository.capture_sunday_wuxun_snapshot(datetime(2026, 8, 16, 20, 0, 0))
+        connection.execute("UPDATE team_users SET wuxun=0 WHERE uid='1'")
+        rows = ScoreAggregator(connection, repository).aggregate("current")
+        player = next(row for row in rows if row.player_name == "玩家甲")
+        self.assertEqual(3579, player.metrics.gongxun_total)
+        connection.close()
+
     def test_aggregates_attack_identity_results_and_attendance(self):
         connection, repository = build_connection()
         try:
@@ -88,7 +112,7 @@ class ScoreCenterAggregationTest(unittest.TestCase):
             self.assertEqual(player.metrics.battles, 3)
             self.assertEqual(player.metrics.wins, 1)
             self.assertEqual(player.metrics.draws, 1)
-            self.assertEqual(player.metrics.gongxun_total, 1000)
+            self.assertEqual(player.metrics.gongxun_total, 1234)
             self.assertEqual(player.metrics.main_city_cnt, 1)
             self.assertEqual(player.metrics.tear_cnt, 1)
             self.assertEqual(player.metrics.attendance_cnt, 1)
@@ -134,14 +158,16 @@ class ScoreCenterAggregationTest(unittest.TestCase):
         finally:
             connection.close()
 
-    def test_all_zero_gongxun_is_reported_as_missing_source(self):
+    def test_zero_member_wuxun_is_a_valid_observed_value(self):
         connection, repository = build_connection()
         try:
             connection.execute("UPDATE battles_v2 SET atk_gongxun=0")
+            connection.execute("UPDATE team_users SET wuxun=0")
             rows = ScoreAggregator(connection, repository).aggregate("current")
             player = next(row for row in rows if row.player_name == "玩家甲")
-            self.assertEqual(player.data_completeness, "partial")
-            self.assertIn("gongxun", player.missing_sources)
+            self.assertEqual(player.metrics.gongxun_total, 0)
+            self.assertEqual(player.data_completeness, "complete")
+            self.assertNotIn("gongxun", player.missing_sources)
         finally:
             connection.close()
 
