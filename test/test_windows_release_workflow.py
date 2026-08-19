@@ -9,6 +9,10 @@ WORKFLOW = (
 
 
 class WindowsReleaseWorkflowTest(unittest.TestCase):
+    def test_checkout_initializes_recursive_submodules(self):
+        checkout = WORKFLOW.split('- name: Set up Python', 1)[0]
+        self.assertIn('submodules: recursive', checkout)
+
     def test_manual_workflow_accepts_release_tag_and_publish_switch(self):
         self.assertIn('release_tag:', WORKFLOW)
         self.assertIn('publish_release:', WORKFLOW)
