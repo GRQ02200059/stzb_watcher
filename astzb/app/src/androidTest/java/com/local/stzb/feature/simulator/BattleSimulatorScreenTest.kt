@@ -11,6 +11,8 @@ import androidx.compose.ui.test.performScrollTo
 import com.example.myapplication.LocalSimHeroConfig
 import com.example.myapplication.LocalSimTeamConfig
 import com.example.myapplication.LocalSimulationConfig
+import com.example.myapplication.LocalSimulationEvent
+import com.example.myapplication.LocalSimulationEventKind
 import com.example.myapplication.LocalSimulationHeroSnapshot
 import com.example.myapplication.LocalSimulationRun
 import com.example.myapplication.LocalSimulationSummary
@@ -97,7 +99,7 @@ class BattleSimulatorScreenTest {
         }
 
         listOf("战报过程", "蓝色方", "红色方", "状态", "触发").forEach {
-            rule.onNodeWithText(it, substring = true).assertIsDisplayed()
+            rule.onNodeWithText(it, substring = false).assertIsDisplayed()
         }
         rule.onNodeWithText("回合", substring = false).assertIsDisplayed()
     }
@@ -133,10 +135,48 @@ class BattleSimulatorScreenTest {
         }
 
         val card = rule.onNodeWithTag("tactical-report-hero-card-101").fetchSemanticsNode().boundsInRoot
+        rule.onNodeWithTag("tactical-report-hero-level-101").assertIsDisplayed()
+        rule.onNodeWithTag("tactical-report-hero-troop-value-101").assertIsDisplayed()
+        rule.onNodeWithText("9800/10000", substring = false).assertIsDisplayed()
         val troops = rule.onNodeWithTag("tactical-report-hero-troops-101").fetchSemanticsNode().boundsInRoot
         assert(troops.bottom <= card.bottom - 24f) {
             "Troop text must stay clear of the report card's bottom frame"
         }
+        assert(troops.left >= card.left + 24f && troops.right <= card.right - 24f) {
+            "Troop text must stay clear of the report card's side frames"
+        }
+    }
+
+    @Test fun reportRoundTabRendersPreparationThenEachRoundAsAContinuousTimeline() {
+        val report = TacticalSimulationReport(1, reportWithTimelineEvents())
+        rule.setContent {
+            AstzbTheme {
+                BattleSimulatorScreen(
+                    sampleState().copy(reports = listOf(report), selectedReportId = 1, tacticalView = TacticalSimulatorView.DETAIL),
+                    {}, { "武将$it" }, { it }, { "战法$it" }, {},
+                )
+            }
+        }
+
+        listOf("准备阶段", "第 1 回合", "第 2 回合", "战斗结算").forEach { label ->
+            rule.onNodeWithText(label, substring = false).performScrollTo().assertIsDisplayed()
+        }
+        rule.onNodeWithText("张辽 对 马超 造成 320 伤害（普通攻击）", substring = false).performScrollTo().assertIsDisplayed()
+    }
+
+    @Test fun reportRoundTabAlwaysShowsPreparationStageEvenWithoutPreparationEffects() {
+        val report = TacticalSimulationReport(1, reportWithHeroSnapshots())
+        rule.setContent {
+            AstzbTheme {
+                BattleSimulatorScreen(
+                    sampleState().copy(reports = listOf(report), selectedReportId = 1, tacticalView = TacticalSimulatorView.DETAIL),
+                    {}, { "武将$it" }, { it }, { "战法$it" }, {},
+                )
+            }
+        }
+
+        rule.onNodeWithText("准备阶段", substring = false).performScrollTo().assertIsDisplayed()
+        rule.onNodeWithText("本局没有准备阶段的可触发战法", substring = false).performScrollTo().assertIsDisplayed()
     }
 
     private fun reportWithHeroSnapshots() = LocalSimulationRun(
@@ -156,6 +196,18 @@ class BattleSimulatorScreenTest {
         ),
         roundsPlayed = 8,
         seed = 88,
+    )
+
+    private fun reportWithTimelineEvents() = reportWithHeroSnapshots().copy(
+        events = listOf(
+            LocalSimulationEvent(0, LocalSimulationEventKind.PREPARATION, "张辽", "张辽", "陷阵", targetRemaining = 10_000, description = "张辽 执行指挥战法【陷阵】"),
+            LocalSimulationEvent(1, LocalSimulationEventKind.ROUND_START, description = "第1回合开始"),
+            LocalSimulationEvent(1, LocalSimulationEventKind.ACTION, "张辽", "张辽", targetRemaining = 10_000, description = "张辽 行动开始，兵力=10000"),
+            LocalSimulationEvent(1, LocalSimulationEventKind.DAMAGE, "张辽", "马超", "普通攻击", 320, 9_680, "张辽 对 马超 造成 320 伤害（普通攻击）"),
+            LocalSimulationEvent(2, LocalSimulationEventKind.ROUND_START, description = "第2回合开始"),
+            LocalSimulationEvent(2, LocalSimulationEventKind.RECOVERY, "刘备", "刘备", "仁德", 180, 9_980, "刘备 发动【仁德】恢复 180 兵力"),
+            LocalSimulationEvent(2, LocalSimulationEventKind.RESULT, "攻方", amount = 500, description = "战斗结束：攻方，攻方剩余=18000，守方剩余=12000"),
+        ),
     )
 
     private fun sampleState() = BattleSimulatorUiState(

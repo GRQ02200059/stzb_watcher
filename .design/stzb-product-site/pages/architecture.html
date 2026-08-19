@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>技术架构 · STZB Watcher</title>
+  <link rel="stylesheet" href="../colors_and_type.css" />
+
+  <!-- ===== Shared shell styles (from project-shell.html) ===== -->
+  <style>
+    /* ---------- Top Navigation ---------- */
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      width: 100%;
+      background: rgba(5, 8, 16, 0.82);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      border-bottom: 1px solid var(--border);
+    }
+    .site-nav__inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 12px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    /* ---- Brand seal + name ---- */
+    .site-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+      border-radius: var(--radius-md);
+      outline: none;
+      flex-shrink: 0;
+    }
+    .site-seal {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(150deg, var(--color-primary-hi), var(--color-primary-500));
+      box-shadow: inset 0 0 0 1px rgba(11, 15, 24, 0.35), var(--glow-gold);
+      position: relative;
+    }
+    .site-seal::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border: 1px solid rgba(11, 15, 24, 0.45);
+      border-radius: 2px;
+      pointer-events: none;
+    }
+    .site-seal__char {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 24px;
+      line-height: 1;
+      color: var(--on-accent);
+      position: relative;
+      z-index: 1;
+      user-select: none;
+    }
+    .site-brand__text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .site-brand__name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1.1;
+      letter-spacing: 0.01em;
+      background: linear-gradient(120deg, var(--color-primary-hi), var(--color-primary), var(--color-primary-600));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      white-space: nowrap;
+    }
+    .site-brand__sub {
+      font-family: var(--font-body);
+      font-size: 12px;
+      line-height: 1.2;
+      color: var(--text-2);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ---- Right side: links + cta ---- */
+    .site-nav__right {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      min-width: 0;
+    }
+    .site-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .site-nav__link {
+      position: relative;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-2);
+      text-decoration: none;
+      padding: 6px 2px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color var(--dur) var(--ease);
+      outline: none;
+    }
+    .site-nav__link::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      height: 2px;
+      width: 100%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-hi));
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform var(--dur) var(--ease);
+    }
+    .site-nav__link:hover,
+    .site-nav__link:focus-visible {
+      color: var(--color-primary-hi);
+    }
+    .site-nav__link:hover::after,
+    .site-nav__link:focus-visible::after {
+      transform: scaleX(1);
+    }
+    .site-nav__link[aria-current="page"] { color: var(--color-primary-hi); }
+    .site-nav__link[aria-current="page"]::after { transform: scaleX(1); }
+
+    /* ---- Primary CTA ---- */
+    .site-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--on-accent);
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(120deg, var(--color-primary-hi), var(--color-primary));
+      border: 1px solid var(--color-primary-300);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+      outline: none;
+    }
+    .site-btn-primary:hover,
+    .site-btn-primary:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: var(--glow-gold);
+    }
+    .site-btn-primary:active { transform: translateY(0); }
+    .site-btn-primary__icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      transition: transform var(--dur) var(--ease);
+    }
+    .site-btn-primary:hover .site-btn-primary__icon,
+    .site-btn-primary:focus-visible .site-btn-primary__icon {
+      transform: translateX(3px);
+    }
+
+    /* ---------- Footer ---------- */
+    .site-footer {
+      width: 100%;
+      background: var(--surface);
+      border-top: 1px solid transparent;
+      position: relative;
+    }
+    .site-footer__rule {
+      height: 1px;
+      width: 100%;
+      background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+      border: 0;
+      margin: 0;
+    }
+    .site-footer__inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 56px 32px 40px;
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1.2fr;
+      gap: 48px;
+    }
+    .site-footer__col-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-primary);
+      letter-spacing: 0.08em;
+      margin: 0 0 18px;
+    }
+    .site-footer__brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+      margin-bottom: 16px;
+    }
+    .site-footer__brand-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--color-primary-hi);
+      white-space: nowrap;
+    }
+    .site-footer__desc {
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-2);
+      margin: 0;
+      max-width: 42ch;
+    }
+    .site-footer__links {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .site-footer__link {
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-2);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color var(--dur) var(--ease);
+      width: fit-content;
+      outline: none;
+    }
+    .site-footer__link:hover,
+    .site-footer__link:focus-visible { color: var(--color-primary-hi); }
+    .site-footer__contact {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .site-footer__contact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.6;
+    }
+    .site-footer__contact-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      color: var(--color-primary);
+      margin-top: 2px;
+    }
+    .site-footer__qq {
+      font-family: var(--font-mono);
+      color: var(--text);
+      letter-spacing: 0.03em;
+    }
+    .site-footer__bottom {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 18px 32px 32px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-faint);
+      letter-spacing: 0.04em;
+    }
+
+    /* ---------- Focus ring (accessibility) ---------- */
+    .site-brand:focus-visible,
+    .site-nav__link:focus-visible,
+    .site-btn-primary:focus-visible,
+    .site-footer__link:focus-visible,
+    .site-footer__brand:focus-visible {
+      box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--color-primary);
+      border-radius: var(--radius-sm);
+    }
+
+    /* ---------- Responsive: tablet ---------- */
+    @media (max-width: 1024px) {
+      .site-nav__inner,
+      .site-footer__inner,
+      .site-footer__bottom { padding-left: 24px; padding-right: 24px; }
+      .site-nav__right { gap: 20px; }
+      .site-nav__links { gap: 20px; }
+      .site-footer__inner { grid-template-columns: 1fr 1fr; gap: 36px; }
+    }
+
+    /* ---------- Responsive: mobile (< 768px) ---------- */
+    @media (max-width: 767px) {
+      .site-nav__inner {
+        flex-wrap: wrap;
+        row-gap: 12px;
+        padding: 10px 16px;
+      }
+      .site-brand__sub { display: none; }
+      .site-nav__right {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px 16px;
+      }
+      .site-nav__links {
+        flex-wrap: wrap;
+        gap: 10px 18px;
+        order: 2;
+      }
+      .site-btn-primary { order: 1; margin-left: auto; }
+      .site-footer__inner {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 40px 16px 32px;
+      }
+      .site-footer__bottom {
+        padding: 16px 16px 28px;
+        justify-content: center;
+        text-align: center;
+      }
+    }
+
+    /* ---------- Reduced motion ---------- */
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav__link,
+      .site-nav__link::after,
+      .site-btn-primary,
+      .site-btn-primary__icon,
+      .site-footer__link { transition-duration: 0.01ms; }
+    }
+  </style>
+
+  <!-- ===== Page-specific styles (arch- prefix) ===== -->
+  <style>
+    body { overflow-x: hidden; }
+
+    .arch-main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    /* ---------- Hero / page title ---------- */
+    .arch-hero {
+      padding: 88px 0 56px;
+      text-align: center;
+      position: relative;
+    }
+    .arch-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-primary-hi);
+      padding: 6px 14px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-full);
+      background: var(--surface-2);
+    }
+    .arch-tag__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      background: var(--color-primary);
+      box-shadow: var(--glow-gold);
+    }
+    .arch-hero__title {
+      font-size: clamp(34px, 5.6vw, 60px);
+      margin: 26px 0 20px;
+      line-height: 1.18;
+    }
+    .arch-hero__lead {
+      max-width: 62ch;
+      margin: 0 auto;
+      font-size: 17px;
+      line-height: 1.8;
+      color: var(--text-2);
+    }
+    .arch-hero__lead strong { color: var(--text); font-weight: 600; }
+
+    /* ---------- Section frame ---------- */
+    .arch-section { padding: 40px 0; }
+    .arch-section__head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+    .arch-section__title {
+      font-size: clamp(24px, 3vw, 34px);
+      line-height: 1.2;
+    }
+    .arch-section__title .num {
+      font-family: var(--font-mono);
+      font-size: 0.6em;
+      color: var(--color-primary);
+      margin-right: 12px;
+      letter-spacing: 0.08em;
+    }
+    .arch-section__desc {
+      font-size: 15px;
+      color: var(--text-2);
+      max-width: 46ch;
+    }
+
+    /* ---------- Diagram panel ---------- */
+    .arch-diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .arch-diagram__scroll {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 8px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-strong) transparent;
+    }
+    .arch-diagram__scroll::-webkit-scrollbar { height: 8px; }
+    .arch-diagram__scroll::-webkit-scrollbar-thumb {
+      background: var(--border-strong);
+      border-radius: var(--radius-full);
+    }
+    .arch-canvas {
+      min-width: 1040px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* lane (one data path) */
+    .arch-lane {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface-2);
+      padding: 20px 22px;
+      position: relative;
+    }
+    .arch-lane__label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-primary-hi);
+      margin-bottom: 16px;
+    }
+    .arch-lane__label svg { width: 16px; height: 16px; }
+    .arch-flow {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+    }
+
+    /* node box */
+    .arch-node {
+      flex: 1 1 0;
+      min-width: 132px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+    }
+    .arch-node:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-float);
+    }
+    .arch-node--terminal {
+      border-color: var(--color-primary-500);
+      background: var(--surface-3);
+    }
+    .arch-node__ico {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong);
+      background: var(--surface-2);
+      color: var(--color-primary-hi);
+    }
+    .arch-node__ico svg { width: 17px; height: 17px; }
+    .arch-node__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 15px;
+      line-height: 1.3;
+      color: var(--text);
+    }
+    .arch-node__tech {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      letter-spacing: 0.02em;
+      color: var(--text-2);
+      line-height: 1.5;
+    }
+
+    /* gold arrow connector between nodes */
+    .arch-arrow {
+      flex: 0 0 40px;
+      align-self: center;
+      display: grid;
+      place-items: center;
+      color: var(--color-primary);
+    }
+    .arch-arrow svg { width: 40px; height: 20px; display: block; }
+
+    /* shared combat engine highlight box */
+    .arch-shared {
+      margin-top: 4px;
+      border: 1px solid var(--color-primary-400);
+      border-radius: var(--radius-md);
+      background:
+        linear-gradient(180deg, rgba(200,160,68,0.10), rgba(200,160,68,0.02)),
+        var(--surface-2);
+      box-shadow: var(--glow-gold);
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .arch-shared__ico {
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(150deg, var(--color-primary-hi), var(--color-primary-500));
+      color: var(--on-accent);
+    }
+    .arch-shared__ico svg { width: 24px; height: 24px; }
+    .arch-shared__body { flex: 1 1 auto; min-width: 0; }
+    .arch-shared__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--color-primary-hi);
+      margin: 0 0 4px;
+    }
+    .arch-shared__text {
+      font-size: 13.5px;
+      color: var(--text-2);
+      margin: 0;
+      line-height: 1.6;
+    }
+    .arch-shared__tech {
+      font-family: var(--font-mono);
+      color: var(--text);
+    }
+    /* dashed link cue pointing to both UIs */
+    .arch-shared__link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.08em;
+      color: var(--color-primary);
+      text-align: center;
+    }
+    .arch-shared__link svg { width: 26px; height: 34px; }
+
+    .arch-diagram__legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 22px;
+      margin-top: 22px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-faint);
+    }
+    .arch-legend__item { display: inline-flex; align-items: center; gap: 8px; }
+    .arch-legend__swatch {
+      width: 26px; height: 12px; border-radius: 3px;
+      border: 1px solid var(--border-strong);
+    }
+    .arch-legend__swatch--web { background: var(--surface); }
+    .arch-legend__swatch--and { background: var(--surface-3); }
+    .arch-legend__swatch--shared {
+      background: linear-gradient(120deg, var(--color-primary-hi), var(--color-primary-500));
+      border-color: var(--color-primary-400);
+    }
+
+    /* ---------- Tech stack cards ---------- */
+    .arch-stack-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .arch-stack-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px 22px 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+    }
+    .arch-stack-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-float);
+    }
+    .arch-stack-card__head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .arch-stack-card__ico {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong);
+      background: var(--surface-2);
+      color: var(--color-primary-hi);
+    }
+    .arch-stack-card__ico svg { width: 22px; height: 22px; }
+    .arch-stack-card__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 19px;
+      color: var(--text);
+    }
+    .arch-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .arch-chip {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      color: var(--text-2);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 5px 10px;
+      transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+    }
+    .arch-stack-card:hover .arch-chip { border-color: var(--border-strong); }
+
+    /* ---------- Privacy section ---------- */
+    .arch-privacy-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+    .arch-privacy-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+    }
+    .arch-privacy-item:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+    .arch-privacy-item__ico {
+      width: 34px;
+      height: 34px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-primary-600);
+      background: var(--surface-2);
+      color: var(--color-primary-hi);
+    }
+    .arch-privacy-item__ico svg { width: 19px; height: 19px; }
+    .arch-privacy-item__title {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 15.5px;
+      color: var(--text);
+      margin: 0 0 4px;
+    }
+    .arch-privacy-item__text {
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: var(--text-2);
+      margin: 0;
+    }
+    .arch-privacy-item__text code {
+      font-family: var(--font-mono);
+      font-size: 0.92em;
+      color: var(--color-primary-hi);
+      background: var(--surface-3);
+      padding: 1px 6px;
+      border-radius: var(--radius-sm);
+    }
+
+    /* ---------- Android six-stage stepper ---------- */
+    .arch-stages {
+      margin-top: 34px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 26px 28px 28px;
+    }
+    .arch-stages__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--text);
+      margin: 0 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .arch-stages__title svg { width: 20px; height: 20px; color: var(--color-primary-hi); }
+    .arch-stages__sub {
+      font-size: 13.5px;
+      color: var(--text-2);
+      margin: 0 0 22px;
+    }
+    .arch-stages__scroll {
+      overflow-x: auto;
+      padding-bottom: 6px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-strong) transparent;
+    }
+    .arch-stages__scroll::-webkit-scrollbar { height: 8px; }
+    .arch-stages__scroll::-webkit-scrollbar-thumb {
+      background: var(--border-strong);
+      border-radius: var(--radius-full);
+    }
+    .arch-steps {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      min-width: 900px;
+    }
+    .arch-step {
+      flex: 1 1 0;
+      min-width: 120px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+    }
+    .arch-step:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+    .arch-step__num {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--on-accent);
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(150deg, var(--color-primary-hi), var(--color-primary-500));
+    }
+    .arch-step__name {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 14.5px;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .arch-step__hint {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-faint);
+      letter-spacing: 0.02em;
+    }
+    .arch-step-arrow {
+      flex: 0 0 30px;
+      align-self: center;
+      display: grid;
+      place-items: center;
+      color: var(--color-primary);
+    }
+    .arch-step-arrow svg { width: 30px; height: 16px; }
+
+    /* ---------- Closing CTA ---------- */
+    .arch-cta {
+      text-align: center;
+      padding: 56px 0 96px;
+    }
+    .arch-cta .rule-gold { max-width: 340px; margin: 0 auto 40px; }
+    .arch-cta__title {
+      font-size: clamp(26px, 3.4vw, 38px);
+      margin-bottom: 16px;
+    }
+    .arch-cta__text {
+      font-size: 16px;
+      color: var(--text-2);
+      max-width: 52ch;
+      margin: 0 auto 32px;
+      line-height: 1.8;
+    }
+    .arch-cta__btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--on-accent);
+      text-decoration: none;
+      padding: 15px 34px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(120deg, var(--color-primary-hi), var(--color-primary));
+      border: 1px solid var(--color-primary-300);
+      cursor: pointer;
+      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+      outline: none;
+    }
+    .arch-cta__btn:hover,
+    .arch-cta__btn:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: var(--glow-gold);
+    }
+    .arch-cta__btn:active { transform: translateY(0); }
+    .arch-cta__btn svg { width: 18px; height: 18px; transition: transform var(--dur) var(--ease); }
+    .arch-cta__btn:hover svg,
+    .arch-cta__btn:focus-visible svg { transform: translateX(4px); }
+    .arch-cta__btn:focus-visible {
+      box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--color-primary);
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 1024px) {
+      .arch-main { padding: 0 24px; }
+      .arch-stack-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 767px) {
+      .arch-main { padding: 0 16px; }
+      .arch-hero { padding: 60px 0 40px; }
+      .arch-diagram { padding: 20px 16px; }
+      .arch-shared { flex-wrap: wrap; gap: 14px; }
+      .arch-stack-grid { grid-template-columns: 1fr; }
+      .arch-privacy-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .arch-node,
+      .arch-stack-card,
+      .arch-privacy-item,
+      .arch-step,
+      .arch-cta__btn,
+      .arch-cta__btn svg,
+      .arch-chip { transition-duration: 0.01ms; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================ TOP NAV ============================ -->
+  <header class="site-nav">
+    <div class="site-nav__inner">
+      <a class="site-brand" href="index.html" data-dom-id="nav-home" aria-label="STZB Watcher 首页">
+        <span class="site-seal" aria-hidden="true">
+          <span class="site-seal__char">率</span>
+        </span>
+        <span class="site-brand__text">
+          <span class="site-brand__name">STZB Watcher</span>
+          <span class="site-brand__sub">率土战场数据指挥平台</span>
+        </span>
+      </a>
+
+      <nav class="site-nav__right" aria-label="主导航">
+        <ul class="site-nav__links">
+          <li><a class="site-nav__link" href="index.html" data-dom-id="nav-home">首页</a></li>
+          <li><a class="site-nav__link" href="features.html" data-dom-id="nav-features">核心功能</a></li>
+          <li><a class="site-nav__link" href="architecture.html" data-dom-id="nav-architecture" aria-current="page">技术架构</a></li>
+          <li><a class="site-nav__link" href="start.html" data-dom-id="nav-start">下载与开始</a></li>
+        </ul>
+        <a class="site-btn-primary" href="start.html" data-dom-id="hero-cta-start">
+          立即开始
+          <svg class="site-btn-primary__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="arch-main">
+
+    <!-- ============================ HERO ============================ -->
+    <section class="arch-hero">
+      <span class="arch-tag">
+        <span class="arch-tag__dot" aria-hidden="true"></span>
+        技术架构
+      </span>
+      <h1 class="arch-hero__title gold-gradient">本地优先，双链路同源</h1>
+      <p class="arch-hero__lead">
+        STZB Watcher 采用<strong>本地优先数据策略</strong>：Web 与 Android 两条独立采集链路各自完成抓包、解析与本地入库，
+        再由<strong>同一套 Kotlin 战斗引擎</strong>提供共享战斗语义，保证两端模拟结果一致。数据默认留在本机，
+        闭环之内，尽在掌控。
+      </p>
+    </section>
+
+    <!-- ============================ 01 · ARCHITECTURE DIAGRAM ============================ -->
+    <section class="arch-section" aria-labelledby="arch-flow-title">
+      <div class="arch-section__head">
+        <h2 class="arch-section__title" id="arch-flow-title">
+          <span class="num">01</span>数据流架构
+        </h2>
+        <p class="arch-section__desc">
+          两条横向数据链路 + 中枢共享战斗引擎，构成完整的本地数据闭环。窄屏可横向滚动查看全图。
+        </p>
+      </div>
+
+      <div class="arch-diagram">
+        <div class="arch-diagram__scroll" tabindex="0" role="group" aria-label="双链路数据流架构图，可横向滚动">
+          <div class="arch-canvas">
+
+            <!-- ===== Web lane ===== -->
+            <div class="arch-lane arch-lane--web">
+              <span class="arch-lane__label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"></path>
+                </svg>
+                Web 链路
+              </span>
+              <div class="arch-flow">
+                <!-- node: game data -->
+                <div class="arch-node">
+                  <span class="arch-node__ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                      <path d="M6 12h4M8 10v4"></path><circle cx="16" cy="11" r="1"></circle><circle cx="18" cy="14" r="1"></circle>
+                    </svg>
+                  </span>
+                  <span class="arch-node__title">游戏数据</span>
+                  <span class="arch-node__tech">率土之滨 · 网络报文</span>
+                </div>
+                <div class="arch-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 40 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="10" x2="32" y2="10"></line><polyline points="26 4 34 10 26 16"></polyline></svg>
+                </div>
+                <!-- node: web capture -->
+                <div class="arch-node">
+                  <span class="arch-node__ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 12a8 8 0 0 1 16 0"></path><path d="M8 12a4 4 0 0 1 8 0"></path><line x1="12" y1="12" x2="12" y2="20"></line>
+                    </svg>
+                  </span>
+                  <span class="arch-node__title">Web Capture</span>
+                  <span class="arch-node__tech">Scapy / SOCKS5</span>
+                </div>
+                <div class="arch-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 40 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="10" x2="32" y2="10"></line><polyline points="26 4 34 10 26 16"></polyline></svg>
+                </div>
+                <!-- node: parse + realtime writer -->
+                <div class="arch-node">
+                  <span class="arch-node__ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 6 4 12 9 18"></polyline><polyline points="15 6 20 12 15 18"></polyline>
+                    </svg>
+                  </span>
+                  <span class="arch-node__title">解析 + 实时写入</span>
+                  <span class="arch-node__tech">Parse · Realtime Writer</span>
+                </div>
+                <div class="arch-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 40 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="10" x2="32" y2="10"></line><polyline points="26 4 34 10 26 16"></polyline></svg>
+                </div>
+                <!-- node: sqlite -->
+                <div class="arch-node">
+                  <span class="arch-node__ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <ellipse cx="12" cy="5" rx="8" ry="3"></ellipse><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"></path><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"></path>
+                    </svg>
+                  </span>
+                  <span class="arch-node__title">SQLite</span>
+                  <span class="arch-node__tech">本地业务库</span>
+                </div>
+                <div class="arch-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 40 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="10" x2="32" y2="10"></line><polyline points="26 4 34 10 26 16"></polyline></svg>
+                </div>
+                <!-- node: flask api + sse -->
+                <div class="arch-node">
+                  <span class="arch-node__ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="4" width="18" height="6" rx="1"></rect><rect x="3" y="14" width="18" height="6" rx="1"></rect><line x1="7" y1="7" x2="7" y2="7"></line><line x1="7" y1="17" x2="7" y2="17"></line>
+                    </svg>
+                  </span>
+                  <span class="arch-node__title">Flask API + SSE</span>
+                  <span class="arch-node__tech">HTTP · Server-Sent Events</span>
+                </div>
+                <div class="arch-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 40 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="10" x2="32" y2="10"></line><polyline points="26 4 34 10 26 16"></polyline></svg>
+                </div>
+                <!-- node: web dashboard (terminal) -->
+                <div class="arch-node arch-node--terminal" id="arch-node-web-ui">
+                  <span class="arch-node__ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="4" width="18" height="13" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line>
+                    </svg>
+                  </span>
+                  <span class="arch-node__title">Web Dashboard</span>
+                  <span class="arch-node__tech">Vanilla JS · Canvas</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ===== Android lane ===== -->
+            <div class="arch-lane arch-lane--android">
+              <span class="arch-lane__label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="6" y="3" width="12" height="18" rx="2"></rect><line x1="10" y1="18" x2="14" y2="18"></line>
+                </svg>
+                Android 链路
+              </span>
+              <div class="arch-flow">
+                <!-- node: game data -->
+                <div class="arch-node">
+                  <span class="arch-node__ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M6 12h4M8 10v4"></path><circle cx="16" cy="11" r="1"></circle><circle cx="18" cy="14" r="1"></circle>
+                    </svg>
+                  </span>
+                  <span class="arch-node__title">游戏数据</span>
+                  <span class="arch-node__tech">率土之滨 · 网络报文</span>
+                </div>
+                <div class="arch-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 40 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="10" x2="32" y2="10"></line><polyline points="26 4 34 10 26 16"></polyline></svg>
+                </div>
+                <!-- node: vpnservice -->
+                <div class="arch-node">
+                  <span class="arch-node__ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"></path><path d="M9 12l2 2 4-4"></path>
+                    </svg>
+                  </span>
+                  <span class="arch-node__title">VpnService</span>
+                  <span class="arch-node__tech">系统 VPN 通道</span>
+                </div>
+                <div class="arch-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 40 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="10" x2="32" y2="10"></line><polyline points="26 4 34 10 26 16"></polyline></svg>
+                </div>
+                <!-- node: local parser -->
+                <div class="arch-node">
+                  <span class="arch-node__ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 6 4 12 9 18"></polyline><polyline points="15 6 20 12 15 18"></polyline>
+                    </svg>
+                  </span>
+                  <span class="arch-node__title">Local Parser</span>
+                  <span class="arch-node__tech">Kotlin · NDK</span>
+                </div>
+                <div class="arch-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 40 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="10" x2="32" y2="10"></line><polyline points="26 4 34 10 26 16"></polyline></svg>
+                </div>
+                <!-- node: local sqlite -->
+                <div class="arch-node">
+                  <span class="arch-node__ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <ellipse cx="12" cy="5" rx="8" ry="3"></ellipse><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"></path><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"></path>
+                    </svg>
+                  </span>
+                  <span class="arch-node__title">Local SQLite</span>
+                  <span class="arch-node__tech">App 私有目录</span>
+                </div>
+                <div class="arch-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 40 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="10" x2="32" y2="10"></line><polyline points="26 4 34 10 26 16"></polyline></svg>
+                </div>
+                <!-- node: compose ui (terminal) -->
+                <div class="arch-node arch-node--terminal" id="arch-node-android-ui">
+                  <span class="arch-node__ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="6" y="2" width="12" height="20" rx="2"></rect><line x1="10" y1="19" x2="14" y2="19"></line>
+                    </svg>
+                  </span>
+                  <span class="arch-node__title">Compose UI</span>
+                  <span class="arch-node__tech">Jetpack Compose</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ===== Shared combat engine ===== -->
+            <div class="arch-shared" aria-labelledby="arch-shared-title">
+              <span class="arch-shared__ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14.5 3.5L21 10l-3 3-6.5-6.5z"></path><path d="M9.5 8.5L3 15l3 3 6.5-6.5"></path><line x1="7" y1="17" x2="4" y2="20"></line><line x1="17" y1="7" x2="20" y2="4"></line>
+                </svg>
+              </span>
+              <div class="arch-shared__body">
+                <h3 class="arch-shared__title" id="arch-shared-title">共享战斗语义 · Kotlin 战斗引擎</h3>
+                <p class="arch-shared__text">
+                  同一套 <span class="arch-shared__tech">Kotlin / JVM 17</span> 战斗引擎同时供给 Web Dashboard 与 Android Compose UI，
+                  以一致的模拟语义保证两端计算结果完全对齐。
+                </p>
+              </div>
+              <span class="arch-shared__link" aria-hidden="true">
+                <svg viewBox="0 0 26 34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 4">
+                  <path d="M13 32V16"></path><path d="M13 16C13 9 6 9 3 4"></path><path d="M13 16C13 9 20 9 23 4"></path>
+                </svg>
+                同源供给两端 UI
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- legend -->
+        <div class="arch-diagram__legend" aria-hidden="true">
+          <span class="arch-legend__item"><span class="arch-legend__swatch arch-legend__swatch--web"></span>Web 链路节点</span>
+          <span class="arch-legend__item"><span class="arch-legend__swatch arch-legend__swatch--and"></span>链路终端 UI</span>
+          <span class="arch-legend__item"><span class="arch-legend__swatch arch-legend__swatch--shared"></span>共享战斗引擎</span>
+          <span class="arch-legend__item">→ 金色箭头表示数据流向</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ 02 · TECH STACK ============================ -->
+    <section class="arch-section" aria-labelledby="arch-stack-title">
+      <div class="arch-section__head">
+        <h2 class="arch-section__title" id="arch-stack-title">
+          <span class="num">02</span>技术栈
+        </h2>
+        <p class="arch-section__desc">
+          分层构建：从前端呈现、移动端采集，到实时链路与共享战斗能力，各司其职。
+        </p>
+      </div>
+
+      <div class="arch-stack-grid">
+        <!-- Web -->
+        <div class="arch-stack-card">
+          <div class="arch-stack-card__head">
+            <span class="arch-stack-card__ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"></path>
+              </svg>
+            </span>
+            <h3 class="arch-stack-card__title">Web</h3>
+          </div>
+          <div class="arch-chips">
+            <span class="arch-chip">Python</span>
+            <span class="arch-chip">Flask</span>
+            <span class="arch-chip">SQLite</span>
+            <span class="arch-chip">Vanilla JavaScript</span>
+            <span class="arch-chip">Canvas</span>
+            <span class="arch-chip">SSE</span>
+          </div>
+        </div>
+
+        <!-- Android -->
+        <div class="arch-stack-card">
+          <div class="arch-stack-card__head">
+            <span class="arch-stack-card__ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="6" y="3" width="12" height="18" rx="2"></rect><line x1="10" y1="18" x2="14" y2="18"></line>
+              </svg>
+            </span>
+            <h3 class="arch-stack-card__title">Android</h3>
+          </div>
+          <div class="arch-chips">
+            <span class="arch-chip">Kotlin</span>
+            <span class="arch-chip">Jetpack Compose</span>
+            <span class="arch-chip">VpnService</span>
+            <span class="arch-chip">SQLite</span>
+            <span class="arch-chip">NDK</span>
+          </div>
+        </div>
+
+        <!-- Realtime pipeline -->
+        <div class="arch-stack-card">
+          <div class="arch-stack-card__head">
+            <span class="arch-stack-card__ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 7h11"></path><path d="M4 12h16"></path><path d="M4 17h8"></path><polyline points="16 4 19 7 16 10"></polyline>
+              </svg>
+            </span>
+            <h3 class="arch-stack-card__title">实时链路</h3>
+          </div>
+          <div class="arch-chips">
+            <span class="arch-chip">Scapy / SOCKS5 捕获</span>
+            <span class="arch-chip">报文解析</span>
+            <span class="arch-chip">增量写入</span>
+          </div>
+        </div>
+
+        <!-- Combat capability -->
+        <div class="arch-stack-card">
+          <div class="arch-stack-card__head">
+            <span class="arch-stack-card__ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 3.5L21 10l-3 3-6.5-6.5z"></path><path d="M9.5 8.5L3 15l3 3 6.5-6.5"></path><line x1="7" y1="17" x2="4" y2="20"></line>
+              </svg>
+            </span>
+            <h3 class="arch-stack-card__title">战斗能力</h3>
+          </div>
+          <div class="arch-chips">
+            <span class="arch-chip">Kotlin / JVM 17</span>
+            <span class="arch-chip">战斗引擎</span>
+            <span class="arch-chip">一致模拟语义</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ 03 · DATA & PRIVACY ============================ -->
+    <section class="arch-section" aria-labelledby="arch-privacy-title">
+      <div class="arch-section__head">
+        <h2 class="arch-section__title" id="arch-privacy-title">
+          <span class="num">03</span>数据与隐私 · 本地优先
+        </h2>
+        <p class="arch-section__desc">
+          数据默认留在本机，账号与抓包文件不入 Git，对外部署时以令牌收口访问。
+        </p>
+      </div>
+
+      <div class="arch-privacy-grid">
+        <!-- item: local sqlite -->
+        <div class="arch-privacy-item">
+          <span class="arch-privacy-item__ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="12" cy="5" rx="8" ry="3"></ellipse><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"></path><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"></path>
+            </svg>
+          </span>
+          <div>
+            <h3 class="arch-privacy-item__title">业务数据存本地 SQLite</h3>
+            <p class="arch-privacy-item__text">
+              Web 原始数据默认写入 <code>capture_new/</code>，业务数据落本地 SQLite；Android 数据存 App 私有目录本地 SQLite，并支持本机导出。
+            </p>
+          </div>
+        </div>
+
+        <!-- item: not committed to git -->
+        <div class="arch-privacy-item">
+          <span class="arch-privacy-item__ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18"></path><path d="M6 6l12 12"></path><rect x="3" y="3" width="18" height="18" rx="3"></rect>
+            </svg>
+          </span>
+          <div>
+            <h3 class="arch-privacy-item__title">敏感文件不提交 Git</h3>
+            <p class="arch-privacy-item__text">
+              数据库、账号文件、日志与抓包文件一律不入 Git，避免个人战场数据外泄到代码仓库。
+            </p>
+          </div>
+        </div>
+
+        <!-- item: profile files -->
+        <div class="arch-privacy-item">
+          <span class="arch-privacy-item__ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><circle cx="12" cy="14" r="2.2"></circle>
+            </svg>
+          </span>
+          <div>
+            <h3 class="arch-privacy-item__title">档案文件含本机信息</h3>
+            <p class="arch-privacy-item__text">
+              <code>current_profile.json</code> 与 <code>profiles.json</code> 可能包含角色、区服与本机路径，仅存于本地、不外传。
+            </p>
+          </div>
+        </div>
+
+        <!-- item: api token -->
+        <div class="arch-privacy-item">
+          <span class="arch-privacy-item__ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path><line x1="12" y1="14" x2="12" y2="17"></line>
+            </svg>
+          </span>
+          <div>
+            <h3 class="arch-privacy-item__title">对外部署设访问令牌</h3>
+            <p class="arch-privacy-item__text">
+              对外或局域网部署 Web 服务时，应设置 <code>STZB_API_TOKEN</code> 收口接口访问，防止未授权拉取数据。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Android six-stage closed loop -->
+      <div class="arch-stages" aria-labelledby="arch-stages-title">
+        <h3 class="arch-stages__title" id="arch-stages-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12a9 9 0 1 1-3-6.7"></path><polyline points="21 4 21 9 16 9"></polyline>
+          </svg>
+          Android 抓包六阶段闭环
+        </h3>
+        <p class="arch-stages__sub">抓包链路需依次通过六个阶段，形成从启动到停止恢复的完整闭环。</p>
+
+        <div class="arch-stages__scroll" tabindex="0" role="group" aria-label="Android 抓包六阶段步骤条，可横向滚动">
+          <div class="arch-steps">
+            <div class="arch-step">
+              <span class="arch-step__num">01</span>
+              <span class="arch-step__name">Native 组件</span>
+              <span class="arch-step__hint">NDK 就绪</span>
+            </div>
+            <div class="arch-step-arrow" aria-hidden="true">
+              <svg viewBox="0 0 30 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="8" x2="23" y2="8"></line><polyline points="18 3 25 8 18 13"></polyline></svg>
+            </div>
+            <div class="arch-step">
+              <span class="arch-step__num">02</span>
+              <span class="arch-step__name">VPN 通道</span>
+              <span class="arch-step__hint">VpnService</span>
+            </div>
+            <div class="arch-step-arrow" aria-hidden="true">
+              <svg viewBox="0 0 30 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="8" x2="23" y2="8"></line><polyline points="18 3 25 8 18 13"></polyline></svg>
+            </div>
+            <div class="arch-step">
+              <span class="arch-step__num">03</span>
+              <span class="arch-step__name">SOCKS 连接</span>
+              <span class="arch-step__hint">代理建立</span>
+            </div>
+            <div class="arch-step-arrow" aria-hidden="true">
+              <svg viewBox="0 0 30 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="8" x2="23" y2="8"></line><polyline points="18 3 25 8 18 13"></polyline></svg>
+            </div>
+            <div class="arch-step">
+              <span class="arch-step__num">04</span>
+              <span class="arch-step__name">已知协议</span>
+              <span class="arch-step__hint">协议识别</span>
+            </div>
+            <div class="arch-step-arrow" aria-hidden="true">
+              <svg viewBox="0 0 30 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="8" x2="23" y2="8"></line><polyline points="18 3 25 8 18 13"></polyline></svg>
+            </div>
+            <div class="arch-step">
+              <span class="arch-step__num">05</span>
+              <span class="arch-step__name">本地入库</span>
+              <span class="arch-step__hint">Local SQLite</span>
+            </div>
+            <div class="arch-step-arrow" aria-hidden="true">
+              <svg viewBox="0 0 30 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="8" x2="23" y2="8"></line><polyline points="18 3 25 8 18 13"></polyline></svg>
+            </div>
+            <div class="arch-step">
+              <span class="arch-step__num">06</span>
+              <span class="arch-step__name">停止与恢复</span>
+              <span class="arch-step__hint">网络还原</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ CLOSING CTA ============================ -->
+    <section class="arch-cta" aria-labelledby="arch-cta-title">
+      <hr class="rule-gold" />
+      <h2 class="arch-cta__title font-display">本地闭环，双端同源，即刻部署</h2>
+      <p class="arch-cta__text">
+        从抓包到战斗推演，STZB Watcher 把数据牢牢留在你的设备。三分钟完成部署，让每一场战役都有据可依。
+      </p>
+      <a class="arch-cta__btn" href="start.html" data-dom-id="cta-start">
+        开始使用
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </a>
+    </section>
+
+  </main>
+
+  <!-- ============================ FOOTER ============================ -->
+  <footer class="site-footer">
+    <hr class="site-footer__rule" aria-hidden="true" />
+    <div class="site-footer__inner">
+      <div>
+        <a class="site-footer__brand" href="index.html" aria-label="STZB Watcher 首页">
+          <span class="site-seal" aria-hidden="true">
+            <span class="site-seal__char">率</span>
+          </span>
+          <span class="site-footer__brand-name">STZB Watcher</span>
+        </a>
+        <p class="site-footer__desc">
+          面向率土之滨战场的数据指挥平台，实时汇聚战报、同盟态势与资源脉络，让每一次调度都有据可依。
+        </p>
+      </div>
+
+      <div>
+        <h3 class="site-footer__col-title">快速导航</h3>
+        <ul class="site-footer__links">
+          <li><a class="site-footer__link" href="index.html">首页</a></li>
+          <li><a class="site-footer__link" href="features.html">核心功能</a></li>
+          <li><a class="site-footer__link" href="architecture.html">技术架构</a></li>
+          <li><a class="site-footer__link" href="start.html">下载与开始</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="site-footer__col-title">联系与开源</h3>
+        <div class="site-footer__contact">
+          <div class="site-footer__contact-item">
+            <svg class="site-footer__contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>QQ 反馈：<span class="site-footer__qq">3268276553</span></span>
+          </div>
+          <div class="site-footer__contact-item">
+            <svg class="site-footer__contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>基于 MIT License 开源，可自由使用与二次开发。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <span>© 2026 STZB Watcher · 率土战场数据指挥平台</span>
+      <span>Released under the MIT License</span>
+    </div>
+  </footer>
+
+</body>
+</html>

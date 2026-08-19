@@ -7,6 +7,7 @@ import com.example.myapplication.LocalSimTeamConfig
 import com.example.myapplication.LocalSimulationConfig
 import com.example.myapplication.LocalSimulationRun
 import com.example.myapplication.LocalSimulationSummary
+import com.stzb.server.game.battle.BattleConfigRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -38,6 +39,28 @@ class BattleSimulatorViewModelTest {
         assertEquals(engine.heroOptions, viewModel.state.value.heroOptions)
         assertEquals(engine.skillOptions, viewModel.state.value.skillOptions)
         assertFalse(viewModel.state.value.loading)
+    }
+
+    @Test fun defaultViewModelRunsTheCompleteEngineInsteadOfTheLightweightSimulator() = runTest(dispatcher) {
+        val viewModel = BattleSimulatorViewModel(io = dispatcher) { 42 }
+        advanceUntilIdle()
+
+        viewModel.onIntent(BattleSimulatorIntent.Run(1))
+        advanceUntilIdle()
+
+        val run = viewModel.state.value.reports.single().run
+        assertTrue(run.events.any {
+            it.kind == com.example.myapplication.LocalSimulationEventKind.PREPARATION &&
+                it.skillName == "皇裔流离"
+        })
+        assertTrue(run.events.any { it.kind == com.example.myapplication.LocalSimulationEventKind.ROUND_START })
+    }
+
+    @Test fun completeBattleEngineConfigurationLoadsLiuBeiIntrinsicSkill() {
+        val config = BattleConfigRepository.loadDefault()
+
+        assertEquals("皇裔流离", config.skill(200016)?.name)
+        assertEquals(200016, config.hero(100016)?.initialSkillId)
     }
 
     @Test fun clampsNumericFieldsAndUpdatesOnlyRequestedHero() = runTest(dispatcher) {

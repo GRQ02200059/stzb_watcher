@@ -3,6 +3,8 @@ package com.local.stzb.feature.simulator
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -115,44 +117,45 @@ fun TacticalReportDetail(
         return
     }
     val selectedEvent = selectedEventIndex?.let { run.events.getOrNull(it) }
-    val visibleEvents = run.events.withIndex().filter { it.value.matches(reportTab) }
+    val indexedEvents = run.events.withIndex().toList()
     TacticalBackdrop(modifier) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
+        Column(
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            item { TacticalTitle("战报", "第 ${run.roundsPlayed} 回合 · 固定种子 ${run.seed}", "返回战报库", onBackToReports) }
-            item { TacticalSideBlock("蓝色方", TacticalBlue, run.attackerHeroes, run.blueRemain, heroIconId, "tactical-report-blue-stage") }
-            item {
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Image(
-                        painter = painterResource(R.drawable.tactical_battle_emblem),
-                        contentDescription = null,
-                        modifier = Modifier.size(104.dp),
-                        alpha = 0.4f,
-                        colorFilter = ColorFilter.tint(outcomeColor(run.winner)),
-                    )
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(run.winner, color = TacticalGold, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
-                        Text("第 ${run.roundsPlayed} 回合结束", color = TacticalInk.copy(alpha = 0.75f), style = MaterialTheme.typography.bodySmall)
-                    }
+            TacticalTitle("战报", "第 ${run.roundsPlayed} 回合 · 固定种子 ${run.seed}", "返回战报库", onBackToReports)
+            TacticalSideBlock("蓝色方", TacticalBlue, run.attackerHeroes, run.blueRemain, heroIconId, "tactical-report-blue-stage")
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Image(
+                    painter = painterResource(R.drawable.tactical_battle_emblem),
+                    contentDescription = null,
+                    modifier = Modifier.size(104.dp),
+                    alpha = 0.4f,
+                    colorFilter = ColorFilter.tint(outcomeColor(run.winner)),
+                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(run.winner, color = TacticalGold, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
+                    Text("第 ${run.roundsPlayed} 回合结束", color = TacticalInk.copy(alpha = 0.75f), style = MaterialTheme.typography.bodySmall)
                 }
             }
-            item { TacticalSideBlock("红色方", TacticalRed, run.defenderHeroes, run.redRemain, heroIconId, "tactical-report-red-stage") }
-            item { TacticalTabs(reportTab, onSelectTab) }
-            item {
-                Column(
-                    Modifier.fillMaxWidth().background(Color(0xEA171819)).testTag("tactical-report-event-stream").padding(bottom = 6.dp),
-                    verticalArrangement = Arrangement.spacedBy(1.dp),
-                ) {
-                    Text("战报过程", Modifier.fillMaxWidth().background(Color(0xFF222324)).padding(horizontal = 12.dp, vertical = 9.dp), color = TacticalGold, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
-                    Text("点击记录查看战法、目标与兵力变化", Modifier.padding(horizontal = 12.dp, vertical = 4.dp), color = TacticalInk.copy(alpha = 0.68f), style = MaterialTheme.typography.bodySmall)
-                    visibleEvents.forEach { indexed ->
-                        TacticalEventRow(indexed.index, indexed.value) { onSelectEvent(indexed.index) }
-                    }
+            TacticalSideBlock("红色方", TacticalRed, run.defenderHeroes, run.redRemain, heroIconId, "tactical-report-red-stage")
+            TacticalTabs(reportTab, onSelectTab)
+            Column(
+                Modifier.fillMaxWidth().background(Color(0xEA171819)).testTag("tactical-report-event-stream").padding(bottom = 6.dp),
+                verticalArrangement = Arrangement.spacedBy(1.dp),
+            ) {
+                Text("战报过程", Modifier.fillMaxWidth().background(Color(0xFF222324)).padding(horizontal = 12.dp, vertical = 9.dp), color = TacticalGold, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+                Text("点击记录查看战法、目标与兵力变化", Modifier.padding(horizontal = 12.dp, vertical = 4.dp), color = TacticalInk.copy(alpha = 0.68f), style = MaterialTheme.typography.bodySmall)
+                when (reportTab) {
+                    TacticalReportTab.ROUND -> TacticalRoundTimeline(indexedEvents, onSelectEvent)
+                    TacticalReportTab.STATUS, TacticalReportTab.TRIGGER -> indexedEvents
+                        .filter { it.value.matches(reportTab) }
+                        .forEach { indexed ->
+                            TacticalEventRow(indexed.index, indexed.value) { onSelectEvent(indexed.index) }
+                        }
                 }
             }
-            item { Spacer(Modifier.height(28.dp)) }
+            Spacer(Modifier.height(28.dp))
         }
     }
     if (selectedEvent != null) TacticalEventDialog(selectedEvent) { onSelectEvent(null) }
@@ -249,17 +252,33 @@ private fun TacticalTroopBar(label: String, color: Color, remain: Int, total: In
 private fun TacticalHeroCard(hero: LocalSimulationHeroSnapshot, heroIconId: (Long) -> Long, frameColor: Color, modifier: Modifier) {
     Box(modifier.testTag("tactical-report-hero-card-${hero.heroId}")) {
         Card(colors = CardDefaults.cardColors(containerColor = Color(0xED202123)), shape = RoundedCornerShape(1.dp), modifier = Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Column(Modifier.padding(start = 6.dp, top = 8.dp, end = 6.dp, bottom = 28.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(hero.positionName, color = TacticalGold, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-                BattlefieldHeroPortrait(BattlefieldHero(hero.positionName, hero.heroId, heroIconId(hero.heroId), hero.name, hero.level, hero.advance, emptyList()), Modifier.aspectRatio(0.72f))
+                BattlefieldHeroPortrait(BattlefieldHero(hero.positionName, hero.heroId, heroIconId(hero.heroId), hero.name, hero.level, hero.advance, emptyList()), Modifier.aspectRatio(0.75f))
                 Text(hero.name, color = TacticalInk, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-                Text(
-                    "Lv.${hero.level} ${hero.remainingTroops}/${hero.initialTroops}",
-                    Modifier.testTag("tactical-report-hero-troops-${hero.heroId}"),
-                    color = if (hero.alive) TacticalInk.copy(alpha = 0.78f) else TacticalDamage,
-                    style = MaterialTheme.typography.labelSmall,
-                    maxLines = 1,
-                )
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .testTag("tactical-report-hero-troops-${hero.heroId}"),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(1.dp),
+                ) {
+                    Text(
+                        "Lv.${hero.level}",
+                        Modifier.testTag("tactical-report-hero-level-${hero.heroId}"),
+                        color = TacticalInk.copy(alpha = 0.78f),
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1,
+                    )
+                    Text(
+                        "${hero.remainingTroops}/${hero.initialTroops}",
+                        Modifier.testTag("tactical-report-hero-troop-value-${hero.heroId}"),
+                        color = if (hero.alive) TacticalInk.copy(alpha = 0.78f) else TacticalDamage,
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1,
+                    )
+                }
             }
         }
         Image(
@@ -298,6 +317,57 @@ private fun TacticalEventRow(index: Int, event: LocalSimulationEvent, onClick: (
                 Text(event.description.ifBlank { event.kind.label() }, color = TacticalInk, style = MaterialTheme.typography.bodyMedium)
                 if (event.amount != 0) Text("${if (event.kind == LocalSimulationEventKind.RECOVERY) "+" else "-"}${event.amount} · 剩余 ${event.targetRemaining}", color = event.color(), fontWeight = FontWeight.Bold)
             }
+    }
+}
+
+@Composable
+private fun TacticalRoundTimeline(
+    events: List<IndexedValue<LocalSimulationEvent>>,
+    onSelectEvent: (Int) -> Unit,
+) {
+    val preparation = events.filter { it.value.round == 0 && it.value.kind != LocalSimulationEventKind.RESULT }
+    TacticalTimelineHeader("准备阶段", TacticalGold, "指挥、被动与入场效果")
+    if (preparation.isNotEmpty()) {
+        preparation.forEach { indexed ->
+            TacticalEventRow(indexed.index, indexed.value) { onSelectEvent(indexed.index) }
+        }
+    } else {
+        Text(
+            "本局没有准备阶段的可触发战法",
+            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+            color = TacticalInk.copy(alpha = 0.62f),
+            style = MaterialTheme.typography.bodySmall,
+        )
+    }
+
+    events
+        .filter { it.value.round > 0 && it.value.kind != LocalSimulationEventKind.RESULT }
+        .groupBy { it.value.round }
+        .toSortedMap()
+        .forEach { (round, entries) ->
+            TacticalTimelineHeader("第 $round 回合", TacticalBlue, "行动、战法与兵力变化")
+            entries
+                .filterNot { it.value.kind == LocalSimulationEventKind.ROUND_START }
+                .forEach { indexed ->
+                    TacticalEventRow(indexed.index, indexed.value) { onSelectEvent(indexed.index) }
+                }
+        }
+
+    events.filter { it.value.kind == LocalSimulationEventKind.RESULT }.forEach { indexed ->
+        TacticalTimelineHeader("战斗结算", outcomeColor(indexed.value.sourceName), "胜负与最终兵力")
+        TacticalEventRow(indexed.index, indexed.value) { onSelectEvent(indexed.index) }
+    }
+}
+
+@Composable
+private fun TacticalTimelineHeader(title: String, color: Color, supporting: String) {
+    Row(
+        Modifier.fillMaxWidth().background(color.copy(alpha = 0.42f)).padding(horizontal = 10.dp, vertical = 7.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(title, color = TacticalInk, fontWeight = FontWeight.Bold)
+        Text(supporting, color = TacticalInk.copy(alpha = 0.68f), style = MaterialTheme.typography.labelSmall)
     }
 }
 

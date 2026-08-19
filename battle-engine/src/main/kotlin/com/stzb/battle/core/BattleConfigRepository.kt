@@ -581,5 +581,5 @@ private object Csv {
 }
 
 private fun resourceStream(name: String): InputStream =
-    BattleConfigRepository::class.java.classLoader.getResourceAsStream(name)
+    BattleConfigRepository::class.java.classLoader?.getResourceAsStream(name)
         ?: error("Missing packaged battle configuration: $name")

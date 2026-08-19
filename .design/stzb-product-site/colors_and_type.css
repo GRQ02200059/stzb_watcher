@@ -1,0 +1,118 @@
+/* ==========================================================================
+   STZB Watcher · 产品官网 · 率土战场「黑金史诗」品牌样式
+   深色战场底 + 战术金强调，宋体标题承接三国史诗气质
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Share+Tech+Mono&display=swap');
+
+:root {
+  /* ---- Brand primary hue: 战术金 (single identity hue + tints) ---- */
+  --color-primary: #c8a044;
+  --color-primary-hi: #e8c86a;
+  --color-primary-050: #fbf6e6;
+  --color-primary-100: #f3e6bd;
+  --color-primary-200: #e6cf8f;
+  --color-primary-300: #d9b862;
+  --color-primary-400: #c8a044;
+  --color-primary-500: #a9842f;
+  --color-primary-600: #866620;
+  --color-primary-700: #634a15;
+  --color-primary-800: #43310d;
+  --color-primary-900: #241a06;
+
+  /* ---- Dark battlefield surfaces (neutral scale) ---- */
+  --bg: #050810;
+  --bg-deep: #020409;
+  --surface: #0b1019;
+  --surface-2: #0e1425;
+  --surface-3: #141d30;
+  --border: #233043;
+  --border-strong: #3a4b63;
+
+  /* ---- Text ---- */
+  --text: #eef2f8;
+  --text-2: #9db0c6;
+  --text-faint: #5b6b7d;
+  --on-accent: #0b0f18;
+
+  /* ---- Semantic status tokens (status only, not identity) ---- */
+  --state-success: #22c55e;
+  --state-warning: #f0a935;
+  --state-error: #ef4444;
+  --state-info: #4a8fe0;
+
+  /* ---- Typography ---- */
+  --font-display: 'Noto Serif SC', 'SimSun', 'STSong', serif;
+  --font-body: 'Noto Serif SC', 'SimSun', serif;
+  --font-mono: 'Share Tech Mono', 'SFMono-Regular', Consolas, monospace;
+
+  /* ---- Radius (restrained scale) ---- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* ---- Spacing ---- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-8: 48px;
+  --sp-10: 64px;
+  --sp-12: 96px;
+
+  /* ---- Elevation (static surfaces border-led; deep only for floating) ---- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-float: 0 18px 48px rgba(0, 0, 0, 0.55);
+  --glow-gold: 0 0 32px rgba(200, 160, 68, 0.28);
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur: 240ms;
+}
+
+/* ---- Base ---- */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Type helpers ---- */
+.font-display { font-family: var(--font-display); }
+.font-mono { font-family: var(--font-mono); }
+.text-gold { color: var(--color-primary); }
+.text-gold-hi { color: var(--color-primary-hi); }
+.text-muted { color: var(--text-2); }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  color: var(--text);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+  margin: 0;
+}
+
+/* ---- Gold gradient text (brand tint only) ---- */
+.gold-gradient {
+  background: linear-gradient(120deg, var(--color-primary-hi), var(--color-primary), var(--color-primary-600));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---- Hairline divider ---- */
+.rule-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+  border: 0;
+}

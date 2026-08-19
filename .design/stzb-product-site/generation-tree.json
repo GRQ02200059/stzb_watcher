@@ -1,0 +1,58 @@
+{
+  "root": {
+    "nodeId": "gen-project-shell",
+    "kind": "project-shell",
+    "pageIds": [],
+    "output": "partials/project-shell.html",
+    "sharedRegions": ["顶部全宽导航条", "页脚", "全局背景", "品牌CSS用法", "字体规模", "圆角规模", "阴影模型", "CTA样式"],
+    "privateRegions": [],
+    "mutableSlots": ["activeNavItem", "pageTitle", "pageBody"],
+    "status": "planned",
+    "children": [
+      {
+        "nodeId": "gen-page-index",
+        "kind": "page-leaf",
+        "pageIds": ["page-index"],
+        "output": "pages/index.html",
+        "sharedRegions": ["导航", "页脚"],
+        "privateRegions": ["hero", "价值条", "双端对照", "功能预览网格"],
+        "mutableSlots": [],
+        "status": "planned",
+        "children": []
+      },
+      {
+        "nodeId": "gen-page-features",
+        "kind": "page-leaf",
+        "pageIds": ["page-features"],
+        "output": "pages/features.html",
+        "sharedRegions": ["导航", "页脚"],
+        "privateRegions": ["五大能力域交替行", "能力矩阵表"],
+        "mutableSlots": [],
+        "status": "planned",
+        "children": []
+      },
+      {
+        "nodeId": "gen-page-architecture",
+        "kind": "page-leaf",
+        "pageIds": ["page-architecture"],
+        "output": "pages/architecture.html",
+        "sharedRegions": ["导航", "页脚"],
+        "privateRegions": ["架构流程图", "技术栈分层", "数据隐私要点"],
+        "mutableSlots": [],
+        "status": "planned",
+        "children": []
+      },
+      {
+        "nodeId": "gen-page-start",
+        "kind": "page-leaf",
+        "pageIds": ["page-start"],
+        "output": "pages/start.html",
+        "sharedRegions": ["导航", "页脚"],
+        "privateRegions": ["双路径分栏", "步骤时间线", "FAQ"],
+        "mutableSlots": [],
+        "status": "planned",
+        "children": []
+      }
+    ]
+  }
+}

@@ -222,7 +222,7 @@ object LocalAuxiliaryParser {
 
     private fun extractMapCellEntries(packet: LocalStzbPacket): List<MapCellEntry> {
         val text = normalizeJsKeys(packet.decodedText)
-        val root: Any = jsonArray(text) ?: jsonObject(text) ?: return emptyList()
+        val root = jsonArray(text) ?: return emptyList()
         val out = linkedMapOf<Int, MapCellEntry>()
 
         fun addEntry(key: String, arr: JSONArray) {
@@ -254,7 +254,11 @@ object LocalAuxiliaryParser {
             }
         }
 
-        collect(root)
+        // 5026/5028 world chunks live only in top-level slot [14]. Do not
+        // recursively scan subjects, armies, unions, or other slots: their
+        // numeric keys can look like WIDs and overwrite real map cells.
+        val chunks = root.optJSONObject(14) ?: return emptyList()
+        collect(chunks)
         if (out.isEmpty()) {
             PacketLogStore.add("5026 地图格子解析未命中已知结构：${packet.preview.take(120)}")
         }

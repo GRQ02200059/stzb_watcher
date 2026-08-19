@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>核心功能 · STZB Watcher</title>
+  <meta name="description" content="STZB Watcher 核心功能：战场情报、实时部队、战斗模拟、阵容战法研究，以及 Web / Android 双端能力支持度矩阵。" />
+  <link rel="stylesheet" href="../colors_and_type.css" />
+
+  <!-- ============================================================
+       共享外壳样式（来自 partials/project-shell.html，原样复制）
+       ============================================================ -->
+  <style>
+    /* ---------- Top Navigation ---------- */
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      width: 100%;
+      background: rgba(5, 8, 16, 0.82);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      border-bottom: 1px solid var(--border);
+    }
+    .site-nav__inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 12px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    /* ---- Brand seal + name ---- */
+    .site-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+      border-radius: var(--radius-md);
+      outline: none;
+      flex-shrink: 0;
+    }
+    .site-seal {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(150deg, var(--color-primary-hi), var(--color-primary-500));
+      box-shadow: inset 0 0 0 1px rgba(11, 15, 24, 0.35), var(--glow-gold);
+      position: relative;
+    }
+    .site-seal::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border: 1px solid rgba(11, 15, 24, 0.45);
+      border-radius: 2px;
+      pointer-events: none;
+    }
+    .site-seal__char {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 24px;
+      line-height: 1;
+      color: var(--on-accent);
+      position: relative;
+      z-index: 1;
+      user-select: none;
+    }
+    .site-brand__text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .site-brand__name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1.1;
+      letter-spacing: 0.01em;
+      background: linear-gradient(120deg, var(--color-primary-hi), var(--color-primary), var(--color-primary-600));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      white-space: nowrap;
+    }
+    .site-brand__sub {
+      font-family: var(--font-body);
+      font-size: 12px;
+      line-height: 1.2;
+      color: var(--text-2);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ---- Right side: links + cta ---- */
+    .site-nav__right {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      min-width: 0;
+    }
+    .site-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .site-nav__link {
+      position: relative;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-2);
+      text-decoration: none;
+      padding: 6px 2px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color var(--dur) var(--ease);
+      outline: none;
+    }
+    .site-nav__link::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      height: 2px;
+      width: 100%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-hi));
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform var(--dur) var(--ease);
+    }
+    .site-nav__link:hover,
+    .site-nav__link:focus-visible {
+      color: var(--color-primary-hi);
+    }
+    .site-nav__link:hover::after,
+    .site-nav__link:focus-visible::after {
+      transform: scaleX(1);
+    }
+
+    /* ---- Primary CTA ---- */
+    .site-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--on-accent);
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(120deg, var(--color-primary-hi), var(--color-primary));
+      border: 1px solid var(--color-primary-300);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+      outline: none;
+    }
+    .site-btn-primary:hover,
+    .site-btn-primary:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: var(--glow-gold);
+    }
+    .site-btn-primary:active { transform: translateY(0); }
+    .site-btn-primary__icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      transition: transform var(--dur) var(--ease);
+    }
+    .site-btn-primary:hover .site-btn-primary__icon,
+    .site-btn-primary:focus-visible .site-btn-primary__icon {
+      transform: translateX(3px);
+    }
+
+    /* ---------- Footer ---------- */
+    .site-footer {
+      width: 100%;
+      background: var(--surface);
+      border-top: 1px solid transparent;
+      position: relative;
+    }
+    .site-footer__rule {
+      height: 1px;
+      width: 100%;
+      background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+      border: 0;
+      margin: 0;
+    }
+    .site-footer__inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 56px 32px 40px;
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1.2fr;
+      gap: 48px;
+    }
+    .site-footer__col-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-primary);
+      letter-spacing: 0.08em;
+      margin: 0 0 18px;
+    }
+    .site-footer__brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+      margin-bottom: 16px;
+    }
+    .site-footer__brand-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--color-primary-hi);
+      white-space: nowrap;
+    }
+    .site-footer__desc {
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-2);
+      margin: 0;
+      max-width: 42ch;
+    }
+    .site-footer__links {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .site-footer__link {
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-2);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color var(--dur) var(--ease);
+      width: fit-content;
+      outline: none;
+    }
+    .site-footer__link:hover,
+    .site-footer__link:focus-visible { color: var(--color-primary-hi); }
+    .site-footer__contact {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .site-footer__contact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.6;
+    }
+    .site-footer__contact-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      color: var(--color-primary);
+      margin-top: 2px;
+    }
+    .site-footer__qq {
+      font-family: var(--font-mono);
+      color: var(--text);
+      letter-spacing: 0.03em;
+    }
+    .site-footer__bottom {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 18px 32px 32px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-faint);
+      letter-spacing: 0.04em;
+    }
+
+    /* ---------- Focus ring (accessibility) ---------- */
+    .site-brand:focus-visible,
+    .site-nav__link:focus-visible,
+    .site-btn-primary:focus-visible,
+    .site-footer__link:focus-visible,
+    .site-footer__brand:focus-visible {
+      box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--color-primary);
+      border-radius: var(--radius-sm);
+    }
+
+    /* ---------- Responsive: tablet ---------- */
+    @media (max-width: 1024px) {
+      .site-nav__inner,
+      .site-footer__inner,
+      .site-footer__bottom { padding-left: 24px; padding-right: 24px; }
+      .site-nav__right { gap: 20px; }
+      .site-nav__links { gap: 20px; }
+      .site-footer__inner { grid-template-columns: 1fr 1fr; gap: 36px; }
+    }
+
+    /* ---------- Responsive: mobile (< 768px) ---------- */
+    @media (max-width: 767px) {
+      .site-nav__inner {
+        flex-wrap: wrap;
+        row-gap: 12px;
+        padding: 10px 16px;
+      }
+      .site-brand__sub { display: none; }
+      .site-nav__right {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px 16px;
+      }
+      .site-nav__links {
+        flex-wrap: wrap;
+        gap: 10px 18px;
+        order: 2;
+      }
+      .site-btn-primary { order: 1; margin-left: auto; }
+      .site-footer__inner {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 40px 16px 32px;
+      }
+      .site-footer__bottom {
+        padding: 16px 16px 28px;
+        justify-content: center;
+        text-align: center;
+      }
+    }
+
+    /* ---------- Reduced motion ---------- */
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav__link,
+      .site-nav__link::after,
+      .site-btn-primary,
+      .site-btn-primary__icon,
+      .site-footer__link { transition-duration: 0.01ms; }
+    }
+  </style>
+
+  <!-- ============================================================
+       页面专属样式（feat- 前缀，避免与 site- 冲突）
+       ============================================================ -->
+  <style>
+    .feat-main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    /* ---------- Page header ---------- */
+    .feat-hero {
+      padding: 96px 0 64px;
+      text-align: center;
+      position: relative;
+    }
+    .feat-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      padding: 6px 14px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-full);
+      background: var(--surface-2);
+    }
+    .feat-eyebrow__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      background: var(--color-primary-hi);
+      box-shadow: var(--glow-gold);
+    }
+    .feat-hero__title {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: clamp(34px, 5.4vw, 60px);
+      line-height: 1.14;
+      margin: 24px auto 0;
+      max-width: 18ch;
+    }
+    .feat-hero__lead {
+      max-width: 62ch;
+      margin: 24px auto 0;
+      color: var(--text-2);
+      font-size: 17px;
+      line-height: 1.8;
+    }
+    .feat-hero__meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 32px;
+    }
+    .feat-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      color: var(--text-2);
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      background: var(--surface);
+      transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+    }
+    .feat-chip:hover { border-color: var(--border-strong); color: var(--text); }
+    .feat-chip svg { width: 15px; height: 15px; color: var(--color-primary); flex-shrink: 0; }
+
+    /* ---------- Section common ---------- */
+    .feat-section { padding: 40px 0; }
+    .feat-section__head {
+      max-width: 60ch;
+      margin: 0 0 40px;
+    }
+    .feat-section__kicker {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin: 0 0 12px;
+    }
+    .feat-section__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(26px, 3.4vw, 38px);
+      line-height: 1.2;
+    }
+    .feat-section__desc {
+      color: var(--text-2);
+      font-size: 16px;
+      line-height: 1.8;
+      margin: 14px 0 0;
+    }
+
+    /* ---------- Alternating rows ---------- */
+    .feat-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .feat-row {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 48px;
+      align-items: center;
+      padding: 24px 0;
+      border-top: 1px solid var(--border);
+    }
+    .feat-row:first-child { border-top: 0; }
+    .feat-row--reverse .feat-row__visual { order: 2; }
+    .feat-row--reverse .feat-row__body { order: 1; }
+
+    .feat-row__body { min-width: 0; }
+    .feat-row__index {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      color: var(--color-primary);
+    }
+    .feat-row__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(24px, 3vw, 32px);
+      line-height: 1.25;
+      margin: 10px 0 0;
+    }
+    .feat-row__desc {
+      color: var(--text-2);
+      font-size: 16px;
+      line-height: 1.8;
+      margin: 16px 0 0;
+    }
+    .feat-list {
+      list-style: none;
+      margin: 24px 0 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .feat-list__item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .feat-check {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      color: var(--color-primary);
+    }
+
+    /* ---------- Visual blocks ---------- */
+    .feat-row__visual { min-width: 0; }
+    .feat-media {
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--surface-2);
+      transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+    }
+    .feat-media:hover { border-color: var(--border-strong); box-shadow: var(--glow-gold); }
+    .feat-media__img {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+    }
+    .feat-media__tag {
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--color-primary-hi);
+      padding: 5px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      background: rgba(5, 8, 16, 0.7);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    /* CSS-drawn abstract panel (no external image) */
+    .feat-panel {
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background:
+        radial-gradient(120% 90% at 80% 10%, rgba(200, 160, 68, 0.08), transparent 60%),
+        var(--surface-2);
+      padding: 24px;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+    }
+    .feat-panel:hover { border-color: var(--border-strong); box-shadow: var(--glow-gold); }
+    .feat-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.28;
+      pointer-events: none;
+    }
+    .feat-panel__head {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--text-2);
+    }
+    .feat-panel__dots { display: inline-flex; gap: 6px; }
+    .feat-panel__dots span {
+      width: 8px; height: 8px; border-radius: var(--radius-full);
+      background: var(--border-strong);
+    }
+    .feat-panel__dots span:first-child { background: var(--color-primary); }
+    .feat-panel__svg {
+      position: relative;
+      z-index: 1;
+      display: block;
+      width: 100%;
+      height: auto;
+      margin-top: 12px;
+    }
+    .feat-panel__stats {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .feat-stat {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      padding: 10px 12px;
+    }
+    .feat-stat__k {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--text-faint);
+      text-transform: uppercase;
+    }
+    .feat-stat__v {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      color: var(--color-primary-hi);
+      margin-top: 4px;
+    }
+
+    /* ---------- Capability matrix table ---------- */
+    .feat-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      -webkit-overflow-scrolling: touch;
+    }
+    .feat-table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .feat-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--surface-3);
+      color: var(--color-primary-hi);
+      font-family: var(--font-display);
+      font-weight: 600;
+      text-align: left;
+      letter-spacing: 0.04em;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-strong);
+      white-space: nowrap;
+    }
+    .feat-table tbody td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-2);
+      vertical-align: top;
+      line-height: 1.6;
+    }
+    .feat-table tbody tr:nth-child(even) td { background: var(--surface-2); }
+    .feat-table tbody tr:hover td { background: var(--surface-3); }
+    .feat-table tbody tr:last-child td { border-bottom: 0; }
+    .feat-table__domain {
+      font-family: var(--font-mono);
+      color: var(--text);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .feat-table__cap { color: var(--text); max-width: 34ch; }
+
+    /* status pills */
+    .feat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.03em;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .feat-pill svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .feat-pill--gold {
+      color: var(--color-primary-hi);
+      border-color: var(--color-primary-600);
+      background: var(--color-primary-900);
+    }
+    .feat-pill--native {
+      color: var(--state-success);
+      border-color: color-mix(in srgb, var(--state-success) 45%, transparent);
+      background: color-mix(in srgb, var(--state-success) 12%, transparent);
+    }
+    .feat-pill--warn {
+      color: var(--state-warning);
+      border-color: color-mix(in srgb, var(--state-warning) 45%, transparent);
+      background: color-mix(in srgb, var(--state-warning) 12%, transparent);
+    }
+    .feat-cell-stack { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+    .feat-cell-note {
+      font-family: var(--font-body);
+      font-size: 12px;
+      color: var(--text-faint);
+      line-height: 1.5;
+    }
+    .feat-table__caption {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-faint);
+      margin-top: 14px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ---------- CTA ---------- */
+    .feat-cta {
+      text-align: center;
+      padding: 72px 0 104px;
+    }
+    .feat-cta__inner { max-width: 60ch; margin: 40px auto 0; }
+    .feat-cta__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(24px, 3.4vw, 36px);
+      line-height: 1.25;
+    }
+    .feat-cta__desc {
+      color: var(--text-2);
+      font-size: 16px;
+      line-height: 1.8;
+      margin: 16px 0 28px;
+    }
+    .feat-btn-arch {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--color-primary-hi);
+      text-decoration: none;
+      padding: 13px 26px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-primary-600);
+      background: var(--surface-2);
+      cursor: pointer;
+      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+      outline: none;
+    }
+    .feat-btn-arch:hover,
+    .feat-btn-arch:focus-visible {
+      transform: translateY(-1px);
+      border-color: var(--color-primary-300);
+      color: var(--color-primary);
+      box-shadow: var(--glow-gold);
+    }
+    .feat-btn-arch:active { transform: translateY(0); }
+    .feat-btn-arch svg { width: 18px; height: 18px; transition: transform var(--dur) var(--ease); }
+    .feat-btn-arch:hover svg,
+    .feat-btn-arch:focus-visible svg { transform: translateX(3px); }
+    .feat-btn-arch:focus-visible {
+      box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--color-primary);
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 1024px) {
+      .feat-main { padding: 0 24px; }
+      .feat-row { gap: 36px; }
+    }
+    @media (max-width: 767px) {
+      .feat-main { padding: 0 16px; }
+      .feat-hero { padding: 56px 0 40px; }
+      .feat-row {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      /* stacked: visual always above body regardless of reverse */
+      .feat-row--reverse .feat-row__visual,
+      .feat-row__visual { order: 1; }
+      .feat-row--reverse .feat-row__body,
+      .feat-row__body { order: 2; }
+      .feat-panel__stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .feat-chip,
+      .feat-media,
+      .feat-panel,
+      .feat-btn-arch,
+      .feat-btn-arch svg,
+      .feat-table tbody tr td { transition-duration: 0.01ms; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================ TOP NAV ============================ -->
+  <header class="site-nav">
+    <div class="site-nav__inner">
+      <a class="site-brand" href="index.html" data-dom-id="nav-home" aria-label="STZB Watcher 首页">
+        <span class="site-seal" aria-hidden="true">
+          <span class="site-seal__char">率</span>
+        </span>
+        <span class="site-brand__text">
+          <span class="site-brand__name">STZB Watcher</span>
+          <span class="site-brand__sub">率土战场数据指挥平台</span>
+        </span>
+      </a>
+
+      <nav class="site-nav__right" aria-label="主导航">
+        <ul class="site-nav__links">
+          <li><a class="site-nav__link" href="index.html" data-dom-id="nav-home">首页</a></li>
+          <li><a class="site-nav__link" href="features.html" data-dom-id="nav-features">核心功能</a></li>
+          <li><a class="site-nav__link" href="architecture.html" data-dom-id="nav-architecture">技术架构</a></li>
+          <li><a class="site-nav__link" href="start.html" data-dom-id="nav-start">下载与开始</a></li>
+        </ul>
+        <a class="site-btn-primary" href="start.html" data-dom-id="hero-cta-start">
+          立即开始
+          <svg class="site-btn-primary__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============================ PAGE HEADER ============================ -->
+  <main>
+    <div class="feat-main">
+      <section class="feat-hero" aria-labelledby="feat-hero-title">
+        <span class="feat-eyebrow">
+          <span class="feat-eyebrow__dot" aria-hidden="true"></span>
+          核心功能
+        </span>
+        <h1 class="feat-hero__title" id="feat-hero-title">
+          战场之上，<span class="gold-gradient">运筹于数据</span>
+        </h1>
+        <p class="feat-hero__lead">
+          STZB Watcher 是面向《率土之滨》的 Web + Android 双端战场数据平台，围绕情报、行动、组织、分析、系统五大业务域，
+          将战场态势、战报流水、队伍阵容与推演证据收拢进一处硬核工作区，让每一次调度都有据可依。
+        </p>
+        <div class="feat-hero__meta">
+          <span class="feat-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18M9 21V9"></path></svg>
+            五大业务域
+          </span>
+          <span class="feat-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v12H5.17L4 17.17z"></path></svg>
+            七大能力域
+          </span>
+          <span class="feat-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg>
+            Web + Android 双端
+          </span>
+        </div>
+      </section>
+
+      <!-- ============================ ALTERNATING ROWS ============================ -->
+      <section class="feat-section" aria-labelledby="feat-rows-title">
+        <div class="feat-section__head">
+          <p class="feat-section__kicker">CAPABILITY HIGHLIGHTS</p>
+          <h2 class="feat-section__title" id="feat-rows-title">能力域纵览</h2>
+          <p class="feat-section__desc">
+            从全域情报到单场推演，重点能力以图文交替呈现，凸显 STZB Watcher 在战场数据链上的密度与连贯性。
+          </p>
+        </div>
+
+        <div class="feat-rows">
+
+          <!-- Row 1: 战场情报 · 实时部队 (image left / text right) -->
+          <article class="feat-row">
+            <div class="feat-row__visual">
+              <figure class="feat-media">
+                <img class="feat-media__img" src="../assets/feature-intelligence.jpg"
+                     alt="战场情报工作区示意：宽屏地图与实时部队指挥视图" loading="lazy" />
+                <figcaption class="feat-media__tag">战场情报 · 实时部队</figcaption>
+              </figure>
+            </div>
+            <div class="feat-row__body">
+              <span class="feat-row__index">01 / 战场域</span>
+              <h3 class="feat-row__title">战场情报与实时部队</h3>
+              <p class="feat-row__desc">
+                战场情报把全域地图、图层控制、风险态势与情报详情收拢到一处宽屏工作区；实时部队则聚合位置、路线、目标
+                与精确战报阵容，形成三栏指挥视图，让态势一目了然。
+              </p>
+              <ul class="feat-list">
+                <li class="feat-list__item">
+                  <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  全域地图与地图格子、图层控制统一收拢于宽屏工作区
+                </li>
+                <li class="feat-list__item">
+                  <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  实时部队聚合位置、行军路线与目标于三栏指挥视图
+                </li>
+                <li class="feat-list__item">
+                  <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  风险态势与世界事件同屏呈现，把握战场节奏
+                </li>
+                <li class="feat-list__item">
+                  <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  精确战报阵容与情报详情联动，Web / Android 双端支持
+                </li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- Row 2: 战斗模拟 (text left / CSS visual right) -->
+          <article class="feat-row feat-row--reverse">
+            <div class="feat-row__visual">
+              <div class="feat-panel" role="img" aria-label="战斗模拟示意：攻守阵容配置与批量推演结果面板">
+                <div class="feat-panel__head">
+                  <span>simulate.kt · battle-engine</span>
+                  <span class="feat-panel__dots" aria-hidden="true"><span></span><span></span><span></span></span>
+                </div>
+                <!-- Abstract gold-line waveform / event timeline -->
+                <svg class="feat-panel__svg" viewBox="0 0 320 120" fill="none" aria-hidden="true">
+                  <line x1="0" y1="100" x2="320" y2="100" stroke="var(--border-strong)" stroke-width="1"></line>
+                  <polyline points="0,86 40,72 80,90 120,54 160,66 200,38 240,58 280,30 320,46"
+                            fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                  <polyline points="0,96 40,90 80,98 120,84 160,92 200,80 240,88 280,74 320,82"
+                            fill="none" stroke="var(--border-strong)" stroke-width="1.5" stroke-dasharray="4 5" stroke-linecap="round"></polyline>
+                  <circle cx="120" cy="54" r="3.5" fill="var(--color-primary-hi)"></circle>
+                  <circle cx="200" cy="38" r="3.5" fill="var(--color-primary-hi)"></circle>
+                  <circle cx="280" cy="30" r="3.5" fill="var(--color-primary-hi)"></circle>
+                </svg>
+                <div class="feat-panel__stats">
+                  <div class="feat-stat"><div class="feat-stat__k">推演模式</div><div class="feat-stat__v">单场 / 批量</div></div>
+                  <div class="feat-stat"><div class="feat-stat__k">引擎</div><div class="feat-stat__v">Kotlin</div></div>
+                  <div class="feat-stat"><div class="feat-stat__k">事件回放</div><div class="feat-stat__v">语义化</div></div>
+                </div>
+              </div>
+            </div>
+            <div class="feat-row__body">
+              <span class="feat-row__index">02 / 模拟域</span>
+              <h3 class="feat-row__title">战斗模拟与批量推演</h3>
+              <p class="feat-row__desc">
+                以 Kotlin 战斗引擎为核心，配置攻守双方阵容，执行单场或批量推演，并查看语义化的事件回放，
+                把「打之前先算清」变成可复用的日常动作。
+              </p>
+              <ul class="feat-list">
+                <li class="feat-list__item">
+                  <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  双方配置：分别设定攻守阵容与武将战法
+                </li>
+                <li class="feat-list__item">
+                  <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  单场或批量推演，快速比较不同阵容组合
+                </li>
+                <li class="feat-list__item">
+                  <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  Kotlin 战斗引擎输出结果与语义化事件回放
+                </li>
+                <li class="feat-list__item">
+                  <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  Web / Android 双端均可执行推演
+                </li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- Row 3: 阵容战法研究 (CSS visual left / text right) -->
+          <article class="feat-row">
+            <div class="feat-row__visual">
+              <div class="feat-panel" role="img" aria-label="阵容战法研究示意：历史对阵、战法执行链与模拟结果的连接关系">
+                <div class="feat-panel__head">
+                  <span>research · lineup-and-tactics</span>
+                  <span class="feat-panel__dots" aria-hidden="true"><span></span><span></span><span></span></span>
+                </div>
+                <!-- Abstract linked graph: matchup → tactic chain → sim result -->
+                <svg class="feat-panel__svg" viewBox="0 0 320 120" fill="none" aria-hidden="true">
+                  <line x1="60" y1="34" x2="160" y2="60" stroke="var(--border-strong)" stroke-width="1.5"></line>
+                  <line x1="160" y1="60" x2="260" y2="34" stroke="var(--border-strong)" stroke-width="1.5"></line>
+                  <line x1="160" y1="60" x2="160" y2="100" stroke="var(--color-primary)" stroke-width="1.5" stroke-dasharray="4 4"></line>
+                  <line x1="60" y1="34" x2="60" y2="90" stroke="var(--border-strong)" stroke-width="1"></line>
+                  <line x1="260" y1="34" x2="260" y2="90" stroke="var(--border-strong)" stroke-width="1"></line>
+                  <circle cx="60" cy="34" r="9" fill="var(--surface-3)" stroke="var(--color-primary)" stroke-width="2"></circle>
+                  <circle cx="260" cy="34" r="9" fill="var(--surface-3)" stroke="var(--color-primary)" stroke-width="2"></circle>
+                  <circle cx="160" cy="60" r="11" fill="var(--surface-3)" stroke="var(--color-primary-hi)" stroke-width="2"></circle>
+                  <rect x="40" y="90" width="40" height="16" rx="3" fill="var(--surface)" stroke="var(--border-strong)" stroke-width="1"></rect>
+                  <rect x="140" y="92" width="40" height="16" rx="3" fill="var(--surface)" stroke="var(--color-primary-600)" stroke-width="1"></rect>
+                  <rect x="240" y="90" width="40" height="16" rx="3" fill="var(--surface)" stroke="var(--border-strong)" stroke-width="1"></rect>
+                </svg>
+                <div class="feat-panel__stats">
+                  <div class="feat-stat"><div class="feat-stat__k">历史对阵</div><div class="feat-stat__v">证据链</div></div>
+                  <div class="feat-stat"><div class="feat-stat__k">战法执行</div><div class="feat-stat__v">可追溯</div></div>
+                  <div class="feat-stat"><div class="feat-stat__k">对接模拟</div><div class="feat-stat__v">结果联动</div></div>
+                </div>
+              </div>
+            </div>
+            <div class="feat-row__body">
+              <span class="feat-row__index">03 / 分析域</span>
+              <h3 class="feat-row__title">阵容战法研究</h3>
+              <p class="feat-row__desc">
+                把历史对阵、战法执行链与模拟结果连接起来，为武将阵容与战法搭配提供对阵证据，
+                让研究结论可回溯、可复现，而非停留在经验直觉。
+              </p>
+              <ul class="feat-list">
+                <li class="feat-list__item">
+                  <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  连接历史对阵与战法执行链，形成对阵证据
+                </li>
+                <li class="feat-list__item">
+                  <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  武将阵容与战法搭配研究，服务分析业务域
+                </li>
+                <li class="feat-list__item">
+                  <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  与战斗模拟结果联动，研究结论可回溯复现
+                </li>
+                <li class="feat-list__item">
+                  <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  排行与阵容研究在 Android 端原生呈现
+                </li>
+              </ul>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- ============================ CAPABILITY MATRIX ============================ -->
+      <section class="feat-section" aria-labelledby="feat-matrix-title">
+        <div class="feat-section__head">
+          <p class="feat-section__kicker">SUPPORT MATRIX</p>
+          <h2 class="feat-section__title" id="feat-matrix-title">Web / Android 能力支持度</h2>
+          <p class="feat-section__desc">
+            七大能力域在双端的支持情况一览。「支持 / 原生」为完整可用，「经典兼容」表示以经典模式适配，具体见备注。
+          </p>
+        </div>
+
+        <div class="feat-table-wrap" role="region" aria-label="Web 与 Android 能力支持度表格，可横向滚动" tabindex="0">
+          <table class="feat-table">
+            <caption class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">七大能力域在 Web 与 Android 端的支持度</caption>
+            <thead>
+              <tr>
+                <th scope="col">能力域</th>
+                <th scope="col">主要能力</th>
+                <th scope="col">Web</th>
+                <th scope="col">Android</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row" class="feat-table__domain">战场</th>
+                <td class="feat-table__cap">战场情报、地图格子、行军、实时部队、世界事件</td>
+                <td>
+                  <span class="feat-pill feat-pill--gold">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>支持
+                  </span>
+                </td>
+                <td>
+                  <span class="feat-pill feat-pill--gold">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>支持
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" class="feat-table__domain">战报</th>
+                <td class="feat-table__cap">完整战报、详情、筛选、通知与衍生统计</td>
+                <td>
+                  <span class="feat-pill feat-pill--gold">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>支持
+                  </span>
+                </td>
+                <td>
+                  <span class="feat-pill feat-pill--gold">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>支持
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" class="feat-table__domain">队伍</th>
+                <td class="feat-table__cap">玩家队伍、同盟成员队伍、武将阵容与表现</td>
+                <td>
+                  <span class="feat-pill feat-pill--gold">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>支持
+                  </span>
+                </td>
+                <td>
+                  <span class="feat-pill feat-pill--gold">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>支持
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" class="feat-table__domain">团队</th>
+                <td class="feat-table__cap">团数据、成员管理、打城考勤、自定义积分</td>
+                <td>
+                  <span class="feat-pill feat-pill--gold">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>支持
+                  </span>
+                </td>
+                <td>
+                  <div class="feat-cell-stack">
+                    <span class="feat-pill feat-pill--native">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>原生
+                    </span>
+                    <span class="feat-cell-note">团数据 / 考勤 / 自定义积分原生实现</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" class="feat-table__domain">分析</th>
+                <td class="feat-table__cap">排行、州郡分布、阵容研究与对阵证据</td>
+                <td>
+                  <span class="feat-pill feat-pill--gold">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>支持
+                  </span>
+                </td>
+                <td>
+                  <div class="feat-cell-stack">
+                    <span class="feat-pill feat-pill--native">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>排行 / 阵容研究原生
+                    </span>
+                    <span class="feat-pill feat-pill--warn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4l3 2"></path></svg>州郡经典兼容
+                    </span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" class="feat-table__domain">模拟</th>
+                <td class="feat-table__cap">双方配置、批量推演、结果与事件回放</td>
+                <td>
+                  <span class="feat-pill feat-pill--gold">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>支持
+                  </span>
+                </td>
+                <td>
+                  <span class="feat-pill feat-pill--gold">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>支持
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" class="feat-table__domain">系统</th>
+                <td class="feat-table__cap">本地采集、SQLite、多档案、导出与设置</td>
+                <td>
+                  <span class="feat-pill feat-pill--gold">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>支持
+                  </span>
+                </td>
+                <td>
+                  <div class="feat-cell-stack">
+                    <span class="feat-pill feat-pill--native">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>原生
+                    </span>
+                    <span class="feat-cell-note">抓包 / SQLite / 多档案 / 导出原生实现</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="feat-table__caption">
+          图例：支持 / 原生 = 完整可用；经典兼容 = 以经典模式适配。支持度信息来自产品能力域说明。
+        </p>
+      </section>
+
+      <!-- ============================ CTA ============================ -->
+      <section class="feat-cta" aria-labelledby="feat-cta-title">
+        <hr class="rule-gold" aria-hidden="true" />
+        <div class="feat-cta__inner">
+          <h2 class="feat-cta__title" id="feat-cta-title">想知道这些能力如何被支撑？</h2>
+          <p class="feat-cta__desc">
+            从本地采集、SQLite 存储到 Kotlin 战斗引擎，STZB Watcher 的能力背后是一套可解释的技术架构。
+            了解数据如何流动、双端如何协同。
+          </p>
+          <a class="feat-btn-arch" href="architecture.html" data-dom-id="cta-architecture">
+            了解技术架构
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ============================ FOOTER ============================ -->
+  <footer class="site-footer">
+    <hr class="site-footer__rule" aria-hidden="true" />
+    <div class="site-footer__inner">
+      <div>
+        <a class="site-footer__brand" href="index.html" aria-label="STZB Watcher 首页">
+          <span class="site-seal" aria-hidden="true">
+            <span class="site-seal__char">率</span>
+          </span>
+          <span class="site-footer__brand-name">STZB Watcher</span>
+        </a>
+        <p class="site-footer__desc">
+          面向率土之滨战场的数据指挥平台，实时汇聚战报、同盟态势与资源脉络，让每一次调度都有据可依。
+        </p>
+      </div>
+
+      <div>
+        <h3 class="site-footer__col-title">快速导航</h3>
+        <ul class="site-footer__links">
+          <li><a class="site-footer__link" href="index.html">首页</a></li>
+          <li><a class="site-footer__link" href="features.html">核心功能</a></li>
+          <li><a class="site-footer__link" href="architecture.html">技术架构</a></li>
+          <li><a class="site-footer__link" href="start.html">下载与开始</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="site-footer__col-title">联系与开源</h3>
+        <div class="site-footer__contact">
+          <div class="site-footer__contact-item">
+            <svg class="site-footer__contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>QQ 反馈：<span class="site-footer__qq">3268276553</span></span>
+          </div>
+          <div class="site-footer__contact-item">
+            <svg class="site-footer__contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>基于 MIT License 开源，可自由使用与二次开发。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <span>© 2026 STZB Watcher · 率土战场数据指挥平台</span>
+      <span>Released under the MIT License</span>
+    </div>
+  </footer>
+
+</body>
+</html>

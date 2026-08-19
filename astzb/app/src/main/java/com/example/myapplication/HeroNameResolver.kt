@@ -46,12 +46,14 @@ object HeroNameResolver {
 
     @Synchronized
     fun nameOf(heroId: Long): String {
-        return names[heroId] ?: "武将$heroId"
+        val normalizedId = HeroIdNormalizer.normalize(heroId)
+        return names[normalizedId] ?: "武将$normalizedId"
     }
 
     @Synchronized
     fun iconIdOf(heroId: Long): Long {
-        return iconIds[heroId] ?: heroId
+        val normalizedId = HeroIdNormalizer.normalize(heroId)
+        return iconIds[normalizedId] ?: normalizedId
     }
 
     @Synchronized

@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STZB Watcher · 率土战场数据指挥平台</title>
+  <meta name="description" content="STZB Watcher —— 《率土之滨》Web + Android 双端战场数据平台。从战场数据采集到态势研判、队伍研究、团队管理与战斗模拟，两端一致口径。" />
+
+  <!-- 品牌 CSS：颜色/字体/间距/圆角 token -->
+  <link rel="stylesheet" href="../colors_and_type.css" />
+
+  <!-- ===================== 共享外壳片段样式 (project-shell) ===================== -->
+  <style>
+    /* ---------- Top Navigation ---------- */
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      width: 100%;
+      background: rgba(5, 8, 16, 0.82);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      border-bottom: 1px solid var(--border);
+    }
+    .site-nav__inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 12px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    /* ---- Brand seal + name ---- */
+    .site-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+      border-radius: var(--radius-md);
+      outline: none;
+      flex-shrink: 0;
+    }
+    .site-seal {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(150deg, var(--color-primary-hi), var(--color-primary-500));
+      box-shadow: inset 0 0 0 1px rgba(11, 15, 24, 0.35), var(--glow-gold);
+      position: relative;
+    }
+    .site-seal::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border: 1px solid rgba(11, 15, 24, 0.45);
+      border-radius: 2px;
+      pointer-events: none;
+    }
+    .site-seal__char {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 24px;
+      line-height: 1;
+      color: var(--on-accent);
+      position: relative;
+      z-index: 1;
+      user-select: none;
+    }
+    .site-brand__text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .site-brand__name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1.1;
+      letter-spacing: 0.01em;
+      background: linear-gradient(120deg, var(--color-primary-hi), var(--color-primary), var(--color-primary-600));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      white-space: nowrap;
+    }
+    .site-brand__sub {
+      font-family: var(--font-body);
+      font-size: 12px;
+      line-height: 1.2;
+      color: var(--text-2);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ---- Right side: links + cta ---- */
+    .site-nav__right {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      min-width: 0;
+    }
+    .site-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .site-nav__link {
+      position: relative;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-2);
+      text-decoration: none;
+      padding: 6px 2px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color var(--dur) var(--ease);
+      outline: none;
+    }
+    .site-nav__link::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      height: 2px;
+      width: 100%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-hi));
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform var(--dur) var(--ease);
+    }
+    .site-nav__link:hover,
+    .site-nav__link:focus-visible {
+      color: var(--color-primary-hi);
+    }
+    .site-nav__link:hover::after,
+    .site-nav__link:focus-visible::after {
+      transform: scaleX(1);
+    }
+
+    /* ---- Primary CTA ---- */
+    .site-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--on-accent);
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(120deg, var(--color-primary-hi), var(--color-primary));
+      border: 1px solid var(--color-primary-300);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+      outline: none;
+    }
+    .site-btn-primary:hover,
+    .site-btn-primary:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: var(--glow-gold);
+    }
+    .site-btn-primary:active { transform: translateY(0); }
+    .site-btn-primary__icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      transition: transform var(--dur) var(--ease);
+    }
+    .site-btn-primary:hover .site-btn-primary__icon,
+    .site-btn-primary:focus-visible .site-btn-primary__icon {
+      transform: translateX(3px);
+    }
+
+    /* ---------- Footer ---------- */
+    .site-footer {
+      width: 100%;
+      background: var(--surface);
+      border-top: 1px solid transparent;
+      position: relative;
+    }
+    .site-footer__rule {
+      height: 1px;
+      width: 100%;
+      background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+      border: 0;
+      margin: 0;
+    }
+    .site-footer__inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 56px 32px 40px;
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1.2fr;
+      gap: 48px;
+    }
+    .site-footer__col-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-primary);
+      letter-spacing: 0.08em;
+      margin: 0 0 18px;
+    }
+    .site-footer__brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+      margin-bottom: 16px;
+    }
+    .site-footer__brand-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--color-primary-hi);
+      white-space: nowrap;
+    }
+    .site-footer__desc {
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-2);
+      margin: 0;
+      max-width: 42ch;
+    }
+    .site-footer__links {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .site-footer__link {
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-2);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color var(--dur) var(--ease);
+      width: fit-content;
+      outline: none;
+    }
+    .site-footer__link:hover,
+    .site-footer__link:focus-visible { color: var(--color-primary-hi); }
+    .site-footer__contact {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .site-footer__contact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.6;
+    }
+    .site-footer__contact-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      color: var(--color-primary);
+      margin-top: 2px;
+    }
+    .site-footer__qq {
+      font-family: var(--font-mono);
+      color: var(--text);
+      letter-spacing: 0.03em;
+    }
+    .site-footer__bottom {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 18px 32px 32px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-faint);
+      letter-spacing: 0.04em;
+    }
+
+    /* ---------- Focus ring (accessibility) ---------- */
+    .site-brand:focus-visible,
+    .site-nav__link:focus-visible,
+    .site-btn-primary:focus-visible,
+    .site-footer__link:focus-visible,
+    .site-footer__brand:focus-visible {
+      box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--color-primary);
+      border-radius: var(--radius-sm);
+    }
+
+    /* ---------- Responsive: tablet ---------- */
+    @media (max-width: 1024px) {
+      .site-nav__inner,
+      .site-footer__inner,
+      .site-footer__bottom { padding-left: 24px; padding-right: 24px; }
+      .site-nav__right { gap: 20px; }
+      .site-nav__links { gap: 20px; }
+      .site-footer__inner { grid-template-columns: 1fr 1fr; gap: 36px; }
+    }
+
+    /* ---------- Responsive: mobile (< 768px) ---------- */
+    @media (max-width: 767px) {
+      .site-nav__inner {
+        flex-wrap: wrap;
+        row-gap: 12px;
+        padding: 10px 16px;
+      }
+      .site-brand__sub { display: none; }
+      .site-nav__right {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px 16px;
+      }
+      .site-nav__links {
+        flex-wrap: wrap;
+        gap: 10px 18px;
+        order: 2;
+      }
+      .site-btn-primary { order: 1; margin-left: auto; }
+      .site-footer__inner {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 40px 16px 32px;
+      }
+      .site-footer__bottom {
+        padding: 16px 16px 28px;
+        justify-content: center;
+        text-align: center;
+      }
+    }
+
+    /* ---------- Reduced motion ---------- */
+    @media (prefers-reduced-motion: reduce) {
+      .site-nav__link,
+      .site-nav__link::after,
+      .site-btn-primary,
+      .site-btn-primary__icon,
+      .site-footer__link { transition-duration: 0.01ms; }
+    }
+  </style>
+
+  <!-- ===================== 首页专属样式 (home- 前缀) ===================== -->
+  <style>
+    .home-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding-left: 32px;
+      padding-right: 32px;
+    }
+
+    /* ---------- Hero ---------- */
+    .home-hero {
+      position: relative;
+      width: 100%;
+      min-height: 88vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      background-image:
+        linear-gradient(90deg, rgba(5, 8, 16, 0.92) 0%, rgba(5, 8, 16, 0.72) 45%, rgba(5, 8, 16, 0.55) 100%),
+        url('../assets/hero-battlefield.jpg');
+      background-size: cover;
+      background-position: center right;
+      background-repeat: no-repeat;
+    }
+    .home-hero__veil {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(5, 8, 16, 0.55) 0%, rgba(5, 8, 16, 0.35) 40%, rgba(5, 8, 16, 0.92) 100%);
+    }
+    .home-hero__inner {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      padding-top: var(--sp-12);
+      padding-bottom: var(--sp-12);
+    }
+    .home-hero__badges {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: var(--sp-5);
+    }
+    .home-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-primary-700);
+      background: rgba(11, 16, 25, 0.6);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      color: var(--color-primary-hi);
+      text-transform: uppercase;
+    }
+    .home-badge__icon {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      color: var(--color-primary);
+    }
+    .home-hero__title {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: clamp(40px, 6vw, 76px);
+      line-height: 1.08;
+      letter-spacing: 0.02em;
+      margin: 0 0 var(--sp-5);
+      max-width: 18ch;
+    }
+    .home-hero__subtitle {
+      font-family: var(--font-body);
+      font-size: clamp(16px, 1.5vw, 19px);
+      line-height: 1.8;
+      color: var(--text-2);
+      max-width: 58ch;
+      margin: 0 0 var(--sp-8);
+    }
+    .home-hero__cta {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-4);
+      flex-wrap: wrap;
+    }
+
+    /* ---- Buttons (home) ---- */
+    .home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 16px;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+      outline: none;
+    }
+    .home-btn__icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      transition: transform var(--dur) var(--ease);
+    }
+    .home-btn--primary {
+      color: var(--on-accent);
+      background: linear-gradient(120deg, var(--color-primary-hi), var(--color-primary));
+      border: 1px solid var(--color-primary-300);
+    }
+    .home-btn--primary:hover,
+    .home-btn--primary:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: var(--glow-gold);
+    }
+    .home-btn--primary:hover .home-btn__icon,
+    .home-btn--primary:focus-visible .home-btn__icon {
+      transform: translateX(3px);
+    }
+    .home-btn--ghost {
+      color: var(--color-primary-hi);
+      background: rgba(11, 16, 25, 0.55);
+      border: 1px solid var(--color-primary-600);
+    }
+    .home-btn--ghost:hover,
+    .home-btn--ghost:focus-visible {
+      transform: translateY(-1px);
+      border-color: var(--color-primary-300);
+      background: rgba(20, 29, 48, 0.75);
+    }
+    .home-btn:focus-visible {
+      box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--color-primary);
+    }
+
+    /* ---- Hero trust bar ---- */
+    .home-trustbar {
+      margin-top: var(--sp-10);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--sp-4);
+    }
+    .home-trust {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-primary-700);
+      background: rgba(5, 8, 16, 0.62);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .home-trust__icon {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      color: var(--color-primary);
+    }
+    .home-trust__label {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    /* ---------- Section shared ---------- */
+    .home-section { padding-top: var(--sp-12); padding-bottom: var(--sp-12); }
+    .home-section--surface { background: var(--surface); }
+    .home-section__head {
+      text-align: center;
+      max-width: 62ch;
+      margin: 0 auto var(--sp-10);
+    }
+    .home-eyebrow {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: var(--sp-3);
+    }
+    .home-section__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(28px, 3.4vw, 44px);
+      line-height: 1.2;
+      margin: 0 0 var(--sp-4);
+    }
+    .home-section__lead {
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--text-2);
+      margin: 0;
+    }
+
+    /* ---------- Dual-end compare ---------- */
+    .home-dual {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-5);
+    }
+    .home-dual__card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-8);
+      transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+    }
+    .home-dual__card:hover {
+      border-color: var(--color-primary-600);
+    }
+    .home-dual__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-primary-700);
+      background: var(--surface-2);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      color: var(--color-primary-hi);
+      margin-bottom: var(--sp-5);
+    }
+    .home-dual__badge svg { width: 16px; height: 16px; color: var(--color-primary); }
+    .home-dual__name {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 var(--sp-2);
+    }
+    .home-dual__tag {
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-2);
+      margin: 0 0 var(--sp-5);
+      line-height: 1.7;
+    }
+    .home-dual__list {
+      list-style: none;
+      margin: 0 0 var(--sp-5);
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-3);
+    }
+    .home-dual__item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .home-dual__item svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      color: var(--color-primary);
+      margin-top: 2px;
+    }
+    .home-dual__fit {
+      padding-top: var(--sp-4);
+      border-top: 1px solid var(--border);
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.7;
+    }
+    .home-dual__fit strong { color: var(--color-primary-hi); font-weight: 600; }
+
+    /* ---------- Value grid ---------- */
+    .home-values {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-5);
+    }
+    .home-value {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-6);
+      transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+    }
+    .home-value:hover {
+      border-color: var(--color-primary-600);
+      transform: translateY(-2px);
+    }
+    .home-value__icon-wrap {
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-primary-700);
+      background: var(--surface-2);
+      margin-bottom: var(--sp-5);
+    }
+    .home-value__icon {
+      width: 26px;
+      height: 26px;
+      color: var(--color-primary);
+    }
+    .home-value__title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 var(--sp-3);
+    }
+    .home-value__desc {
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--text-2);
+      margin: 0;
+    }
+
+    /* ---------- Closing CTA ---------- */
+    .home-cta {
+      text-align: center;
+      padding-top: var(--sp-12);
+      padding-bottom: var(--sp-12);
+    }
+    .home-cta__rule { margin: 0 auto var(--sp-8); max-width: 480px; }
+    .home-cta__title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(26px, 3.2vw, 40px);
+      line-height: 1.25;
+      margin: 0 auto var(--sp-4);
+      max-width: 24ch;
+    }
+    .home-cta__lead {
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--text-2);
+      margin: 0 auto var(--sp-8);
+      max-width: 54ch;
+    }
+
+    /* ---------- Responsive: tablet ---------- */
+    @media (max-width: 1024px) {
+      .home-container { padding-left: 24px; padding-right: 24px; }
+      .home-trustbar { grid-template-columns: repeat(2, 1fr); }
+      .home-values { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ---------- Responsive: mobile ---------- */
+    @media (max-width: 767px) {
+      .home-container { padding-left: 16px; padding-right: 16px; }
+      .home-hero { min-height: 80vh; }
+      .home-hero__inner { padding-top: var(--sp-10); padding-bottom: var(--sp-10); }
+      .home-trustbar { grid-template-columns: 1fr; margin-top: var(--sp-8); }
+      .home-dual { grid-template-columns: 1fr; }
+      .home-values { grid-template-columns: 1fr; }
+      .home-section { padding-top: var(--sp-10); padding-bottom: var(--sp-10); }
+      .home-hero__cta { width: 100%; }
+      .home-btn { flex: 1 1 auto; justify-content: center; }
+    }
+
+    /* ---------- Reduced motion ---------- */
+    @media (prefers-reduced-motion: reduce) {
+      .home-btn,
+      .home-btn__icon,
+      .home-dual__card,
+      .home-value { transition-duration: 0.01ms; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================ TOP NAV ============================ -->
+  <header class="site-nav">
+    <div class="site-nav__inner">
+      <a class="site-brand" href="index.html" data-dom-id="nav-home" aria-label="STZB Watcher 首页">
+        <span class="site-seal" aria-hidden="true">
+          <span class="site-seal__char">率</span>
+        </span>
+        <span class="site-brand__text">
+          <span class="site-brand__name">STZB Watcher</span>
+          <span class="site-brand__sub">率土战场数据指挥平台</span>
+        </span>
+      </a>
+
+      <nav class="site-nav__right" aria-label="主导航">
+        <ul class="site-nav__links">
+          <li><a class="site-nav__link" href="index.html" data-dom-id="nav-home">首页</a></li>
+          <li><a class="site-nav__link" href="features.html" data-dom-id="nav-features">核心功能</a></li>
+          <li><a class="site-nav__link" href="architecture.html" data-dom-id="nav-architecture">技术架构</a></li>
+          <li><a class="site-nav__link" href="start.html" data-dom-id="nav-start">下载与开始</a></li>
+        </ul>
+        <a class="site-btn-primary" href="start.html" data-dom-id="hero-cta-start">
+          立即开始
+          <svg class="site-btn-primary__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============================ HERO ============================ -->
+  <section class="home-hero" aria-labelledby="hero-title">
+    <div class="home-hero__veil" aria-hidden="true"></div>
+    <div class="home-hero__inner">
+      <div class="home-container">
+        <!-- 双端徽记 -->
+        <div class="home-hero__badges">
+          <span class="home-badge">
+            <svg class="home-badge__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            Web 端
+          </span>
+          <span class="home-badge">
+            <svg class="home-badge__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="5" y="2" width="14" height="20" rx="2.5"></rect>
+              <line x1="12" y1="18" x2="12" y2="18"></line>
+            </svg>
+            Android 端
+          </span>
+          <span class="home-badge">
+            <svg class="home-badge__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 12l2 2 4-4"></path>
+              <path d="M12 3a9 9 0 1 0 9 9"></path>
+            </svg>
+            一致口径
+          </span>
+        </div>
+
+        <h1 class="home-hero__title" id="hero-title">
+          <span class="gold-gradient">率土战场数据指挥平台</span>
+        </h1>
+
+        <p class="home-hero__subtitle">
+          STZB Watcher 面向《率土之滨》战场，从本地数据采集到态势研判、队伍研究、团队管理与战斗模拟，
+          Web 与 Android 使用一致的数据口径和业务语义，覆盖同一套核心能力，让每一次调度都有据可依。
+        </p>
+
+        <div class="home-hero__cta">
+          <a class="home-btn home-btn--primary" href="start.html">
+            立即开始
+            <svg class="home-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+          <a class="home-btn home-btn--ghost" href="features.html" data-dom-id="cta-features">
+            查看核心功能
+            <svg class="home-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </a>
+        </div>
+
+        <!-- 价值信任条 -->
+        <div class="home-trustbar" role="list" aria-label="平台核心特性">
+          <div class="home-trust" role="listitem">
+            <svg class="home-trust__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+              <path d="M16 3h3a2 2 0 0 1 2 2v3"></path>
+              <path d="M8 21H5a2 2 0 0 1-2-2v-3"></path>
+              <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <span class="home-trust__label">双端一致口径</span>
+          </div>
+          <div class="home-trust" role="listitem">
+            <svg class="home-trust__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+              <path d="M3 5v14a9 3 0 0 0 18 0V5"></path>
+              <path d="M3 12a9 3 0 0 0 18 0"></path>
+            </svg>
+            <span class="home-trust__label">本地数据闭环</span>
+          </div>
+          <div class="home-trust" role="listitem">
+            <svg class="home-trust__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+            </svg>
+            <span class="home-trust__label">实时战场态势</span>
+          </div>
+          <div class="home-trust" role="listitem">
+            <svg class="home-trust__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14.5 3.5 20.5 9.5 8 22H2v-6z"></path>
+              <path d="M12 6 18 12"></path>
+            </svg>
+            <span class="home-trust__label">Kotlin 战斗引擎</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 双端能力对照 ============================ -->
+  <section class="home-section home-section--surface" aria-labelledby="dual-title">
+    <div class="home-container">
+      <div class="home-section__head">
+        <span class="home-eyebrow">One Core · Two Carriers</span>
+        <h2 class="home-section__title" id="dual-title">一套内核，两种载体</h2>
+        <p class="home-section__lead">
+          核心数据模型、业务口径、阵容语义与模拟结果两端保持一致，不区分主端与次端。
+          你在桌面与移动之间自由切换，看到的都是同一套战场事实。
+        </p>
+      </div>
+
+      <div class="home-dual">
+        <!-- Web -->
+        <article class="home-dual__card">
+          <span class="home-dual__badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            WEB 端
+          </span>
+          <h3 class="home-dual__name">桌面宽屏指挥台</h3>
+          <p class="home-dual__tag">面向桌面宽屏的高密度指挥与多面板分析。</p>
+          <ul class="home-dual__list">
+            <li class="home-dual__item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              桌面宽屏布局，多面板并行观察战场
+            </li>
+            <li class="home-dual__item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Flask API + SSE 实时推送数据流
+            </li>
+            <li class="home-dual__item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              浏览器仪表盘，无需安装即开即用
+            </li>
+          </ul>
+          <p class="home-dual__fit">适合 <strong>持续监控</strong>、<strong>横向比较</strong> 与 <strong>团队管理</strong> 等长时段作业场景。</p>
+        </article>
+
+        <!-- Android -->
+        <article class="home-dual__card">
+          <span class="home-dual__badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="5" y="2" width="14" height="20" rx="2.5"></rect>
+              <line x1="12" y1="18" x2="12" y2="18"></line>
+            </svg>
+            ANDROID 端
+          </span>
+          <h3 class="home-dual__name">随身移动作战</h3>
+          <p class="home-dual__tag">面向移动设备的触控操作与本机运行。</p>
+          <ul class="home-dual__list">
+            <li class="home-dual__item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              VpnService 本机流量捕获与本地解析
+            </li>
+            <li class="home-dual__item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              SQLite 本地存储，Compose 触控界面
+            </li>
+            <li class="home-dual__item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              全程本机运行，随开随用
+            </li>
+          </ul>
+          <p class="home-dual__fit">适合 <strong>随身采集</strong>、<strong>快速查看</strong> 与 <strong>移动决策</strong> 等即时场景。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 五大核心价值 ============================ -->
+  <section class="home-section" aria-labelledby="value-title">
+    <div class="home-container">
+      <div class="home-section__head">
+        <span class="home-eyebrow">Why STZB Watcher</span>
+        <h2 class="home-section__title" id="value-title">为什么选择 STZB Watcher</h2>
+        <p class="home-section__lead">
+          从战场态势到阵容推演，再到团队协同与本地闭环，五大核心价值构成完整的战场数据决策链。
+        </p>
+      </div>
+
+      <div class="home-values">
+        <!-- 1 战场态势统一 -->
+        <article class="home-value">
+          <div class="home-value__icon-wrap">
+            <svg class="home-value__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="1 6 8 3 16 6 23 3 23 18 16 21 8 18 1 21 1 6"></polygon>
+              <line x1="8" y1="3" x2="8" y2="18"></line>
+              <line x1="16" y1="6" x2="16" y2="21"></line>
+            </svg>
+          </div>
+          <h3 class="home-value__title">战场态势统一</h3>
+          <p class="home-value__desc">
+            地图格子、行军路线、实时部队、战报与世界事件汇聚到同一视图，战场全貌一屏尽览。
+          </p>
+        </article>
+
+        <!-- 2 实时行动判断 -->
+        <article class="home-value">
+          <div class="home-value__icon-wrap">
+            <svg class="home-value__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2v3"></path>
+              <circle cx="12" cy="12" r="7"></circle>
+              <path d="M12 12 15.5 9"></path>
+            </svg>
+          </div>
+          <h3 class="home-value__title">实时行动判断</h3>
+          <p class="home-value__desc">
+            追踪部队位置、路线、目标与新鲜度，结合阵容证据，让每一次出击判断都有迹可循。
+          </p>
+        </article>
+
+        <!-- 3 阵容研究推演 -->
+        <article class="home-value">
+          <div class="home-value__icon-wrap">
+            <svg class="home-value__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7z"></path>
+              <path d="M9 12l2 2 4-4"></path>
+            </svg>
+          </div>
+          <h3 class="home-value__title">阵容研究推演</h3>
+          <p class="home-value__desc">
+            结合历史样本、武将战法资料与 Kotlin 战斗引擎验证对阵，把经验沉淀为可复盘的推演。
+          </p>
+        </article>
+
+        <!-- 4 团队协同管理 -->
+        <article class="home-value">
+          <div class="home-value__icon-wrap">
+            <svg class="home-value__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <h3 class="home-value__title">团队协同管理</h3>
+          <p class="home-value__desc">
+            成员队伍、团数据、攻城考勤、自定义积分与赛季表现统一管理，让同盟协作井然有序。
+          </p>
+        </article>
+
+        <!-- 5 本地数据闭环 -->
+        <article class="home-value">
+          <div class="home-value__icon-wrap">
+            <svg class="home-value__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 12a9 9 0 1 1-3-6.7"></path>
+              <polyline points="21 3 21 9 15 9"></polyline>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </div>
+          <h3 class="home-value__title">本地数据闭环</h3>
+          <p class="home-value__desc">
+            Web 与 Android 均可本地完成采集、解析、存储与查询，数据始终掌握在自己手中。
+          </p>
+        </article>
+
+        <!-- 6 开源自由 -->
+        <article class="home-value">
+          <div class="home-value__icon-wrap">
+            <svg class="home-value__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2a7 7 0 0 0-4 12.7V22l4-2 4 2v-7.3A7 7 0 0 0 12 2z"></path>
+            </svg>
+          </div>
+          <h3 class="home-value__title">开源与自由</h3>
+          <p class="home-value__desc">
+            基于 MIT License 开源发布，代码透明、可自由使用与二次开发，欢迎共建战场工具生态。
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ 结尾 CTA ============================ -->
+  <section class="home-section--surface" aria-labelledby="cta-title">
+    <div class="home-container">
+      <div class="home-cta">
+        <hr class="rule-gold home-cta__rule" aria-hidden="true" />
+        <h2 class="home-cta__title" id="cta-title">整备数据，指挥你的下一场战场</h2>
+        <p class="home-cta__lead">
+          无论桌面持续监控还是移动随身决策，STZB Watcher 都用同一套口径陪你研判到底。现在就开始。
+        </p>
+        <a class="home-btn home-btn--primary" href="start.html">
+          立即开始
+          <svg class="home-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ FOOTER ============================ -->
+  <footer class="site-footer">
+    <hr class="site-footer__rule" aria-hidden="true" />
+    <div class="site-footer__inner">
+      <div>
+        <a class="site-footer__brand" href="index.html" aria-label="STZB Watcher 首页">
+          <span class="site-seal" aria-hidden="true">
+            <span class="site-seal__char">率</span>
+          </span>
+          <span class="site-footer__brand-name">STZB Watcher</span>
+        </a>
+        <p class="site-footer__desc">
+          面向率土之滨战场的数据指挥平台，实时汇聚战报、同盟态势与资源脉络，让每一次调度都有据可依。
+        </p>
+      </div>
+
+      <div>
+        <h3 class="site-footer__col-title">快速导航</h3>
+        <ul class="site-footer__links">
+          <li><a class="site-footer__link" href="index.html">首页</a></li>
+          <li><a class="site-footer__link" href="features.html">核心功能</a></li>
+          <li><a class="site-footer__link" href="architecture.html">技术架构</a></li>
+          <li><a class="site-footer__link" href="start.html">下载与开始</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="site-footer__col-title">联系与开源</h3>
+        <div class="site-footer__contact">
+          <div class="site-footer__contact-item">
+            <svg class="site-footer__contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>QQ 反馈：<span class="site-footer__qq">3268276553</span></span>
+          </div>
+          <div class="site-footer__contact-item">
+            <svg class="site-footer__contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>基于 MIT License 开源，可自由使用与二次开发。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <span>© 2026 STZB Watcher · 率土战场数据指挥平台</span>
+      <span>Released under the MIT License</span>
+    </div>
+  </footer>
+
+</body>
+</html>

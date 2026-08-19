@@ -1,0 +1,76 @@
+{
+  "data": [
+    {
+      "id": "page-index",
+      "title": "首页",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787141727000,
+      "devMetadata": {
+        "htmlSrc": "pages/index.html",
+        "interactions": []
+      },
+      "canvasData": { "x": 0, "y": 0, "group": 0 }
+    },
+    {
+      "id": "page-features",
+      "title": "核心功能",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787141727000,
+      "devMetadata": {
+        "htmlSrc": "pages/features.html",
+        "interactions": []
+      },
+      "canvasData": { "x": 0, "y": 0, "group": 0 }
+    },
+    {
+      "id": "page-architecture",
+      "title": "技术架构",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787141727000,
+      "devMetadata": {
+        "htmlSrc": "pages/architecture.html",
+        "interactions": []
+      },
+      "canvasData": { "x": 0, "y": 0, "group": 0 }
+    },
+    {
+      "id": "page-start",
+      "title": "下载与开始",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787141727000,
+      "devMetadata": {
+        "htmlSrc": "pages/start.html",
+        "interactions": []
+      },
+      "canvasData": { "x": 0, "y": 0, "group": 0 }
+    },
+    {
+      "id": "image-001",
+      "title": "战场沙盘主视觉",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1787141727000,
+      "devMetadata": { "imageSrc": "assets/hero-battlefield.jpg" },
+      "canvasData": { "x": 0, "y": 0 }
+    },
+    {
+      "id": "image-002",
+      "title": "战场情报态势图",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1787141727000,
+      "devMetadata": { "imageSrc": "assets/feature-intelligence.jpg" },
+      "canvasData": { "x": 0, "y": 0 }
+    }
+  ],
+  "config": {
+    "autoLayout": true,
+    "deviceType": "desktop",
+    "projectName": "STZB Watcher 产品官网",
+    "designLibrary": null
+  }
+}

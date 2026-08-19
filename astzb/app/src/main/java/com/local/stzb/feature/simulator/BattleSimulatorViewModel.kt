@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class BattleSimulatorViewModel(
-    private val engine: BattleSimulatorEngine = LocalBattleSimulatorEngine,
+    private val engine: BattleSimulatorEngine = CompleteBattleSimulatorEngine,
     private val io: CoroutineDispatcher = Dispatchers.Default,
     private val seed: () -> Int = { System.currentTimeMillis().toInt() },
 ) : ViewModel() {

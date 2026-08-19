@@ -1,0 +1,103 @@
+{
+  "project": {
+    "name": "stzb-product-site",
+    "operation": "create",
+    "deviceType": "desktop",
+    "designRead": "产品官网 showcase / 率土之滨玩家与团队 / 硬核战术黑金史诗 / medium density / 避免通用 SaaS 紫色渐变与居中三卡",
+    "designDials": { "layoutVariance": 3, "motionIntensity": 2, "visualDensity": 3 },
+    "styleDefinitionBrief": "率土战场黑金史诗官网：深色战场底(#050810) + 战术金(#c8a044)品牌强调，宋体(Noto Serif SC)史诗标题 + 等宽字体(Share Tech Mono)数据，硬核指挥台质感。",
+    "styleContinuityAnchors": {
+      "surface": "深色战场底 --bg #050810，面板 --surface #0b1019，1px --border 描边，静态面不用重阴影",
+      "brand": "战术金 --color-primary #c8a044 作唯一品牌强调；金色渐变仅用于大标题与分隔线",
+      "typographySystem": { "title": "'Noto Serif SC', serif", "body": "'Noto Serif SC', serif", "mono": "'Share Tech Mono', monospace 用于所有数字/ID/时间戳/KPI" },
+      "shell": "顶部全宽导航条(半透明深色 + 金色 logo 印章)，页脚统一深色，导航项一致",
+      "radiusScale": { "sm": 4, "md": 8, "lg": 12, "full": 9999 },
+      "shadowModel": "静态面 border-led，仅浮层与 hero 徽记允许金色 glow"
+    },
+    "generationTree": "见 generation-tree.json"
+  },
+  "designSource": {
+    "operatingMode": "free-explore",
+    "libraryIdentity": null,
+    "cssPath": "../colors_and_type.css",
+    "styleConstraints": { "radiusMax": 16, "staticShadowAlphaMax": 0.05 }
+  },
+  "pages": [
+    {
+      "nodeId": "page-index",
+      "title": "首页",
+      "htmlSrc": "pages/index.html",
+      "pageIndex": 1,
+      "pageKind": "showcase",
+      "visualNorthStar": "全屏史诗 hero：战术地图/沙盘俯瞰暗景 + 巨型宋体主标题，'率土战场数据指挥平台'，双端(Web+Android)徽记，一行数据信任条(格子/行军/战报/武将数)",
+      "compositionPattern": "full-bleed-hero + 左对齐大标题 + 下方横向价值条 + 双端能力对照 + 功能预览网格",
+      "continuityAnchors": ["顶部全宽导航 + 金色 logo 印章", "战术金强调 + 宋体史诗标题", "等宽字体呈现所有数据"],
+      "imagePlan": [
+        { "role": "critical-hero", "sectionType": "hero", "filename": "hero-battlefield.jpg", "status": "planned" }
+      ],
+      "chartsRequired": false
+    },
+    {
+      "nodeId": "page-features",
+      "title": "核心功能",
+      "htmlSrc": "pages/features.html",
+      "pageIndex": 2,
+      "pageKind": "showcase",
+      "visualNorthStar": "五大能力域(战场情报/实时部队/阵容研究推演/团队协同/本地数据闭环)特性网格，交替图文行 + 功能亮点卡，硬核信息密度",
+      "compositionPattern": "alternating feature rows + 能力矩阵表(Web/Android 支持度)",
+      "continuityAnchors": ["顶部全宽导航 + 金色 logo 印章", "战术金强调 + 宋体史诗标题", "等宽字体呈现所有数据"],
+      "imagePlan": [
+        { "role": "supporting-content", "sectionType": "feature", "filename": "feature-intelligence.jpg", "status": "planned" }
+      ],
+      "chartsRequired": false
+    },
+    {
+      "nodeId": "page-architecture",
+      "title": "技术架构",
+      "htmlSrc": "pages/architecture.html",
+      "pageIndex": 3,
+      "pageKind": "showcase",
+      "visualNorthStar": "本地优先数据闭环架构图：Web(Flask+SSE) 与 Android(VpnService+SQLite) 双链路 + 共享战斗引擎，技术栈分层 + 隐私本地化说明",
+      "compositionPattern": "架构流程图(纯 CSS/HTML 绘制) + 技术栈分层卡 + 数据隐私要点",
+      "continuityAnchors": ["顶部全宽导航 + 金色 logo 印章", "战术金强调 + 宋体史诗标题", "等宽字体呈现所有数据"],
+      "imagePlan": [],
+      "chartsRequired": false
+    },
+    {
+      "nodeId": "page-start",
+      "title": "下载与开始",
+      "htmlSrc": "pages/start.html",
+      "pageIndex": 4,
+      "pageKind": "task-driven",
+      "visualNorthStar": "开始使用 CTA：Android(下载 APK)与 Web(源码启动)两条上手路径分栏 + 步骤时间线 + 常见问题，结尾 QQ 反馈",
+      "compositionPattern": "双路径分栏 + 步骤时间线 + FAQ 折叠列表",
+      "continuityAnchors": ["顶部全宽导航 + 金色 logo 印章", "战术金强调 + 宋体史诗标题", "等宽字体呈现所有数据"],
+      "imagePlan": [],
+      "chartsRequired": false
+    }
+  ],
+  "assets": [
+    { "filename": "hero-battlefield.jpg", "role": "critical-hero", "owningPage": "page-index", "sectionType": "hero", "status": "planned" },
+    { "filename": "feature-intelligence.jpg", "role": "supporting-content", "owningPage": "page-features", "sectionType": "feature", "status": "planned" }
+  ],
+  "wiringPlan": [
+    { "source": "page-index", "domId": "cta-features", "target": "page-features", "label": "查看核心功能" },
+    { "source": "page-features", "domId": "cta-architecture", "target": "page-architecture", "label": "了解技术架构" },
+    { "source": "page-architecture", "domId": "cta-start", "target": "page-start", "label": "开始使用" }
+  ],
+  "hiddenInteractionPlan": [
+    { "source": "page-index", "domId": "nav-features", "target": "page-features" },
+    { "source": "page-index", "domId": "nav-architecture", "target": "page-architecture" },
+    { "source": "page-index", "domId": "nav-start", "target": "page-start" },
+    { "source": "page-index", "domId": "hero-cta-start", "target": "page-start" },
+    { "source": "page-features", "domId": "nav-home", "target": "page-index" },
+    { "source": "page-features", "domId": "nav-architecture", "target": "page-architecture" },
+    { "source": "page-features", "domId": "nav-start", "target": "page-start" },
+    { "source": "page-architecture", "domId": "nav-home", "target": "page-index" },
+    { "source": "page-architecture", "domId": "nav-features", "target": "page-features" },
+    { "source": "page-architecture", "domId": "nav-start", "target": "page-start" },
+    { "source": "page-start", "domId": "nav-home", "target": "page-index" },
+    { "source": "page-start", "domId": "nav-features", "target": "page-features" },
+    { "source": "page-start", "domId": "nav-architecture", "target": "page-architecture" }
+  ]
+}

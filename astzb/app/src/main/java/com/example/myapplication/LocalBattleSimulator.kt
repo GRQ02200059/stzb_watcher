@@ -84,13 +84,15 @@ object LocalBattleSimulator {
     }
 
     fun heroName(heroId: Long): String {
-        return heroes[heroId]?.name ?: HeroNameResolver.nameOf(heroId)
+        val normalizedId = HeroIdNormalizer.normalize(heroId)
+        return heroes[normalizedId]?.name ?: HeroNameResolver.nameOf(normalizedId)
     }
 
     fun heroIconId(heroId: Long): Long {
-        val hero = heroes[heroId]
+        val normalizedId = HeroIdNormalizer.normalize(heroId)
+        val hero = heroes[normalizedId]
         return if (hero == null) {
-            HeroNameResolver.iconIdOf(heroId)
+            HeroNameResolver.iconIdOf(normalizedId)
         } else {
             HeroNameResolver.iconIdForName(hero.name, hero.iconId)
         }
@@ -242,7 +244,8 @@ object LocalBattleSimulator {
         }
 
         private fun createHero(config: LocalSimHeroConfig, camp: String, index: Int): SimBattleHero? {
-            val res = heroes[config.heroId] ?: return null
+            val normalizedId = HeroIdNormalizer.normalize(config.heroId)
+            val res = heroes[normalizedId] ?: return null
             val level = config.level.coerceIn(1, 50)
             val attrs = SimAttrs(
                 attack = res.attack + (level - 1) * res.attackGrow + config.extraAttack + 20.0,
