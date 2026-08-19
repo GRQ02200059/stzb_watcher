@@ -1,0 +1,50 @@
+name: Build Windows Web EXE
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'run_web_exe.py'
+      - 'api_server.py'
+      - 'realtime_writer.py'
+      - 'static/**'
+      - 'packaging/pyinstaller/**'
+      - 'packaging/scripts/build_web_exe.ps1'
+      - '.github/workflows/build-windows-web.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: packaging/pyinstaller/requirements-build.txt
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -r packaging/pyinstaller/requirements-build.txt
+      - name: Build Web EXE
+        shell: pwsh
+        run: .\packaging\scripts\build_web_exe.ps1
+      - name: Verify artifact
+        shell: pwsh
+        run: |
+          $exe = 'dist/STZB助手-Web/STZB助手-Web.exe'
+          if (-not (Test-Path $exe)) { throw "Missing $exe" }
+          Get-Item $exe | Format-List FullName,Length,LastWriteTime
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: STZB-Web-Windows
+          path: dist/STZB助手-Web
+          if-no-files-found: error
