@@ -140,6 +140,16 @@ class LocalStzbDatabase(
         )
         db.execSQL(
             """
+            CREATE TABLE IF NOT EXISTS world_scene_slots (
+                state_version INTEGER NOT NULL,
+                slot_index INTEGER NOT NULL,
+                raw_json TEXT NOT NULL,
+                PRIMARY KEY(state_version, slot_index)
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
             CREATE TABLE IF NOT EXISTS world_real_marches (
                 real_march_id INTEGER PRIMARY KEY,
                 last_wid INTEGER, current_wid INTEGER, current_arrive_time INTEGER,
@@ -170,6 +180,39 @@ class LocalStzbDatabase(
                 army_id INTEGER NOT NULL,
                 source_version INTEGER NOT NULL,
                 PRIMARY KEY(block_id, army_id)
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS world_scene_entities (
+                category TEXT NOT NULL,
+                entity_id INTEGER NOT NULL,
+                raw_json TEXT NOT NULL,
+                source_version INTEGER NOT NULL,
+                deleted_at_version INTEGER,
+                updated_at INTEGER NOT NULL,
+                PRIMARY KEY(category, entity_id)
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS world_ship_blocks (
+                block_id INTEGER NOT NULL,
+                ship_id INTEGER NOT NULL,
+                source_version INTEGER NOT NULL,
+                PRIMARY KEY(block_id, ship_id)
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS world_assist_army_blocks (
+                block_id INTEGER NOT NULL,
+                assist_army_id INTEGER NOT NULL,
+                source_version INTEGER NOT NULL,
+                PRIMARY KEY(block_id, assist_army_id)
             )
             """.trimIndent()
         )
@@ -742,7 +785,7 @@ class LocalStzbDatabase(
 
     companion object {
         const val DEFAULT_DATABASE_NAME = "astzb_local.db"
-        private const val DB_VERSION = 20
+        private const val DB_VERSION = 21
     }
 }
 
@@ -909,6 +952,14 @@ object LocalStzbRepository {
                     put("captured_at", now)
                 },
             )
+            snapshot.slotPayloads.forEach { (slotIndex, rawJson) ->
+                database.insertOrThrow(
+                    "world_scene_slots", null, ContentValues().apply {
+                        put("state_version", version); put("slot_index", slotIndex)
+                        put("raw_json", rawJson)
+                    },
+                )
+            }
             fun event(type: String, entityType: String, entityId: Int, evidence: JSONObject) {
                 database.insertOrThrow(
                     "world_state_events",
@@ -938,6 +989,19 @@ object LocalStzbRepository {
                 database.delete("world_real_marches", null, null)
                 database.delete("world_tile_chunks", null, null)
                 database.delete("world_army_blocks", null, null)
+                database.delete("world_scene_entities", null, null)
+                database.delete("world_ship_blocks", null, null)
+                database.delete("world_assist_army_blocks", null, null)
+            }
+            snapshot.entities.forEach { entity ->
+                database.insertWithOnConflict(
+                    "world_scene_entities", null, ContentValues().apply {
+                        put("category", entity.category); put("entity_id", entity.entityId)
+                        put("raw_json", entity.rawJson); put("source_version", version)
+                        putNull("deleted_at_version"); put("updated_at", now)
+                    }, SQLiteDatabase.CONFLICT_REPLACE,
+                )
+                event("entity_upserted", entity.category, entity.entityId, baseEvidence)
             }
             snapshot.mapStates.forEach { state ->
                 val chunks = runCatching { JSONObject(state.chunksJson) }.getOrNull() ?: JSONObject()
@@ -968,6 +1032,8 @@ object LocalStzbRepository {
                     )
                 }
             }
+            replaceWorldMemberships(database, "world_ship_blocks", "ship_id", snapshot.blockShipIds, version)
+            replaceWorldMemberships(database, "world_assist_army_blocks", "assist_army_id", snapshot.blockAssistArmyIds, version)
             snapshot.directDeletedTeamIds.distinct().forEach { armyId ->
                 database.delete("world_army_blocks", "army_id = ?", arrayOf(armyId.toString()))
             }
@@ -978,6 +1044,47 @@ object LocalStzbRepository {
                         "block_id = ? AND army_id = ?",
                         arrayOf(snapshot.blockId.toString(), armyId.toString()),
                     )
+                }
+            }
+            snapshot.deletedEntityIds.forEach { (category, entityIds) ->
+                entityIds.distinct().forEach { entityId ->
+                    val membership = when (category) {
+                        "war_ship" -> "world_ship_blocks" to "ship_id"
+                        "assist_army" -> "world_assist_army_blocks" to "assist_army_id"
+                        else -> null
+                    }
+                    var shouldDelete = true
+                    if (membership != null && snapshot.blockMode == 2 && snapshot.blockId > 0) {
+                        database.delete(
+                            membership.first,
+                            "block_id = ? AND ${membership.second} = ?",
+                            arrayOf(snapshot.blockId.toString(), entityId.toString()),
+                        )
+                        shouldDelete = database.rawQuery(
+                            "SELECT 1 FROM ${membership.first} WHERE ${membership.second}=? LIMIT 1",
+                            arrayOf(entityId.toString()),
+                        ).useCursor { cursor -> !cursor.moveToFirst() }
+                    }
+                    if (shouldDelete) {
+                        database.execSQL(
+                            "UPDATE world_scene_entities SET deleted_at_version=?,updated_at=? WHERE category=? AND entity_id=?",
+                            arrayOf(version, now, category, entityId),
+                        )
+                        event("entity_deleted", category, entityId, baseEvidence)
+                    }
+                }
+            }
+            snapshot.directDeletedEntityIds.forEach { (category, entityIds) ->
+                entityIds.distinct().forEach { entityId ->
+                    when (category) {
+                        "war_ship" -> database.delete("world_ship_blocks", "ship_id=?", arrayOf(entityId.toString()))
+                        "assist_army" -> database.delete("world_assist_army_blocks", "assist_army_id=?", arrayOf(entityId.toString()))
+                    }
+                    database.execSQL(
+                        "UPDATE world_scene_entities SET deleted_at_version=?,updated_at=? WHERE category=? AND entity_id=?",
+                        arrayOf(version, now, category, entityId),
+                    )
+                    event("entity_deleted", category, entityId, baseEvidence)
                 }
             }
             snapshot.realMarches.forEach { march ->
@@ -998,6 +1105,23 @@ object LocalStzbRepository {
             database.setTransactionSuccessful()
         } finally {
             database.endTransaction()
+        }
+    }
+
+    private fun replaceWorldMemberships(
+        database: SQLiteDatabase,
+        table: String,
+        idColumn: String,
+        memberships: Map<Int, List<Int>>,
+        version: Long,
+    ) {
+        memberships.forEach { (blockId, entityIds) ->
+            database.delete(table, "block_id=?", arrayOf(blockId.toString()))
+            entityIds.distinct().forEach { entityId ->
+                database.insertOrThrow(table, null, ContentValues().apply {
+                    put("block_id", blockId); put(idColumn, entityId); put("source_version", version)
+                })
+            }
         }
     }
 

@@ -91,6 +91,61 @@ class LocalStzbDatabaseBattleMonitorTest {
     }
 
     @Test
+    fun genericEntitiesAndShipAssistBlockMembershipPersistAndDelete() {
+        withDatabase { database ->
+            LocalStzbRepository.syncBattleMonitor(
+                database.writableDatabase,
+                snapshot(
+                    marker = 10,
+                    entities = listOf(
+                        LocalWorldEntity("war_ship", 8001, "[1]"),
+                        LocalWorldEntity("assist_army", 10001, "[1]"),
+                        LocalWorldEntity("strategy", 4001, "[1]"),
+                    ),
+                    blockShipIds = mapOf(40 to listOf(8001), 41 to listOf(8001)),
+                    blockAssistArmyIds = mapOf(40 to listOf(10001), 41 to listOf(10001)),
+                ), 100, "5026",
+            )
+            LocalStzbRepository.syncBattleMonitor(
+                database.writableDatabase,
+                snapshot(
+                    marker = 11, blockMode = 2, blockId = 40,
+                    deletedEntityIds = mapOf(
+                        "war_ship" to listOf(8001),
+                        "assist_army" to listOf(10001),
+                    ),
+                ), 200, "5028",
+            )
+            assertEquals(3, database.intColumn(
+                "SELECT COUNT(*) FROM world_scene_entities WHERE deleted_at_version IS NULL",
+            ).single())
+            LocalStzbRepository.syncBattleMonitor(
+                database.writableDatabase,
+                snapshot(
+                    marker = 12, blockMode = 2, blockId = 41,
+                    deletedEntityIds = mapOf(
+                        "war_ship" to listOf(8001),
+                        "assist_army" to listOf(10001),
+                        "strategy" to listOf(4001),
+                    ),
+                ), 300, "5028",
+            )
+
+            assertEquals(0, database.intColumn(
+                "SELECT COUNT(*) FROM world_scene_entities WHERE deleted_at_version IS NULL",
+            ).single())
+            assertEquals(0, database.intColumn("SELECT COUNT(*) FROM world_ship_blocks").single())
+            assertEquals(0, database.intColumn("SELECT COUNT(*) FROM world_assist_army_blocks").single())
+            assertEquals(3, database.intColumn(
+                "SELECT COUNT(*) FROM world_state_events WHERE event_type='entity_deleted'",
+            ).single())
+            assertEquals(listOf(31, 31, 31), database.intColumn(
+                "SELECT COUNT(*) FROM world_scene_slots GROUP BY state_version ORDER BY state_version",
+            ))
+        }
+    }
+
+    @Test
     fun sundayWuxunSnapshotsKeepWeeklyMaximumAndAccumulateAcrossWeeks() {
         withDatabase { database ->
             database.writableDatabase.execSQL(
@@ -193,6 +248,12 @@ class LocalStzbDatabaseBattleMonitorTest {
         blockArmyIds: Map<Int, List<Int>> = emptyMap(),
         clearChunks: Map<Int, List<String>> = emptyMap(),
         realMarches: List<LocalRealMarch> = emptyList(),
+        entities: List<LocalWorldEntity> = emptyList(),
+        deletedEntityIds: Map<String, List<Int>> = emptyMap(),
+        directDeletedEntityIds: Map<String, List<Int>> = emptyMap(),
+        blockShipIds: Map<Int, List<Int>> = emptyMap(),
+        blockAssistArmyIds: Map<Int, List<Int>> = emptyMap(),
+        slotPayloads: Map<Int, String> = (0..30).associateWith { "{}" },
     ) = LocalBattleMonitorSnapshot(
         teamIds = ids.toList(),
         moves = ids.map(::move),
@@ -206,6 +267,12 @@ class LocalStzbDatabaseBattleMonitorTest {
         blockArmyIds = blockArmyIds,
         clearChunks = clearChunks,
         realMarches = realMarches,
+        entities = entities,
+        deletedEntityIds = deletedEntityIds,
+        directDeletedEntityIds = directDeletedEntityIds,
+        blockShipIds = blockShipIds,
+        blockAssistArmyIds = blockAssistArmyIds,
+        slotPayloads = slotPayloads,
     )
 
     private fun withDatabase(block: (LocalStzbDatabase) -> Unit) {
