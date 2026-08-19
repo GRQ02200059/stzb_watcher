@@ -10,6 +10,14 @@
       ]
     },
     {
+      "decimalId": 21,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00000015",
+      "names": [
+        "GET_FIELD_INFO_CMD"
+      ]
+    },
+    {
       "decimalId": 92,
       "evidence": "CLIENT_CONFIRMED",
       "hexId": "0000005c",
@@ -79,6 +87,22 @@
       "hexId": "000013a4",
       "names": [
         "SEND_WORLD_SCENCE_CHANGE_INFO"
+      ]
+    },
+    {
+      "decimalId": 6314,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "000018aa",
+      "names": [
+        "UNION_BUILDING_SPEED_UP_ADD"
+      ]
+    },
+    {
+      "decimalId": 90005,
+      "evidence": "CLIENT_CONFIRMED",
+      "hexId": "00015f95",
+      "names": [
+        "SYS_NOTIFY_DB_UPDATE_90005"
       ]
     }
   ],

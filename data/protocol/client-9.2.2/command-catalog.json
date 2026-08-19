@@ -76,14 +76,22 @@
       "webStatus": "typed"
     },
     {
-      "androidStatus": "raw",
-      "clientSources": [],
+      "androidStatus": "typed",
+      "clientSources": [
+        {
+          "file": "Game.Network/Tenth.Network/NetCommandDef.cs",
+          "lines": [
+            139,
+            146
+          ]
+        }
+      ],
       "count": 14,
       "decimalId": 21,
       "decodeKinds": [
         "xor"
       ],
-      "evidence": "CAPTURE_CONFIRMED",
+      "evidence": "CLIENT_CONFIRMED",
       "hexId": "00000015",
       "names": [
         "GET_FIELD_INFO_CMD"
@@ -117,7 +125,7 @@
         "scannedCount": 14,
         "totalCount": 14
       },
-      "webStatus": "raw"
+      "webStatus": "typed"
     },
     {
       "androidStatus": "raw",
@@ -21933,14 +21941,22 @@
       "webStatus": "raw"
     },
     {
-      "androidStatus": "raw",
-      "clientSources": [],
+      "androidStatus": "typed",
+      "clientSources": [
+        {
+          "file": "Game.Data.GamePlay/Tenth.Data/UnionData.cs",
+          "lines": [
+            1598,
+            1612
+          ]
+        }
+      ],
       "count": 154,
       "decimalId": 6314,
       "decodeKinds": [
         "zlib"
       ],
-      "evidence": "CAPTURE_CONFIRMED",
+      "evidence": "CLIENT_CONFIRMED",
       "hexId": "000018aa",
       "names": [
         "UNION_BUILDING_SPEED_UP_ADD"
@@ -22132,7 +22148,7 @@
         "scannedCount": 64,
         "totalCount": 154
       },
-      "webStatus": "raw"
+      "webStatus": "typed"
     },
     {
       "androidStatus": "raw",
@@ -22829,15 +22845,23 @@
       "webStatus": "raw"
     },
     {
-      "androidStatus": "raw",
-      "clientSources": [],
+      "androidStatus": "typed",
+      "clientSources": [
+        {
+          "file": "Game.Network/Tenth.Network/NetCommandDef.cs",
+          "lines": [
+            603,
+            610
+          ]
+        }
+      ],
       "count": 974,
       "decimalId": 90005,
       "decodeKinds": [
         "xor",
         "zlib"
       ],
-      "evidence": "CAPTURE_CONFIRMED",
+      "evidence": "CLIENT_CONFIRMED",
       "hexId": "00015f95",
       "names": [
         "SYS_NOTIFY_DB_UPDATE_90005"
@@ -23838,7 +23862,7 @@
         "scannedCount": 64,
         "totalCount": 974
       },
-      "webStatus": "raw"
+      "webStatus": "typed"
     },
     {
       "androidStatus": "raw",

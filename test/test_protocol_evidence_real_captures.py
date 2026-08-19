@@ -72,6 +72,23 @@ class ProtocolEvidenceRealCaptureTest(unittest.TestCase):
         self.assertEqual("CLIENT_CONFIRMED", field["evidence"])
         self.assertTrue(field["businessApproved"])
 
+    def test_all_existing_typed_parser_commands_have_evidence(self):
+        expected = {
+            "0000000a", "00000015", "0000005c", "00000067",
+            "000001fe", "0000029f", "0000030c", "00000834",
+            "00000898", "000013a2", "000013a4", "000018aa",
+            "00015f95",
+        }
+        by_hex = {row["hexId"]: row for row in self.commands}
+        for command in expected:
+            with self.subTest(command=command):
+                self.assertIn(command, by_hex)
+                self.assertEqual("CLIENT_CONFIRMED", by_hex[command]["evidence"])
+                self.assertIn(
+                    "typed",
+                    {by_hex[command]["webStatus"], by_hex[command]["androidStatus"]},
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

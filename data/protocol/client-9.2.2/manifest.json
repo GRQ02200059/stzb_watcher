@@ -1,7 +1,7 @@
 {
   "androidStatusCounts": {
-    "raw": 84,
-    "typed": 10,
+    "raw": 81,
+    "typed": 13,
     "unsupported": 0
   },
   "clientVersion": "9.2.2",
@@ -9,26 +9,26 @@
   "fieldCount": 28,
   "files": {
     "command-catalog.json": {
-      "sha256": "77eed390e31db06eebfebeca1782fae2fd4d0ac1b9d64841ab9f458f2468a80a",
-      "size": 2159373
+      "sha256": "5be3b50b42c33a0505e719b95aa022e52616243d20cb0fe753b010eb9a2c9c5d",
+      "size": 2159857
     },
     "field-registry.json": {
       "sha256": "885f5f008b8f7f5050f73c6c8e03b97a1063ebc3ed4675be48e06d407537646f",
       "size": 13057
     },
     "protocol-coverage-client-9.2.2.md": {
-      "sha256": "aad9a45a623fc726e70a5e096207ba36414b0339cd86e7577fb4a8305a9519e2",
-      "size": 8855
+      "sha256": "71541dff010bd18a2dd651fe4ecb67e6cb9c01a26cbfb5686961c4913ab92de0",
+      "size": 8865
     },
     "protocol_contract_client_9_2_2.json": {
-      "sha256": "9045937ad0b06221644c6a0f3d72c72958f75fdd610f8d0a3a838602eddc8f0a",
-      "size": 7951
+      "sha256": "d6c909a0b6934dc2b272609e757cd2963044b5cd5cfb2be83ea157c4e6d58ee2",
+      "size": 8438
     }
   },
   "generatorVersion": 1,
   "webStatusCounts": {
-    "raw": 85,
-    "typed": 9,
+    "raw": 82,
+    "typed": 12,
     "unsupported": 0
   }
 }

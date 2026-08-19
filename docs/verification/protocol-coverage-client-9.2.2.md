@@ -7,11 +7,11 @@
 | Registered fields | 28 |
 | Shape drift commands | 15 |
 | Invalid scanned samples | 153 |
-| Web typed | 9 |
-| Web raw | 85 |
+| Web typed | 12 |
+| Web raw | 82 |
 | Web unsupported | 0 |
-| Android typed | 10 |
-| Android raw | 84 |
+| Android typed | 13 |
+| Android raw | 81 |
 | Android unsupported | 0 |
 
 ## Commands
@@ -20,7 +20,7 @@
 |---|---:|---|---:|---|---|---|---|
 | 00000002 | 2 | CREATE_ROLE | 1 | array | raw | raw | CAPTURE_CONFIRMED |
 | 0000000a | 10 | GET_ALL_BATTLE_REPORT_PROFILE_CMD | 5 | array | typed | typed | CLIENT_CONFIRMED |
-| 00000015 | 21 | GET_FIELD_INFO_CMD | 14 | array | raw | raw | CAPTURE_CONFIRMED |
+| 00000015 | 21 | GET_FIELD_INFO_CMD | 14 | array | typed | typed | CLIENT_CONFIRMED |
 | 00000019 | 25 | SYNC_SERVER_TIME_STAMP | 7 | array | raw | raw | CAPTURE_CONFIRMED |
 | 0000001f | 31 | ARMY_REMOVE_HERO_FROM_ARMY | 1 | array | raw | raw | CAPTURE_CONFIRMED |
 | 00000025 | 37 | ARMY_RECRUIT_BATCH | 5 | integer | raw | raw | CAPTURE_CONFIRMED |
@@ -98,13 +98,13 @@
 | 000017a5 | 6053 | CHAT_UNION_PLAN_HISTORY_ID | 48 | object | raw | raw | CAPTURE_CONFIRMED |
 | 0000184b | 6219 | ARMY_REINFORCE_STAY_CHECK | 4 | object | raw | raw | CAPTURE_CONFIRMED |
 | 00001857 | 6231 | GET_BRIEF_BATTLE_REPORT_DETAIL | 1 | array | raw | raw | CAPTURE_CONFIRMED |
-| 000018aa | 6314 | UNION_BUILDING_SPEED_UP_ADD | 154 | array | raw | raw | CAPTURE_CONFIRMED |
+| 000018aa | 6314 | UNION_BUILDING_SPEED_UP_ADD | 154 | array | typed | typed | CLIENT_CONFIRMED |
 | 000018ad | 6317 | UNION_BUILDING_SPEED_UP_REMOVE | 305 | array | raw | raw | CAPTURE_CONFIRMED |
 | 000018b6 | 6326 | UNION_RELATION_FULL_NOTIFY | 97 | array | raw | raw | CAPTURE_CONFIRMED |
 | 000018b7 | 6327 | UNION_RELATION_CHANGE_NOTIFY | 16 | array | raw | raw | CAPTURE_CONFIRMED |
 | 00001f49 | 8009 | - | 48 | array | raw | raw | CAPTURE_CONFIRMED |
 | 00015f92 | 90002 | SYS_NOTIFY_EXCEPTION | 80 | array | raw | raw | CAPTURE_CONFIRMED |
-| 00015f95 | 90005 | SYS_NOTIFY_DB_UPDATE_90005 | 974 | array | raw | raw | CAPTURE_CONFIRMED |
+| 00015f95 | 90005 | SYS_NOTIFY_DB_UPDATE_90005 | 974 | array | typed | typed | CLIENT_CONFIRMED |
 | 00015f96 | 90006 | SYS_PING_90006 | 2078 | array | raw | raw | CAPTURE_CONFIRMED |
 | 00015f98 | 90008 | SYS_CHECK_SID_90008 | 5401 | integer | raw | raw | CAPTURE_CONFIRMED |
 | 00016b4e | 93006 | SYS_MOD_PLAYER_ALL_MT | 10 | array | raw | raw | CAPTURE_CONFIRMED |
