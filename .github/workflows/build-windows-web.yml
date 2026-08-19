@@ -39,12 +39,12 @@ jobs:
       - name: Verify artifact
         shell: pwsh
         run: |
-          $exe = 'dist/STZB助手-Web/STZB助手-Web.exe'
+          $exe = 'dist/STZB助手-Web.exe'
           if (-not (Test-Path $exe)) { throw "Missing $exe" }
           Get-Item $exe | Format-List FullName,Length,LastWriteTime
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: STZB-Web-Windows
-          path: dist/STZB助手-Web
+          path: dist/STZB助手-Web.exe
           if-no-files-found: error

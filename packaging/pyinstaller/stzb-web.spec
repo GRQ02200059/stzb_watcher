@@ -1,5 +1,8 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_submodules
+from pathlib import Path
+
+ROOT = Path(SPECPATH).resolve().parents[1]
 
 hiddenimports = [
     "api_server", "realtime_writer", "scrapy_v2", "profile_manager",
@@ -10,13 +13,15 @@ hiddenimports = [
 ]
 
 a = Analysis(
-    ["run_web_exe.py"], pathex=["."], binaries=[],
+    [str(ROOT / "run_web_exe.py")], pathex=[str(ROOT)], binaries=[],
     datas=[
-        ("static", "static"), ("data", "data"),
-        ("protocol", "protocol"), ("hero_scraper", "hero_scraper"),
-        ("battle-engine", "battle-engine"),
+        (str(ROOT / "static"), "static"),
+        (str(ROOT / "data"), "data"),
+        (str(ROOT / "protocol"), "protocol"),
+        (str(ROOT / "hero_scraper"), "hero_scraper"),
+        (str(ROOT / "battle-engine"), "battle-engine"),
     ],
-    hiddenimports=hiddenimports, hookspath=["packaging/pyinstaller/hooks"],
+    hiddenimports=hiddenimports, hookspath=[str(ROOT / "packaging/pyinstaller/hooks")],
     noarchive=False,
 )
 pyz = PYZ(a.pure)
