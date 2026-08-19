@@ -212,6 +212,40 @@ class WorldStateStore:
             {"blockInfo": packet.block_info},
         )
         event_count = 1
+        for army_id in packet.armies:
+            self._record_event(
+                version,
+                packet_seq,
+                "entity_upserted",
+                "army",
+                str(army_id),
+                packet,
+                {"source": "armyChanges"},
+            )
+            event_count += 1
+        for wid in packet.tiles:
+            self._record_event(
+                version,
+                packet_seq,
+                "entity_upserted",
+                "tile",
+                str(wid),
+                packet,
+                {"source": "worldChunkChanges"},
+            )
+            event_count += 1
+        for wid, chunk_types in packet.clear_chunks.items():
+            for chunk_type in chunk_types:
+                self._record_event(
+                    version,
+                    packet_seq,
+                    "chunk_cleared",
+                    "tile_chunk",
+                    f"{wid}:{chunk_type}",
+                    packet,
+                    {"wid": wid, "chunkType": str(chunk_type)},
+                )
+                event_count += 1
         for category, entity_ids in removed_entities.items():
             for entity_id in entity_ids:
                 self._record_event(
@@ -250,8 +284,10 @@ class WorldStateStore:
         memberships,
         packet_seq: int,
     ) -> None:
-        self.conn.execute(f"DELETE FROM {table}")
         for block_id, entity_ids in memberships.items():
+            self.conn.execute(
+                f"DELETE FROM {table} WHERE block_id=?", (block_id,)
+            )
             for entity_id in entity_ids:
                 self.conn.execute(
                     f"""

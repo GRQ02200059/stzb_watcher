@@ -112,7 +112,7 @@ class WorldStateStoreTest(unittest.TestCase):
         ).fetchone()
         self.assertEqual(row["block_id"], 1)
 
-    def test_baseline_replaces_all_block_membership_types(self):
+    def test_baseline_replaces_only_explicitly_covered_blocks(self):
         first = world_payload(
             marker=10,
             armies={"100": army_tuple()},
@@ -131,15 +131,11 @@ class WorldStateStoreTest(unittest.TestCase):
         )
         self.store.apply_baseline(self.packet(5026, second, observed=2000))
 
-        for table in (
-            "world_army_blocks",
-            "world_ship_blocks",
-            "world_assist_army_blocks",
-        ):
-            self.assertEqual(
-                self.conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0],
-                0,
-            )
+        for table in ("world_army_blocks", "world_ship_blocks", "world_assist_army_blocks"):
+            rows = self.conn.execute(
+                f"SELECT block_id FROM {table} ORDER BY block_id"
+            ).fetchall()
+            self.assertEqual([row["block_id"] for row in rows], [1])
 
     def test_ship_and_assist_unlink_delete_after_last_membership(self):
         baseline = world_payload(
@@ -278,6 +274,28 @@ class WorldStateStoreTest(unittest.TestCase):
         ).fetchall()
         self.assertIn(("entity_deleted", "strategy", "101"), [tuple(row) for row in events])
         self.assertIn(("entity_deleted", "career_support", "106"), [tuple(row) for row in events])
+
+    def test_delta_records_tile_army_and_chunk_events(self):
+        self.store.apply_baseline(
+            self.packet(5026, world_payload(marker=10, block_armies={"1": []}))
+        )
+        delta = world_payload(
+            marker=11,
+            armies={"100": army_tuple()},
+            chunks={"10004": {"0": world_city("新格")}},
+            clear_chunks={"10005": ["4"]},
+        )
+        delta[20] = [2, 1]
+        result = self.store.apply_delta(self.packet(5028, delta, observed=2000))
+        events = self.conn.execute(
+            "SELECT event_type,entity_type,entity_id FROM world_state_events "
+            "WHERE state_version=? ORDER BY seq",
+            (result.state_version,),
+        ).fetchall()
+        values = [tuple(row) for row in events]
+        self.assertIn(("entity_upserted", "army", "100"), values)
+        self.assertIn(("entity_upserted", "tile", "10004"), values)
+        self.assertIn(("chunk_cleared", "tile_chunk", "10005:4"), values)
 
 
 if __name__ == "__main__":
