@@ -9,16 +9,16 @@
   "fieldCount": 28,
   "files": {
     "command-catalog.json": {
-      "sha256": "ac864c60d77552d10a420d2b6e2b216649c533ce999a010de72ff5c212558e46",
-      "size": 2159228
+      "sha256": "77eed390e31db06eebfebeca1782fae2fd4d0ac1b9d64841ab9f458f2468a80a",
+      "size": 2159373
     },
     "field-registry.json": {
       "sha256": "885f5f008b8f7f5050f73c6c8e03b97a1063ebc3ed4675be48e06d407537646f",
       "size": 13057
     },
     "protocol-coverage-client-9.2.2.md": {
-      "sha256": "b862d3ef026bb134db27663ed18a77adeef423a03b610ec12f3deb760292559c",
-      "size": 8861
+      "sha256": "aad9a45a623fc726e70a5e096207ba36414b0339cd86e7577fb4a8305a9519e2",
+      "size": 8855
     }
   },
   "generatorVersion": 1,

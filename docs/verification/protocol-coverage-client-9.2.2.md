@@ -6,7 +6,7 @@
 | Client-named commands | 90 |
 | Registered fields | 28 |
 | Shape drift commands | 15 |
-| Invalid scanned samples | 243 |
+| Invalid scanned samples | 153 |
 | Web typed | 9 |
 | Web raw | 85 |
 | Web unsupported | 0 |
@@ -42,8 +42,8 @@
 | 000000dc | 220 | MAIL_GET_CONTACTS | 48 | array | raw | raw | CAPTURE_CONFIRMED |
 | 000000dd | 221 | MAIL_REWARD_ONE_KEY | 1 | array | raw | raw | CAPTURE_CONFIRMED |
 | 000000e2 | 226 | MAIL_REWARD_ONE_KEY_QUERY | 1 | array | raw | raw | CAPTURE_CONFIRMED |
-| 00000105 | 261 | MINI_MAP_WORLD_INFO | 3 | invalid | raw | raw | CAPTURE_CONFIRMED |
-| 00000106 | 262 | MINI_MAP_REGION_INFO | 34 | invalid | raw | raw | CAPTURE_CONFIRMED |
+| 00000105 | 261 | MINI_MAP_WORLD_INFO | 3 | array | raw | raw | CAPTURE_CONFIRMED |
+| 00000106 | 262 | MINI_MAP_REGION_INFO | 34 | array | raw | raw | CAPTURE_CONFIRMED |
 | 00000190 | 400 | TASK_AWARD | 19 | integer | raw | raw | CAPTURE_CONFIRMED |
 | 000001fd | 509 | USER_GET_SEASON_COURSE_LIST | 48 | array | raw | raw | CAPTURE_CONFIRMED |
 | 000001fe | 510 | USER_GET_USER_SEASON_COURSE | 34 | object | typed | typed | CLIENT_CONFIRMED |
@@ -87,7 +87,7 @@
 | 00001363 | 4963 | SKILL_RECOMMENDATION | 2 | array | raw | raw | CAPTURE_CONFIRMED |
 | 00001367 | 4967 | QUERY_WANTED_TO_REPOTR | 47 | array | raw | raw | CAPTURE_CONFIRMED |
 | 00001368 | 4968 | CHECK_ADD_WEIXIN | 101 | array | raw | raw | CAPTURE_CONFIRMED |
-| 000013a2 | 5026 | SEND_WORLD_SCENCE_FULL_INFO | 1616 | invalid | typed | typed | CLIENT_CONFIRMED |
+| 000013a2 | 5026 | SEND_WORLD_SCENCE_FULL_INFO | 1616 | array | typed | typed | CLIENT_CONFIRMED |
 | 000013a4 | 5028 | SEND_WORLD_SCENCE_CHANGE_INFO | 294 | array | typed | typed | CLIENT_CONFIRMED |
 | 000013cd | 5069 | HELP_GUIDE_TIPS_LOG | 6 | integer | raw | raw | CAPTURE_CONFIRMED |
 | 000013ce | 5070 | DAILY_REPORT_GET_DETAIL | 2 | array | raw | raw | CAPTURE_CONFIRMED |

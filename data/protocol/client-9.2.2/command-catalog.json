@@ -1129,11 +1129,15 @@
         "capture_new/00000105/cap_20260814233252654_00000105_zlib_raw.txt"
       ],
       "shape": {
-        "arrayLengths": [],
+        "arrayLengths": [
+          6
+        ],
         "drift": false,
-        "invalidCount": 3,
-        "parsedCount": 0,
-        "rootTypes": [],
+        "invalidCount": 0,
+        "parsedCount": 3,
+        "rootTypes": [
+          "array"
+        ],
         "scannedCount": 3,
         "totalCount": 3
       },
@@ -1189,11 +1193,15 @@
         "capture_new/00000106/cap_20260814233254547_00000106_zlib_raw.txt"
       ],
       "shape": {
-        "arrayLengths": [],
+        "arrayLengths": [
+          10
+        ],
         "drift": false,
-        "invalidCount": 34,
-        "parsedCount": 0,
-        "rootTypes": [],
+        "invalidCount": 0,
+        "parsedCount": 34,
+        "rootTypes": [
+          "array"
+        ],
         "scannedCount": 34,
         "totalCount": 34
       },
@@ -21144,11 +21152,15 @@
         "capture_new/000013a2/cap_20260815165816416_000013a2_plain_str.txt"
       ],
       "shape": {
-        "arrayLengths": [],
+        "arrayLengths": [
+          31
+        ],
         "drift": false,
-        "invalidCount": 64,
-        "parsedCount": 0,
-        "rootTypes": [],
+        "invalidCount": 59,
+        "parsedCount": 5,
+        "rootTypes": [
+          "array"
+        ],
         "scannedCount": 64,
         "totalCount": 1616
       },
@@ -21477,8 +21489,8 @@
           31
         ],
         "drift": true,
-        "invalidCount": 48,
-        "parsedCount": 16,
+        "invalidCount": 0,
+        "parsedCount": 64,
         "rootTypes": [
           "array"
         ],

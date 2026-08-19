@@ -52,6 +52,19 @@ class ProtocolEvidenceShapeTest(unittest.TestCase):
         self.assertEqual([2, 3], summary["arrayLengths"])
         self.assertEqual(["array"], summary["rootTypes"])
 
+    def test_sample_summary_accepts_client_numeric_object_keys(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / "world.txt").write_text(
+                '[{},{10496:["secret-player",951330]},null]',
+                encoding="utf-8",
+            )
+            summary = summarize_command_samples(root, ["world.txt"])
+
+        self.assertEqual(1, summary["parsedCount"])
+        self.assertEqual(0, summary["invalidCount"])
+        self.assertEqual([3], summary["arrayLengths"])
+
     def test_sample_limit_is_deterministic_but_keeps_total_count(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

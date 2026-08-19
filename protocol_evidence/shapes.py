@@ -1,5 +1,9 @@
 import json
 from pathlib import Path
+import re
+
+
+_NUMERIC_OBJECT_KEY = re.compile(r"(?<=[{,])\s*(-?\d+)\s*(?=:)")
 
 
 def _type_name(value) -> str:
@@ -50,7 +54,12 @@ def summarize_command_samples(
     for relative_path in scanned:
         path = repository_root / relative_path
         try:
-            value = json.loads(path.read_text(encoding="utf-8"))
+            text = path.read_text(encoding="utf-8")
+            try:
+                value = json.loads(text)
+            except json.JSONDecodeError:
+                normalized = _NUMERIC_OBJECT_KEY.sub(r'"\1"', text)
+                value = json.loads(normalized)
             summaries.append(summarize_json_value(value))
         except (OSError, UnicodeError, json.JSONDecodeError):
             invalid_count += 1
