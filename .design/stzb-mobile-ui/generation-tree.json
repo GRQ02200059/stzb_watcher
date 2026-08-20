@@ -1,0 +1,18 @@
+{
+  "root": {
+    "nodeId": "gen-project-shell",
+    "kind": "project-shell",
+    "pageIds": [],
+    "output": "partials/mobile-shell.html",
+    "sharedRegions": ["390px 移动端设备框", "顶部状态栏", "底部玻璃4段Tab栏", "app-bg 背景", "玻璃组件类"],
+    "privateRegions": [],
+    "mutableSlots": ["pageContent", "activeTab"],
+    "status": "planned",
+    "children": [
+      { "nodeId": "page-battlefield", "kind": "page-leaf", "pageIds": ["page-battlefield"], "output": "pages/battlefield.html", "sharedRegions": ["shell"], "privateRegions": ["pageContent"], "mutableSlots": [], "status": "planned", "children": [] },
+      { "nodeId": "page-tools", "kind": "page-leaf", "pageIds": ["page-tools"], "output": "pages/tools.html", "sharedRegions": ["shell"], "privateRegions": ["pageContent"], "mutableSlots": [], "status": "planned", "children": [] },
+      { "nodeId": "page-live-army", "kind": "page-leaf", "pageIds": ["page-live-army"], "output": "pages/live-army.html", "sharedRegions": ["shell"], "privateRegions": ["pageContent"], "mutableSlots": [], "status": "planned", "children": [] },
+      { "nodeId": "page-simulator", "kind": "page-leaf", "pageIds": ["page-simulator"], "output": "pages/simulator.html", "sharedRegions": ["shell"], "privateRegions": ["pageContent"], "mutableSlots": [], "status": "planned", "children": [] }
+    ]
+  }
+}

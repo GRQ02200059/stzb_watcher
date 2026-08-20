@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Android UI 方向选择</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "PingFang SC", "Noto Sans SC", system-ui, sans-serif; background: #EEF2F8; color: #14223A; padding: 24px; }
+h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.subtitle { font-size: 14px; color: #60708B; margin-bottom: 28px; }
+.grid { display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; }
+.card { cursor: pointer; border-radius: 28px; padding: 18px; background: #fff; box-shadow: 0 4px 20px rgba(20,34,58,0.08); transition: transform .18s, box-shadow .18s; }
+.card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(20,34,58,0.14); }
+.card.selected { outline: 3px solid #426AD2; outline-offset: 3px; }
+.label { text-align: center; margin-top: 14px; max-width: 280px; }
+.label h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.label p { font-size: 13px; color: #60708B; line-height: 18px; }
+.recommend { margin-top: 28px; padding: 18px 22px; background: rgba(66,106,210,0.07); border-radius: 16px; max-width: 920px; margin-left: auto; margin-right: auto; font-size: 14px; line-height: 22px; }
+.recommend strong { color: #426AD2; }
+
+.phone { width: 280px; height: 560px; border-radius: 38px; overflow: hidden; position: relative; box-shadow: 0 12px 40px rgba(0,0,0,0.18); }
+.notch { position: absolute; top:0; left:50%; transform:translateX(-50%); width:120px; height:26px; background:#000; border-radius:0 0 18px 18px; z-index:10; }
+.screen { width:100%; height:100%; position:relative; display:flex; flex-direction:column; }
+.statusbar { display:flex; justify-content:space-between; align-items:center; padding:8px 22px 0; font-size:11px; font-weight:600; height:34px; flex-shrink:0; }
+.body { flex:1; padding:6px 12px 0; overflow:hidden; }
+.tabbar { position:absolute; bottom:10px; left:12px; right:12px; border-radius:26px; padding:8px 6px; display:flex; justify-content:space-around; align-items:center; backdrop-filter:blur(20px); }
+.tab { display:flex; flex-direction:column; align-items:center; gap:2px; font-size:10px; padding:5px 10px; border-radius:18px; }
+.tab.active { font-weight:700; }
+.tab svg { width:20px; height:20px; }
+.hdr { border-radius:22px; padding:14px; margin-bottom:10px; }
+.hdr-t { font-size:17px; font-weight:800; }
+.hdr-s { font-size:11px; opacity:.65; margin-top:2px; }
+.block { border-radius:20px; padding:12px; margin-bottom:10px; }
+.mini { border-radius:14px; padding:10px; }
+.row { display:flex; gap:8px; } .row > * { flex:1; }
+.stat { font-size:22px; font-weight:800; line-height:26px; font-variant-numeric:tabular-nums; }
+.caption { font-size:10px; opacity:.65; margin-top:2px; }
+.chip { display:inline-block; padding:2px 9px; border-radius:999px; font-size:10px; font-weight:600; }
+.ev-t { font-size:13px; font-weight:700; margin-top:6px; }
+.ev-s { font-size:11px; opacity:.65; }
+.space { height:4px; }
+
+/* A: glass light */
+.g-screen { background: radial-gradient(120% 80% at 10% 0%, rgba(140,200,255,.35), transparent 50%), radial-gradient(120% 80% at 90% 5%, rgba(201,155,255,.3), transparent 50%), radial-gradient(140% 70% at 80% 100%, rgba(114,228,214,.25), transparent 50%), linear-gradient(180deg,#FBFCFF,#F1F6FF 50%,#E9F1FC); color:#14223A; }
+.g-hdr, .g-block { background:rgba(255,255,255,.75); border:1px solid rgba(255,255,255,.75); box-shadow:0 2px 8px rgba(20,34,58,.04); backdrop-filter:blur(18px); }
+.g-mini { background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.6); }
+.g-tabbar { background:rgba(255,255,255,.85); border:1px solid rgba(255,255,255,.8); box-shadow:0 8px 30px rgba(46,79,166,.12); }
+.g-tab { color:#60708B; } .g-tab.active { background:rgba(255,255,255,.95); color:#426AD2; }
+.c-ok { background:#E0F4EE; color:#1E9B83; } .c-warn { background:#FDECD4; color:#BE7A18; } .c-info { background:#E3ECF9; color:#4C78C8; }
+
+/* B: dark */
+.d-screen { background:linear-gradient(180deg,#0B1120,#0F172A 50%,#111827); color:#E2E8F0; }
+.d-hdr { background:rgba(30,41,59,.75); border:1px solid rgba(71,85,105,.4); box-shadow:0 4px 16px rgba(0,0,0,.3); }
+.d-block { background:rgba(30,41,59,.7); border:1px solid rgba(71,85,105,.4); box-shadow:0 4px 16px rgba(0,0,0,.3); }
+.d-mini { background:rgba(15,23,42,.65); border:1px solid rgba(71,85,105,.3); }
+.d-tabbar { background:rgba(15,23,42,.92); border:1px solid rgba(71,85,105,.4); box-shadow:0 -4px 24px rgba(0,0,0,.4); }
+.d-tab { color:#64748B; } .d-tab.active { background:rgba(34,211,238,.12); color:#22D3EE; }
+.d-acc { color:#22D3EE; }
+.d-c-ok { background:rgba(16,185,129,.15); color:#34D399; } .d-c-warn { background:rgba(245,158,11,.15); color:#FBBF24; } .d-c-info { background:rgba(56,189,248,.15); color:#38BDF8; }
+.d-glow { box-shadow:0 0 24px rgba(34,211,238,.1); }
+
+/* C: M3 */
+.m-screen { background:#F8F9FC; color:#1C1B1F; }
+.m-hdr { background:#fff; border-radius:24px; padding:16px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04); }
+.m-block { background:#fff; border-radius:20px; padding:14px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04); }
+.m-mini { background:#F0F3FA; }
+.m-tabbar { background:#fff; border-top:1px solid #E5E7EB; box-shadow:0 -2px 12px rgba(0,0,0,.04); border-radius:0; left:0; right:0; bottom:0; padding:8px 0 12px; }
+.m-tab { color:#7A7F88; } .m-tab.active { background:#E8DEF8; color:#6750A4; }
+.m-acc { color:#6750A4; }
+.m-c-ok { background:#E7F5EC; color:#1E8E3E; } .m-c-warn { background:#FEF7E0; color:#B06000; } .m-c-info { background:#E8F0FE; color:#1A73E8; }
+</style>
+</head>
+<body>
+<h1>选择 Android 端整体视觉方向</h1>
+<p class="subtitle">三套方案都保持中文标签、无 emoji、底部 4 Tab 导航。点击卡片选择，或直接在终端告诉我。</p>
+<div class="grid">
+
+<!-- A -->
+<div class="card" onclick="document.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));this.classList.add('selected');window.location.hash='glass';">
+<div class="phone"><div class="notch"></div>
+<div class="screen g-screen">
+<div class="statusbar" style="color:#14223A"><span>9:41</span><span>5G ▮</span></div>
+<div class="body">
+<div class="hdr g-hdr"><div class="hdr-t">实时战场</div><div class="hdr-s">战场动态与抓包状态</div></div>
+<div class="block g-block">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="chip c-ok">运行中</span><span class="caption">02:14:33</span></div>
+<div class="row"><div class="mini g-mini"><div class="stat">3,472</div><div class="caption">在线玩家</div></div><div class="mini g-mini"><div class="stat">86</div><div class="caption">活跃同盟</div></div></div>
+</div>
+<div class="block g-block" style="padding:10px 12px"><div style="display:flex;justify-content:space-between;align-items:center"><span class="chip c-warn">集结</span><span class="caption">1分钟前</span></div><div class="ev-t">[天下会] 于洛阳外城发起集结</div><div class="ev-s">参战 8 队 · 预计 12:20 抵达</div></div>
+</div>
+<div class="tabbar g-tabbar">
+<div class="tab g-tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>战场</div>
+<div class="tab g-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 17l5-5 3 3 5-6 5 5v6H5z"/></svg>战报</div>
+<div class="tab g-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M3 19c1-3 3-4 6-4s5 1 6 4"/></svg>同盟</div>
+<div class="tab g-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="5" cy="5" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="19" cy="5" r="1.5"/><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/></svg>工具</div>
+</div></div></div>
+<div class="label"><h3>A · 液态玻璃（浅色精修）</h3><p>沿用现有浅色方向，提升卡片层级和信息节奏。改动最小，整体明亮通透。</p></div>
+</div>
+
+<!-- B -->
+<div class="card" onclick="document.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));this.classList.add('selected');window.location.hash='dark';">
+<div class="phone"><div class="notch"></div>
+<div class="screen d-screen">
+<div class="statusbar" style="color:#E2E8F0"><span>9:41</span><span>5G ▮</span></div>
+<div class="body">
+<div class="hdr d-hdr d-glow"><div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:#34D399;box-shadow:0 0 8px #34D399"></div><span class="hdr-t d-acc">实时战场</span></div><div class="hdr-s" style="color:#94A3B8">战场动态与抓包状态</div></div>
+<div class="block d-block">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="chip d-c-ok">运行中</span><span class="caption" style="color:#94A3B8">02:14:33</span></div>
+<div class="row"><div class="mini d-mini"><div class="stat d-acc">3,472</div><div class="caption" style="color:#94A3B8">在线玩家</div></div><div class="mini d-mini"><div class="stat d-acc">86</div><div class="caption" style="color:#94A3B8">活跃同盟</div></div></div>
+</div>
+<div class="block d-block" style="padding:10px 12px"><div style="display:flex;justify-content:space-between;align-items:center"><span class="chip d-c-warn">集结</span><span class="caption" style="color:#94A3B8">1分钟前</span></div><div class="ev-t" style="color:#F1F5F9">[天下会] 于洛阳外城发起集结</div><div class="ev-s" style="color:#94A3B8">参战 8 队 · 预计 12:20 抵达</div></div>
+</div>
+<div class="tabbar d-tabbar">
+<div class="tab d-tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>战场</div>
+<div class="tab d-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 17l5-5 3 3 5-6 5 5v6H5z"/></svg>战报</div>
+<div class="tab d-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M3 19c1-3 3-4 6-4s5 1 6 4"/></svg>同盟</div>
+<div class="tab d-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="5" cy="5" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="19" cy="5" r="1.5"/><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/></svg>工具</div>
+</div></div></div>
+<div class="label"><h3>B · 暗色战术台</h3><p>深蓝黑底配青色高光，与 Web 端和战术演练页统一。游戏感强，但改动最大。</p></div>
+</div>
+
+<!-- C -->
+<div class="card" onclick="document.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));this.classList.add('selected');window.location.hash='m3';">
+<div class="phone"><div class="notch"></div>
+<div class="screen m-screen">
+<div class="statusbar" style="color:#1C1B1F"><span>9:41</span><span>5G ▮</span></div>
+<div class="body">
+<div class="hdr m-hdr"><div class="hdr-t" style="font-size:20px">实时战场</div><div class="hdr-s">战场动态与抓包状态</div></div>
+<div class="block m-block">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span class="chip m-c-ok">运行中</span><span class="caption">02:14:33</span></div>
+<div class="row"><div class="mini m-mini"><div class="stat m-acc">3,472</div><div class="caption">在线玩家</div></div><div class="mini m-mini"><div class="stat m-acc">86</div><div class="caption">活跃同盟</div></div></div>
+</div>
+<div class="block m-block" style="padding:12px 14px"><div style="display:flex;justify-content:space-between;align-items:center"><span class="chip m-c-warn">集结</span><span class="caption">1分钟前</span></div><div class="ev-t">[天下会] 于洛阳外城发起集结</div><div class="ev-s">参战 8 队 · 预计 12:20 抵达</div></div>
+</div>
+<div class="tabbar m-tabbar">
+<div class="tab m-tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>战场</div>
+<div class="tab m-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 17l5-5 3 3 5-6 5 5v6H5z"/></svg>战报</div>
+<div class="tab m-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M3 19c1-3 3-4 6-4s5 1 6 4"/></svg>同盟</div>
+<div class="tab m-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="5" cy="5" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="19" cy="5" r="1.5"/><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/></svg>工具</div>
+</div></div></div>
+<div class="label"><h3>C · 原生 Material 3</h3><p>标准安卓风格，干净克制，系统感强。辨识度和游戏氛围较弱。</p></div>
+</div>
+
+</div>
+<div class="recommend">
+我的建议是 <strong>A（液态玻璃精修）</strong>：当前 App 已经建立了浅色玻璃基线，工作区里也有战场、工具、实时部队、模拟器四页现成精修稿，改造成本最低，视觉一致性最好。B 的暗色方向更有游戏感，但需要把战术演练页和所有页面全部重做。C 最稳妥但缺乏个性。
+</div>
+</body>
+</html>

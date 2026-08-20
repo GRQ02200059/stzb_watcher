@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>率土之滨 · 监控 App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../colors_and_type.css" />
+  <style>
+    /* 设备外框：iPhone-like，44px 圆角，柔和外阴影 */
+    .device-frame {
+      width: 390px;
+      max-width: 390px;
+      height: 844px;
+      border-radius: 44px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 40px 90px rgba(46, 79, 166, 0.20), 0 8px 24px rgba(20, 34, 58, 0.10);
+    }
+
+    /* ===== 精修专用装饰（仅用既有 token 派生，不引入新色板） ===== */
+
+    /* 武将头像：极细 outline + 内高光，层次更立体 */
+    .hero-slot {
+      width: 52px; height: 52px;
+      border-radius: var(--radius-md);
+      background: var(--color-primary-container);
+      box-shadow:
+        0 0 0 1px var(--outline-blue),
+        inset 0 1px 0 var(--glass-highlight);
+      transition: transform .2s ease;
+    }
+    .hero-slot:hover { transform: translateY(-1px); }
+
+    /* 武将战法小 chip：更收敛的间距与字重 */
+    .skill-chip {
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      background: var(--color-primary-container);
+      color: var(--color-primary);
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* 中央 VS 徽标：主色描边 + 轻微高光呼吸 */
+    .vs-badge {
+      width: 46px; height: 46px;
+      border-radius: var(--radius-full);
+      box-shadow:
+        0 0 0 1.5px var(--color-primary),
+        0 8px 20px rgba(66, 106, 210, 0.20),
+        inset 0 1px 0 var(--glass-highlight);
+      animation: vsPulse 3.2s ease-in-out infinite;
+    }
+    @keyframes vsPulse {
+      0%, 100% { box-shadow: 0 0 0 1.5px var(--color-primary), 0 8px 20px rgba(66, 106, 210, 0.20), inset 0 1px 0 var(--glass-highlight); }
+      50%      { box-shadow: 0 0 0 1.5px var(--color-primary), 0 8px 26px rgba(66, 106, 210, 0.32), inset 0 1px 0 var(--glass-highlight); }
+    }
+
+    /* iOS 设置项：整行触感 */
+    .settings-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 2px;
+      transition: background .15s ease;
+      border-radius: var(--radius-sm);
+    }
+    .settings-row:not(:last-child) { border-bottom: 1px solid var(--hairline); }
+    .settings-row:active { background: var(--color-primary-container); }
+
+    /* 主按钮：细腻按压反馈 */
+    .cta-btn {
+      transition: transform .12s ease, box-shadow .2s ease;
+      box-shadow: 0 8px 20px rgba(66, 106, 210, 0.24);
+    }
+    .cta-btn:active { transform: translateY(1px); box-shadow: 0 4px 12px rgba(66, 106, 210, 0.20); }
+
+    /* 进度条：统一 10px、full 圆角、内嵌轨道 + 表面高光 */
+    .bar-track {
+      height: 10px;
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      box-shadow: inset 0 1px 0 var(--glass-highlight);
+    }
+
+    /* 结果头胜率数字 */
+    .win-rate { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+
+<!-- body 使用 app-bg，居中承载移动设备外框 -->
+<body class="app-bg min-h-screen flex items-center justify-center p-6">
+
+  <!-- ===== 移动设备外框 ===== -->
+  <div class="device-frame app-bg">
+
+    <!-- ===== 顶部 iOS 状态栏 ===== -->
+    <div class="flex items-center justify-between px-6" style="height: 44px;">
+      <!-- 时间 -->
+      <span class="type-caption" style="font-weight: 600; color: var(--text-primary);">9:41</span>
+      <!-- 信号 / WiFi / 电量 -->
+      <div class="flex items-center gap-1.5" style="color: var(--text-primary);">
+        <!-- 信号 -->
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="currentColor" aria-hidden="true">
+          <rect x="0" y="9" width="3" height="5" rx="1"></rect>
+          <rect x="5" y="6" width="3" height="8" rx="1"></rect>
+          <rect x="10" y="3" width="3" height="11" rx="1"></rect>
+          <rect x="15" y="0" width="3" height="14" rx="1"></rect>
+        </svg>
+        <!-- WiFi -->
+        <svg width="18" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2 8.5a15 15 0 0 1 20 0"></path>
+          <path d="M5 12a10 10 0 0 1 14 0"></path>
+          <path d="M8.5 15.5a5 5 0 0 1 7 0"></path>
+          <circle cx="12" cy="19" r="0.6" fill="currentColor"></circle>
+        </svg>
+        <!-- 电量 -->
+        <svg width="26" height="14" viewBox="0 0 26 14" fill="none" aria-hidden="true">
+          <rect x="0.5" y="0.5" width="21" height="13" rx="3.5" stroke="currentColor" stroke-opacity="0.4"></rect>
+          <rect x="2.5" y="2.5" width="15" height="9" rx="2" fill="currentColor"></rect>
+          <rect x="23" y="4.5" width="2" height="5" rx="1" fill="currentColor" fill-opacity="0.4"></rect>
+        </svg>
+      </div>
+    </div>
+
+    <!-- ===== 玻璃头部（SLOT：页面标题栏） ===== -->
+    <header class="glass-veil mx-4 mt-1 px-4 py-3 flex items-center justify-between">
+      <!-- SLOT: pageHeader -->
+      <div class="flex flex-col">
+        <span class="type-title" style="color: var(--text-primary);">战斗模拟</span>
+        <span class="type-caption" style="color: var(--text-tertiary);">阵容推演 · 胜负预测</span>
+      </div>
+      <!-- 右侧动作区（SLOT：刷新 / 菜单等图标） -->
+      <div class="flex items-center gap-3" style="color: var(--text-secondary);">
+        <!-- 刷新 -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
+          <path d="M21 4v5h-5"></path>
+        </svg>
+        <!-- 菜单 -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="4" y1="7" x2="20" y2="7"></line>
+          <line x1="4" y1="12" x2="20" y2="12"></line>
+          <line x1="4" y1="17" x2="20" y2="17"></line>
+        </svg>
+      </div>
+      <!-- /SLOT: pageHeader -->
+    </header>
+
+    <!-- ===== 主内容滚动区（SLOT：页面内容） ===== -->
+    <main class="no-scrollbar flex flex-col overflow-y-auto"
+          style="height: calc(844px - 44px - 64px); padding: 16px; gap: 16px; padding-bottom: 96px;">
+      <!-- SLOT: pageContent -->
+
+      <!-- ==== 1. 对阵配置区 ==== -->
+      <section class="flex flex-col" style="gap: 8px;">
+
+        <!-- Team A：我方队伍 -->
+        <div class="glass-card" style="padding: 14px;">
+          <!-- 卡头 -->
+          <div class="flex items-center justify-between" style="margin-bottom: 14px;">
+            <span class="type-label" style="color: var(--text-primary);">我方队伍</span>
+            <span class="chip chip-success">已配置</span>
+          </div>
+          <!-- 3 武将 slots -->
+          <div class="flex items-start justify-between" style="gap: 8px;">
+            <!-- 吕布 -->
+            <div class="flex flex-col items-center" style="width: 33%; gap: 7px;">
+              <div class="hero-slot flex items-center justify-center">
+                <span class="type-title" style="color: var(--color-primary);">吕</span>
+              </div>
+              <span class="type-label" style="color: var(--text-primary);">吕布</span>
+              <span class="type-caption skill-chip">破军威胜</span>
+            </div>
+            <!-- 陈宫 -->
+            <div class="flex flex-col items-center" style="width: 33%; gap: 7px;">
+              <div class="hero-slot flex items-center justify-center">
+                <span class="type-title" style="color: var(--color-primary);">陈</span>
+              </div>
+              <span class="type-label" style="color: var(--text-primary);">陈宫</span>
+              <span class="type-caption skill-chip">太公兵法</span>
+            </div>
+            <!-- 貂蝉 -->
+            <div class="flex flex-col items-center" style="width: 33%; gap: 7px;">
+              <div class="hero-slot flex items-center justify-center">
+                <span class="type-title" style="color: var(--color-primary);">貂</span>
+              </div>
+              <span class="type-label" style="color: var(--text-primary);">貂蝉</span>
+              <span class="type-caption skill-chip">倾国倾城</span>
+            </div>
+          </div>
+          <!-- 卡脚 -->
+          <div class="flex items-center justify-between" style="margin-top: 14px; padding-top: 11px; border-top: 1px solid var(--hairline);">
+            <span class="type-caption" style="color: var(--text-secondary);">全骑 · 满编</span>
+            <span class="type-caption" style="color: var(--text-primary);">战力 132,000</span>
+          </div>
+        </div>
+
+        <!-- 中央 VS 分隔 -->
+        <div class="flex items-center justify-center" style="margin: -6px 0;">
+          <div class="vs-badge glass-floating flex items-center justify-center">
+            <span class="type-label" style="color: var(--color-primary); letter-spacing: 0.04em;">VS</span>
+          </div>
+        </div>
+
+        <!-- Team B：敌方队伍 -->
+        <div class="glass-card" style="padding: 14px;">
+          <!-- 卡头 -->
+          <div class="flex items-center justify-between" style="margin-bottom: 14px;">
+            <span class="type-label" style="color: var(--text-primary);">敌方队伍</span>
+            <span class="chip chip-info">已配置</span>
+          </div>
+          <!-- 3 武将 slots -->
+          <div class="flex items-start justify-between" style="gap: 8px;">
+            <!-- 刘备 -->
+            <div class="flex flex-col items-center" style="width: 33%; gap: 7px;">
+              <div class="hero-slot flex items-center justify-center">
+                <span class="type-title" style="color: var(--color-primary);">刘</span>
+              </div>
+              <span class="type-label" style="color: var(--text-primary);">刘备</span>
+              <span class="type-caption skill-chip">桃园结义</span>
+            </div>
+            <!-- 关羽 -->
+            <div class="flex flex-col items-center" style="width: 33%; gap: 7px;">
+              <div class="hero-slot flex items-center justify-center">
+                <span class="type-title" style="color: var(--color-primary);">关</span>
+              </div>
+              <span class="type-label" style="color: var(--text-primary);">关羽</span>
+              <span class="type-caption skill-chip">义薄云天</span>
+            </div>
+            <!-- 张飞 -->
+            <div class="flex flex-col items-center" style="width: 33%; gap: 7px;">
+              <div class="hero-slot flex items-center justify-center">
+                <span class="type-title" style="color: var(--color-primary);">张</span>
+              </div>
+              <span class="type-label" style="color: var(--text-primary);">张飞</span>
+              <span class="type-caption skill-chip">破阵摧坚</span>
+            </div>
+          </div>
+          <!-- 卡脚 -->
+          <div class="flex items-center justify-between" style="margin-top: 14px; padding-top: 11px; border-top: 1px solid var(--hairline);">
+            <span class="type-caption" style="color: var(--text-secondary);">全盾 · 满编</span>
+            <span class="type-caption" style="color: var(--text-primary);">战力 128,400</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==== 2. 模拟设置 ==== -->
+      <section class="glass-veil" style="padding: 2px 14px;">
+        <!-- 战斗回合 -->
+        <div class="settings-row">
+          <span class="type-body" style="color: var(--text-secondary);">战斗回合</span>
+          <div class="flex items-center" style="gap: 6px;">
+            <span class="type-label" style="color: var(--text-primary);">8 回合</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-tertiary);" aria-hidden="true">
+              <path d="M9 6l6 6-6 6"></path>
+            </svg>
+          </div>
+        </div>
+        <!-- 地形 -->
+        <div class="settings-row">
+          <span class="type-body" style="color: var(--text-secondary);">地形</span>
+          <div class="flex items-center" style="gap: 6px;">
+            <span class="type-label" style="color: var(--text-primary);">平原</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-tertiary);" aria-hidden="true">
+              <path d="M9 6l6 6-6 6"></path>
+            </svg>
+          </div>
+        </div>
+        <!-- 先攻 -->
+        <div class="settings-row">
+          <span class="type-body" style="color: var(--text-secondary);">先攻</span>
+          <div class="flex items-center" style="gap: 6px;">
+            <span class="type-label" style="color: var(--text-primary);">我方</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-tertiary);" aria-hidden="true">
+              <path d="M9 6l6 6-6 6"></path>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==== 3. 开始模拟 主按钮 ==== -->
+      <button type="button"
+              class="cta-btn type-label w-full flex items-center justify-center"
+              style="padding: 15px; gap: 8px; border: none; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-on-primary);">
+        <!-- 推演小图标 -->
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 3l14 9-14 9V3z"></path>
+        </svg>
+        开始模拟推演
+      </button>
+
+      <!-- ==== 4. 模拟结果 ==== -->
+      <section class="glass-card" style="padding: 16px;">
+        <!-- 结果 banner -->
+        <div class="flex items-center justify-between" style="padding-bottom: 14px; border-bottom: 1px solid var(--hairline);">
+          <div class="flex flex-col" style="gap: 3px;">
+            <span class="type-caption" style="color: var(--text-tertiary);">预测胜负</span>
+            <div class="flex items-center" style="gap: 6px;">
+              <span class="chip chip-success">我方胜</span>
+            </div>
+          </div>
+          <div class="flex flex-col items-end" style="gap: 1px;">
+            <span class="type-display win-rate" style="color: var(--state-success); line-height: 30px;">68.5%</span>
+            <span class="type-caption" style="color: var(--text-tertiary);">综合胜率</span>
+          </div>
+        </div>
+
+        <!-- 双横条对比 -->
+        <div class="flex flex-col" style="gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--hairline);">
+          <!-- 我方 -->
+          <div class="flex flex-col" style="gap: 7px;">
+            <div class="flex items-center justify-between">
+              <span class="type-caption" style="color: var(--text-secondary);">我方输出</span>
+              <span class="type-label" style="color: var(--text-primary);">1.42万 <span style="color: var(--color-primary);">· 59%</span></span>
+            </div>
+            <div class="bar-track glass-veil">
+              <div class="bar-fill" style="width: 59%; background: var(--color-primary);"></div>
+            </div>
+          </div>
+          <!-- 敌方 -->
+          <div class="flex flex-col" style="gap: 7px;">
+            <div class="flex items-center justify-between">
+              <span class="type-caption" style="color: var(--text-secondary);">敌方输出</span>
+              <span class="type-label" style="color: var(--text-secondary);">0.98万 <span style="color: var(--text-tertiary);">· 41%</span></span>
+            </div>
+            <div class="bar-track glass-veil">
+              <div class="bar-fill" style="width: 41%; background: var(--text-tertiary);"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2x2 统计小卡 -->
+        <div class="grid grid-cols-2" style="gap: 10px; padding: 16px 0; border-bottom: 1px solid var(--hairline);">
+          <div class="glass-veil flex flex-col" style="padding: 11px 12px; gap: 5px;">
+            <span class="type-caption" style="color: var(--text-tertiary);">预计折损 · 我方</span>
+            <span class="type-title" style="color: var(--state-success);">18%</span>
+          </div>
+          <div class="glass-veil flex flex-col" style="padding: 11px 12px; gap: 5px;">
+            <span class="type-caption" style="color: var(--text-tertiary);">预计折损 · 敌方</span>
+            <span class="type-title" style="color: var(--state-error);">34%</span>
+          </div>
+          <div class="glass-veil flex flex-col" style="padding: 11px 12px; gap: 5px;">
+            <span class="type-caption" style="color: var(--text-tertiary);">关键回合</span>
+            <span class="type-title" style="color: var(--text-primary);">第 4 回合</span>
+          </div>
+          <div class="glass-veil flex flex-col" style="padding: 11px 12px; gap: 5px;">
+            <span class="type-caption" style="color: var(--text-tertiary);">决胜战法</span>
+            <span class="type-title" style="color: var(--color-primary);">破军威胜</span>
+          </div>
+        </div>
+
+        <!-- 结果脚注 -->
+        <div style="padding-top: 12px;">
+          <span class="type-caption" style="color: var(--text-tertiary);">基于当前战法等级与兵种克制推演，结果仅供参考</span>
+        </div>
+      </section>
+
+      <!-- /SLOT: pageContent -->
+    </main>
+
+    <!-- ===== 底部玻璃浮层 Tab 栏 ===== -->
+    <nav class="glass-floating absolute left-3 right-3"
+         style="bottom: 10px; padding: 8px 8px 6px;">
+      <div class="flex items-stretch justify-between">
+        <!-- SLOT: activeTab（叶子页面在对应 tab 上设置 data-active="true"） -->
+
+        <!-- Tab 1：实时战场（雷达 / 脉冲） -->
+        <a href="#" data-dom-id="tab-battlefield"
+           class="flex flex-1 flex-col items-center gap-1 py-1.5 rounded-2xl relative">
+          <span class="absolute inset-x-2 inset-y-0 rounded-2xl hidden" data-tab-pill
+                style="background: var(--color-primary-container);"></span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="relative" style="color: var(--text-tertiary);" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <circle cx="12" cy="12" r="5"></circle>
+            <circle cx="12" cy="12" r="1.4" fill="currentColor"></circle>
+            <path d="M12 12 20 6"></path>
+          </svg>
+          <span class="type-caption relative" style="color: var(--text-tertiary);">实时战场</span>
+        </a>
+
+        <!-- Tab 2：工具中心（网格） -->
+        <a href="#" data-dom-id="tab-tools"
+           class="flex flex-1 flex-col items-center gap-1 py-1.5 rounded-2xl relative">
+          <span class="absolute inset-x-2 inset-y-0 rounded-2xl hidden" data-tab-pill
+                style="background: var(--color-primary-container);"></span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="relative" style="color: var(--text-tertiary);" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1.6"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1.6"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1.6"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1.6"></rect>
+          </svg>
+          <span class="type-caption relative" style="color: var(--text-tertiary);">工具中心</span>
+        </a>
+
+        <!-- Tab 3：实时部队（护盾 / 用户） -->
+        <a href="#" data-dom-id="tab-live-army"
+           class="flex flex-1 flex-col items-center gap-1 py-1.5 rounded-2xl relative">
+          <span class="absolute inset-x-2 inset-y-0 rounded-2xl hidden" data-tab-pill
+                style="background: var(--color-primary-container);"></span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="relative" style="color: var(--text-tertiary);" aria-hidden="true">
+            <path d="M12 3 20 6v5c0 4.2-3 7.6-8 9-5-1.4-8-4.8-8-9V6z"></path>
+            <circle cx="12" cy="10" r="2.2"></circle>
+            <path d="M8.4 16c.6-1.8 2-2.7 3.6-2.7s3 .9 3.6 2.7"></path>
+          </svg>
+          <span class="type-caption relative" style="color: var(--text-tertiary);">实时部队</span>
+        </a>
+
+        <!-- Tab 4：战斗模拟（双剑） -->
+        <a href="#" data-dom-id="tab-simulator" data-active="true"
+           class="flex flex-1 flex-col items-center gap-1 py-1.5 rounded-2xl relative">
+          <span class="absolute inset-x-2 inset-y-0 rounded-2xl" data-tab-pill
+                style="background: var(--color-primary-container);"></span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="relative" style="color: var(--color-primary);" aria-hidden="true">
+            <path d="M14.5 4.5 20 3l-1.5 5.5-6.5 6.5"></path>
+            <path d="M9.5 4.5 4 3l1.5 5.5 6.5 6.5"></path>
+            <path d="M12 15 8 19l1.5 1.5L13 17"></path>
+            <path d="m12 15 4 4-1.5 1.5L11 17"></path>
+          </svg>
+          <span class="type-caption relative" style="color: var(--color-primary);">战斗模拟</span>
+        </a>
+      </div>
+
+      <!-- 底部 Home 指示条（安全区） -->
+      <div class="flex justify-center pt-1.5 pb-0.5">
+        <span class="rounded-full" style="width: 134px; height: 5px; background: var(--text-tertiary); opacity: 0.55;"></span>
+      </div>
+    </nav>
+
+  </div>
+</body>
+</html>

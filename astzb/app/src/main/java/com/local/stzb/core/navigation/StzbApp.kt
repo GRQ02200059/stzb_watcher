@@ -87,6 +87,7 @@ import com.local.stzb.feature.teamreport.TeamReportViewModel
 import com.local.stzb.feature.capture.*
 import com.local.stzb.feature.overlay.BattlefieldOverlayService
 import com.local.stzb.feature.overlay.OverlayServiceState
+import com.local.stzb.feature.autoscroll.AutoScrollScreen
 import com.local.stzb.feature.simulator.BattleLogScreen
 import com.local.stzb.feature.simulator.BattleSimulatorScreen
 import com.local.stzb.feature.simulator.BattleSimulatorViewModel
@@ -246,6 +247,7 @@ fun StzbApp(
                         openAttendance = { navController.navigate("attendance") },
                         openScores = { navController.navigate("scores") },
                         openResearch = { navController.navigate("research") },
+                        openAutoScroll = { navController.navigate("auto-scroll") },
                         onLogout = onLogout,
                         onBack = {
                             if (!navController.popBackStack()) {
@@ -357,6 +359,9 @@ fun StzbApp(
                             navController.navigate(AppDestination.BATTLES.route)
                         },
                     )
+                }
+                composable("auto-scroll") {
+                    AutoScrollScreen(onBack = { navController.popBackStack() })
                 }
             }
         }

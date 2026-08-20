@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模拟对局 · 率土之滨监控</title>
+    <style id="theme-vars">
+/* ==========================================================================
+   STZB Watcher — 战术演练（模拟器）深色战术皮肤
+   全 App 唯一差异化深色页：深灰墨底 + 暖金标题 + 仿古边框 + 红蓝对决
+   ========================================================================== */
+
+:root {
+  /* 战术深色皮肤色板（本页专属，允许硬编码） */
+  --tac-gold:        #D9B76A;   /* 暖金标题 */
+  --tac-gold-soft:   #EDE3C8;   /* 浅米金（状态栏/高亮文字） */
+  --tac-gold-line:   rgba(198, 166, 100, 0.35); /* 仿古边框 */
+  --tac-gold-line-2: rgba(198, 166, 100, 0.55);
+
+  --tac-text:        #C9CDD6;   /* 正文浅米灰 */
+  --tac-text-2:      #8A9099;   /* 次要文字 */
+
+  --tac-ally:        #4C78C8;   /* 我方（蓝方） */
+  --tac-ally-soft:   rgba(76, 120, 200, 0.16);
+  --tac-ally-line:   rgba(76, 120, 200, 0.45);
+
+  --tac-enemy:       #C75862;   /* 敌方（红方） */
+  --tac-enemy-soft:  rgba(199, 88, 98, 0.16);
+  --tac-enemy-line:  rgba(199, 88, 98, 0.45);
+
+  --tac-card:        rgba(40, 44, 54, 0.72);   /* 深灰玻璃卡 */
+  --tac-inset:       rgba(24, 27, 34, 0.66);   /* 内嵌深底 */
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --font-sans: -apple-system, "SF Pro SC", "SF Pro Text", "PingFang SC",
+    "Helvetica Neue", "Noto Sans SC", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: var(--font-sans);
+  color: var(--tac-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 字号刻度 */
+.type-display { font-size: 24px; line-height: 30px; font-weight: 700; letter-spacing: -0.01em; }
+.type-title   { font-size: 18px; line-height: 24px; font-weight: 600; }
+.type-body-lg { font-size: 16px; line-height: 24px; font-weight: 400; }
+.type-body    { font-size: 14px; line-height: 20px; font-weight: 400; }
+.type-label   { font-size: 14px; line-height: 20px; font-weight: 600; }
+.type-caption { font-size: 12px; line-height: 16px; font-weight: 500; }
+
+.tabnum { font-variant-numeric: tabular-nums; }
+
+/* 页面深色墨底 + 极淡红蓝径向光 */
+.tac-bg {
+  background:
+    radial-gradient(120% 70% at 14% 6%, rgba(76, 120, 200, 0.16) 0%, transparent 42%),
+    radial-gradient(120% 70% at 88% 10%, rgba(199, 88, 98, 0.14) 0%, transparent 44%),
+    linear-gradient(180deg, #1C1E24 0%, #232733 55%, #1A1C22 100%);
+}
+
+/* 深灰玻璃卡 + 仿古金边 */
+.tac-card {
+  background: var(--tac-card);
+  border: 1px solid var(--tac-gold-line);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(20px) saturate(130%);
+  -webkit-backdrop-filter: blur(20px) saturate(130%);
+}
+.tac-card.ally { border-color: var(--tac-ally-line); }
+.tac-card.enemy { border-color: var(--tac-enemy-line); }
+
+/* 内嵌深底格 */
+.tac-inset {
+  background: var(--tac-inset);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+}
+
+/* 战法 chip：深底金边小字 */
+.skill-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 3px 8px;
+  font-size: 11px; line-height: 14px; font-weight: 600;
+  color: var(--tac-gold-soft);
+  background: rgba(217, 183, 106, 0.08);
+  border: 1px solid var(--tac-gold-line);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+/* 阵营胶囊 */
+.side-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 12px; border-radius: var(--radius-full);
+  font-size: 12px; font-weight: 700; line-height: 16px;
+  letter-spacing: 0.02em;
+}
+.side-tag.ally  { color: var(--tac-ally);  background: var(--tac-ally-soft);  border: 1px solid var(--tac-ally-line); }
+.side-tag.enemy { color: var(--tac-enemy); background: var(--tac-enemy-soft); border: 1px solid var(--tac-enemy-line); }
+
+/* 士气 / 设置步进控件 */
+.step-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: var(--radius-sm);
+  color: var(--tac-gold-soft);
+  background: rgba(217, 183, 106, 0.06);
+  border: 1px solid var(--tac-gold-line);
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+.step-btn:hover { background: rgba(217, 183, 106, 0.16); border-color: var(--tac-gold-line-2); }
+.step-btn:focus-visible { outline: 2px solid var(--tac-gold); outline-offset: 2px; }
+
+/* 武将圆形头像占位 */
+.hero-ava {
+  display: flex; align-items: center; justify-content: center;
+  width: 52px; height: 52px; border-radius: var(--radius-full);
+  background: radial-gradient(120% 120% at 30% 22%, #363B47 0%, #23262E 100%);
+  border: 1px solid var(--tac-gold-line);
+  color: var(--tac-gold);
+  font-size: 20px; font-weight: 700;
+}
+
+/* 滚动条隐藏 */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="tac-bg min-h-screen flex items-center justify-center p-6">
+
+  <!-- ===== 移动设备外框 ===== -->
+  <div class="device-frame tac-bg">
+
+    <!-- ===== 顶部 iOS 状态栏（深色页：浅米金文字/图标） ===== -->
+    <div class="flex items-center justify-between px-6" style="height: 44px;">
+      <span class="type-caption tabnum" style="font-weight: 600; color: var(--tac-gold-soft);">9:41</span>
+      <div class="flex items-center gap-1.5" style="color: var(--tac-gold-soft);">
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="currentColor" aria-hidden="true">
+          <rect x="0" y="9" width="3" height="5" rx="1"></rect>
+          <rect x="5" y="6" width="3" height="8" rx="1"></rect>
+          <rect x="10" y="3" width="3" height="11" rx="1"></rect>
+          <rect x="15" y="0" width="3" height="14" rx="1"></rect>
+        </svg>
+        <svg width="18" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2 8.5a15 15 0 0 1 20 0"></path>
+          <path d="M5 12a10 10 0 0 1 14 0"></path>
+          <path d="M8.5 15.5a5 5 0 0 1 7 0"></path>
+          <circle cx="12" cy="19" r="0.6" fill="currentColor"></circle>
+        </svg>
+        <svg width="26" height="14" viewBox="0 0 26 14" fill="none" aria-hidden="true">
+          <rect x="0.5" y="0.5" width="21" height="13" rx="3.5" stroke="currentColor" stroke-opacity="0.4"></rect>
+          <rect x="2.5" y="2.5" width="15" height="9" rx="2" fill="currentColor"></rect>
+          <rect x="23" y="4.5" width="2" height="5" rx="1" fill="currentColor" fill-opacity="0.4"></rect>
+        </svg>
+      </div>
+    </div>
+
+    <!-- ===== 头部（返回 / 标题 / 战报计数） ===== -->
+    <header class="mx-4 mt-1 px-2 py-2 flex items-center justify-between">
+      <a href="tools.html" data-dom-id="btn-back" aria-label="返回"
+         class="nav-back flex items-center justify-center rounded-full"
+         style="width: 40px; height: 40px; color: var(--tac-gold); background: transparent;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m15 18-6-6 6-6"></path>
+        </svg>
+      </a>
+      <h1 class="type-title" style="color: var(--tac-gold); font-weight: 700; letter-spacing: 0.14em;">模拟对局</h1>
+      <span class="type-caption" style="color: var(--tac-text-2);">战报&nbsp;<span class="tabnum" style="color: var(--tac-text);">12</span></span>
+    </header>
+
+    <!-- ===== 主内容滚动区 ===== -->
+    <main class="no-scrollbar flex flex-col overflow-y-auto"
+          style="height: calc(844px - 44px - 56px); padding: 12px 16px 32px; gap: 14px;">
+
+      <!-- ---- 我方队伍卡（蓝方） ---- -->
+      <section class="tac-card ally" style="padding: 14px;">
+        <div class="flex items-center justify-between">
+          <span class="side-tag ally">我方 · 蓝方</span>
+          <!-- 士气调节 -->
+          <div class="flex items-center gap-2">
+            <span class="type-caption" style="color: var(--tac-text-2);">士气</span>
+            <button type="button" class="step-btn" data-dom-id="ally-morale-minus" aria-label="降低士气">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg>
+            </button>
+            <span class="type-label tabnum" style="color: var(--tac-gold); min-width: 30px; text-align: center;">100</span>
+            <button type="button" class="step-btn" data-dom-id="ally-morale-plus" aria-label="提高士气">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 三名武将横排 -->
+        <div class="grid grid-cols-3 mt-3" style="gap: 8px;">
+
+          <div class="tac-inset flex flex-col items-center" style="padding: 10px 6px; gap: 5px;">
+            <div class="hero-ava">赵</div>
+            <span class="type-caption" style="color: var(--tac-text); font-weight: 600;">赵云</span>
+            <span class="type-caption tabnum" style="color: var(--tac-text-2);">Lv.50 · 红度5</span>
+            <div class="flex flex-col items-stretch w-full mt-1" style="gap: 4px;">
+              <span class="skill-chip">疾风迅雷</span>
+              <span class="skill-chip">突击强袭</span>
+              <span class="skill-chip">一骑当千</span>
+            </div>
+          </div>
+
+          <div class="tac-inset flex flex-col items-center" style="padding: 10px 6px; gap: 5px;">
+            <div class="hero-ava">诸</div>
+            <span class="type-caption" style="color: var(--tac-text); font-weight: 600;">诸葛亮</span>
+            <span class="type-caption tabnum" style="color: var(--tac-text-2);">Lv.50 · 红度5</span>
+            <div class="flex flex-col items-stretch w-full mt-1" style="gap: 4px;">
+              <span class="skill-chip">神机妙算</span>
+              <span class="skill-chip">八门金锁</span>
+              <span class="skill-chip">火烧连营</span>
+            </div>
+          </div>
+
+          <div class="tac-inset flex flex-col items-center" style="padding: 10px 6px; gap: 5px;">
+            <div class="hero-ava">黄</div>
+            <span class="type-caption" style="color: var(--tac-text); font-weight: 600;">黄月英</span>
+            <span class="type-caption tabnum" style="color: var(--tac-text-2);">Lv.50 · 红度5</span>
+            <div class="flex flex-col items-stretch w-full mt-1" style="gap: 4px;">
+              <span class="skill-chip">巧夺天工</span>
+              <span class="skill-chip">乱世奸雄</span>
+              <span class="skill-chip">避实击虚</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ---- 中央对决徽标 ---- -->
+      <div class="flex items-center justify-center" style="gap: 12px; margin: -2px 0;">
+        <span style="flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--tac-ally-line));"></span>
+        <span class="flex items-center justify-center"
+              style="width: 56px; height: 56px; border-radius: var(--radius-full);
+                     border: 1.5px solid var(--tac-gold-line-2);
+                     background: radial-gradient(120% 120% at 50% 30%, rgba(217,183,106,0.14), rgba(24,27,34,0.9));
+                     color: var(--tac-gold); font-size: 18px; font-weight: 800; letter-spacing: 0.04em;">
+          VS
+        </span>
+        <span style="flex: 1; height: 1px; background: linear-gradient(90deg, var(--tac-enemy-line), transparent);"></span>
+      </div>
+
+      <!-- ---- 敌方队伍卡（红方） ---- -->
+      <section class="tac-card enemy" style="padding: 14px;">
+        <div class="flex items-center justify-between">
+          <span class="side-tag enemy">敌方 · 红方</span>
+          <div class="flex items-center gap-2">
+            <span class="type-caption" style="color: var(--tac-text-2);">士气</span>
+            <button type="button" class="step-btn" data-dom-id="enemy-morale-minus" aria-label="降低士气">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg>
+            </button>
+            <span class="type-label tabnum" style="color: var(--tac-gold); min-width: 30px; text-align: center;">100</span>
+            <button type="button" class="step-btn" data-dom-id="enemy-morale-plus" aria-label="提高士气">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 mt-3" style="gap: 8px;">
+
+          <div class="tac-inset flex flex-col items-center" style="padding: 10px 6px; gap: 5px;">
+            <div class="hero-ava">曹</div>
+            <span class="type-caption" style="color: var(--tac-text); font-weight: 600;">曹操</span>
+            <span class="type-caption tabnum" style="color: var(--tac-text-2);">Lv.50 · 红度5</span>
+            <div class="flex flex-col items-stretch w-full mt-1" style="gap: 4px;">
+              <span class="skill-chip">乱世奸雄</span>
+              <span class="skill-chip">虎豹骑</span>
+              <span class="skill-chip">尽锐出击</span>
+            </div>
+          </div>
+
+          <div class="tac-inset flex flex-col items-center" style="padding: 10px 6px; gap: 5px;">
+            <div class="hero-ava">郭</div>
+            <span class="type-caption" style="color: var(--tac-text); font-weight: 600;">郭嘉</span>
+            <span class="type-caption tabnum" style="color: var(--tac-text-2);">Lv.50 · 红度5</span>
+            <div class="flex flex-col items-stretch w-full mt-1" style="gap: 4px;">
+              <span class="skill-chip">鬼谋遗计</span>
+              <span class="skill-chip">十面埋伏</span>
+              <span class="skill-chip">锋矢阵</span>
+            </div>
+          </div>
+
+          <div class="tac-inset flex flex-col items-center" style="padding: 10px 6px; gap: 5px;">
+            <div class="hero-ava">张</div>
+            <span class="type-caption" style="color: var(--tac-text); font-weight: 600;">张辽</span>
+            <span class="type-caption tabnum" style="color: var(--tac-text-2);">Lv.50 · 红度5</span>
+            <div class="flex flex-col items-stretch w-full mt-1" style="gap: 4px;">
+              <span class="skill-chip">威震逍遥津</span>
+              <span class="skill-chip">磐阵携行</span>
+              <span class="skill-chip">先锋营</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ---- 模拟设置卡 ---- -->
+      <section class="tac-card" style="padding: 6px 14px;">
+        <div class="flex items-center justify-between" style="height: 44px;">
+          <span class="type-body" style="color: var(--tac-text-2);">回合上限</span>
+          <span class="type-label tabnum" style="color: var(--tac-gold);">8&nbsp;回合</span>
+        </div>
+        <div style="height: 1px; background: var(--tac-gold-line); opacity: 0.5;"></div>
+        <div class="flex items-center justify-between" style="height: 44px;">
+          <span class="type-body" style="color: var(--tac-text-2);">地形</span>
+          <span class="type-label" style="color: var(--tac-gold);">平原</span>
+        </div>
+        <div style="height: 1px; background: var(--tac-gold-line); opacity: 0.5;"></div>
+        <div class="flex items-center justify-between" style="height: 44px;">
+          <span class="type-body" style="color: var(--tac-text-2);">先攻</span>
+          <span class="type-label" style="color: var(--tac-gold);">我方</span>
+        </div>
+      </section>
+
+      <!-- ---- 开始模拟推演 主按钮 ---- -->
+      <button type="button" data-dom-id="btn-simulate" class="sim-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m6 3 14 9-14 9V3z"></path>
+        </svg>
+        <span>开始模拟推演</span>
+      </button>
+
+      <!-- ---- 模拟结果卡 ---- -->
+      <section class="tac-card" style="padding: 16px;">
+        <div class="flex items-center justify-between">
+          <span class="side-tag ally">我方胜</span>
+          <div class="flex items-baseline" style="gap: 4px;">
+            <span class="type-display tabnum" style="color: var(--tac-gold); font-size: 32px; line-height: 34px;">76%</span>
+            <span class="type-caption" style="color: var(--tac-text-2);">胜率</span>
+          </div>
+        </div>
+
+        <!-- 双方输出对比横条 -->
+        <div class="mt-4">
+          <div class="flex items-center justify-between type-caption" style="color: var(--tac-text-2);">
+            <span style="color: var(--tac-ally);">我方输出</span>
+            <span class="tabnum" style="color: var(--tac-text);">142.6万</span>
+          </div>
+          <div style="height: 8px; border-radius: var(--radius-full); background: var(--tac-inset); overflow: hidden; margin-top: 4px;">
+            <div style="width: 62%; height: 100%; border-radius: var(--radius-full); background: linear-gradient(90deg, #3B62A8, var(--tac-ally));"></div>
+          </div>
+          <div class="flex items-center justify-between type-caption mt-3" style="color: var(--tac-text-2);">
+            <span style="color: var(--tac-enemy);">敌方输出</span>
+            <span class="tabnum" style="color: var(--tac-text);">98.3万</span>
+          </div>
+          <div style="height: 8px; border-radius: var(--radius-full); background: var(--tac-inset); overflow: hidden; margin-top: 4px;">
+            <div style="width: 43%; height: 100%; border-radius: var(--radius-full); background: linear-gradient(90deg, #A24750, var(--tac-enemy));"></div>
+          </div>
+        </div>
+
+        <!-- 2×2 统计网格 -->
+        <div class="grid grid-cols-2 mt-4" style="gap: 8px;">
+          <div class="tac-inset flex flex-col" style="padding: 10px 12px; gap: 3px;">
+            <span class="type-caption" style="color: var(--tac-text-2);">预计折损</span>
+            <span class="type-label tabnum" style="color: var(--tac-gold);">31.4%</span>
+          </div>
+          <div class="tac-inset flex flex-col" style="padding: 10px 12px; gap: 3px;">
+            <span class="type-caption" style="color: var(--tac-text-2);">关键回合</span>
+            <span class="type-label tabnum" style="color: var(--tac-gold);">第 5 回合</span>
+          </div>
+          <div class="tac-inset flex flex-col" style="padding: 10px 12px; gap: 3px;">
+            <span class="type-caption" style="color: var(--tac-text-2);">决胜战法</span>
+            <span class="type-label" style="color: var(--tac-gold);">神机妙算</span>
+          </div>
+          <div class="tac-inset flex flex-col" style="padding: 10px 12px; gap: 3px;">
+            <span class="type-caption" style="color: var(--tac-text-2);">总伤害</span>
+            <span class="type-label tabnum" style="color: var(--tac-gold);">240.9万</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---- 战报列表 ---- -->
+      <section class="flex flex-col" style="gap: 10px;">
+        <span class="type-caption px-1" style="color: var(--tac-text-2);">历史推演</span>
+
+        <a href="report-detail.html" data-dom-id="sim-log-1"
+           class="log-row tac-card flex items-center justify-between" style="padding: 12px 14px; text-decoration: none;">
+          <div class="flex flex-col" style="gap: 2px;">
+            <span class="type-label" style="color: var(--tac-text);">第 12 场 · <span style="color: var(--tac-ally);">我方胜</span></span>
+            <span class="type-caption tabnum" style="color: var(--tac-text-2);">用时 8 回合 · 胜率 76%</span>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--tac-gold); flex-shrink: 0;">
+            <path d="m9 18 6-6-6-6"></path>
+          </svg>
+        </a>
+
+        <a href="report-detail.html" data-dom-id="sim-log-2"
+           class="log-row tac-card flex items-center justify-between" style="padding: 12px 14px; text-decoration: none;">
+          <div class="flex flex-col" style="gap: 2px;">
+            <span class="type-label" style="color: var(--tac-text);">第 11 场 · <span style="color: var(--tac-enemy);">我方负</span></span>
+            <span class="type-caption tabnum" style="color: var(--tac-text-2);">用时 6 回合 · 胜率 38%</span>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--tac-gold); flex-shrink: 0;">
+            <path d="m9 18 6-6-6-6"></path>
+          </svg>
+        </a>
+
+        <a href="report-detail.html" data-dom-id="sim-log-3"
+           class="log-row tac-card flex items-center justify-between" style="padding: 12px 14px; text-decoration: none;">
+          <div class="flex flex-col" style="gap: 2px;">
+            <span class="type-label" style="color: var(--tac-text);">第 10 场 · <span style="color: var(--tac-ally);">我方胜</span></span>
+            <span class="type-caption tabnum" style="color: var(--tac-text-2);">用时 8 回合 · 胜率 81%</span>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--tac-gold); flex-shrink: 0;">
+            <path d="m9 18 6-6-6-6"></path>
+          </svg>
+        </a>
+
+      </section>
+    </main>
+
+  </div>
+
+  <!-- ===== 页面级样式：设备外框 + 交互反馈 ===== -->
+  <style>
+    /* 设备外框：iPhone-like，44px 圆角，深色柔和外阴影 */
+    .device-frame {
+      width: 390px;
+      max-width: 390px;
+      height: 844px;
+      border-radius: 44px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55), 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    /* 返回按钮 */
+    .nav-back { transition: background 140ms ease; }
+    .nav-back:hover { background: rgba(217, 183, 106, 0.12); }
+    .nav-back:active { opacity: 0.7; }
+    .nav-back:focus-visible { outline: 2px solid var(--tac-gold); outline-offset: 2px; }
+
+    /* 主按钮：金色渐变底 + 深色字 */
+    .sim-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; height: 52px;
+      border: none; border-radius: var(--radius-lg);
+      font-size: 16px; font-weight: 700; letter-spacing: 0.04em;
+      color: #201A0C;
+      background: linear-gradient(135deg, #E7CE8E 0%, #D9B76A 52%, #C39E52 100%);
+      box-shadow: 0 6px 18px rgba(199, 166, 100, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      cursor: pointer;
+      transition: transform 140ms cubic-bezier(.2,.8,.2,1), box-shadow 140ms ease, filter 140ms ease;
+    }
+    .sim-btn:hover { filter: brightness(1.06); box-shadow: 0 10px 24px rgba(199, 166, 100, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.4); }
+    .sim-btn:active { transform: translateY(1px); filter: brightness(0.98); }
+    .sim-btn:focus-visible { outline: 2px solid var(--tac-gold-soft); outline-offset: 3px; }
+
+    /* 历史推演行卡 */
+    .log-row { transition: transform 160ms cubic-bezier(.2,.8,.2,1), border-color 160ms ease; }
+    .log-row:hover { transform: translateY(-2px); border-color: var(--tac-gold-line-2); }
+    .log-row:active { transform: translateY(0); }
+    .log-row:focus-visible { outline: 2px solid var(--tac-gold); outline-offset: 2px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sim-btn, .log-row, .nav-back { transition-duration: 0.01ms !important; }
+    }
+  </style>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

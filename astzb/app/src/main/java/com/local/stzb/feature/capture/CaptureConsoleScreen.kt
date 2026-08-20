@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.local.stzb.core.ui.GlassCard
+import com.local.stzb.core.ui.MacGlassHeader
 
 @Composable
 fun CaptureConsoleScreen(
@@ -29,13 +30,11 @@ fun CaptureConsoleScreen(
 
     LazyColumn(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item {
-            Row(Modifier.fillMaxWidth()) {
-                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "返回更多") }
-                Column {
-                    Text("抓包启动台", style = MaterialTheme.typography.headlineMedium)
-                    Text("本机 VPN → SOCKS5 → STZB 协议解析", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
+            MacGlassHeader(
+                title = "抓包启动台",
+                subtitle = "本机 VPN → SOCKS5 → STZB 协议解析",
+                leading = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "返回") } },
+            )
         }
         item {
             GlassGroupCard(
@@ -147,16 +146,20 @@ private fun CaptureEvidenceCard(evidence: CaptureEvidence) {
 }
 
 @Composable private fun StatusCard(state: CaptureConsoleUiState) {
-    GlassCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), Arrangement.spacedBy(6.dp)) {
-        Text(
-            if (state.running) "抓包运行中" else "抓包未启动",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-        )
-        Text("已解析 ${state.packetCount} 包")
-        Text("SOCKS ${state.socksHost}:${state.socksPort}", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        if (!state.nativeReady) Text("当前安装包缺少 native 抓包组件", color = MaterialTheme.colorScheme.error)
-    } }
+    GlassCard(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(14.dp), Arrangement.spacedBy(8.dp)) {
+            Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+                Text(
+                    if (state.running) "抓包运行中" else "抓包未启动",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text("${state.packetCount} 包", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+            }
+            Text("SOCKS ${state.socksHost}:${state.socksPort}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (!state.nativeReady) Text("当前安装包缺少 native 抓包组件", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        }
+    }
 }
 
 @Composable private fun ExportButton(label: String, action: () -> Unit) {

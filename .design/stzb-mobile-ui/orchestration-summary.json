@@ -1,0 +1,87 @@
+{
+  "project": {
+    "name": "率土之滨监控 · 移动端 UI 样例",
+    "operation": "create",
+    "deviceType": "mobile",
+    "designRead": "移动端监控App / 率土之滨玩家与同盟 / 专业冷静克制 / 信息密集 / 避免花哨渐变与低对比",
+    "designDials": { "layoutVariance": 2, "motionIntensity": 2, "visualDensity": 4 },
+    "styleContinuityAnchors": {
+      "background": "浅雾白 + 蓝/紫/青/桃四向环境光斑（.app-bg）",
+      "surface": "半透明玻璃卡片 backdrop-blur，白色高光描边，静态卡片阴影 alpha<=0.05",
+      "primary": "#426AD2 主蓝，仅作强调/主操作",
+      "typography": "SF Pro / PingFang SC；display24 / title18 / body16 / label14 / caption12",
+      "radius": "卡片 20px、内块 14px、浮层 26px、胶囊 full",
+      "components": "顶部 MacGlassHeader（标题+副标题）、玻璃指标卡、状态胶囊、底部玻璃 4 段 Tab 栏",
+      "statusColors": "success#1E9B83 / warning#BE7A18 / error#C75862 / info#4C78C8，仅语义状态使用"
+    },
+    "generationTree": {
+      "root": {
+        "nodeId": "gen-project-shell",
+        "kind": "project-shell",
+        "pageIds": [],
+        "output": "partials/mobile-shell.html",
+        "sharedRegions": ["390px 移动端设备框", "顶部状态栏", "底部玻璃4段Tab栏", "app-bg 背景", "玻璃组件类"],
+        "privateRegions": [],
+        "mutableSlots": ["pageContent", "activeTab"],
+        "status": "planned",
+        "children": [
+          { "nodeId": "page-battlefield", "kind": "page-leaf", "pageIds": ["page-battlefield"], "output": "pages/battlefield.html", "status": "planned", "children": [] },
+          { "nodeId": "page-tools", "kind": "page-leaf", "pageIds": ["page-tools"], "output": "pages/tools.html", "status": "planned", "children": [] },
+          { "nodeId": "page-live-army", "kind": "page-leaf", "pageIds": ["page-live-army"], "output": "pages/live-army.html", "status": "planned", "children": [] },
+          { "nodeId": "page-simulator", "kind": "page-leaf", "pageIds": ["page-simulator"], "output": "pages/simulator.html", "status": "planned", "children": [] }
+        ]
+      }
+    }
+  },
+  "designSource": {
+    "operatingMode": "free-explore",
+    "libraryIdentity": null,
+    "styleConstraints": { "radiusMax": 26, "staticShadowAlphaMax": 0.05 }
+  },
+  "pages": [
+    {
+      "nodeId": "page-battlefield",
+      "title": "实时战场",
+      "pageType": "information-dense",
+      "visualNorthStar": "抓包运行状态一眼可见 + 关键指标 + 实时战场事件流，信息层级分明",
+      "continuityAnchors": ["顶部玻璃Header", "底部4段Tab栏", "玻璃指标卡", "状态胶囊"],
+      "imagePlan": []
+    },
+    {
+      "nodeId": "page-tools",
+      "title": "工具中心",
+      "pageType": "information-dense",
+      "visualNorthStar": "13 个功能入口的清晰宫格/列表，分组有序，主入口突出",
+      "continuityAnchors": ["顶部玻璃Header", "底部4段Tab栏", "玻璃卡片"],
+      "imagePlan": []
+    },
+    {
+      "nodeId": "page-live-army",
+      "title": "实时部队",
+      "pageType": "information-dense",
+      "visualNorthStar": "全服玩家实时部队队列（武将+战法+兵种），时间倒序，可扫读",
+      "continuityAnchors": ["顶部玻璃Header", "底部4段Tab栏", "玻璃列表卡"],
+      "imagePlan": []
+    },
+    {
+      "nodeId": "page-simulator",
+      "title": "战斗模拟",
+      "pageType": "task-driven",
+      "visualNorthStar": "红蓝双方阵容配置 + 模拟结果对比，操作聚焦",
+      "continuityAnchors": ["顶部玻璃Header", "底部4段Tab栏", "玻璃卡片"],
+      "imagePlan": []
+    }
+  ],
+  "assets": [],
+  "wiringPlan": [
+    { "from": "page-battlefield", "domId": "tab-tools", "to": "page-tools" },
+    { "from": "page-tools", "domId": "tab-live-army", "to": "page-live-army" },
+    { "from": "page-live-army", "domId": "tab-simulator", "to": "page-simulator" }
+  ],
+  "hiddenInteractionPlan": [
+    { "from": "page-tools", "domId": "tab-battlefield", "to": "page-battlefield", "hideEdge": true },
+    { "from": "page-live-army", "domId": "tab-battlefield", "to": "page-battlefield", "hideEdge": true },
+    { "from": "page-simulator", "domId": "tab-battlefield", "to": "page-battlefield", "hideEdge": true },
+    { "from": "page-battlefield", "domId": "open-tool-simulator", "to": "page-simulator", "hideEdge": true }
+  ]
+}

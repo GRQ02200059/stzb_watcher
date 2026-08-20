@@ -32,6 +32,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.myapplication.LocalStzbRepository
 import com.local.stzb.core.ui.GlassCard
 import com.local.stzb.core.ui.MacGlassHeader
+import com.local.stzb.core.ui.SectionLabel
+import com.local.stzb.core.ui.StatBlock
 import com.local.stzb.data.score.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -85,23 +87,60 @@ fun ScoreCenterScreen(state: ScoreCenterUiState, viewModel: ScoreCenterViewModel
         confirmButton = { TextButton(onClick = viewModel::confirmPreview) { Text("确认写入") } },
         dismissButton = { TextButton(onClick = viewModel::dismissPreview) { Text("取消") } },
     ) }
-    LazyColumn(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item { MacGlassHeader("自定义积分", state.activeRule?.let { "当前 v${it.version} ${it.name}" } ?: "请创建并激活规则", leading = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "返回工具") } }) }
-        item { GlassCard(Modifier.fillMaxWidth()) { Column(Modifier.fillMaxWidth().padding(14.dp), Arrangement.spacedBy(8.dp)) {
-            Text("规则预设", fontWeight = FontWeight.Bold)
-            Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(6.dp)) {
-                OutlinedButton({ viewModel.createPreset("联盟贡献", "alliance_contribution") }, Modifier.weight(1f)) { Text("联盟贡献") }
-                OutlinedButton({ viewModel.createPreset("赛季奖励", "season_reward") }, Modifier.weight(1f)) { Text("赛季奖励") }
-                OutlinedButton({ viewModel.createPreset("攻城优先", "siege_priority") }, Modifier.weight(1f)) { Text("攻城优先") }
+    LazyColumn(modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        item {
+            MacGlassHeader(
+                "自定义积分",
+                state.activeRule?.let { "当前 v${it.version} ${it.name}" } ?: "请创建并激活规则",
+                leading = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "返回工具") } },
+            )
+        }
+        item {
+            GlassCard(Modifier.fillMaxWidth()) {
+                Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    SectionLabel("规则预设")
+                    Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(6.dp)) {
+                        OutlinedButton({ viewModel.createPreset("联盟贡献", "alliance_contribution") }, Modifier.weight(1f)) { Text("联盟贡献") }
+                        OutlinedButton({ viewModel.createPreset("赛季奖励", "season_reward") }, Modifier.weight(1f)) { Text("赛季奖励") }
+                        OutlinedButton({ viewModel.createPreset("攻城优先", "siege_priority") }, Modifier.weight(1f)) { Text("攻城优先") }
+                    }
+                    state.rules.forEach { rule ->
+                        GlassCard(Modifier.fillMaxWidth()) {
+                            Row(Modifier.fillMaxWidth().padding(10.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("v${rule.version} ${rule.name} · ${rule.status.name.lowercase().replaceFirstChar { it.uppercase() }}")
+                                if (rule.status != RuleStatus.ACTIVE) TextButton({ viewModel.activate(rule.id) }) { Text("激活") }
+                            }
+                        }
+                    }
+                }
             }
-            state.rules.forEach { rule -> Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) { Text("v${rule.version} ${rule.name} · ${rule.status.name}"); if (rule.status != RuleStatus.ACTIVE) TextButton({ viewModel.activate(rule.id) }) { Text("激活") } } }
-        } } }
-        item { GlassCard(Modifier.fillMaxWidth()) { Column(Modifier.fillMaxWidth().padding(14.dp), Arrangement.spacedBy(8.dp)) {
-            Text("手工调整", fontWeight = FontWeight.Bold); OutlinedTextField(player, { player = it }, label = { Text("玩家名") }, modifier = Modifier.fillMaxWidth()); OutlinedTextField(points, { points = it }, label = { Text("分值") }, modifier = Modifier.fillMaxWidth()); OutlinedTextField(reason, { reason = it }, label = { Text("原因（必填）") }, modifier = Modifier.fillMaxWidth()); Button({ viewModel.addAdjustment(player, points.toDoubleOrNull() ?: 0.0, reason) }, enabled = player.isNotBlank() && reason.isNotBlank() && points.toDoubleOrNull() != null, modifier = Modifier.fillMaxWidth()) { Text("保存调整") }
-        } } }
-        item { Button(viewModel::preview, enabled = state.activeRule != null && !state.busy, modifier = Modifier.fillMaxWidth()) { Text("预览重算") } }
-        if (state.savedRows.isNotEmpty()) item { Text("已保存榜单", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
-        items(state.savedRows, key = { it.playerName }) { row -> GlassCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(14.dp), Arrangement.spacedBy(4.dp)) { Text("#${row.rank} ${row.playerName}  ${row.score}", fontWeight = FontWeight.Bold); Text("战斗 ${row.battleScore} · 攻城 ${row.siegeScore} · 调整 ${row.adjustmentScore}") } } }
-        state.message?.let { item { Text(it, color = MaterialTheme.colorScheme.primary) } }; state.error?.let { item { Text(it, color = MaterialTheme.colorScheme.error) } }
+        }
+        item {
+            GlassCard(Modifier.fillMaxWidth()) {
+                Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    SectionLabel("手工调整")
+                    OutlinedTextField(player, { player = it }, label = { Text("玩家名") }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(points, { points = it }, label = { Text("分值") }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(reason, { reason = it }, label = { Text("原因（必填）") }, modifier = Modifier.fillMaxWidth())
+                    Button({ viewModel.addAdjustment(player, points.toDoubleOrNull() ?: 0.0, reason); player = ""; points = ""; reason = "" }, enabled = player.isNotBlank() && reason.isNotBlank() && points.toDoubleOrNull() != null, modifier = Modifier.fillMaxWidth()) { Text("保存调整") }
+                }
+            }
+        }
+        item {
+            Button(viewModel::preview, enabled = state.activeRule != null && !state.busy, modifier = Modifier.fillMaxWidth()) { Text("预览重算") }
+        }
+        if (state.savedRows.isNotEmpty()) {
+            item { SectionLabel("已保存榜单") }
+            items(state.savedRows, key = { it.playerName }) { row ->
+                GlassCard(Modifier.fillMaxWidth()) {
+                    Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("#${row.rank} ${row.playerName}", fontWeight = FontWeight.Bold)
+                        Text("${row.score}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            }
+        }
+        state.message?.let { item { Text(it, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodySmall) } }
+        state.error?.let { item { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) } }
     }
 }

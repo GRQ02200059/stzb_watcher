@@ -1,17 +1,21 @@
 package com.local.stzb.feature.battles
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Refresh
@@ -20,17 +24,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.local.stzb.core.ui.EmptyPanel
 import com.local.stzb.core.ui.ErrorPanel
-import com.local.stzb.core.ui.LoadingPanel
 import com.local.stzb.core.ui.GlassCard
+import com.local.stzb.core.ui.LoadingPanel
 import com.local.stzb.core.ui.MacGlassHeader
+import com.local.stzb.core.ui.StatBlock
 import com.local.stzb.domain.battles.BattleOutcome
 import com.local.stzb.domain.battles.BattleSummary
 import java.time.Instant
@@ -42,7 +49,7 @@ fun BattlesScreen(state: BattlesUiState, onIntent: (BattlesIntent) -> Unit, onBa
     Column(modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         MacGlassHeader(
             title = "本机战报",
-            subtitle = "来自 battles_v2",
+            subtitle = "共 ${state.battles.size} 条",
             leading = {
                 if (onBack != null) IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "返回更多") }
             },
@@ -75,7 +82,7 @@ fun BattlesScreen(state: BattlesUiState, onIntent: (BattlesIntent) -> Unit, onBa
             state.loading -> LoadingPanel(Modifier.weight(1f))
             state.error != null -> ErrorPanel(state.error, true, { onIntent(BattlesIntent.Refresh) }, Modifier.weight(1f))
             state.battles.isEmpty() -> EmptyPanel("本机还没有完整战报", "刷新", { onIntent(BattlesIntent.Refresh) }, Modifier.weight(1f))
-            else -> LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            else -> LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 items(state.battles, key = BattleSummary::id) { battle -> BattleCard(battle) { onIntent(BattlesIntent.OpenBattle(battle.id)) } }
             }
         }
@@ -84,16 +91,31 @@ fun BattlesScreen(state: BattlesUiState, onIntent: (BattlesIntent) -> Unit, onBa
 
 @Composable
 private fun BattleCard(battle: BattleSummary, onClick: () -> Unit) {
+    val outcomeColor = battle.outcomeColor
     GlassCard(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(battle.outcomeLabel, color = battle.outcome.color, fontWeight = FontWeight.Bold)
-                Text(formatTime(battle.occurredAt), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Surface(shape = RoundedCornerShape(999.dp), color = outcomeColor.copy(alpha = 0.12f)) {
+                    Text(
+                        battle.outcomeLabel,
+                        Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        color = outcomeColor,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+                Text(formatTime(battle.occurredAt), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelMedium)
             }
-            Text(battle.title, style = MaterialTheme.typography.titleLarge)
-            Text(battle.locationAndType, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text("武勋 ${battle.attackerWuxun} · 兵力 ${battle.attackerHp} / ${battle.defenderHp}")
-            if (battle.heroNames.isNotEmpty()) Text(battle.heroNames.joinToString(" · "))
+            Text(battle.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1)
+            Text(battle.locationAndType, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                StatBlock("武勋", battle.attackerWuxun.toString(), emphasis = true)
+                StatBlock("攻方兵力", battle.attackerHp.toString())
+                StatBlock("守方兵力", battle.defenderHp.toString())
+            }
+            if (battle.heroNames.isNotEmpty()) {
+                Text(battle.heroNames.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
+            }
         }
     }
 }
@@ -105,8 +127,8 @@ private fun QuickBattleFilter.matches(state: BattlesUiState) = when (this) {
     QuickBattleFilter.SIEGE -> state.filters.siegeOnly
 }
 
-private val BattleOutcome.color: Color
-    @Composable get() = when (this) {
+private val BattleSummary.outcomeColor: Color
+    @Composable get() = when (outcome) {
         BattleOutcome.VICTORY -> MaterialTheme.colorScheme.tertiary
         BattleOutcome.DEFEAT -> MaterialTheme.colorScheme.error
         BattleOutcome.DRAW -> MaterialTheme.colorScheme.primary

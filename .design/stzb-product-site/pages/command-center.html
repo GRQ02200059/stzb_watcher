@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>战场指挥台 · STZB Watcher</title>
+    <style id="theme-vars">
+/* ==========================================================================
+   STZB Watcher · 产品官网 · 率土战场「黑金史诗」品牌样式
+   深色战场底 + 战术金强调，宋体标题承接三国史诗气质
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Share+Tech+Mono&display=swap');
+
+:root {
+  /* ---- Brand primary hue: 战术金 (single identity hue + tints) ---- */
+  --color-primary: #c8a044;
+  --color-primary-hi: #e8c86a;
+  --color-primary-050: #fbf6e6;
+  --color-primary-100: #f3e6bd;
+  --color-primary-200: #e6cf8f;
+  --color-primary-300: #d9b862;
+  --color-primary-400: #c8a044;
+  --color-primary-500: #a9842f;
+  --color-primary-600: #866620;
+  --color-primary-700: #634a15;
+  --color-primary-800: #43310d;
+  --color-primary-900: #241a06;
+
+  /* ---- Dark battlefield surfaces (neutral scale) ---- */
+  --bg: #050810;
+  --bg-deep: #020409;
+  --surface: #0b1019;
+  --surface-2: #0e1425;
+  --surface-3: #141d30;
+  --border: #233043;
+  --border-strong: #3a4b63;
+
+  /* ---- Text ---- */
+  --text: #eef2f8;
+  --text-2: #9db0c6;
+  --text-faint: #5b6b7d;
+  --on-accent: #0b0f18;
+
+  /* ---- Semantic status tokens (status only, not identity) ---- */
+  --state-success: #22c55e;
+  --state-warning: #f0a935;
+  --state-error: #ef4444;
+  --state-info: #4a8fe0;
+
+  /* ---- Typography ---- */
+  --font-display: 'Noto Serif SC', 'SimSun', 'STSong', serif;
+  --font-body: 'Noto Serif SC', 'SimSun', serif;
+  --font-mono: 'Share Tech Mono', 'SFMono-Regular', Consolas, monospace;
+
+  /* ---- Radius (restrained scale) ---- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* ---- Spacing ---- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-8: 48px;
+  --sp-10: 64px;
+  --sp-12: 96px;
+
+  /* ---- Elevation (static surfaces border-led; deep only for floating) ---- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-float: 0 18px 48px rgba(0, 0, 0, 0.55);
+  --glow-gold: 0 0 32px rgba(200, 160, 68, 0.28);
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur: 240ms;
+}
+
+/* ---- Base ---- */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Type helpers ---- */
+.font-display { font-family: var(--font-display); }
+.font-mono { font-family: var(--font-mono); }
+.text-gold { color: var(--color-primary); }
+.text-gold-hi { color: var(--color-primary-hi); }
+.text-muted { color: var(--text-2); }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  color: var(--text);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+  margin: 0;
+}
+
+/* ---- Gold gradient text (brand tint only) ---- */
+.gold-gradient {
+  background: linear-gradient(120deg, var(--color-primary-hi), var(--color-primary), var(--color-primary-600));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---- Hairline divider ---- */
+.rule-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+  border: 0;
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-primary: var(--color-primary);
+  }
+  @layer base {
+    body { background: var(--color-background); color: var(--color-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+
+  <!-- ============================ TOP NAV (project-shell) ============================ -->
+  <header class="site-nav">
+    <div class="site-nav__inner">
+      <a class="site-brand" href="index.html" data-dom-id="nav-home" aria-label="STZB Watcher 首页">
+        <span class="site-seal" aria-hidden="true">
+          <span class="site-seal__char">率</span>
+        </span>
+        <span class="site-brand__text">
+          <span class="site-brand__name">STZB Watcher</span>
+          <span class="site-brand__sub">率土战场数据指挥平台</span>
+        </span>
+      </a>
+
+      <nav class="site-nav__right" aria-label="主导航">
+        <ul class="site-nav__links">
+          <li><a class="site-nav__link" href="index.html" data-dom-id="nav-home">首页</a></li>
+          <li><a class="site-nav__link" href="features.html" data-dom-id="nav-features">核心功能</a></li>
+        </ul>
+        <a class="site-btn-primary" href="index.html" data-dom-id="hero-cta-start">
+          立即开始
+          <svg class="site-btn-primary__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ==================== HERO · 战场态势 ==================== -->
+    <section class="cc-hero" aria-labelledby="cc-hero-title">
+      <div class="cc-hero__veil" aria-hidden="true"></div>
+      <div class="cc-wrap cc-hero__inner">
+        <span class="cc-eyebrow">
+          <span class="cc-eyebrow__dot" aria-hidden="true"></span>
+          LIVE BATTLE COMMAND
+        </span>
+        <h1 id="cc-hero-title" class="cc-hero__title">
+          <span class="gold-gradient">战场态势，一屏掌控</span>
+        </h1>
+        <p class="cc-hero__subtitle">
+          实时汇聚本机战报、行军与同盟态势，全域战场一屏掌控。
+        </p>
+
+        <div class="cc-hero__cta">
+          <button type="button" class="cc-btn cc-btn--gold" data-dom-id="cc-refresh">
+            <svg class="cc-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+            刷新态势
+          </button>
+          <button type="button" class="cc-btn cc-btn--outline" data-dom-id="cc-command">
+            <svg class="cc-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path>
+            </svg>
+            <span class="cc-kbd">⌘K</span> 命令
+          </button>
+        </div>
+
+        <dl class="cc-trust" aria-label="全局战场数据信任条">
+          <div class="cc-trust__item">
+            <dt class="cc-trust__label">战报</dt>
+            <dd class="cc-trust__val">12,480</dd>
+          </div>
+          <span class="cc-trust__sep" aria-hidden="true">·</span>
+          <div class="cc-trust__item">
+            <dt class="cc-trust__label">武勋</dt>
+            <dd class="cc-trust__val">3.2M</dd>
+          </div>
+          <span class="cc-trust__sep" aria-hidden="true">·</span>
+          <div class="cc-trust__item">
+            <dt class="cc-trust__label">活跃行军</dt>
+            <dd class="cc-trust__val">217</dd>
+          </div>
+          <span class="cc-trust__sep" aria-hidden="true">·</span>
+          <div class="cc-trust__item">
+            <dt class="cc-trust__label">在线时长</dt>
+            <dd class="cc-trust__val">08:42:16</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ==================== KPI 指标网格 ==================== -->
+    <section class="cc-wrap cc-section" aria-labelledby="cc-kpi-title">
+      <div class="cc-section__head">
+        <p class="cc-kicker">KEY METRICS</p>
+        <h2 id="cc-kpi-title" class="cc-section__title">核心指标</h2>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <article class="cc-kpi">
+          <span class="cc-kpi__bar" aria-hidden="true"></span>
+          <p class="cc-kpi__label">今日战报</p>
+          <p class="cc-kpi__value">1,284</p>
+          <p class="cc-kpi__trend cc-kpi__trend--up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 15 12 9 6 15"></polyline></svg>
+            12%
+          </p>
+        </article>
+
+        <article class="cc-kpi">
+          <span class="cc-kpi__bar" aria-hidden="true"></span>
+          <p class="cc-kpi__label">活跃玩家</p>
+          <p class="cc-kpi__value">486</p>
+          <p class="cc-kpi__trend cc-kpi__trend--muted">在线中</p>
+        </article>
+
+        <article class="cc-kpi">
+          <span class="cc-kpi__bar" aria-hidden="true"></span>
+          <p class="cc-kpi__label">活跃行军</p>
+          <p class="cc-kpi__value">217</p>
+          <p class="cc-kpi__trend cc-kpi__trend--info">进行中</p>
+        </article>
+
+        <article class="cc-kpi">
+          <span class="cc-kpi__bar" aria-hidden="true"></span>
+          <p class="cc-kpi__label">数据同步</p>
+          <p class="cc-kpi__value">99.8<span class="cc-kpi__unit">%</span></p>
+          <p class="cc-kpi__trend cc-kpi__trend--up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            正常
+          </p>
+        </article>
+
+        <article class="cc-kpi cc-kpi--alert">
+          <span class="cc-kpi__bar" aria-hidden="true"></span>
+          <p class="cc-kpi__label">战术预警</p>
+          <p class="cc-kpi__value">5</p>
+          <p class="cc-kpi__trend cc-kpi__trend--warn">需处置</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ==================== 概览面板网格 ==================== -->
+    <section class="cc-wrap cc-section cc-section--panels" aria-labelledby="cc-overview-title">
+      <div class="cc-section__head">
+        <p class="cc-kicker">BATTLEFIELD OVERVIEW</p>
+        <h2 id="cc-overview-title" class="cc-section__title">全域态势概览</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+
+        <!-- 面板 1：最新战报 -->
+        <article class="cc-panel" aria-labelledby="cc-panel-feed">
+          <div class="cc-panel__head">
+            <div class="cc-panel__titles">
+              <p class="cc-kicker">BATTLE FEED</p>
+              <h3 id="cc-panel-feed" class="cc-panel__title">最新战报</h3>
+            </div>
+            <button type="button" class="cc-link-btn" data-dom-id="cc-feed-all">
+              查看全部
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+          <ul class="cc-feed">
+            <li class="cc-feed__row">
+              <span class="cc-chip cc-chip--atk">攻</span>
+              <span class="cc-feed__body"><span class="cc-mono">卧龙盟·逐鹿</span> 攻破 <span class="cc-strong">洛阳西门</span></span>
+              <span class="cc-feed__meta"><span class="cc-merit">+860</span><span class="cc-time">03:12</span></span>
+            </li>
+            <li class="cc-feed__row">
+              <span class="cc-chip cc-chip--def">守</span>
+              <span class="cc-feed__body"><span class="cc-mono">铁壁盟·子龙</span> 据守 <span class="cc-strong">虎牢关</span></span>
+              <span class="cc-feed__meta"><span class="cc-merit">+540</span><span class="cc-time">02:58</span></span>
+            </li>
+            <li class="cc-feed__row">
+              <span class="cc-chip cc-chip--occ">占</span>
+              <span class="cc-feed__body"><span class="cc-mono">燎原盟·孟德</span> 占领 <span class="cc-strong">陈留粮仓</span></span>
+              <span class="cc-feed__meta"><span class="cc-merit">+720</span><span class="cc-time">02:41</span></span>
+            </li>
+            <li class="cc-feed__row">
+              <span class="cc-chip cc-chip--aid">援</span>
+              <span class="cc-feed__body"><span class="cc-mono">卧龙盟·公瑾</span> 驰援 <span class="cc-strong">官渡大营</span></span>
+              <span class="cc-feed__meta"><span class="cc-merit">+310</span><span class="cc-time">02:20</span></span>
+            </li>
+            <li class="cc-feed__row">
+              <span class="cc-chip cc-chip--atk">攻</span>
+              <span class="cc-feed__body"><span class="cc-mono">苍狼盟·文远</span> 拔除 <span class="cc-strong">许昌箭塔</span></span>
+              <span class="cc-feed__meta"><span class="cc-merit">+480</span><span class="cc-time">01:55</span></span>
+            </li>
+            <li class="cc-feed__row">
+              <span class="cc-chip cc-chip--atk">破</span>
+              <span class="cc-feed__body"><span class="cc-mono">燎原盟·奉先</span> 击溃 <span class="cc-strong">敌骑三队</span></span>
+              <span class="cc-feed__meta"><span class="cc-merit">+990</span><span class="cc-time">01:33</span></span>
+            </li>
+          </ul>
+        </article>
+
+        <!-- 面板 2：战术预警 -->
+        <article class="cc-panel" aria-labelledby="cc-panel-alert">
+          <div class="cc-panel__head">
+            <div class="cc-panel__titles">
+              <p class="cc-kicker">TACTICAL ALERTS</p>
+              <h3 id="cc-panel-alert" class="cc-panel__title">战术预警</h3>
+            </div>
+            <span class="cc-count" aria-label="5 条待处置预警">5</span>
+          </div>
+          <ul class="cc-alerts">
+            <li class="cc-alert cc-alert--error">
+              <span class="cc-alert__dot" aria-hidden="true"></span>
+              <span class="cc-alert__body">
+                <span class="cc-alert__text">敌盟主力向 <span class="cc-strong">许昌</span> 集结</span>
+                <span class="cc-alert__meta"><span class="cc-tag-sev cc-tag-sev--error">高危</span><span class="cc-time">03:02</span></span>
+              </span>
+            </li>
+            <li class="cc-alert cc-alert--warn">
+              <span class="cc-alert__dot" aria-hidden="true"></span>
+              <span class="cc-alert__body">
+                <span class="cc-alert__text">我方 <span class="cc-mono">3</span> 支部队即将抵达 官渡</span>
+                <span class="cc-alert__meta"><span class="cc-tag-sev cc-tag-sev--warn">注意</span><span class="cc-time">02:47</span></span>
+              </span>
+            </li>
+            <li class="cc-alert cc-alert--error">
+              <span class="cc-alert__dot" aria-hidden="true"></span>
+              <span class="cc-alert__body">
+                <span class="cc-alert__text">洛阳西门 城防跌破 <span class="cc-mono">40%</span></span>
+                <span class="cc-alert__meta"><span class="cc-tag-sev cc-tag-sev--error">高危</span><span class="cc-time">02:29</span></span>
+              </span>
+            </li>
+            <li class="cc-alert cc-alert--warn">
+              <span class="cc-alert__dot" aria-hidden="true"></span>
+              <span class="cc-alert__body">
+                <span class="cc-alert__text">侦测到 苍狼盟 迁城至边境</span>
+                <span class="cc-alert__meta"><span class="cc-tag-sev cc-tag-sev--warn">注意</span><span class="cc-time">02:05</span></span>
+              </span>
+            </li>
+            <li class="cc-alert cc-alert--info">
+              <span class="cc-alert__dot" aria-hidden="true"></span>
+              <span class="cc-alert__body">
+                <span class="cc-alert__text">陈留粮仓 资源即将耗尽</span>
+                <span class="cc-alert__meta"><span class="cc-tag-sev cc-tag-sev--info">提示</span><span class="cc-time">01:38</span></span>
+              </span>
+            </li>
+          </ul>
+        </article>
+
+        <!-- 面板 3：活跃行军 -->
+        <article class="cc-panel" aria-labelledby="cc-panel-march">
+          <div class="cc-panel__head">
+            <div class="cc-panel__titles">
+              <p class="cc-kicker">LIVE MARCH</p>
+              <h3 id="cc-panel-march" class="cc-panel__title">活跃行军</h3>
+            </div>
+            <button type="button" class="cc-link-btn" data-dom-id="cc-march-map">
+              打开战场情报
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+          <ul class="cc-march">
+            <li class="cc-march__row">
+              <div class="cc-march__route">
+                <span class="cc-mono cc-strong">官渡大营</span>
+                <svg class="cc-march__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                <span class="cc-mono cc-strong">许昌东门</span>
+              </div>
+              <div class="cc-march__foot">
+                <span class="cc-march__team">主力先锋队</span>
+                <span class="cc-countdown">剩 04:32</span>
+              </div>
+            </li>
+            <li class="cc-march__row">
+              <div class="cc-march__route">
+                <span class="cc-mono cc-strong">洛阳西门</span>
+                <svg class="cc-march__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                <span class="cc-mono cc-strong">虎牢关</span>
+              </div>
+              <div class="cc-march__foot">
+                <span class="cc-march__team">白马义从</span>
+                <span class="cc-countdown">剩 12:08</span>
+              </div>
+            </li>
+            <li class="cc-march__row">
+              <div class="cc-march__route">
+                <span class="cc-mono cc-strong">陈留粮仓</span>
+                <svg class="cc-march__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                <span class="cc-mono cc-strong">己方主城</span>
+              </div>
+              <div class="cc-march__foot">
+                <span class="cc-march__team">屯田运输队</span>
+                <span class="cc-countdown">剩 01:47</span>
+              </div>
+            </li>
+            <li class="cc-march__row">
+              <div class="cc-march__route">
+                <span class="cc-mono cc-strong">边境哨站</span>
+                <svg class="cc-march__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                <span class="cc-mono cc-strong">苍狼盟城</span>
+              </div>
+              <div class="cc-march__foot">
+                <span class="cc-march__team">侦察轻骑</span>
+                <span class="cc-countdown">剩 27:15</span>
+              </div>
+            </li>
+          </ul>
+        </article>
+
+        <!-- 面板 4：实时事件时间线 -->
+        <article class="cc-panel" aria-labelledby="cc-panel-stream">
+          <div class="cc-panel__head">
+            <div class="cc-panel__titles">
+              <p class="cc-kicker">EVENT STREAM</p>
+              <h3 id="cc-panel-stream" class="cc-panel__title">实时事件时间线</h3>
+            </div>
+          </div>
+          <div class="cc-stream__controls">
+            <label class="cc-select" aria-label="事件类型筛选">
+              <select class="cc-select__el" data-dom-id="cc-stream-filter">
+                <option>全部</option>
+                <option>战报</option>
+                <option>世界</option>
+                <option>监控</option>
+              </select>
+              <svg class="cc-select__caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </label>
+            <button type="button" class="cc-btn-mini" data-dom-id="cc-stream-pause">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+              暂停
+            </button>
+          </div>
+          <ul class="cc-timeline">
+            <li class="cc-tl">
+              <span class="cc-tl__node" aria-hidden="true"></span>
+              <span class="cc-tl__time">03:12</span>
+              <span class="cc-tl__text"><span class="cc-tl__type cc-tl__type--feed">战报</span> 逐鹿 攻破 洛阳西门</span>
+            </li>
+            <li class="cc-tl">
+              <span class="cc-tl__node" aria-hidden="true"></span>
+              <span class="cc-tl__time">03:04</span>
+              <span class="cc-tl__text"><span class="cc-tl__type cc-tl__type--world">世界</span> 燎原盟 发布 集结令</span>
+            </li>
+            <li class="cc-tl">
+              <span class="cc-tl__node" aria-hidden="true"></span>
+              <span class="cc-tl__time">02:50</span>
+              <span class="cc-tl__text"><span class="cc-tl__type cc-tl__type--watch">监控</span> 敌盟迁城至许昌近郊</span>
+            </li>
+            <li class="cc-tl">
+              <span class="cc-tl__node" aria-hidden="true"></span>
+              <span class="cc-tl__time">02:33</span>
+              <span class="cc-tl__text"><span class="cc-tl__type cc-tl__type--feed">战报</span> 子龙 据守 虎牢关 成功</span>
+            </li>
+            <li class="cc-tl">
+              <span class="cc-tl__node" aria-hidden="true"></span>
+              <span class="cc-tl__time">02:11</span>
+              <span class="cc-tl__text"><span class="cc-tl__type cc-tl__type--world">世界</span> 卧龙盟 与 铁壁盟 结盟</span>
+            </li>
+            <li class="cc-tl">
+              <span class="cc-tl__node" aria-hidden="true"></span>
+              <span class="cc-tl__time">01:48</span>
+              <span class="cc-tl__text"><span class="cc-tl__type cc-tl__type--watch">监控</span> 官渡粮道 出现敌骑</span>
+            </li>
+          </ul>
+        </article>
+
+        <!-- 面板 5：我的关注 -->
+        <article class="cc-panel" aria-labelledby="cc-panel-watch">
+          <div class="cc-panel__head">
+            <div class="cc-panel__titles">
+              <p class="cc-kicker">WATCH LIST</p>
+              <h3 id="cc-panel-watch" class="cc-panel__title">我的关注</h3>
+            </div>
+            <button type="button" class="cc-link-btn" data-dom-id="cc-watch-add">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              添加
+            </button>
+          </div>
+          <ul class="cc-watch">
+            <li class="cc-watch__card">
+              <span class="cc-watch__kind">WID 07</span>
+              <span class="cc-watch__name">卧龙盟主力</span>
+              <span class="cc-watch__hint">格子活跃 · 12 支部队</span>
+            </li>
+            <li class="cc-watch__card">
+              <span class="cc-watch__kind">队伍</span>
+              <span class="cc-watch__name">主力先锋队</span>
+              <span class="cc-watch__hint">行军中 · 剩 04:32</span>
+            </li>
+            <li class="cc-watch__card">
+              <span class="cc-watch__kind">玩家</span>
+              <span class="cc-watch__name">逐鹿</span>
+              <span class="cc-watch__hint">武勋 3.2M · 在线</span>
+            </li>
+            <li class="cc-watch__card">
+              <span class="cc-watch__kind">WID 12</span>
+              <span class="cc-watch__name">许昌防线</span>
+              <span class="cc-watch__hint">城防 40% · 告警</span>
+            </li>
+          </ul>
+        </article>
+
+        <!-- 面板 6：快捷指挥 -->
+        <article class="cc-panel" aria-labelledby="cc-panel-quick">
+          <div class="cc-panel__head">
+            <div class="cc-panel__titles">
+              <p class="cc-kicker">QUICK ACCESS</p>
+              <h3 id="cc-panel-quick" class="cc-panel__title">快捷指挥</h3>
+            </div>
+          </div>
+          <div class="cc-quick">
+            <button type="button" class="cc-quick__btn" data-dom-id="cc-quick-monitor">
+              <span class="cc-quick__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18M9 21V9"></path></svg>
+              </span>
+              <span class="cc-quick__body">
+                <span class="cc-quick__title">战场监控</span>
+                <span class="cc-quick__sub">实时格子与行军热力</span>
+              </span>
+              <svg class="cc-quick__go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+            <button type="button" class="cc-quick__btn" data-dom-id="cc-quick-team">
+              <span class="cc-quick__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              </span>
+              <span class="cc-quick__body">
+                <span class="cc-quick__title">团数据</span>
+                <span class="cc-quick__sub">成员活跃与资源统计</span>
+              </span>
+              <svg class="cc-quick__go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+            <button type="button" class="cc-quick__btn" data-dom-id="cc-quick-sim">
+              <span class="cc-quick__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+              </span>
+              <span class="cc-quick__body">
+                <span class="cc-quick__title">战斗模拟</span>
+                <span class="cc-quick__sub">阵容对拆推演</span>
+              </span>
+              <svg class="cc-quick__go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================ FOOTER (project-shell) ============================ -->
+  <footer class="site-footer">
+    <hr class="site-footer__rule" aria-hidden="true" />
+    <div class="site-footer__inner">
+      <div>
+        <a class="site-footer__brand" href="index.html" aria-label="STZB Watcher 首页">
+          <span class="site-seal" aria-hidden="true">
+            <span class="site-seal__char">率</span>
+          </span>
+          <span class="site-footer__brand-name">STZB Watcher</span>
+        </a>
+        <p class="site-footer__desc">
+          面向率土之滨战场的数据指挥平台，实时汇聚战报、同盟态势与资源脉络，让每一次调度都有据可依。
+        </p>
+      </div>
+
+      <div>
+        <h3 class="site-footer__col-title">快速导航</h3>
+        <ul class="site-footer__links">
+          <li><a class="site-footer__link" href="index.html">首页</a></li>
+          <li><a class="site-footer__link" href="features.html">核心功能</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="site-footer__col-title">联系与开源</h3>
+        <div class="site-footer__contact">
+          <div class="site-footer__contact-item">
+            <svg class="site-footer__contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>QQ 反馈：<span class="site-footer__qq">3268276553</span></span>
+          </div>
+          <div class="site-footer__contact-item">
+            <svg class="site-footer__contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>基于 MIT License 开源，可自由使用与二次开发。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <span>© 2026 STZB Watcher · 率土战场数据指挥平台</span>
+      <span>Released under the MIT License</span>
+    </div>
+  </footer>
+
+  <!-- ============================ SHARED SHELL + PAGE STYLES (custom, in <body> per hard rules) ============================ -->
+  <style>
+    /* ---------- Top Navigation (project-shell) ---------- */
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      width: 100%;
+      background: rgba(5, 8, 16, 0.82);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      border-bottom: 1px solid var(--border);
+    }
+    .site-nav__inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 12px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .site-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+      border-radius: var(--radius-md);
+      outline: none;
+      flex-shrink: 0;
+    }
+    .site-seal {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(150deg, var(--color-primary-hi), var(--color-primary-500));
+      box-shadow: inset 0 0 0 1px rgba(11, 15, 24, 0.35), var(--glow-gold);
+      position: relative;
+    }
+    .site-seal::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border: 1px solid rgba(11, 15, 24, 0.45);
+      border-radius: 2px;
+      pointer-events: none;
+    }
+    .site-seal__char {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 24px;
+      line-height: 1;
+      color: var(--on-accent);
+      position: relative;
+      z-index: 1;
+      user-select: none;
+    }
+    .site-brand__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .site-brand__name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1.1;
+      letter-spacing: 0.01em;
+      background: linear-gradient(120deg, var(--color-primary-hi), var(--color-primary), var(--color-primary-600));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      white-space: nowrap;
+    }
+    .site-brand__sub {
+      font-family: var(--font-body);
+      font-size: 12px;
+      line-height: 1.2;
+      color: var(--text-2);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .site-nav__right { display: flex; align-items: center; gap: 28px; min-width: 0; }
+    .site-nav__links { display: flex; align-items: center; gap: 28px; list-style: none; margin: 0; padding: 0; }
+    .site-nav__link {
+      position: relative;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-2);
+      text-decoration: none;
+      padding: 6px 2px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color var(--dur) var(--ease);
+      outline: none;
+    }
+    .site-nav__link::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      height: 2px;
+      width: 100%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-hi));
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform var(--dur) var(--ease);
+    }
+    .site-nav__link:hover,
+    .site-nav__link:focus-visible { color: var(--color-primary-hi); }
+    .site-nav__link:hover::after,
+    .site-nav__link:focus-visible::after { transform: scaleX(1); }
+    .site-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--on-accent);
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(120deg, var(--color-primary-hi), var(--color-primary));
+      border: 1px solid var(--color-primary-300);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+      outline: none;
+    }
+    .site-btn-primary:hover,
+    .site-btn-primary:focus-visible { transform: translateY(-1px); box-shadow: var(--glow-gold); }
+    .site-btn-primary:active { transform: translateY(0); }
+    .site-btn-primary__icon { width: 16px; height: 16px; flex-shrink: 0; transition: transform var(--dur) var(--ease); }
+    .site-btn-primary:hover .site-btn-primary__icon,
+    .site-btn-primary:focus-visible .site-btn-primary__icon { transform: translateX(3px); }
+
+    /* ---------- Footer (project-shell) ---------- */
+    .site-footer { width: 100%; background: var(--surface); border-top: 1px solid transparent; position: relative; }
+    .site-footer__rule { height: 1px; width: 100%; background: linear-gradient(90deg, transparent, var(--color-primary), transparent); border: 0; margin: 0; }
+    .site-footer__inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 56px 32px 40px;
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1.2fr;
+      gap: 48px;
+    }
+    .site-footer__col-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-primary);
+      letter-spacing: 0.08em;
+      margin: 0 0 18px;
+    }
+    .site-footer__brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; margin-bottom: 16px; }
+    .site-footer__brand-name { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--color-primary-hi); white-space: nowrap; }
+    .site-footer__desc { font-family: var(--font-body); font-size: 14px; line-height: 1.7; color: var(--text-2); margin: 0; max-width: 42ch; }
+    .site-footer__links { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+    .site-footer__link {
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-2);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color var(--dur) var(--ease);
+      width: fit-content;
+      outline: none;
+    }
+    .site-footer__link:hover,
+    .site-footer__link:focus-visible { color: var(--color-primary-hi); }
+    .site-footer__contact { display: flex; flex-direction: column; gap: 14px; }
+    .site-footer__contact-item { display: flex; align-items: flex-start; gap: 10px; font-family: var(--font-body); font-size: 14px; color: var(--text-2); line-height: 1.6; }
+    .site-footer__contact-icon { width: 18px; height: 18px; flex-shrink: 0; color: var(--color-primary); margin-top: 2px; }
+    .site-footer__qq { font-family: var(--font-mono); color: var(--text); letter-spacing: 0.03em; }
+    .site-footer__bottom {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 18px 32px 32px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-faint);
+      letter-spacing: 0.04em;
+    }
+    .site-brand:focus-visible,
+    .site-nav__link:focus-visible,
+    .site-btn-primary:focus-visible,
+    .site-footer__link:focus-visible,
+    .site-footer__brand:focus-visible {
+      box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--color-primary);
+      border-radius: var(--radius-sm);
+    }
+    @media (max-width: 1024px) {
+      .site-nav__inner,
+      .site-footer__inner,
+      .site-footer__bottom { padding-left: 24px; padding-right: 24px; }
+      .site-nav__right { gap: 20px; }
+      .site-nav__links { gap: 20px; }
+      .site-footer__inner { grid-template-columns: 1fr 1fr; gap: 36px; }
+    }
+    @media (max-width: 767px) {
+      .site-nav__inner { flex-wrap: wrap; row-gap: 12px; padding: 10px 16px; }
+      .site-brand__sub { display: none; }
+      .site-nav__right { width: 100%; flex-wrap: wrap; justify-content: space-between; gap: 12px 16px; }
+      .site-nav__links { flex-wrap: wrap; gap: 10px 18px; order: 2; }
+      .site-btn-primary { order: 1; margin-left: auto; }
+      .site-footer__inner { grid-template-columns: 1fr; gap: 32px; padding: 40px 16px 32px; }
+      .site-footer__bottom { padding: 16px 16px 28px; justify-content: center; text-align: center; }
+    }
+
+    /* =========================================================
+       COMMAND CENTER · page styles (cc- prefix)
+       ========================================================= */
+    .cc-wrap { max-width: 1280px; margin: 0 auto; padding-left: 32px; padding-right: 32px; }
+
+    /* ---- Hero ---- */
+    .cc-hero {
+      position: relative;
+      width: 100%;
+      min-height: 62vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      background-image:
+        linear-gradient(90deg,
+          color-mix(in srgb, var(--bg) 94%, transparent) 0%,
+          color-mix(in srgb, var(--bg) 74%, transparent) 45%,
+          color-mix(in srgb, var(--bg) 52%, transparent) 100%),
+        url('../assets/hero-battlefield.jpg');
+      background-size: cover;
+      background-position: center right;
+      background-repeat: no-repeat;
+    }
+    .cc-hero__veil {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg,
+        color-mix(in srgb, var(--bg) 45%, transparent) 0%,
+        color-mix(in srgb, var(--bg) 30%, transparent) 42%,
+        var(--bg) 100%);
+    }
+    .cc-hero__inner {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      padding-top: var(--sp-10);
+      padding-bottom: var(--sp-10);
+    }
+    .cc-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-primary-700);
+      background: color-mix(in srgb, var(--surface) 62%, transparent);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      color: var(--color-primary-hi);
+      margin-bottom: var(--sp-5);
+    }
+    .cc-eyebrow__dot {
+      width: 7px; height: 7px; border-radius: var(--radius-full);
+      background: var(--state-success);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--state-success) 24%, transparent);
+      animation: cc-pulse 2.4s var(--ease) infinite;
+    }
+    @keyframes cc-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+    .cc-hero__title {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: clamp(38px, 6vw, 72px);
+      line-height: 1.12;
+      letter-spacing: 0.02em;
+      margin: 0 0 var(--sp-4);
+      max-width: 16ch;
+      text-wrap: balance;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+    .cc-hero__subtitle {
+      font-family: var(--font-body);
+      font-size: clamp(15px, 1.4vw, 18px);
+      line-height: 1.8;
+      color: var(--text-2);
+      max-width: 56ch;
+      margin: 0 0 var(--sp-6);
+    }
+    .cc-hero__cta { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-bottom: var(--sp-6); }
+    .cc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      padding: 11px 22px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+      outline: none;
+    }
+    .cc-btn__icon { width: 17px; height: 17px; flex-shrink: 0; transition: transform var(--dur) var(--ease); }
+    .cc-btn--gold {
+      color: var(--on-accent);
+      background: linear-gradient(120deg, var(--color-primary-hi), var(--color-primary));
+      border: 1px solid var(--color-primary-300);
+    }
+    .cc-btn--gold:hover,
+    .cc-btn--gold:focus-visible { transform: translateY(-1px); box-shadow: var(--glow-gold); }
+    .cc-btn--gold:active { transform: translateY(0); }
+    .cc-btn--gold:hover .cc-btn__icon,
+    .cc-btn--gold:focus-visible .cc-btn__icon { transform: rotate(-42deg); }
+    .cc-btn--outline {
+      color: var(--text);
+      background: color-mix(in srgb, var(--surface) 55%, transparent);
+      border: 1px solid var(--border-strong);
+    }
+    .cc-btn--outline:hover,
+    .cc-btn--outline:focus-visible { color: var(--color-primary-hi); border-color: var(--color-primary); transform: translateY(-1px); }
+    .cc-kbd {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong);
+      background: color-mix(in srgb, var(--bg) 60%, transparent);
+      color: var(--color-primary-hi);
+    }
+    .cc-trust {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      margin: 0;
+      padding: 14px 18px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: color-mix(in srgb, var(--surface) 68%, transparent);
+      width: fit-content;
+      max-width: 100%;
+    }
+    .cc-trust__item { display: inline-flex; align-items: baseline; gap: 8px; margin: 0; }
+    .cc-trust__label { font-family: var(--font-body); font-size: 13px; color: var(--text-2); margin: 0; }
+    .cc-trust__val { font-family: var(--font-mono); font-size: 16px; font-weight: 500; color: var(--color-primary-hi); margin: 0; letter-spacing: 0.02em; }
+    .cc-trust__sep { color: var(--text-faint); font-family: var(--font-mono); }
+
+    /* ---- Section headings ---- */
+    .cc-section { padding-top: var(--sp-10); }
+    .cc-section--panels { padding-bottom: var(--sp-12); }
+    .cc-section__head { margin-bottom: var(--sp-5); }
+    .cc-kicker {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--color-primary);
+      margin: 0 0 6px;
+      text-transform: uppercase;
+    }
+    .cc-section__title { font-family: var(--font-display); font-size: clamp(22px, 2.4vw, 30px); font-weight: 700; margin: 0; }
+
+    /* ---- KPI cards ---- */
+    .cc-kpi {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px 18px 16px 22px;
+      overflow: hidden;
+      transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
+    }
+    .cc-kpi__bar { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--color-primary-hi), var(--color-primary-600)); }
+    .cc-kpi--alert .cc-kpi__bar { background: linear-gradient(180deg, var(--state-warning), var(--state-error)); }
+    .cc-kpi:hover { transform: translateY(-2px); border-color: var(--border-strong); }
+    .cc-kpi__label { font-family: var(--font-body); font-size: 13px; color: var(--text-2); margin: 0 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cc-kpi__value { font-family: var(--font-mono); font-size: clamp(26px, 3vw, 34px); font-weight: 700; color: var(--text); margin: 0; line-height: 1.05; letter-spacing: 0.01em; white-space: nowrap; }
+    .cc-kpi__unit { font-size: 0.55em; color: var(--text-2); margin-left: 2px; }
+    .cc-kpi__trend { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 12px; margin: 8px 0 0; }
+    .cc-kpi__trend svg { width: 13px; height: 13px; }
+    .cc-kpi__trend--up { color: var(--state-success); }
+    .cc-kpi__trend--warn { color: var(--state-warning); }
+    .cc-kpi__trend--info { color: var(--state-info); }
+    .cc-kpi__trend--muted { color: var(--text-faint); }
+
+    /* ---- Panels ---- */
+    .cc-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 22px 22px;
+      display: flex;
+      flex-direction: column;
+      transition: border-color var(--dur) var(--ease);
+    }
+    .cc-panel:hover { border-color: var(--border-strong); }
+    .cc-panel__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--border); }
+    .cc-panel__titles { min-width: 0; flex: 1; }
+    .cc-panel__title { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin: 0; line-height: 1.3; }
+    .cc-panel__head .cc-kicker { margin-bottom: 4px; }
+    .cc-link-btn {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--color-primary);
+      background: none;
+      border: 0;
+      cursor: pointer;
+      padding: 2px 2px;
+      white-space: nowrap;
+      transition: color var(--dur) var(--ease);
+      outline: none;
+    }
+    .cc-link-btn svg { width: 14px; height: 14px; transition: transform var(--dur) var(--ease); }
+    .cc-link-btn:hover,
+    .cc-link-btn:focus-visible { color: var(--color-primary-hi); }
+    .cc-link-btn:hover svg,
+    .cc-link-btn:focus-visible svg { transform: translateX(2px); }
+    .cc-count {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      padding: 0 7px;
+      border-radius: var(--radius-full);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      background: color-mix(in srgb, var(--state-error) 26%, var(--surface));
+      border: 1px solid color-mix(in srgb, var(--state-error) 55%, transparent);
+    }
+
+    .cc-mono { font-family: var(--font-mono); letter-spacing: 0.01em; }
+    .cc-strong { color: var(--text); font-weight: 600; }
+    .cc-time { font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); white-space: nowrap; }
+    .cc-merit { font-family: var(--font-mono); font-size: 13px; color: var(--color-primary-hi); white-space: nowrap; }
+
+    /* ---- Battle feed ---- */
+    .cc-feed, .cc-alerts, .cc-march, .cc-timeline, .cc-watch { list-style: none; margin: 0; padding: 0; }
+    .cc-feed__row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 8px;
+      margin: 0 -8px;
+      border-radius: var(--radius-sm);
+      border-bottom: 1px solid var(--border);
+      transition: background var(--dur) var(--ease);
+    }
+    .cc-feed__row:last-child { border-bottom: 0; }
+    .cc-feed__row:hover { background: var(--surface-2); }
+    .cc-chip {
+      flex-shrink: 0;
+      width: 26px; height: 26px;
+      display: grid; place-items: center;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-primary-hi);
+      background: color-mix(in srgb, var(--color-primary) 16%, var(--surface));
+      border: 1px solid var(--color-primary-700);
+    }
+    .cc-chip--def { color: var(--state-info); background: color-mix(in srgb, var(--state-info) 16%, var(--surface)); border-color: color-mix(in srgb, var(--state-info) 40%, transparent); }
+    .cc-chip--occ { color: var(--state-success); background: color-mix(in srgb, var(--state-success) 16%, var(--surface)); border-color: color-mix(in srgb, var(--state-success) 40%, transparent); }
+    .cc-chip--aid { color: var(--text-2); background: var(--surface-2); border-color: var(--border-strong); }
+    .cc-feed__body {
+      flex: 1;
+      min-width: 0;
+      font-size: 14px;
+      color: var(--text-2);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cc-feed__meta { flex-shrink: 0; display: inline-flex; align-items: center; gap: 12px; }
+
+    /* ---- Alerts ---- */
+    .cc-alert { display: flex; gap: 11px; padding: 11px 8px; margin: 0 -8px; border-bottom: 1px solid var(--border); }
+    .cc-alert:last-child { border-bottom: 0; }
+    .cc-alert__dot { flex-shrink: 0; width: 8px; height: 8px; margin-top: 7px; border-radius: var(--radius-full); }
+    .cc-alert--error .cc-alert__dot { background: var(--state-error); box-shadow: 0 0 0 3px color-mix(in srgb, var(--state-error) 20%, transparent); }
+    .cc-alert--warn .cc-alert__dot { background: var(--state-warning); box-shadow: 0 0 0 3px color-mix(in srgb, var(--state-warning) 20%, transparent); }
+    .cc-alert--info .cc-alert__dot { background: var(--state-info); box-shadow: 0 0 0 3px color-mix(in srgb, var(--state-info) 20%, transparent); }
+    .cc-alert__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+    .cc-alert__text { font-size: 14px; color: var(--text-2); line-height: 1.5; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .cc-alert__meta { display: inline-flex; align-items: center; gap: 10px; }
+    .cc-tag-sev {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      padding: 1px 7px;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
+    }
+    .cc-tag-sev--error { color: var(--state-error); background: color-mix(in srgb, var(--state-error) 15%, var(--surface)); border: 1px solid color-mix(in srgb, var(--state-error) 40%, transparent); }
+    .cc-tag-sev--warn { color: var(--state-warning); background: color-mix(in srgb, var(--state-warning) 15%, var(--surface)); border: 1px solid color-mix(in srgb, var(--state-warning) 40%, transparent); }
+    .cc-tag-sev--info { color: var(--state-info); background: color-mix(in srgb, var(--state-info) 15%, var(--surface)); border: 1px solid color-mix(in srgb, var(--state-info) 40%, transparent); }
+
+    /* ---- Live march ---- */
+    .cc-march__row { padding: 12px 8px; margin: 0 -8px; border-bottom: 1px solid var(--border); border-radius: var(--radius-sm); transition: background var(--dur) var(--ease); }
+    .cc-march__row:last-child { border-bottom: 0; }
+    .cc-march__row:hover { background: var(--surface-2); }
+    .cc-march__route { display: flex; align-items: center; gap: 10px; font-size: 14px; min-width: 0; margin-bottom: 8px; }
+    .cc-march__route .cc-mono { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cc-march__arrow { width: 16px; height: 16px; flex-shrink: 0; color: var(--color-primary); }
+    .cc-march__foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .cc-march__team { font-family: var(--font-body); font-size: 13px; color: var(--text-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cc-countdown {
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--color-primary-hi);
+      padding: 2px 9px;
+      border-radius: var(--radius-sm);
+      background: color-mix(in srgb, var(--color-primary) 12%, var(--surface));
+      border: 1px solid var(--color-primary-700);
+    }
+
+    /* ---- Event stream / timeline ---- */
+    .cc-stream__controls { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .cc-select { position: relative; flex: 1; min-width: 0; }
+    .cc-select__el {
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--text);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 30px 8px 12px;
+      cursor: pointer;
+      outline: none;
+      transition: border-color var(--dur) var(--ease);
+    }
+    .cc-select__el:focus-visible { border-color: var(--color-primary); }
+    .cc-select__caret { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--text-2); pointer-events: none; }
+    .cc-btn-mini {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--text-2);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+      outline: none;
+    }
+    .cc-btn-mini svg { width: 13px; height: 13px; }
+    .cc-btn-mini:hover,
+    .cc-btn-mini:focus-visible { color: var(--color-primary-hi); border-color: var(--color-primary); }
+    .cc-timeline { position: relative; padding-left: 20px; }
+    .cc-timeline::before {
+      content: "";
+      position: absolute;
+      left: 4px; top: 6px; bottom: 6px;
+      width: 1px;
+      background: linear-gradient(180deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 20%, transparent));
+    }
+    .cc-tl { position: relative; display: flex; align-items: baseline; gap: 10px; padding: 8px 0; }
+    .cc-tl__node {
+      position: absolute;
+      left: -20px; top: 12px;
+      width: 9px; height: 9px;
+      border-radius: var(--radius-full);
+      background: var(--bg);
+      border: 2px solid var(--color-primary);
+    }
+    .cc-tl__time { flex-shrink: 0; font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); }
+    .cc-tl__text { font-size: 14px; color: var(--text-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cc-tl__type { font-family: var(--font-mono); font-size: 11px; padding: 1px 6px; border-radius: var(--radius-sm); margin-right: 6px; }
+    .cc-tl__type--feed { color: var(--color-primary-hi); background: color-mix(in srgb, var(--color-primary) 14%, var(--surface)); }
+    .cc-tl__type--world { color: var(--state-info); background: color-mix(in srgb, var(--state-info) 14%, var(--surface)); }
+    .cc-tl__type--watch { color: var(--state-warning); background: color-mix(in srgb, var(--state-warning) 14%, var(--surface)); }
+
+    /* ---- Watch list ---- */
+    .cc-watch { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .cc-watch__card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+    }
+    .cc-watch__card:hover { border-color: var(--color-primary-700); transform: translateY(-2px); }
+    .cc-watch__kind { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; color: var(--color-primary); }
+    .cc-watch__name { font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cc-watch__hint { font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ---- Quick access ---- */
+    .cc-quick { display: flex; flex-direction: column; gap: 12px; }
+    .cc-quick__btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      text-align: left;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+      outline: none;
+    }
+    .cc-quick__btn:hover,
+    .cc-quick__btn:focus-visible { border-color: var(--color-primary); transform: translateY(-2px); }
+    .cc-quick__icon {
+      flex-shrink: 0;
+      width: 40px; height: 40px;
+      display: grid; place-items: center;
+      border-radius: var(--radius-sm);
+      color: var(--color-primary-hi);
+      background: color-mix(in srgb, var(--color-primary) 12%, var(--surface));
+      border: 1px solid var(--color-primary-700);
+    }
+    .cc-quick__icon svg { width: 20px; height: 20px; }
+    .cc-quick__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .cc-quick__title { font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--text); }
+    .cc-quick__sub { font-family: var(--font-body); font-size: 13px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cc-quick__go { flex-shrink: 0; width: 16px; height: 16px; color: var(--text-faint); transition: transform var(--dur) var(--ease), color var(--dur) var(--ease); }
+    .cc-quick__btn:hover .cc-quick__go,
+    .cc-quick__btn:focus-visible .cc-quick__go { transform: translateX(3px); color: var(--color-primary); }
+
+    /* ---- Focus ring for page buttons ---- */
+    .cc-btn:focus-visible,
+    .cc-link-btn:focus-visible,
+    .cc-btn-mini:focus-visible,
+    .cc-quick__btn:focus-visible,
+    .cc-select__el:focus-visible {
+      box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--color-primary);
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 1024px) {
+      .cc-wrap { padding-left: 24px; padding-right: 24px; }
+    }
+    @media (max-width: 767px) {
+      .cc-wrap { padding-left: 16px; padding-right: 16px; }
+      .cc-hero { min-height: 72vh; background-position: center; }
+      .cc-section { padding-top: var(--sp-8); }
+      .cc-watch { grid-template-columns: 1fr; }
+      .cc-trust { width: 100%; }
+    }
+
+    /* ---- Reduced motion ---- */
+    @media (prefers-reduced-motion: reduce) {
+      .cc-btn, .cc-btn__icon, .cc-link-btn, .cc-link-btn svg, .cc-kpi, .cc-panel,
+      .cc-quick__btn, .cc-quick__go, .cc-watch__card, .cc-btn-mini, .cc-feed__row,
+      .cc-march__row, .cc-select__el, .cc-eyebrow__dot {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

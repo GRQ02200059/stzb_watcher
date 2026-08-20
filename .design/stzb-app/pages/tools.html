@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工具中心 · 率土之滨监控</title>
+    <style id="theme-vars">
+/* ==========================================================================
+   STZB Watcher — Mobile UI (macOS Liquid Glass)
+   配色完全沿用安卓端 AstzbColors：浅雾背景 + 彩色环境光 + 半透明玻璃
+   ========================================================================== */
+
+:root {
+  /* 页面背景：接近 macOS 桌面雾白 */
+  --bg-top: #FBFCFF;
+  --bg-middle: #F1F6FF;
+  --bg-bottom: #E9F1FC;
+
+  /* 环境光斑（穿过玻璃后的蓝 / 紫 / 青 / 桃泛光） */
+  --aurora-blue: rgba(140, 200, 255, 0.40);
+  --aurora-violet: rgba(201, 155, 255, 0.40);
+  --aurora-mint: rgba(114, 228, 214, 0.32);
+  --aurora-peach: rgba(255, 210, 184, 0.24);
+
+  /* 玻璃表面：半透明白（层级） */
+  --glass-veil: rgba(255, 255, 255, 0.45);
+  --glass-frost: rgba(255, 255, 255, 0.72);
+  --glass-floating: rgba(255, 255, 255, 0.85);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+
+  /* 主色 */
+  --color-primary: #426AD2;
+  --color-primary-600: #375DBF;
+  --color-primary-700: #2E4FA6;
+  --color-primary-container: #EAF1FF;
+  --color-on-primary: #FFFFFF;
+
+  /* 文字 */
+  --text-primary: #14223A;
+  --text-secondary: #60708B;
+  --text-tertiary: #8A99B0;
+
+  /* 线框 */
+  --outline: rgba(255, 255, 255, 0.75);
+  --outline-low: rgba(255, 255, 255, 0.55);
+  --outline-blue: rgba(66, 106, 210, 0.14);
+  --hairline: rgba(20, 34, 58, 0.08);
+
+  /* 语义色（仅状态语义使用） */
+  --state-success: #1E9B83;
+  --state-warning: #BE7A18;
+  --state-error: #C75862;
+  --state-info: #4C78C8;
+
+  --state-success-bg: #E0F4EE;
+  --state-warning-bg: #FDECD4;
+  --state-error-bg: #F9E2E5;
+  --state-info-bg: #E3ECF9;
+
+  /* 圆角（克制刻度） */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+  --radius-full: 9999px;
+
+  /* 阴影：静态卡片走边框/表面分层，仅浮层可深 */
+  --shadow-card: 0 1px 2px rgba(20, 34, 58, 0.04);
+  --shadow-float: 0 18px 48px rgba(46, 79, 166, 0.18);
+
+  /* 字体 */
+  --font-sans: -apple-system, "SF Pro SC", "SF Pro Text", "PingFang SC",
+    "Helvetica Neue", "Noto Sans SC", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 字号刻度（对齐 AstzbTypography） */
+.type-display { font-size: 24px; line-height: 30px; font-weight: 700; letter-spacing: -0.01em; }
+.type-title   { font-size: 18px; line-height: 24px; font-weight: 600; }
+.type-body-lg { font-size: 16px; line-height: 24px; font-weight: 400; }
+.type-body    { font-size: 14px; line-height: 20px; font-weight: 400; }
+.type-label   { font-size: 14px; line-height: 20px; font-weight: 600; }
+.type-caption { font-size: 12px; line-height: 16px; font-weight: 500; }
+
+/* ---- 玻璃基础组件 ---- */
+.glass-card {
+  background: var(--glass-frost);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+}
+.glass-veil {
+  background: var(--glass-veil);
+  border: 1px solid var(--outline-low);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+.glass-floating {
+  background: var(--glass-floating);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-float);
+  backdrop-filter: blur(30px) saturate(160%);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+}
+
+/* 页面雾白 + 环境光背景 */
+.app-bg {
+  background:
+    radial-gradient(120% 90% at 12% 4%, var(--aurora-blue) 0%, transparent 46%),
+    radial-gradient(120% 90% at 92% 8%, var(--aurora-violet) 0%, transparent 48%),
+    radial-gradient(140% 80% at 80% 96%, var(--aurora-mint) 0%, transparent 52%),
+    radial-gradient(120% 90% at 8% 92%, var(--aurora-peach) 0%, transparent 50%),
+    linear-gradient(180deg, var(--bg-top) 0%, var(--bg-middle) 52%, var(--bg-bottom) 100%);
+}
+
+/* 状态胶囊 */
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: var(--radius-full); font-size: 12px; font-weight: 600; line-height: 16px; }
+.chip-success { background: var(--state-success-bg); color: var(--state-success); }
+.chip-warning { background: var(--state-warning-bg); color: var(--state-warning); }
+.chip-error   { background: var(--state-error-bg); color: var(--state-error); }
+.chip-info    { background: var(--state-info-bg); color: var(--state-info); }
+
+/* 滚动条隐藏（移动端预览更干净） */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-primary: var(--color-primary);
+  }
+  @layer base {
+    body { background: var(--color-background); color: var(--color-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="app-bg min-h-screen flex items-center justify-center p-6">
+
+  <!-- ===== 移动设备外框 ===== -->
+  <div class="device-frame app-bg">
+
+    <!-- ===== 顶部 iOS 状态栏 ===== -->
+    <div class="flex items-center justify-between px-6" style="height: 44px;">
+      <span class="type-caption tabnum" style="font-weight: 600; color: var(--text-primary);">9:41</span>
+      <div class="flex items-center gap-1.5" style="color: var(--text-primary);">
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="currentColor" aria-hidden="true">
+          <rect x="0" y="9" width="3" height="5" rx="1"></rect>
+          <rect x="5" y="6" width="3" height="8" rx="1"></rect>
+          <rect x="10" y="3" width="3" height="11" rx="1"></rect>
+          <rect x="15" y="0" width="3" height="14" rx="1"></rect>
+        </svg>
+        <svg width="18" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2 8.5a15 15 0 0 1 20 0"></path>
+          <path d="M5 12a10 10 0 0 1 14 0"></path>
+          <path d="M8.5 15.5a5 5 0 0 1 7 0"></path>
+          <circle cx="12" cy="19" r="0.6" fill="currentColor"></circle>
+        </svg>
+        <svg width="26" height="14" viewBox="0 0 26 14" fill="none" aria-hidden="true">
+          <rect x="0.5" y="0.5" width="21" height="13" rx="3.5" stroke="currentColor" stroke-opacity="0.4"></rect>
+          <rect x="2.5" y="2.5" width="15" height="9" rx="2" fill="currentColor"></rect>
+          <rect x="23" y="4.5" width="2" height="5" rx="1" fill="currentColor" fill-opacity="0.4"></rect>
+        </svg>
+      </div>
+    </div>
+
+    <!-- ===== 玻璃头部 MacGlassHeader ===== -->
+    <header class="glass-veil mx-4 mt-1 px-4 py-3 flex items-center justify-between">
+      <div class="flex flex-col min-w-0">
+        <span class="type-title truncate" style="color: var(--text-primary);">工具中心</span>
+        <span class="type-caption truncate" style="color: var(--text-tertiary);">全部功能 · 分组聚合</span>
+      </div>
+    </header>
+
+    <!-- ===== 主内容滚动区 ===== -->
+    <main class="no-scrollbar flex flex-col overflow-y-auto"
+          style="height: calc(844px - 44px - 64px); padding: 16px; gap: 20px; padding-bottom: 96px;">
+
+      <!-- ---- 组1：战斗与队伍 ---- -->
+      <section class="flex flex-col" style="gap: 12px;">
+        <div class="flex items-center" style="gap: 8px;">
+          <span style="width: 3px; height: 14px; border-radius: 2px; background: var(--color-primary); flex-shrink: 0;"></span>
+          <span class="type-caption" style="font-weight: 600; color: var(--text-secondary); letter-spacing: 0.02em;">战斗与队伍</span>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+
+          <!-- 攻城考勤（城墙旗帜） -->
+          <a href="#" data-dom-id="open-attendance" class="tool-tile flex flex-col items-center">
+            <span class="tile-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 21V5l6 2 6-2v9"></path>
+                <path d="M4 12h12"></path>
+                <path d="M4 3v18"></path>
+                <path d="M16 14v7"></path>
+                <path d="M16 21h4"></path>
+              </svg>
+            </span>
+            <span class="type-caption tile-label">攻城考勤</span>
+          </a>
+
+          <!-- 自定义积分（奖章计分） -->
+          <a href="#" data-dom-id="open-score" class="tool-tile flex flex-col items-center">
+            <span class="tile-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="9" r="5"></circle>
+                <path d="M9.5 13.5 8 21l4-2.2L16 21l-1.5-7.5"></path>
+                <path d="M12 7v3l2 1"></path>
+              </svg>
+            </span>
+            <span class="type-caption tile-label">自定义积分</span>
+          </a>
+
+          <!-- 队伍（三人） -->
+          <a href="#" data-dom-id="open-team" class="tool-tile flex flex-col items-center">
+            <span class="tile-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="8" r="2.6"></circle>
+                <circle cx="5.5" cy="10" r="2.2"></circle>
+                <circle cx="18.5" cy="10" r="2.2"></circle>
+                <path d="M8 19c0-2.2 1.8-4 4-4s4 1.8 4 4"></path>
+                <path d="M2.5 18.5c0-1.9 1.3-3.3 3-3.5"></path>
+                <path d="M18.5 15c1.7.2 3 1.6 3 3.5"></path>
+              </svg>
+            </span>
+            <span class="type-caption tile-label">队伍</span>
+          </a>
+
+          <!-- 团队报表（柱状图） -->
+          <a href="#" data-dom-id="open-team-report" class="tool-tile flex flex-col items-center">
+            <span class="tile-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 20V4"></path>
+                <path d="M4 20h16"></path>
+                <rect x="7" y="12" width="3" height="5" rx="0.6"></rect>
+                <rect x="12" y="8" width="3" height="9" rx="0.6"></rect>
+                <rect x="17" y="14" width="3" height="3" rx="0.6"></rect>
+              </svg>
+            </span>
+            <span class="type-caption tile-label">团队报表</span>
+          </a>
+
+          <!-- 战术演练（棋盘剑） -->
+          <a href="simulator.html" data-dom-id="open-simulator" class="tool-tile flex flex-col items-center">
+            <span class="tile-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                <path d="M3 9h18"></path>
+                <path d="M3 15h18"></path>
+                <path d="M9 3v18"></path>
+                <path d="M15 3v18"></path>
+              </svg>
+            </span>
+            <span class="type-caption tile-label">战术演练</span>
+          </a>
+
+          <!-- 战法研究（书卷） -->
+          <a href="#" data-dom-id="open-tactic-study" class="tool-tile flex flex-col items-center">
+            <span class="tile-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5z"></path>
+                <path d="M4 5.5V20.5A2.5 2.5 0 0 0 6.5 18H19"></path>
+                <path d="M8 8h7"></path>
+                <path d="M8 11.5h7"></path>
+              </svg>
+            </span>
+            <span class="type-caption tile-label">战法研究</span>
+          </a>
+
+        </div>
+      </section>
+
+      <!-- ---- 组2：情报与榜单 ---- -->
+      <section class="flex flex-col" style="gap: 12px;">
+        <div class="flex items-center" style="gap: 8px;">
+          <span style="width: 3px; height: 14px; border-radius: 2px; background: var(--color-primary); flex-shrink: 0;"></span>
+          <span class="type-caption" style="font-weight: 600; color: var(--text-secondary); letter-spacing: 0.02em;">情报与榜单</span>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+
+          <!-- 实时部队（行军箭头） -->
+          <a href="#" data-dom-id="open-troops" class="tool-tile flex flex-col items-center">
+            <span class="tile-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 12h13"></path>
+                <path d="M12 6l6 6-6 6"></path>
+                <path d="M3 6v12"></path>
+              </svg>
+            </span>
+            <span class="type-caption tile-label">实时部队</span>
+          </a>
+
+          <!-- 地图城池（地图针） -->
+          <a href="#" data-dom-id="open-map" class="tool-tile flex flex-col items-center">
+            <span class="tile-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10z"></path>
+                <circle cx="12" cy="11" r="2.4"></circle>
+              </svg>
+            </span>
+            <span class="type-caption tile-label">地图城池</span>
+          </a>
+
+          <!-- 游戏公告（喇叭） -->
+          <a href="#" data-dom-id="open-notice" class="tool-tile flex flex-col items-center">
+            <span class="tile-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 10v4a1 1 0 0 0 1 1h3l5 4V5L8 9H5a1 1 0 0 0-1 1z"></path>
+                <path d="M17 9a4 4 0 0 1 0 6"></path>
+              </svg>
+            </span>
+            <span class="type-caption tile-label">游戏公告</span>
+          </a>
+
+          <!-- 排行榜（奖杯） -->
+          <a href="ranking.html" data-dom-id="open-ranking" class="tool-tile flex flex-col items-center">
+            <span class="tile-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M7 4h10v5a5 5 0 0 1-10 0z"></path>
+                <path d="M7 6H4v2a3 3 0 0 0 3 3"></path>
+                <path d="M17 6h3v2a3 3 0 0 1-3 3"></path>
+                <path d="M10 14h4v3h-4z"></path>
+                <path d="M8 20h8"></path>
+                <path d="M12 17v3"></path>
+              </svg>
+            </span>
+            <span class="type-caption tile-label">排行榜</span>
+          </a>
+
+        </div>
+      </section>
+
+      <!-- ---- 组3：抓包与经典 ---- -->
+      <section class="flex flex-col" style="gap: 12px;">
+        <div class="flex items-center" style="gap: 8px;">
+          <span style="width: 3px; height: 14px; border-radius: 2px; background: var(--color-primary); flex-shrink: 0;"></span>
+          <span class="type-caption" style="font-weight: 600; color: var(--text-secondary); letter-spacing: 0.02em;">抓包与经典</span>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+
+          <!-- 抓包启动台（雷达网络） -->
+          <a href="capture.html" data-dom-id="open-capture" class="tool-tile flex flex-col items-center">
+            <span class="tile-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 12a9 9 0 0 1 9 9"></path>
+                <path d="M12 12a5 5 0 0 1 5 5"></path>
+                <circle cx="12" cy="12" r="9"></circle>
+                <circle cx="12" cy="12" r="1.4" fill="currentColor"></circle>
+              </svg>
+            </span>
+            <span class="type-caption tile-label">抓包启动台</span>
+          </a>
+
+          <!-- 经典数据（数据库） -->
+          <a href="#" data-dom-id="open-classic-data" class="tool-tile flex flex-col items-center">
+            <span class="tile-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <ellipse cx="12" cy="6" rx="7" ry="3"></ellipse>
+                <path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"></path>
+                <path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"></path>
+              </svg>
+            </span>
+            <span class="type-caption tile-label">经典数据</span>
+          </a>
+
+        </div>
+      </section>
+
+      <!-- ---- 组4：账号 ---- -->
+      <section class="flex flex-col" style="gap: 12px;">
+        <div class="flex items-center" style="gap: 8px;">
+          <span style="width: 3px; height: 14px; border-radius: 2px; background: var(--color-primary); flex-shrink: 0;"></span>
+          <span class="type-caption" style="font-weight: 600; color: var(--text-secondary); letter-spacing: 0.02em;">账号</span>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+
+          <!-- 账号与区服（用户） -->
+          <a href="#" data-dom-id="open-account" class="tool-tile flex flex-col items-center">
+            <span class="tile-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.4"></circle>
+                <path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"></path>
+              </svg>
+            </span>
+            <span class="type-caption tile-label">账号与区服</span>
+          </a>
+
+          <!-- 退出登录（登出箭头） -->
+          <a href="#" data-dom-id="open-logout" class="tool-tile flex flex-col items-center">
+            <span class="tile-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7"></path>
+                <path d="M12 12h9"></path>
+                <path d="M18 9l3 3-3 3"></path>
+              </svg>
+            </span>
+            <span class="type-caption tile-label">退出登录</span>
+          </a>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ===== 底部玻璃浮层 Tab 栏（战场 / 战报 / 同盟 / 工具） ===== -->
+    <nav class="glass-floating absolute left-3 right-3" style="bottom: 10px; padding: 8px 8px 6px;">
+      <div class="flex items-stretch justify-between">
+
+        <!-- Tab 1：战场（雷达） -->
+        <a href="battlefield.html" data-dom-id="tab-battlefield" data-tab-key="battlefield" data-tab-item
+           class="flex flex-1 flex-col items-center gap-1 py-1.5 rounded-2xl relative">
+          <span class="tab-pill absolute inset-x-2 inset-y-0 rounded-2xl" style="background: var(--color-primary-container);"></span>
+          <svg class="tab-ico relative" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <circle cx="12" cy="12" r="5"></circle>
+            <circle cx="12" cy="12" r="1.4" fill="currentColor"></circle>
+            <path d="M12 12 20 6"></path>
+          </svg>
+          <span class="tab-lbl type-caption relative">战场</span>
+        </a>
+
+        <!-- Tab 2：战报（收据） -->
+        <a href="reports.html" data-dom-id="tab-reports" data-tab-key="reports" data-tab-item
+           class="flex flex-1 flex-col items-center gap-1 py-1.5 rounded-2xl relative">
+          <span class="tab-pill absolute inset-x-2 inset-y-0 rounded-2xl" style="background: var(--color-primary-container);"></span>
+          <svg class="tab-ico relative" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 3h12v18l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4L6 21z"></path>
+            <path d="M9 8h6"></path>
+            <path d="M9 12h6"></path>
+          </svg>
+          <span class="tab-lbl type-caption relative">战报</span>
+        </a>
+
+        <!-- Tab 3：同盟（人群） -->
+        <a href="alliance.html" data-dom-id="tab-alliance" data-tab-key="alliance" data-tab-item
+           class="flex flex-1 flex-col items-center gap-1 py-1.5 rounded-2xl relative">
+          <span class="tab-pill absolute inset-x-2 inset-y-0 rounded-2xl" style="background: var(--color-primary-container);"></span>
+          <svg class="tab-ico relative" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="9" cy="8" r="3"></circle>
+            <path d="M4 19c0-2.8 2.2-5 5-5s5 2.2 5 5"></path>
+            <circle cx="17" cy="9" r="2.4"></circle>
+            <path d="M15.5 14.4c2.3.2 4 1.9 4 4.1"></path>
+          </svg>
+          <span class="tab-lbl type-caption relative">同盟</span>
+        </a>
+
+        <!-- Tab 4：工具（三点）— 当前页 -->
+        <a href="tools.html" data-dom-id="tab-tools" data-tab-key="tools" data-tab-item data-active="true"
+           class="flex flex-1 flex-col items-center gap-1 py-1.5 rounded-2xl relative">
+          <span class="tab-pill absolute inset-x-2 inset-y-0 rounded-2xl" style="background: var(--color-primary-container);"></span>
+          <svg class="tab-ico relative" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="5" cy="12" r="1.6" fill="currentColor"></circle>
+            <circle cx="12" cy="12" r="1.6" fill="currentColor"></circle>
+            <circle cx="19" cy="12" r="1.6" fill="currentColor"></circle>
+          </svg>
+          <span class="tab-lbl type-caption relative">工具</span>
+        </a>
+      </div>
+
+      <div class="flex justify-center pt-1.5 pb-0.5">
+        <span class="rounded-full" style="width: 134px; height: 5px; background: var(--text-tertiary); opacity: 0.55;"></span>
+      </div>
+    </nav>
+
+  </div>
+
+  <!-- ===== 页面级样式：设备外框 + Tab active 态 + 交互反馈（放置于 body 末尾） ===== -->
+  <style>
+    /* 设备外框：iPhone-like，44px 圆角，柔和外阴影 */
+    .device-frame {
+      width: 390px;
+      max-width: 390px;
+      height: 844px;
+      border-radius: 44px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 40px 90px rgba(46, 79, 166, 0.20), 0 8px 24px rgba(20, 34, 58, 0.10);
+    }
+    .tabnum { font-variant-numeric: tabular-nums; }
+
+    /* Tab 项 active 态：由当前页在对应 <a> 设 data-active="true" 驱动 */
+    [data-tab-item] .tab-pill { display: none; }
+    [data-tab-item][data-active="true"] .tab-pill { display: block; }
+    [data-tab-item] .tab-ico, [data-tab-item] .tab-lbl { color: var(--text-tertiary); }
+    [data-tab-item][data-active="true"] .tab-ico,
+    [data-tab-item][data-active="true"] .tab-lbl { color: var(--color-primary); }
+    [data-tab-item] { transition: opacity 140ms cubic-bezier(.2,.8,.2,1); }
+    [data-tab-item]:active { opacity: 0.7; }
+
+    /* 工具磁贴：56x56 圆角方块 + 主色线性图标 + 下方中文标签 */
+    .tool-tile {
+      gap: 8px;
+      padding: 4px 2px;
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      transition: transform 160ms cubic-bezier(.2,.8,.2,1), border-color 160ms cubic-bezier(.2,.8,.2,1);
+    }
+    .tile-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: var(--color-primary-container);
+      color: var(--color-primary);
+      flex-shrink: 0;
+    }
+    .tile-label {
+      color: var(--text-secondary);
+      text-align: center;
+    }
+    .tool-tile:hover { transform: translateY(-2px); border-color: var(--outline-blue); }
+    .tool-tile:active { transform: translateY(0); }
+    .tool-tile:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tool-tile, [data-tab-item] { transition-duration: 0.01ms !important; }
+    }
+  </style>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

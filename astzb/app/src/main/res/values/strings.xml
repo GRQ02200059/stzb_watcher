@@ -2,4 +2,5 @@
     <string name="app_name">st助手安卓独立版</string>
     <string name="expired_title">应用已过期</string>
     <string name="expired_subtitle">应用试用期已结束</string>
+    <string name="accessibility_auto_scroll_desc">自动滑动战报：启用后可在游戏界面自动从上往下循环滑动。仅在你点击悬浮按钮开始后执行手势。</string>
 </resources>

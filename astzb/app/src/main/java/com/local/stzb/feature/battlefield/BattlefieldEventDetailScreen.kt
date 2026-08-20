@@ -2,7 +2,6 @@ package com.local.stzb.feature.battlefield
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,14 +15,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.local.stzb.core.ui.GlassCard
 import com.local.stzb.core.ui.GlassStatus
 import com.local.stzb.core.ui.GlassStatusPill
+import com.local.stzb.core.ui.InfoRow
 import com.local.stzb.core.ui.MacGlassHeader
+import com.local.stzb.core.ui.SectionLabel
 import com.local.stzb.domain.battlefield.BattlefieldEvent
 import com.local.stzb.domain.battlefield.EventCategory
 import com.local.stzb.domain.battlefield.EventPriority
@@ -40,7 +40,7 @@ fun BattlefieldEventDetailScreen(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         MacGlassHeader(
@@ -66,25 +66,25 @@ fun BattlefieldEventDetailScreen(
 
         GlassCard(Modifier.fillMaxWidth()) {
             Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(
+                androidx.compose.foundation.layout.Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
                 ) {
-                    Text(event.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    Text(event.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                     GlassStatusPill(event.priority.label, event.priority.status)
                 }
-                Text(event.summary, style = MaterialTheme.typography.bodyLarge)
-                Text(formatEventTime(event.occurredAt), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(event.summary, style = MaterialTheme.typography.bodyMedium)
+                Text(formatEventTime(event.occurredAt), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
 
         if (event.details.isNotEmpty()) {
             GlassCard(Modifier.fillMaxWidth()) {
-                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("事件信息", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    SectionLabel("事件信息")
                     event.details.forEach { detail ->
-                        Text(detail, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -92,9 +92,9 @@ fun BattlefieldEventDetailScreen(
 
         val target = event.target
         GlassCard(Modifier.fillMaxWidth()) {
-            Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("关联目标", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text(target.label, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                SectionLabel("关联目标")
+                InfoRow("目标", target.label)
                 if (target is EventTarget.Battle) {
                     Button(onClick = { onOpenBattle(target.battleId) }, modifier = Modifier.fillMaxWidth()) {
                         Text("查看完整战报")

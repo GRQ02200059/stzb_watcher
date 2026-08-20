@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>率土之滨 · 监控 App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../colors_and_type.css" />
+  <style>
+    /* 设备外框：iPhone-like，44px 圆角，柔和外阴影 */
+    .device-frame {
+      width: 390px;
+      max-width: 390px;
+      height: 844px;
+      border-radius: 44px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 40px 90px rgba(46, 79, 166, 0.20), 0 8px 24px rgba(20, 34, 58, 0.10);
+    }
+  </style>
+</head>
+
+<!-- body 使用 app-bg，居中承载移动设备外框 -->
+<body class="app-bg min-h-screen flex items-center justify-center p-6">
+
+  <!-- ===== 移动设备外框 ===== -->
+  <div class="device-frame app-bg">
+
+    <!-- ===== 顶部 iOS 状态栏 ===== -->
+    <div class="flex items-center justify-between px-6" style="height: 44px;">
+      <!-- 时间 -->
+      <span class="type-caption" style="font-weight: 600; color: var(--text-primary);">9:41</span>
+      <!-- 信号 / WiFi / 电量 -->
+      <div class="flex items-center gap-1.5" style="color: var(--text-primary);">
+        <!-- 信号 -->
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="currentColor" aria-hidden="true">
+          <rect x="0" y="9" width="3" height="5" rx="1"></rect>
+          <rect x="5" y="6" width="3" height="8" rx="1"></rect>
+          <rect x="10" y="3" width="3" height="11" rx="1"></rect>
+          <rect x="15" y="0" width="3" height="14" rx="1"></rect>
+        </svg>
+        <!-- WiFi -->
+        <svg width="18" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2 8.5a15 15 0 0 1 20 0"></path>
+          <path d="M5 12a10 10 0 0 1 14 0"></path>
+          <path d="M8.5 15.5a5 5 0 0 1 7 0"></path>
+          <circle cx="12" cy="19" r="0.6" fill="currentColor"></circle>
+        </svg>
+        <!-- 电量 -->
+        <svg width="26" height="14" viewBox="0 0 26 14" fill="none" aria-hidden="true">
+          <rect x="0.5" y="0.5" width="21" height="13" rx="3.5" stroke="currentColor" stroke-opacity="0.4"></rect>
+          <rect x="2.5" y="2.5" width="15" height="9" rx="2" fill="currentColor"></rect>
+          <rect x="23" y="4.5" width="2" height="5" rx="1" fill="currentColor" fill-opacity="0.4"></rect>
+        </svg>
+      </div>
+    </div>
+
+    <!-- ===== 玻璃头部（SLOT：页面标题栏） ===== -->
+    <header class="glass-veil mx-4 mt-1 px-4 py-3 flex items-center justify-between">
+      <!-- SLOT: pageHeader -->
+      <div class="flex flex-col">
+        <span class="type-title" style="color: var(--text-primary);">实时部队</span>
+        <span class="type-caption" style="color: var(--text-tertiary);">全服出征队列 · 时间倒序</span>
+      </div>
+      <!-- 右侧动作区（SLOT：刷新 / 菜单等图标） -->
+      <div class="flex items-center gap-3" style="color: var(--text-secondary);">
+        <!-- 刷新 -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
+          <path d="M21 4v5h-5"></path>
+        </svg>
+        <!-- 菜单 -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="4" y1="7" x2="20" y2="7"></line>
+          <line x1="4" y1="12" x2="20" y2="12"></line>
+          <line x1="4" y1="17" x2="20" y2="17"></line>
+        </svg>
+      </div>
+      <!-- /SLOT: pageHeader -->
+    </header>
+
+    <!-- ===== 主内容滚动区（SLOT：页面内容） ===== -->
+    <main class="no-scrollbar flex flex-col overflow-y-auto"
+          style="height: calc(844px - 44px - 64px); padding: 16px; gap: 16px; padding-bottom: 96px;">
+      <!-- SLOT: pageContent -->
+
+      <!-- 1) 概览条：三段内联统计，发丝分隔 -->
+      <section class="glass-veil flex items-center justify-between px-4 py-2.5">
+        <div class="flex flex-1 flex-col items-center">
+          <span class="type-caption" style="color: var(--text-tertiary);">出征队列</span>
+          <span class="type-body" style="font-weight: 600; color: var(--text-primary);">1,206</span>
+        </div>
+        <span style="width: 1px; height: 26px; background: var(--hairline);"></span>
+        <div class="flex flex-1 flex-col items-center">
+          <span class="type-caption" style="color: var(--text-tertiary);">满编骑兵</span>
+          <span class="type-body" style="font-weight: 600; color: var(--text-primary);">46</span>
+        </div>
+        <span style="width: 1px; height: 26px; background: var(--hairline);"></span>
+        <div class="flex flex-1 flex-col items-center">
+          <span class="type-caption" style="color: var(--text-tertiary);">刷新</span>
+          <span class="type-body" style="font-weight: 600; color: var(--text-primary);">3s前</span>
+        </div>
+      </section>
+
+      <!-- 2) 筛选 / 排序条 -->
+      <section class="flex flex-col gap-2">
+        <div class="no-scrollbar flex items-center gap-2 overflow-x-auto">
+          <span class="type-caption" style="flex: 0 0 auto; padding: 5px 12px; border-radius: var(--radius-full); font-weight: 600; background: var(--color-primary-container); color: var(--color-primary);">全部</span>
+          <span class="glass-veil type-caption" style="flex: 0 0 auto; padding: 5px 12px; border-radius: var(--radius-full); color: var(--text-secondary); white-space: nowrap;">骑兵</span>
+          <span class="glass-veil type-caption" style="flex: 0 0 auto; padding: 5px 12px; border-radius: var(--radius-full); color: var(--text-secondary); white-space: nowrap;">盾兵</span>
+          <span class="glass-veil type-caption" style="flex: 0 0 auto; padding: 5px 12px; border-radius: var(--radius-full); color: var(--text-secondary); white-space: nowrap;">弓兵</span>
+          <span class="glass-veil type-caption" style="flex: 0 0 auto; padding: 5px 12px; border-radius: var(--radius-full); color: var(--text-secondary); white-space: nowrap;">枪兵</span>
+          <span class="glass-veil type-caption" style="flex: 0 0 auto; padding: 5px 12px; border-radius: var(--radius-full); color: var(--text-secondary); white-space: nowrap;">器械</span>
+        </div>
+        <div class="flex justify-end">
+          <span class="type-caption" style="color: var(--text-secondary);">时间倒序 ▾</span>
+        </div>
+      </section>
+
+      <!-- 3) 部队队列列表（时间倒序） -->
+
+      <!-- 队列 1 · 刚刚 · 骑兵 -->
+      <article class="glass-card flex flex-col gap-3 px-4 py-3.5">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex items-baseline gap-1.5" style="min-width: 0;">
+            <span class="type-body-lg" style="font-weight: 600; color: var(--text-primary);">独钓寒江雪</span>
+            <span class="type-caption" style="color: var(--text-tertiary); white-space: nowrap;">[铁血同盟]</span>
+          </div>
+          <div class="flex items-center gap-2" style="flex: 0 0 auto;">
+            <span class="type-caption" style="color: var(--text-tertiary);">刚刚</span>
+            <span class="chip chip-info">骑兵</span>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">吕</span>
+            <span class="type-caption" style="color: var(--text-secondary);">吕布</span>
+          </div>
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">陈</span>
+            <span class="type-caption" style="color: var(--text-secondary);">陈宫</span>
+          </div>
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">貂</span>
+            <span class="type-caption" style="color: var(--text-secondary);">貂蝉</span>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="glass-veil type-caption" style="padding: 3px 10px; border-radius: var(--radius-full); color: var(--text-secondary);">破军威胜</span>
+          <span class="glass-veil type-caption" style="padding: 3px 10px; border-radius: var(--radius-full); color: var(--text-secondary);">横扫千军</span>
+        </div>
+        <div style="border-top: 1px solid var(--hairline); padding-top: 8px;">
+          <span class="type-caption" style="color: var(--text-tertiary);">全骑 · 满编 · 满级5级 · 战力 128,400</span>
+        </div>
+      </article>
+
+      <!-- 队列 2 · 20秒前 · 盾兵 -->
+      <article class="glass-card flex flex-col gap-3 px-4 py-3.5">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex items-baseline gap-1.5" style="min-width: 0;">
+            <span class="type-body-lg" style="font-weight: 600; color: var(--text-primary);">许昌丞相</span>
+            <span class="type-caption" style="color: var(--text-tertiary); white-space: nowrap;">[卧龙盟]</span>
+          </div>
+          <div class="flex items-center gap-2" style="flex: 0 0 auto;">
+            <span class="type-caption" style="color: var(--text-tertiary);">20秒前</span>
+            <span class="chip chip-success">盾兵</span>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">曹</span>
+            <span class="type-caption" style="color: var(--text-secondary);">曹操</span>
+          </div>
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">郭</span>
+            <span class="type-caption" style="color: var(--text-secondary);">郭嘉</span>
+          </div>
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">荀</span>
+            <span class="type-caption" style="color: var(--text-secondary);">荀彧</span>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="glass-veil type-caption" style="padding: 3px 10px; border-radius: var(--radius-full); color: var(--text-secondary);">白刃相接</span>
+          <span class="glass-veil type-caption" style="padding: 3px 10px; border-radius: var(--radius-full); color: var(--text-secondary);">太公兵法</span>
+        </div>
+        <div style="border-top: 1px solid var(--hairline); padding-top: 8px;">
+          <span class="type-caption" style="color: var(--text-tertiary);">全盾 · 满编 · 满级5级 · 战力 121,850</span>
+        </div>
+      </article>
+
+      <!-- 队列 3 · 48秒前 · 弓兵 -->
+      <article class="glass-card flex flex-col gap-3 px-4 py-3.5">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex items-baseline gap-1.5" style="min-width: 0;">
+            <span class="type-body-lg" style="font-weight: 600; color: var(--text-primary);">火烧赤壁</span>
+            <span class="type-caption" style="color: var(--text-tertiary); white-space: nowrap;">[赤焰军团]</span>
+          </div>
+          <div class="flex items-center gap-2" style="flex: 0 0 auto;">
+            <span class="type-caption" style="color: var(--text-tertiary);">48秒前</span>
+            <span class="chip chip-warning">弓兵</span>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">孙</span>
+            <span class="type-caption" style="color: var(--text-secondary);">孙权</span>
+          </div>
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">周</span>
+            <span class="type-caption" style="color: var(--text-secondary);">周瑜</span>
+          </div>
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">陆</span>
+            <span class="type-caption" style="color: var(--text-secondary);">陆逊</span>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="glass-veil type-caption" style="padding: 3px 10px; border-radius: var(--radius-full); color: var(--text-secondary);">神机妙算</span>
+          <span class="glass-veil type-caption" style="padding: 3px 10px; border-radius: var(--radius-full); color: var(--text-secondary);">草船借箭</span>
+        </div>
+        <div style="border-top: 1px solid var(--hairline); padding-top: 8px;">
+          <span class="type-caption" style="color: var(--text-tertiary);">弓兵 · 满编 · 满级5级 · 战力 116,320</span>
+        </div>
+      </article>
+
+      <!-- 队列 4 · 1分钟前 · 骑兵 -->
+      <article class="glass-card flex flex-col gap-3 px-4 py-3.5">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex items-baseline gap-1.5" style="min-width: 0;">
+            <span class="type-body-lg" style="font-weight: 600; color: var(--text-primary);">常山赵子龙</span>
+            <span class="type-caption" style="color: var(--text-tertiary); white-space: nowrap;">[五虎上将]</span>
+          </div>
+          <div class="flex items-center gap-2" style="flex: 0 0 auto;">
+            <span class="type-caption" style="color: var(--text-tertiary);">1分钟前</span>
+            <span class="chip chip-info">骑兵</span>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">赵</span>
+            <span class="type-caption" style="color: var(--text-secondary);">赵云</span>
+          </div>
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">关</span>
+            <span class="type-caption" style="color: var(--text-secondary);">关羽</span>
+          </div>
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">张</span>
+            <span class="type-caption" style="color: var(--text-secondary);">张飞</span>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="glass-veil type-caption" style="padding: 3px 10px; border-radius: var(--radius-full); color: var(--text-secondary);">横扫千军</span>
+          <span class="glass-veil type-caption" style="padding: 3px 10px; border-radius: var(--radius-full); color: var(--text-secondary);">破军威胜</span>
+        </div>
+        <div style="border-top: 1px solid var(--hairline); padding-top: 8px;">
+          <span class="type-caption" style="color: var(--text-tertiary);">全骑 · 满编 · 满级5级 · 战力 132,760</span>
+        </div>
+      </article>
+
+      <!-- 队列 5 · 2分钟前 · 枪兵 -->
+      <article class="glass-card flex flex-col gap-3 px-4 py-3.5">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex items-baseline gap-1.5" style="min-width: 0;">
+            <span class="type-body-lg" style="font-weight: 600; color: var(--text-primary);">携民渡江</span>
+            <span class="type-caption" style="color: var(--text-tertiary); white-space: nowrap;">[汉室复兴]</span>
+          </div>
+          <div class="flex items-center gap-2" style="flex: 0 0 auto;">
+            <span class="type-caption" style="color: var(--text-tertiary);">2分钟前</span>
+            <span class="chip chip-error">枪兵</span>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">刘</span>
+            <span class="type-caption" style="color: var(--text-secondary);">刘备</span>
+          </div>
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">诸</span>
+            <span class="type-caption" style="color: var(--text-secondary);">诸葛亮</span>
+          </div>
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">庞</span>
+            <span class="type-caption" style="color: var(--text-secondary);">庞统</span>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="glass-veil type-caption" style="padding: 3px 10px; border-radius: var(--radius-full); color: var(--text-secondary);">神机妙算</span>
+          <span class="glass-veil type-caption" style="padding: 3px 10px; border-radius: var(--radius-full); color: var(--text-secondary);">锋矢阵</span>
+        </div>
+        <div style="border-top: 1px solid var(--hairline); padding-top: 8px;">
+          <span class="type-caption" style="color: var(--text-tertiary);">枪兵 · 满编 · 满级5级 · 战力 119,540</span>
+        </div>
+      </article>
+
+      <!-- 队列 6 · 3分钟前 · 器械 -->
+      <article class="glass-card flex flex-col gap-3 px-4 py-3.5">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex items-baseline gap-1.5" style="min-width: 0;">
+            <span class="type-body-lg" style="font-weight: 600; color: var(--text-primary);">西凉铁骑</span>
+            <span class="type-caption" style="color: var(--text-tertiary); white-space: nowrap;">[锦马超]</span>
+          </div>
+          <div class="flex items-center gap-2" style="flex: 0 0 auto;">
+            <span class="type-caption" style="color: var(--text-tertiary);">3分钟前</span>
+            <span class="chip chip-warning">弓兵</span>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">马</span>
+            <span class="type-caption" style="color: var(--text-secondary);">马超</span>
+          </div>
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">马</span>
+            <span class="type-caption" style="color: var(--text-secondary);">马云騄</span>
+          </div>
+          <div class="flex flex-col items-center gap-1" style="width: 40px;">
+            <span class="glass-veil flex items-center justify-center" style="width: 40px; height: 40px; border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--color-primary); background: var(--color-primary-container);">黄</span>
+            <span class="type-caption" style="color: var(--text-secondary);">黄月英</span>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="glass-veil type-caption" style="padding: 3px 10px; border-radius: var(--radius-full); color: var(--text-secondary);">暴戾无仁</span>
+          <span class="glass-veil type-caption" style="padding: 3px 10px; border-radius: var(--radius-full); color: var(--text-secondary);">锋矢阵</span>
+        </div>
+        <div style="border-top: 1px solid var(--hairline); padding-top: 8px;">
+          <span class="type-caption" style="color: var(--text-tertiary);">弓兵 · 满编 · 满级5级 · 战力 113,980</span>
+        </div>
+      </article>
+
+      <!-- /SLOT: pageContent -->
+    </main>
+
+    <!-- ===== 底部玻璃浮层 Tab 栏 ===== -->
+    <nav class="glass-floating absolute left-3 right-3"
+         style="bottom: 10px; padding: 8px 8px 6px;">
+      <div class="flex items-stretch justify-between">
+        <!-- SLOT: activeTab（叶子页面在对应 tab 上设置 data-active="true"） -->
+
+        <!-- Tab 1：实时战场（雷达 / 脉冲） -->
+        <a href="#" data-dom-id="tab-battlefield"
+           class="flex flex-1 flex-col items-center gap-1 py-1.5 rounded-2xl relative">
+          <span class="absolute inset-x-2 inset-y-0 rounded-2xl hidden" data-tab-pill
+                style="background: var(--color-primary-container);"></span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="relative" style="color: var(--text-tertiary);" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <circle cx="12" cy="12" r="5"></circle>
+            <circle cx="12" cy="12" r="1.4" fill="currentColor"></circle>
+            <path d="M12 12 20 6"></path>
+          </svg>
+          <span class="type-caption relative" style="color: var(--text-tertiary);">实时战场</span>
+        </a>
+
+        <!-- Tab 2：工具中心（网格） -->
+        <a href="#" data-dom-id="tab-tools"
+           class="flex flex-1 flex-col items-center gap-1 py-1.5 rounded-2xl relative">
+          <span class="absolute inset-x-2 inset-y-0 rounded-2xl hidden" data-tab-pill
+                style="background: var(--color-primary-container);"></span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="relative" style="color: var(--text-tertiary);" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1.6"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1.6"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1.6"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1.6"></rect>
+          </svg>
+          <span class="type-caption relative" style="color: var(--text-tertiary);">工具中心</span>
+        </a>
+
+        <!-- Tab 3：实时部队（护盾 / 用户） -->
+        <a href="#" data-dom-id="tab-live-army" data-active="true"
+           class="flex flex-1 flex-col items-center gap-1 py-1.5 rounded-2xl relative">
+          <span class="absolute inset-x-2 inset-y-0 rounded-2xl" data-tab-pill
+                style="background: var(--color-primary-container);"></span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="relative" style="color: var(--color-primary);" aria-hidden="true">
+            <path d="M12 3 20 6v5c0 4.2-3 7.6-8 9-5-1.4-8-4.8-8-9V6z"></path>
+            <circle cx="12" cy="10" r="2.2"></circle>
+            <path d="M8.4 16c.6-1.8 2-2.7 3.6-2.7s3 .9 3.6 2.7"></path>
+          </svg>
+          <span class="type-caption relative" style="color: var(--color-primary);">实时部队</span>
+        </a>
+
+        <!-- Tab 4：战斗模拟（双剑） -->
+        <a href="#" data-dom-id="tab-simulator"
+           class="flex flex-1 flex-col items-center gap-1 py-1.5 rounded-2xl relative">
+          <span class="absolute inset-x-2 inset-y-0 rounded-2xl hidden" data-tab-pill
+                style="background: var(--color-primary-container);"></span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="relative" style="color: var(--text-tertiary);" aria-hidden="true">
+            <path d="M14.5 4.5 20 3l-1.5 5.5-6.5 6.5"></path>
+            <path d="M9.5 4.5 4 3l1.5 5.5 6.5 6.5"></path>
+            <path d="M12 15 8 19l1.5 1.5L13 17"></path>
+            <path d="m12 15 4 4-1.5 1.5L11 17"></path>
+          </svg>
+          <span class="type-caption relative" style="color: var(--text-tertiary);">战斗模拟</span>
+        </a>
+      </div>
+
+      <!-- 底部 Home 指示条（安全区） -->
+      <div class="flex justify-center pt-1.5 pb-0.5">
+        <span class="rounded-full" style="width: 134px; height: 5px; background: var(--text-tertiary); opacity: 0.55;"></span>
+      </div>
+    </nav>
+
+  </div>
+</body>
+</html>

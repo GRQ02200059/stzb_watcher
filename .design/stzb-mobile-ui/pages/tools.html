@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>率土之滨 · 监控 App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../colors_and_type.css" />
+  <style>
+    /* 设备外框：iPhone-like，44px 圆角，柔和外阴影 */
+    .device-frame {
+      width: 390px;
+      max-width: 390px;
+      height: 844px;
+      border-radius: 44px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 40px 90px rgba(46, 79, 166, 0.20), 0 8px 24px rgba(20, 34, 58, 0.10);
+    }
+  </style>
+</head>
+
+<!-- body 使用 app-bg，居中承载移动设备外框 -->
+<body class="app-bg min-h-screen flex items-center justify-center p-6">
+
+  <!-- ===== 移动设备外框 ===== -->
+  <div class="device-frame app-bg">
+
+    <!-- ===== 顶部 iOS 状态栏 ===== -->
+    <div class="flex items-center justify-between px-6" style="height: 44px;">
+      <!-- 时间 -->
+      <span class="type-caption" style="font-weight: 600; color: var(--text-primary);">9:41</span>
+      <!-- 信号 / WiFi / 电量 -->
+      <div class="flex items-center gap-1.5" style="color: var(--text-primary);">
+        <!-- 信号 -->
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="currentColor" aria-hidden="true">
+          <rect x="0" y="9" width="3" height="5" rx="1"></rect>
+          <rect x="5" y="6" width="3" height="8" rx="1"></rect>
+          <rect x="10" y="3" width="3" height="11" rx="1"></rect>
+          <rect x="15" y="0" width="3" height="14" rx="1"></rect>
+        </svg>
+        <!-- WiFi -->
+        <svg width="18" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2 8.5a15 15 0 0 1 20 0"></path>
+          <path d="M5 12a10 10 0 0 1 14 0"></path>
+          <path d="M8.5 15.5a5 5 0 0 1 7 0"></path>
+          <circle cx="12" cy="19" r="0.6" fill="currentColor"></circle>
+        </svg>
+        <!-- 电量 -->
+        <svg width="26" height="14" viewBox="0 0 26 14" fill="none" aria-hidden="true">
+          <rect x="0.5" y="0.5" width="21" height="13" rx="3.5" stroke="currentColor" stroke-opacity="0.4"></rect>
+          <rect x="2.5" y="2.5" width="15" height="9" rx="2" fill="currentColor"></rect>
+          <rect x="23" y="4.5" width="2" height="5" rx="1" fill="currentColor" fill-opacity="0.4"></rect>
+        </svg>
+      </div>
+    </div>
+
+    <!-- ===== 玻璃头部（SLOT：页面标题栏） ===== -->
+    <header class="glass-veil mx-4 mt-1 px-4 py-3 flex items-center justify-between">
+      <!-- SLOT: pageHeader -->
+      <div class="flex flex-col">
+        <span class="type-title" style="color: var(--text-primary);">工具中心</span>
+        <span class="type-caption" style="color: var(--text-tertiary);">13 项监控与分析工具</span>
+      </div>
+      <!-- 右侧动作区（SLOT：刷新 / 菜单等图标） -->
+      <div class="flex items-center gap-3" style="color: var(--text-secondary);">
+        <!-- 刷新 -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
+          <path d="M21 4v5h-5"></path>
+        </svg>
+        <!-- 菜单 -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="4" y1="7" x2="20" y2="7"></line>
+          <line x1="4" y1="12" x2="20" y2="12"></line>
+          <line x1="4" y1="17" x2="20" y2="17"></line>
+        </svg>
+      </div>
+      <!-- /SLOT: pageHeader -->
+    </header>
+
+    <!-- ===== 主内容滚动区（SLOT：页面内容） ===== -->
+    <main class="no-scrollbar flex flex-col overflow-y-auto"
+          style="height: calc(844px - 44px - 64px); padding: 16px; gap: 16px; padding-bottom: 96px;">
+      <!-- SLOT: pageContent -->
+
+      <!-- ===== 主要入口：实时战场 featured card ===== -->
+      <a href="#" class="glass-card px-4 py-4 flex items-center gap-4">
+        <!-- 主色图标徽标 -->
+        <span class="flex items-center justify-center flex-shrink-0"
+              style="width: 52px; height: 52px; border-radius: var(--radius-md); background: var(--color-primary-container);">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <circle cx="12" cy="12" r="5"></circle>
+            <circle cx="12" cy="12" r="1.4" fill="currentColor"></circle>
+            <path d="M12 12 20 6"></path>
+          </svg>
+        </span>
+        <!-- 文案 -->
+        <div class="flex flex-col flex-1 min-w-0">
+          <span class="type-body-lg" style="font-weight: 600; color: var(--text-primary);">实时战场</span>
+          <span class="type-caption mt-0.5" style="color: var(--text-secondary);">3,472 名玩家在线 · 42 战报/分钟</span>
+        </div>
+        <!-- 右侧箭头 -->
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-tertiary);" aria-hidden="true">
+          <path d="M9 6l6 6-6 6"></path>
+        </svg>
+      </a>
+
+      <!-- ===== 分组一：实时监控 ===== -->
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center justify-between px-1">
+          <span class="type-caption" style="color: var(--text-secondary); letter-spacing: 0.06em;">实时监控</span>
+          <span class="type-caption" style="color: var(--text-tertiary);">3 项</span>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <!-- 实时战场 -->
+          <a href="#" class="glass-veil flex flex-col items-center px-2 py-3.5">
+            <span class="flex items-center justify-center"
+                  style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--color-primary-container);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"></circle>
+                <circle cx="12" cy="12" r="5"></circle>
+                <circle cx="12" cy="12" r="1.4" fill="currentColor"></circle>
+                <path d="M12 12 20 6"></path>
+              </svg>
+            </span>
+            <span class="type-body mt-2 text-center" style="font-weight: 600; color: var(--text-primary);">实时战场</span>
+          </a>
+          <!-- 实时部队 -->
+          <a href="#" class="glass-veil flex flex-col items-center px-2 py-3.5">
+            <span class="flex items-center justify-center"
+                  style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--color-primary-container);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);" aria-hidden="true">
+                <path d="M12 3 20 6v5c0 4.2-3 7.6-8 9-5-1.4-8-4.8-8-9V6z"></path>
+                <path d="m9 12 2 2 4-4"></path>
+              </svg>
+            </span>
+            <span class="type-body mt-2 text-center" style="font-weight: 600; color: var(--text-primary);">实时部队</span>
+          </a>
+          <!-- 抓包控制台 -->
+          <a href="#" class="glass-veil flex flex-col items-center px-2 py-3.5">
+            <span class="flex items-center justify-center"
+                  style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--color-primary-container);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                <path d="M6.5 10v3a2 2 0 0 0 2 2h4"></path>
+                <path d="M17.5 14v-3a2 2 0 0 0-2-2h-4"></path>
+              </svg>
+            </span>
+            <span class="type-body mt-2 text-center" style="font-weight: 600; color: var(--text-primary);">抓包控制台</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- ===== 分组二：战场情报 ===== -->
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center justify-between px-1">
+          <span class="type-caption" style="color: var(--text-secondary); letter-spacing: 0.06em;">战场情报</span>
+          <span class="type-caption" style="color: var(--text-tertiary);">4 项</span>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <!-- 地图 -->
+          <a href="#" class="glass-veil flex flex-col items-center px-2 py-3.5">
+            <span class="flex items-center justify-center"
+                  style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--color-primary-container);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);" aria-hidden="true">
+                <path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"></path>
+                <path d="M9 4v14"></path>
+                <path d="M15 6v14"></path>
+              </svg>
+            </span>
+            <span class="type-body mt-2 text-center" style="font-weight: 600; color: var(--text-primary);">地图</span>
+          </a>
+          <!-- 公告 -->
+          <a href="#" class="glass-veil flex flex-col items-center px-2 py-3.5">
+            <span class="flex items-center justify-center"
+                  style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--color-primary-container);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);" aria-hidden="true">
+                <path d="M4 9v6h3l7 4V5L7 9H4z"></path>
+                <path d="M18 8.5a4 4 0 0 1 0 7"></path>
+              </svg>
+            </span>
+            <span class="type-body mt-2 text-center" style="font-weight: 600; color: var(--text-primary);">公告</span>
+          </a>
+          <!-- 排行榜 -->
+          <a href="#" class="glass-veil flex flex-col items-center px-2 py-3.5">
+            <span class="flex items-center justify-center"
+                  style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--color-primary-container);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);" aria-hidden="true">
+                <rect x="4" y="11" width="4" height="9" rx="1"></rect>
+                <rect x="10" y="5" width="4" height="15" rx="1"></rect>
+                <rect x="16" y="8" width="4" height="12" rx="1"></rect>
+              </svg>
+            </span>
+            <span class="type-body mt-2 text-center" style="font-weight: 600; color: var(--text-primary);">排行榜</span>
+          </a>
+          <!-- 赛季积分 -->
+          <a href="#" class="glass-veil flex flex-col items-center px-2 py-3.5">
+            <span class="flex items-center justify-center"
+                  style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--color-primary-container);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);" aria-hidden="true">
+                <path d="M3 17l5-5 3 3 5-6 5 5"></path>
+                <path d="M17 8h4v4"></path>
+              </svg>
+            </span>
+            <span class="type-body mt-2 text-center" style="font-weight: 600; color: var(--text-primary);">赛季积分</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- ===== 分组三：同盟管理 ===== -->
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center justify-between px-1">
+          <span class="type-caption" style="color: var(--text-secondary); letter-spacing: 0.06em;">同盟管理</span>
+          <span class="type-caption" style="color: var(--text-tertiary);">3 项</span>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <!-- 同盟成员 -->
+          <a href="#" class="glass-veil flex flex-col items-center px-2 py-3.5">
+            <span class="flex items-center justify-center"
+                  style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--color-primary-container);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);" aria-hidden="true">
+                <circle cx="9" cy="8" r="3"></circle>
+                <path d="M3.5 19c.6-3 2.9-4.5 5.5-4.5S13.9 16 14.5 19"></path>
+                <path d="M16 6.5a3 3 0 0 1 0 5"></path>
+                <path d="M17 14.6c2 .6 3.4 2 3.8 4.4"></path>
+              </svg>
+            </span>
+            <span class="type-body mt-2 text-center" style="font-weight: 600; color: var(--text-primary);">同盟成员</span>
+          </a>
+          <!-- 队伍战报 -->
+          <a href="#" class="glass-veil flex flex-col items-center px-2 py-3.5">
+            <span class="flex items-center justify-center"
+                  style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--color-primary-container);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);" aria-hidden="true">
+                <circle cx="6" cy="18" r="2.4"></circle>
+                <circle cx="18" cy="6" r="2.4"></circle>
+                <path d="M8.4 18H14a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.6"></path>
+              </svg>
+            </span>
+            <span class="type-body mt-2 text-center" style="font-weight: 600; color: var(--text-primary);">队伍战报</span>
+          </a>
+          <!-- 出勤统计 -->
+          <a href="#" class="glass-veil flex flex-col items-center px-2 py-3.5">
+            <span class="flex items-center justify-center"
+                  style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--color-primary-container);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);" aria-hidden="true">
+                <rect x="4" y="5" width="16" height="16" rx="2.5"></rect>
+                <path d="M4 9.5h16"></path>
+                <path d="M8 3v4"></path>
+                <path d="M16 3v4"></path>
+                <path d="m9 14.5 2 2 3.5-4"></path>
+              </svg>
+            </span>
+            <span class="type-body mt-2 text-center" style="font-weight: 600; color: var(--text-primary);">出勤统计</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- ===== 分组四：分析工具 ===== -->
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center justify-between px-1">
+          <span class="type-caption" style="color: var(--text-secondary); letter-spacing: 0.06em;">分析工具</span>
+          <span class="type-caption" style="color: var(--text-tertiary);">3 项</span>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <!-- 玩家档案 -->
+          <a href="#" class="glass-veil flex flex-col items-center px-2 py-3.5">
+            <span class="flex items-center justify-center"
+                  style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--color-primary-container);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.4"></circle>
+                <path d="M5 20c.8-3.6 3.5-5.4 7-5.4s6.2 1.8 7 5.4"></path>
+              </svg>
+            </span>
+            <span class="type-body mt-2 text-center" style="font-weight: 600; color: var(--text-primary);">玩家档案</span>
+          </a>
+          <!-- 战法研究 -->
+          <a href="#" class="glass-veil flex flex-col items-center px-2 py-3.5">
+            <span class="flex items-center justify-center"
+                  style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--color-primary-container);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);" aria-hidden="true">
+                <path d="M10 3h4"></path>
+                <path d="M10.5 3v6L5.5 18a2 2 0 0 0 1.8 3h9.4a2 2 0 0 0 1.8-3l-5-9V3"></path>
+                <path d="M8 15h8"></path>
+              </svg>
+            </span>
+            <span class="type-body mt-2 text-center" style="font-weight: 600; color: var(--text-primary);">战法研究</span>
+          </a>
+          <!-- 战斗模拟 -->
+          <a href="#" data-dom-id="open-tool-simulator" class="glass-veil flex flex-col items-center px-2 py-3.5">
+            <span class="flex items-center justify-center"
+                  style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--color-primary-container);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);" aria-hidden="true">
+                <rect x="4" y="3" width="16" height="18" rx="2.5"></rect>
+                <path d="M8 7h8"></path>
+                <path d="M8 11h2"></path>
+                <path d="M14 11h2"></path>
+                <path d="M8 15h2"></path>
+                <path d="M14 15h2"></path>
+              </svg>
+            </span>
+            <span class="type-body mt-2 text-center" style="font-weight: 600; color: var(--text-primary);">战斗模拟</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- /SLOT: pageContent -->
+    </main>
+
+    <!-- ===== 底部玻璃浮层 Tab 栏 ===== -->
+    <nav class="glass-floating absolute left-3 right-3"
+         style="bottom: 10px; padding: 8px 8px 6px;">
+      <div class="flex items-stretch justify-between">
+        <!-- SLOT: activeTab（叶子页面在对应 tab 上设置 data-active="true"） -->
+
+        <!-- Tab 1：实时战场（雷达 / 脉冲） -->
+        <a href="#" data-dom-id="tab-battlefield"
+           class="flex flex-1 flex-col items-center gap-1 py-1.5 rounded-2xl relative">
+          <span class="absolute inset-x-2 inset-y-0 rounded-2xl hidden" data-tab-pill
+                style="background: var(--color-primary-container);"></span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="relative" style="color: var(--text-tertiary);" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <circle cx="12" cy="12" r="5"></circle>
+            <circle cx="12" cy="12" r="1.4" fill="currentColor"></circle>
+            <path d="M12 12 20 6"></path>
+          </svg>
+          <span class="type-caption relative" style="color: var(--text-tertiary);">实时战场</span>
+        </a>
+
+        <!-- Tab 2：工具中心（网格） -->
+        <a href="#" data-dom-id="tab-tools" data-active="true"
+           class="flex flex-1 flex-col items-center gap-1 py-1.5 rounded-2xl relative">
+          <span class="absolute inset-x-2 inset-y-0 rounded-2xl" data-tab-pill
+                style="background: var(--color-primary-container);"></span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="relative" style="color: var(--color-primary);" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1.6"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1.6"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1.6"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1.6"></rect>
+          </svg>
+          <span class="type-caption relative" style="color: var(--color-primary);">工具中心</span>
+        </a>
+
+        <!-- Tab 3：实时部队（护盾 / 用户） -->
+        <a href="#" data-dom-id="tab-live-army"
+           class="flex flex-1 flex-col items-center gap-1 py-1.5 rounded-2xl relative">
+          <span class="absolute inset-x-2 inset-y-0 rounded-2xl hidden" data-tab-pill
+                style="background: var(--color-primary-container);"></span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="relative" style="color: var(--text-tertiary);" aria-hidden="true">
+            <path d="M12 3 20 6v5c0 4.2-3 7.6-8 9-5-1.4-8-4.8-8-9V6z"></path>
+            <circle cx="12" cy="10" r="2.2"></circle>
+            <path d="M8.4 16c.6-1.8 2-2.7 3.6-2.7s3 .9 3.6 2.7"></path>
+          </svg>
+          <span class="type-caption relative" style="color: var(--text-tertiary);">实时部队</span>
+        </a>
+
+        <!-- Tab 4：战斗模拟（双剑） -->
+        <a href="#" data-dom-id="tab-simulator"
+           class="flex flex-1 flex-col items-center gap-1 py-1.5 rounded-2xl relative">
+          <span class="absolute inset-x-2 inset-y-0 rounded-2xl hidden" data-tab-pill
+                style="background: var(--color-primary-container);"></span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="relative" style="color: var(--text-tertiary);" aria-hidden="true">
+            <path d="M14.5 4.5 20 3l-1.5 5.5-6.5 6.5"></path>
+            <path d="M9.5 4.5 4 3l1.5 5.5 6.5 6.5"></path>
+            <path d="M12 15 8 19l1.5 1.5L13 17"></path>
+            <path d="m12 15 4 4-1.5 1.5L11 17"></path>
+          </svg>
+          <span class="type-caption relative" style="color: var(--text-tertiary);">战斗模拟</span>
+        </a>
+      </div>
+
+      <!-- 底部 Home 指示条（安全区） -->
+      <div class="flex justify-center pt-1.5 pb-0.5">
+        <span class="rounded-full" style="width: 134px; height: 5px; background: var(--text-tertiary); opacity: 0.55;"></span>
+      </div>
+    </nav>
+
+  </div>
+</body>
+</html>

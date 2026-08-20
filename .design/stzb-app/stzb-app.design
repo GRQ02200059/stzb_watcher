@@ -1,0 +1,266 @@
+{
+  "data": [
+    {
+      "id": "page-login",
+      "title": "登录页",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787220000000,
+      "canvasData": {
+        "x": 0,
+        "y": 0,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/login.html",
+        "interactions": [
+          {
+            "sourceDomId": "btn-login-submit",
+            "targetPageId": "page-battlefield"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-battlefield",
+      "title": "实时战场",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787220000000,
+      "canvasData": {
+        "x": 420,
+        "y": 0,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/battlefield.html",
+        "interactions": [
+          {
+            "sourceDomId": "tab-reports",
+            "targetPageId": "page-reports"
+          },
+          {
+            "sourceDomId": "tab-alliance",
+            "targetPageId": "page-alliance",
+            "hideEdge": true
+          },
+          {
+            "sourceDomId": "tab-tools",
+            "targetPageId": "page-tools",
+            "hideEdge": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-reports",
+      "title": "本机战报",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787220000000,
+      "canvasData": {
+        "x": 840,
+        "y": 0,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/reports.html",
+        "interactions": [
+          {
+            "sourceDomId": "report-card-open",
+            "targetPageId": "page-report-detail"
+          },
+          {
+            "sourceDomId": "tab-battlefield",
+            "targetPageId": "page-battlefield",
+            "hideEdge": true
+          },
+          {
+            "sourceDomId": "tab-alliance",
+            "targetPageId": "page-alliance",
+            "hideEdge": true
+          },
+          {
+            "sourceDomId": "tab-tools",
+            "targetPageId": "page-tools",
+            "hideEdge": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-report-detail",
+      "title": "战报详情",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787220000000,
+      "canvasData": {
+        "x": 1260,
+        "y": 0,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/report-detail.html",
+        "interactions": [
+          {
+            "sourceDomId": "btn-back",
+            "targetPageId": "page-reports",
+            "hideEdge": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-alliance",
+      "title": "同盟中心",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787220000000,
+      "canvasData": {
+        "x": 0,
+        "y": 637,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/alliance.html",
+        "interactions": [
+          {
+            "sourceDomId": "open-ranking",
+            "targetPageId": "page-ranking"
+          },
+          {
+            "sourceDomId": "tab-battlefield",
+            "targetPageId": "page-battlefield",
+            "hideEdge": true
+          },
+          {
+            "sourceDomId": "tab-reports",
+            "targetPageId": "page-reports",
+            "hideEdge": true
+          },
+          {
+            "sourceDomId": "tab-tools",
+            "targetPageId": "page-tools",
+            "hideEdge": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-tools",
+      "title": "工具中心",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787220000000,
+      "canvasData": {
+        "x": 0,
+        "y": 1274,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/tools.html",
+        "interactions": [
+          {
+            "sourceDomId": "open-capture",
+            "targetPageId": "page-capture"
+          },
+          {
+            "sourceDomId": "open-simulator",
+            "targetPageId": "page-simulator"
+          },
+          {
+            "sourceDomId": "open-ranking",
+            "targetPageId": "page-ranking"
+          },
+          {
+            "sourceDomId": "tab-battlefield",
+            "targetPageId": "page-battlefield",
+            "hideEdge": true
+          },
+          {
+            "sourceDomId": "tab-reports",
+            "targetPageId": "page-reports",
+            "hideEdge": true
+          },
+          {
+            "sourceDomId": "tab-alliance",
+            "targetPageId": "page-alliance",
+            "hideEdge": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-capture",
+      "title": "抓包启动台",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787220000000,
+      "canvasData": {
+        "x": 420,
+        "y": 1274,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/capture.html",
+        "interactions": [
+          {
+            "sourceDomId": "btn-back",
+            "targetPageId": "page-tools",
+            "hideEdge": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-ranking",
+      "title": "排行榜",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787220000000,
+      "canvasData": {
+        "x": 420,
+        "y": 637,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/ranking.html",
+        "interactions": [
+          {
+            "sourceDomId": "btn-back",
+            "targetPageId": "page-tools",
+            "hideEdge": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-simulator",
+      "title": "战术演练",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787220000000,
+      "canvasData": {
+        "x": 420,
+        "y": 1911,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/simulator.html",
+        "interactions": [
+          {
+            "sourceDomId": "btn-back",
+            "targetPageId": "page-tools",
+            "hideEdge": true
+          }
+        ]
+      }
+    }
+  ],
+  "config": {
+    "autoLayout": true,
+    "deviceType": "mobile",
+    "projectName": "率土之滨监控 · Android App UI",
+    "designLibrary": null
+  }
+}

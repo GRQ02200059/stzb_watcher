@@ -1,0 +1,130 @@
+/* ==========================================================================
+   STZB Watcher — Mobile UI (macOS Liquid Glass)
+   配色完全沿用安卓端 AstzbColors：浅雾背景 + 彩色环境光 + 半透明玻璃
+   ========================================================================== */
+
+:root {
+  /* 页面背景：接近 macOS 桌面雾白 */
+  --bg-top: #FBFCFF;
+  --bg-middle: #F1F6FF;
+  --bg-bottom: #E9F1FC;
+
+  /* 环境光斑（穿过玻璃后的蓝 / 紫 / 青 / 桃泛光） */
+  --aurora-blue: rgba(140, 200, 255, 0.40);
+  --aurora-violet: rgba(201, 155, 255, 0.40);
+  --aurora-mint: rgba(114, 228, 214, 0.32);
+  --aurora-peach: rgba(255, 210, 184, 0.24);
+
+  /* 玻璃表面：半透明白（层级） */
+  --glass-veil: rgba(255, 255, 255, 0.45);
+  --glass-frost: rgba(255, 255, 255, 0.72);
+  --glass-floating: rgba(255, 255, 255, 0.85);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+
+  /* 主色 */
+  --color-primary: #426AD2;
+  --color-primary-600: #375DBF;
+  --color-primary-700: #2E4FA6;
+  --color-primary-container: #EAF1FF;
+  --color-on-primary: #FFFFFF;
+
+  /* 文字 */
+  --text-primary: #14223A;
+  --text-secondary: #60708B;
+  --text-tertiary: #8A99B0;
+
+  /* 线框 */
+  --outline: rgba(255, 255, 255, 0.75);
+  --outline-low: rgba(255, 255, 255, 0.55);
+  --outline-blue: rgba(66, 106, 210, 0.14);
+  --hairline: rgba(20, 34, 58, 0.08);
+
+  /* 语义色（仅状态语义使用） */
+  --state-success: #1E9B83;
+  --state-warning: #BE7A18;
+  --state-error: #C75862;
+  --state-info: #4C78C8;
+
+  --state-success-bg: #E0F4EE;
+  --state-warning-bg: #FDECD4;
+  --state-error-bg: #F9E2E5;
+  --state-info-bg: #E3ECF9;
+
+  /* 圆角（克制刻度） */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+  --radius-full: 9999px;
+
+  /* 阴影：静态卡片走边框/表面分层，仅浮层可深 */
+  --shadow-card: 0 1px 2px rgba(20, 34, 58, 0.04);
+  --shadow-float: 0 18px 48px rgba(46, 79, 166, 0.18);
+
+  /* 字体 */
+  --font-sans: -apple-system, "SF Pro SC", "SF Pro Text", "PingFang SC",
+    "Helvetica Neue", "Noto Sans SC", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 字号刻度（对齐 AstzbTypography） */
+.type-display { font-size: 24px; line-height: 30px; font-weight: 700; letter-spacing: -0.01em; }
+.type-title   { font-size: 18px; line-height: 24px; font-weight: 600; }
+.type-body-lg { font-size: 16px; line-height: 24px; font-weight: 400; }
+.type-body    { font-size: 14px; line-height: 20px; font-weight: 400; }
+.type-label   { font-size: 14px; line-height: 20px; font-weight: 600; }
+.type-caption { font-size: 12px; line-height: 16px; font-weight: 500; }
+
+/* ---- 玻璃基础组件 ---- */
+.glass-card {
+  background: var(--glass-frost);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+}
+.glass-veil {
+  background: var(--glass-veil);
+  border: 1px solid var(--outline-low);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+.glass-floating {
+  background: var(--glass-floating);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-float);
+  backdrop-filter: blur(30px) saturate(160%);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+}
+
+/* 页面雾白 + 环境光背景 */
+.app-bg {
+  background:
+    radial-gradient(120% 90% at 12% 4%, var(--aurora-blue) 0%, transparent 46%),
+    radial-gradient(120% 90% at 92% 8%, var(--aurora-violet) 0%, transparent 48%),
+    radial-gradient(140% 80% at 80% 96%, var(--aurora-mint) 0%, transparent 52%),
+    radial-gradient(120% 90% at 8% 92%, var(--aurora-peach) 0%, transparent 50%),
+    linear-gradient(180deg, var(--bg-top) 0%, var(--bg-middle) 52%, var(--bg-bottom) 100%);
+}
+
+/* 状态胶囊 */
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: var(--radius-full); font-size: 12px; font-weight: 600; line-height: 16px; }
+.chip-success { background: var(--state-success-bg); color: var(--state-success); }
+.chip-warning { background: var(--state-warning-bg); color: var(--state-warning); }
+.chip-error   { background: var(--state-error-bg); color: var(--state-error); }
+.chip-info    { background: var(--state-info-bg); color: var(--state-info); }
+
+/* 滚动条隐藏（移动端预览更干净） */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

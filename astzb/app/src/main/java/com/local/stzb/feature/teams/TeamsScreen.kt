@@ -128,7 +128,7 @@ private fun PlayerTeamCard(team: PlayerTeam) {
                     }
                 }
             }
-            Text("${team.battles} 战 · ${team.wins} 胜 · 胜率 ${"%.1f".format(team.winRate)}%", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("${team.battles} 战 · ${team.wins} 胜 · 胜率 ${"%.1f".format(team.winRate)}%", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
         }
     }
 }

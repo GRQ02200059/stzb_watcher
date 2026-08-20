@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抓包启动台 · 率土之滨监控</title>
+    <style id="theme-vars">
+/* ==========================================================================
+   STZB Watcher — Mobile UI (macOS Liquid Glass)
+   配色完全沿用安卓端 AstzbColors：浅雾背景 + 彩色环境光 + 半透明玻璃
+   ========================================================================== */
+
+:root {
+  /* 页面背景：接近 macOS 桌面雾白 */
+  --bg-top: #FBFCFF;
+  --bg-middle: #F1F6FF;
+  --bg-bottom: #E9F1FC;
+
+  /* 环境光斑（穿过玻璃后的蓝 / 紫 / 青 / 桃泛光） */
+  --aurora-blue: rgba(140, 200, 255, 0.40);
+  --aurora-violet: rgba(201, 155, 255, 0.40);
+  --aurora-mint: rgba(114, 228, 214, 0.32);
+  --aurora-peach: rgba(255, 210, 184, 0.24);
+
+  /* 玻璃表面：半透明白（层级） */
+  --glass-veil: rgba(255, 255, 255, 0.45);
+  --glass-frost: rgba(255, 255, 255, 0.72);
+  --glass-floating: rgba(255, 255, 255, 0.85);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+
+  /* 主色 */
+  --color-primary: #426AD2;
+  --color-primary-600: #375DBF;
+  --color-primary-700: #2E4FA6;
+  --color-primary-container: #EAF1FF;
+  --color-on-primary: #FFFFFF;
+
+  /* 文字 */
+  --text-primary: #14223A;
+  --text-secondary: #60708B;
+  --text-tertiary: #8A99B0;
+
+  /* 线框 */
+  --outline: rgba(255, 255, 255, 0.75);
+  --outline-low: rgba(255, 255, 255, 0.55);
+  --outline-blue: rgba(66, 106, 210, 0.14);
+  --hairline: rgba(20, 34, 58, 0.08);
+
+  /* 语义色（仅状态语义使用） */
+  --state-success: #1E9B83;
+  --state-warning: #BE7A18;
+  --state-error: #C75862;
+  --state-info: #4C78C8;
+
+  --state-success-bg: #E0F4EE;
+  --state-warning-bg: #FDECD4;
+  --state-error-bg: #F9E2E5;
+  --state-info-bg: #E3ECF9;
+
+  /* 圆角（克制刻度） */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+  --radius-full: 9999px;
+
+  /* 阴影：静态卡片走边框/表面分层，仅浮层可深 */
+  --shadow-card: 0 1px 2px rgba(20, 34, 58, 0.04);
+  --shadow-float: 0 18px 48px rgba(46, 79, 166, 0.18);
+
+  /* 字体 */
+  --font-sans: -apple-system, "SF Pro SC", "SF Pro Text", "PingFang SC",
+    "Helvetica Neue", "Noto Sans SC", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 字号刻度（对齐 AstzbTypography） */
+.type-display { font-size: 24px; line-height: 30px; font-weight: 700; letter-spacing: -0.01em; }
+.type-title   { font-size: 18px; line-height: 24px; font-weight: 600; }
+.type-body-lg { font-size: 16px; line-height: 24px; font-weight: 400; }
+.type-body    { font-size: 14px; line-height: 20px; font-weight: 400; }
+.type-label   { font-size: 14px; line-height: 20px; font-weight: 600; }
+.type-caption { font-size: 12px; line-height: 16px; font-weight: 500; }
+
+/* ---- 玻璃基础组件 ---- */
+.glass-card {
+  background: var(--glass-frost);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+}
+.glass-veil {
+  background: var(--glass-veil);
+  border: 1px solid var(--outline-low);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+.glass-floating {
+  background: var(--glass-floating);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-float);
+  backdrop-filter: blur(30px) saturate(160%);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+}
+
+/* 页面雾白 + 环境光背景 */
+.app-bg {
+  background:
+    radial-gradient(120% 90% at 12% 4%, var(--aurora-blue) 0%, transparent 46%),
+    radial-gradient(120% 90% at 92% 8%, var(--aurora-violet) 0%, transparent 48%),
+    radial-gradient(140% 80% at 80% 96%, var(--aurora-mint) 0%, transparent 52%),
+    radial-gradient(120% 90% at 8% 92%, var(--aurora-peach) 0%, transparent 50%),
+    linear-gradient(180deg, var(--bg-top) 0%, var(--bg-middle) 52%, var(--bg-bottom) 100%);
+}
+
+/* 状态胶囊 */
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: var(--radius-full); font-size: 12px; font-weight: 600; line-height: 16px; }
+.chip-success { background: var(--state-success-bg); color: var(--state-success); }
+.chip-warning { background: var(--state-warning-bg); color: var(--state-warning); }
+.chip-error   { background: var(--state-error-bg); color: var(--state-error); }
+.chip-info    { background: var(--state-info-bg); color: var(--state-info); }
+
+/* 滚动条隐藏（移动端预览更干净） */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-primary: var(--color-primary);
+  }
+  @layer base {
+    body { background: var(--color-background); color: var(--color-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="app-bg min-h-screen flex items-center justify-center p-6">
+
+  <!-- ===== 移动设备外框 ===== -->
+  <div class="device-frame app-bg">
+
+    <!-- ===== 顶部 iOS 状态栏 ===== -->
+    <div class="flex items-center justify-between px-6" style="height: 44px;">
+      <span class="type-caption tabnum" style="font-weight: 600; color: var(--text-primary);">9:41</span>
+      <div class="flex items-center gap-1.5" style="color: var(--text-primary);">
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="currentColor" aria-hidden="true">
+          <rect x="0" y="9" width="3" height="5" rx="1"></rect>
+          <rect x="5" y="6" width="3" height="8" rx="1"></rect>
+          <rect x="10" y="3" width="3" height="11" rx="1"></rect>
+          <rect x="15" y="0" width="3" height="14" rx="1"></rect>
+        </svg>
+        <svg width="18" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2 8.5a15 15 0 0 1 20 0"></path>
+          <path d="M5 12a10 10 0 0 1 14 0"></path>
+          <path d="M8.5 15.5a5 5 0 0 1 7 0"></path>
+          <circle cx="12" cy="19" r="0.6" fill="currentColor"></circle>
+        </svg>
+        <svg width="26" height="14" viewBox="0 0 26 14" fill="none" aria-hidden="true">
+          <rect x="0.5" y="0.5" width="21" height="13" rx="3.5" stroke="currentColor" stroke-opacity="0.4"></rect>
+          <rect x="2.5" y="2.5" width="15" height="9" rx="2" fill="currentColor"></rect>
+          <rect x="23" y="4.5" width="2" height="5" rx="1" fill="currentColor" fill-opacity="0.4"></rect>
+        </svg>
+      </div>
+    </div>
+
+    <!-- ===== 玻璃头部（返回 + 标题 + 副标题） ===== -->
+    <header class="glass-veil mx-4 mt-1 px-3 py-3 flex items-center gap-2">
+      <a href="tools.html" data-dom-id="btn-back" aria-label="返回工具"
+         class="back-btn flex items-center justify-center rounded-full shrink-0"
+         style="width: 44px; height: 44px; color: var(--text-secondary); background: transparent; text-decoration: none;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6"></path>
+        </svg>
+      </a>
+      <div class="flex flex-col min-w-0">
+        <span class="type-title truncate" style="color: var(--text-primary);">抓包启动台</span>
+        <span class="type-caption truncate" style="color: var(--text-tertiary);">本机 VPN → SOCKS5 → STZB 协议解析</span>
+      </div>
+    </header>
+
+    <!-- ===== 主内容滚动区（全屏无 Tab） ===== -->
+    <main class="no-scrollbar flex flex-col overflow-y-auto"
+          style="height: calc(844px - 44px); padding: 16px; gap: 16px; padding-bottom: 24px;">
+
+      <!-- ---- 1. 抓包状态卡 ---- -->
+      <section class="glass-card" style="padding: 16px;">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="live-dot rounded-full shrink-0" style="width: 10px; height: 10px; background: var(--state-success);"></span>
+            <span class="type-title truncate" style="color: var(--text-primary);">抓包运行中</span>
+          </div>
+          <span class="type-title tabnum shrink-0" style="color: var(--color-primary); font-weight: 700;">1,284&nbsp;包</span>
+        </div>
+        <p class="type-caption tabnum mt-2.5" style="color: var(--text-tertiary);">SOCKS&nbsp;127.0.0.1:8964</p>
+      </section>
+
+      <!-- ---- 2. 真实抓包闭环卡 ---- -->
+      <section class="glass-card" style="padding: 16px;">
+        <div class="flex items-center justify-between gap-2">
+          <h2 class="type-title" style="color: var(--text-primary);">真实抓包闭环</h2>
+          <span class="chip chip-success">六阶段验证通过</span>
+        </div>
+
+        <ul class="mt-3 flex flex-col">
+          <!-- 阶段 1 -->
+          <li class="stage-row flex items-center justify-between gap-3" style="padding: 11px 0;">
+            <span class="type-body" style="color: var(--text-primary);">Native 组件</span>
+            <span class="chip chip-success">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+              已通过
+            </span>
+          </li>
+          <!-- 阶段 2 -->
+          <li class="stage-row flex items-center justify-between gap-3" style="padding: 11px 0; border-top: 1px solid var(--hairline);">
+            <span class="type-body" style="color: var(--text-primary);">VPN 通道</span>
+            <span class="chip chip-success">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+              已通过
+            </span>
+          </li>
+          <!-- 阶段 3 -->
+          <li class="stage-row flex items-center justify-between gap-3" style="padding: 11px 0; border-top: 1px solid var(--hairline);">
+            <span class="type-body" style="color: var(--text-primary);">SOCKS 连接</span>
+            <span class="chip chip-success">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+              已通过
+            </span>
+          </li>
+          <!-- 阶段 4 -->
+          <li class="stage-row flex items-center justify-between gap-3" style="padding: 11px 0; border-top: 1px solid var(--hairline);">
+            <span class="type-body" style="color: var(--text-primary);">已知协议</span>
+            <span class="chip chip-success">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+              已通过
+            </span>
+          </li>
+          <!-- 阶段 5 -->
+          <li class="stage-row flex items-center justify-between gap-3" style="padding: 11px 0; border-top: 1px solid var(--hairline);">
+            <span class="type-body" style="color: var(--text-primary);">本地入库</span>
+            <span class="chip chip-success">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+              已通过
+            </span>
+          </li>
+          <!-- 阶段 6 -->
+          <li class="stage-row flex items-center justify-between gap-3" style="padding: 11px 0; border-top: 1px solid var(--hairline);">
+            <span class="type-body" style="color: var(--text-primary);">停止与网络恢复</span>
+            <span class="chip chip-success">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+              已通过
+            </span>
+          </li>
+        </ul>
+      </section>
+
+      <!-- ---- 3. 抓包控制卡 ---- -->
+      <section class="glass-card" style="padding: 16px;">
+        <label class="type-caption" style="color: var(--text-tertiary);">目标 App</label>
+        <div class="flex items-center gap-2.5 px-3 mt-2"
+             style="background: var(--glass-highlight); border: 1px solid var(--outline); border-radius: var(--radius-md); height: 44px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--text-tertiary); flex-shrink: 0;">
+            <rect x="4" y="4" width="16" height="16" rx="4"></rect>
+            <path d="M9 4v16"></path>
+          </svg>
+          <input type="text" readonly value="率土之滨（com.netease.stzb）"
+                 class="type-body min-w-0 flex-1"
+                 style="background: transparent; border: none; outline: none; color: var(--text-primary);" />
+        </div>
+
+        <button type="button" data-dom-id="btn-pick-app" class="btn-outline mt-3" style="width: 100%;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
+          搜索并选择 App
+        </button>
+
+        <div class="grid grid-cols-2 gap-3 mt-3">
+          <button type="button" data-dom-id="btn-start-capture" class="btn-primary">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4l14 8-14 8z"></path></svg>
+            启动抓包
+          </button>
+          <button type="button" data-dom-id="btn-stop-capture" class="btn-outline">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>
+            停止抓包
+          </button>
+        </div>
+      </section>
+
+      <!-- ---- 4. 抓包日志卡 ---- -->
+      <section class="glass-card" style="padding: 16px;">
+        <div class="flex items-center justify-between gap-2">
+          <h2 class="type-title" style="color: var(--text-primary);">抓包日志</h2>
+          <button type="button" data-dom-id="btn-clear-log" class="type-caption" style="background: transparent; border: none; color: var(--text-secondary); font-weight: 600; cursor: pointer;">清空内存日志</button>
+        </div>
+
+        <div class="flex items-center gap-2.5 px-3 mt-3"
+             style="background: var(--glass-highlight); border: 1px solid var(--outline); border-radius: var(--radius-md); height: 44px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--text-tertiary); flex-shrink: 0;">
+            <path d="M3 5h18"></path><path d="M6 12h12"></path><path d="M10 19h4"></path>
+          </svg>
+          <input type="text" placeholder="5026, 5028"
+                 class="type-body log-mono min-w-0 flex-1"
+                 style="background: transparent; border: none; outline: none; color: var(--text-primary);" />
+        </div>
+
+        <div class="log-view no-scrollbar mt-3" style="min-height: 120px;">
+          <p>[21:32:07] 解析 5026 战报包 · 洛阳争夺战</p>
+          <p>[21:32:07] 解析 5028 武将属性包 · 吕布</p>
+          <p>[21:32:06] 解析 5026 战报包 · 许昌攻防战</p>
+          <p>[21:32:05] 入库成功 · pkt#1283 已落盘</p>
+          <p>[21:32:04] 解析 5028 武将属性包 · 貂蝉</p>
+          <p style="color: var(--state-success);">[21:32:03] SOCKS 连接稳定 · 127.0.0.1:8964</p>
+        </div>
+      </section>
+
+      <!-- ---- 5. 导出卡 ---- -->
+      <section class="glass-card" style="padding: 16px;">
+        <h2 class="type-title" style="color: var(--text-primary);">导出</h2>
+        <div class="flex flex-col mt-3" style="gap: 8px;">
+          <button type="button" data-dom-id="btn-export-parsed" class="btn-outline" style="width: 100%;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 20h16"></path></svg>
+            导出解析包
+          </button>
+          <button type="button" data-dom-id="btn-export-db" class="btn-outline" style="width: 100%;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"></ellipse><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"></path><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"></path></svg>
+            导出数据库
+          </button>
+          <button type="button" data-dom-id="btn-export-diag" class="btn-outline" style="width: 100%;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M9 15h6"></path><path d="M9 18h4"></path></svg>
+            导出诊断
+          </button>
+          <button type="button" data-dom-id="btn-export-evidence" class="btn-outline" style="width: 100%;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 6v6c0 5 3.4 8.2 8 10 4.6-1.8 8-5 8-10V6z"></path><path d="m9 12 2 2 4-4"></path></svg>
+            导出抓包证据
+          </button>
+        </div>
+        <div class="flex justify-center mt-4">
+          <button type="button" data-dom-id="btn-open-legacy" class="type-label" style="background: transparent; border: none; color: var(--color-primary); font-weight: 600; cursor: pointer;">打开旧控制台</button>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- ===== 页面级样式：设备外框 + 按钮 + 脉冲绿点 + 日志（放置于 body 末尾） ===== -->
+  <style>
+    /* 设备外框：iPhone-like，44px 圆角，柔和外阴影 */
+    .device-frame {
+      width: 390px;
+      max-width: 390px;
+      height: 844px;
+      border-radius: 44px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 40px 90px rgba(46, 79, 166, 0.20), 0 8px 24px rgba(20, 34, 58, 0.10);
+    }
+    .tabnum { font-variant-numeric: tabular-nums; }
+
+    /* 返回按钮：悬停主色容器底 */
+    .back-btn:hover { background: var(--color-primary-container); color: var(--color-primary); }
+    .back-btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+    /* 脉冲绿点：运行中呼吸动画 */
+    @keyframes pulse { 0%{transform:scale(1);opacity:1} 50%{transform:scale(1.35);opacity:.55} 100%{transform:scale(1);opacity:1} }
+    .live-dot { animation: pulse 1.8s ease-in-out infinite; }
+
+    /* 主按钮：主色底白字 */
+    .btn-primary {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      height: 46px; padding: 0 16px;
+      border-radius: var(--radius-md);
+      font-size: 15px; font-weight: 600; line-height: 1;
+      color: var(--color-on-primary);
+      background: var(--color-primary);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background 160ms cubic-bezier(.2,.8,.2,1), transform 160ms cubic-bezier(.2,.8,.2,1);
+    }
+    .btn-primary:hover { background: var(--color-primary-600); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); background: var(--color-primary-700); }
+    .btn-primary:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+    /* 描边按钮：透明底 + hairline 描边 + 次级文字 */
+    .btn-outline {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      height: 46px; padding: 0 16px;
+      border-radius: var(--radius-md);
+      font-size: 15px; font-weight: 600; line-height: 1;
+      color: var(--text-secondary);
+      background: transparent;
+      border: 1px solid var(--hairline);
+      cursor: pointer;
+      transition: color 160ms cubic-bezier(.2,.8,.2,1), border-color 160ms cubic-bezier(.2,.8,.2,1), background 160ms cubic-bezier(.2,.8,.2,1);
+    }
+    .btn-outline:hover { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-container); }
+    .btn-outline:active { background: transparent; }
+    .btn-outline:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+    /* 日志显示区：等宽字体 + 浅玻璃底 */
+    .log-mono, .log-view { font-family: "SF Mono", "JetBrains Mono", "Menlo", "Consolas", ui-monospace, monospace; }
+    .log-view {
+      background: var(--glass-highlight);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      overflow-y: auto;
+      max-height: 176px;
+      font-size: 12px;
+      line-height: 20px;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+    }
+    .log-view p { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    input::placeholder { color: var(--text-tertiary); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .live-dot { animation: none !important; }
+      .btn-primary, .btn-outline, .back-btn { transition-duration: 0.01ms !important; }
+    }
+  </style>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

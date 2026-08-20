@@ -1,0 +1,160 @@
+{
+  "project": {
+    "name": "率土之滨监控 · Android App UI",
+    "path": "/Users/bytedance/stzb_watcher/.design/stzb-app",
+    "operation": "create",
+    "deviceType": "mobile",
+    "language": "zh-CN",
+    "dashboardMode": false,
+    "replicationMode": null,
+    "sourceUrl": null,
+    "designRead": "本机游戏数据监控App / 率土之滨玩家与同盟 / 专业冷静克制 / 信息密集 / 液态玻璃浅色，避免花哨渐变与低对比",
+    "designDials": { "layoutVariance": 2, "motionIntensity": 2, "visualDensity": 4 },
+    "styleContinuityAnchors": {
+      "background": "浅雾白 + 蓝/紫/青/桃四向环境光斑（.app-bg）",
+      "surface": "半透明玻璃卡片 backdrop-blur，白色高光描边，静态卡片阴影 alpha<=0.05",
+      "primary": "#426AD2 主蓝，仅作强调/主操作；强调色青绿 #25A88E",
+      "typographySystem": "SF Pro / PingFang SC；display24 / title18 / body16 / label14 / caption12；数值用 tabular-nums",
+      "shapeSystem": "卡片 20px、内块 14px、浮层 26px、胶囊 full",
+      "componentLanguage": "顶部 MacGlassHeader（标题+副标题+可选返回/操作）、SectionLabel 蓝竖条、玻璃指标卡、状态胶囊、列表行卡、底部玻璃 4 段 Tab 栏（战场/战报/同盟/工具）",
+      "statusColors": "success#1E9B83 / warning#BE7A18 / error#C75862 / info#4C78C8，仅语义状态使用",
+      "surfaceAndDepth": "静态卡片走边框/表面分层；仅浮层可深阴影"
+    },
+    "sharedProjectShellContract": {
+      "deviceFrame": "390x844 device-frame，44px 圆角，app-bg 背景",
+      "statusBar": "iOS 44px 状态栏（9:41 + 信号/WiFi/电量）",
+      "tabBar": "底部玻璃浮层 4 段 Tab：战场(page-battlefield)/战报(page-reports)/同盟(page-alliance)/工具(page-tools)；每项 data-dom-id=tab-*，data-tab-key，active 用 data-active=true + 蓝色 pill；登录与战术演练页隐藏 Tab 栏全屏",
+      "radiusScale": "sm8 / md14 / lg20 / xl26 / full",
+      "typographySystem": "SF Pro / PingFang SC",
+      "surfaceDepthModel": "静态卡 border/surface 优先，阴影 alpha<=0.05；浮层可深"
+    },
+    "generationTree": {
+      "root": {
+        "nodeId": "gen-project-shell",
+        "kind": "project-shell",
+        "pageIds": [],
+        "output": "partials/mobile-shell.html",
+        "sharedRegions": ["390px 设备框", "顶部状态栏", "底部玻璃4段Tab栏", "app-bg 背景", "MacGlassHeader 结构", "玻璃组件类"],
+        "privateRegions": [],
+        "mutableSlots": ["pageHeader", "pageContent", "activeTab"],
+        "status": "planned",
+        "children": [
+          { "nodeId": "page-login", "kind": "page-leaf", "pageIds": ["page-login"], "output": "pages/login.html", "status": "planned", "children": [] },
+          { "nodeId": "page-battlefield", "kind": "page-leaf", "pageIds": ["page-battlefield"], "output": "pages/battlefield.html", "status": "planned", "children": [] },
+          { "nodeId": "page-reports", "kind": "page-leaf", "pageIds": ["page-reports"], "output": "pages/reports.html", "status": "planned", "children": [] },
+          { "nodeId": "page-report-detail", "kind": "page-leaf", "pageIds": ["page-report-detail"], "output": "pages/report-detail.html", "status": "planned", "children": [] },
+          { "nodeId": "page-alliance", "kind": "page-leaf", "pageIds": ["page-alliance"], "output": "pages/alliance.html", "status": "planned", "children": [] },
+          { "nodeId": "page-tools", "kind": "page-leaf", "pageIds": ["page-tools"], "output": "pages/tools.html", "status": "planned", "children": [] },
+          { "nodeId": "page-capture", "kind": "page-leaf", "pageIds": ["page-capture"], "output": "pages/capture.html", "status": "planned", "children": [] },
+          { "nodeId": "page-ranking", "kind": "page-leaf", "pageIds": ["page-ranking"], "output": "pages/ranking.html", "status": "planned", "children": [] },
+          { "nodeId": "page-simulator", "kind": "page-leaf", "pageIds": ["page-simulator"], "output": "pages/simulator.html", "status": "planned", "children": [] }
+        ]
+      }
+    }
+  },
+  "designSource": {
+    "operatingMode": "free-explore",
+    "libraryIdentity": null,
+    "styleConstraints": { "radiusMax": 28, "staticShadowAlphaMax": 0.05 }
+  },
+  "pages": [
+    {
+      "nodeId": "page-login",
+      "title": "登录页",
+      "pageType": "task-driven",
+      "visualNorthStar": "免费声明清晰、登录/注册聚焦，浮层玻璃卡片居中，全屏无 Tab",
+      "continuityAnchors": ["app-bg 背景", "玻璃浮层卡片", "主蓝主按钮"],
+      "imagePlan": []
+    },
+    {
+      "nodeId": "page-battlefield",
+      "title": "实时战场",
+      "pageType": "information-dense",
+      "visualNorthStar": "抓包状态一眼可见 + 2x2 指标卡 + 分类筛选 + 实时事件流（普通事件卡/行军队伍卡），信息层级分明",
+      "continuityAnchors": ["顶部玻璃Header", "底部4段Tab栏", "玻璃指标卡", "状态胶囊"],
+      "imagePlan": []
+    },
+    {
+      "nodeId": "page-reports",
+      "title": "本机战报",
+      "pageType": "information-dense",
+      "visualNorthStar": "搜索+胜负筛选 + 战报列表卡（胜负胶囊/三列数据/参战武将），可扫读",
+      "continuityAnchors": ["顶部玻璃Header", "底部4段Tab栏", "列表行卡", "状态胶囊"],
+      "imagePlan": []
+    },
+    {
+      "nodeId": "page-report-detail",
+      "title": "战报详情",
+      "pageType": "information-dense",
+      "visualNorthStar": "攻守双方对阵详情，顶部两列小卡 + 攻方/守方玻璃卡（武将内嵌卡），返回按钮，全屏无 Tab",
+      "continuityAnchors": ["顶部玻璃Header（返回）", "SectionLabel", "内嵌玻璃卡"],
+      "imagePlan": []
+    },
+    {
+      "nodeId": "page-alliance",
+      "title": "同盟中心",
+      "pageType": "information-dense",
+      "visualNorthStar": "搜索+分组筛选 + 成员列表卡（首字头像/职位胶囊/三列数据/UID）",
+      "continuityAnchors": ["顶部玻璃Header", "底部4段Tab栏", "列表行卡"],
+      "imagePlan": []
+    },
+    {
+      "nodeId": "page-tools",
+      "title": "工具中心",
+      "pageType": "information-dense",
+      "visualNorthStar": "分组 + 3 列磁贴网格聚合所有二级功能入口，分组有序",
+      "continuityAnchors": ["顶部玻璃Header", "底部4段Tab栏", "SectionLabel", "磁贴"],
+      "imagePlan": []
+    },
+    {
+      "nodeId": "page-capture",
+      "title": "抓包启动台",
+      "pageType": "task-driven",
+      "visualNorthStar": "抓包状态卡 + 六阶段证据链清单 + 控制/日志/导出卡，操作聚焦，全屏无 Tab",
+      "continuityAnchors": ["顶部玻璃Header（返回）", "SectionLabel", "状态胶囊", "主/描边按钮"],
+      "imagePlan": []
+    },
+    {
+      "nodeId": "page-ranking",
+      "title": "排行榜",
+      "pageType": "information-dense",
+      "visualNorthStar": "页面/分类切换 Chip + 名次徽章列表（金银铜/蓝），主指标突出，全屏无 Tab",
+      "continuityAnchors": ["顶部玻璃Header（返回）", "筛选 Chip", "列表行卡"],
+      "imagePlan": []
+    },
+    {
+      "nodeId": "page-simulator",
+      "title": "战术演练",
+      "pageType": "task-driven",
+      "visualNorthStar": "深色战术皮肤（深灰底/金标题/仿古边框），红蓝双方阵容 + 对决徽标 + 模拟结果卡，全屏无 Tab，唯一差异化深色页",
+      "continuityAnchors": ["返回头部", "红蓝双方卡", "结果对比条"],
+      "imagePlan": []
+    }
+  ],
+  "assets": [],
+  "wiringPlan": [
+    { "from": "page-login", "domId": "btn-login-submit", "to": "page-battlefield" },
+    { "from": "page-battlefield", "domId": "tab-reports", "to": "page-reports" },
+    { "from": "page-reports", "domId": "report-card-open", "to": "page-report-detail" },
+    { "from": "page-alliance", "domId": "open-ranking", "to": "page-ranking" },
+    { "from": "page-tools", "domId": "open-capture", "to": "page-capture" },
+    { "from": "page-tools", "domId": "open-simulator", "to": "page-simulator" }
+  ],
+  "hiddenInteractionPlan": [
+    { "from": "page-battlefield", "domId": "tab-alliance", "to": "page-alliance", "hideEdge": true },
+    { "from": "page-battlefield", "domId": "tab-tools", "to": "page-tools", "hideEdge": true },
+    { "from": "page-reports", "domId": "tab-battlefield", "to": "page-battlefield", "hideEdge": true },
+    { "from": "page-reports", "domId": "tab-alliance", "to": "page-alliance", "hideEdge": true },
+    { "from": "page-reports", "domId": "tab-tools", "to": "page-tools", "hideEdge": true },
+    { "from": "page-report-detail", "domId": "btn-back", "to": "page-reports", "hideEdge": true },
+    { "from": "page-alliance", "domId": "tab-battlefield", "to": "page-battlefield", "hideEdge": true },
+    { "from": "page-alliance", "domId": "tab-reports", "to": "page-reports", "hideEdge": true },
+    { "from": "page-alliance", "domId": "tab-tools", "to": "page-tools", "hideEdge": true },
+    { "from": "page-tools", "domId": "tab-battlefield", "to": "page-battlefield", "hideEdge": true },
+    { "from": "page-tools", "domId": "tab-reports", "to": "page-reports", "hideEdge": true },
+    { "from": "page-tools", "domId": "tab-alliance", "to": "page-alliance", "hideEdge": true },
+    { "from": "page-capture", "domId": "btn-back", "to": "page-tools", "hideEdge": true },
+    { "from": "page-ranking", "domId": "btn-back", "to": "page-tools", "hideEdge": true },
+    { "from": "page-simulator", "domId": "btn-back", "to": "page-tools", "hideEdge": true }
+  ]
+}

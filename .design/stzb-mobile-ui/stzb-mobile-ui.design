@@ -1,0 +1,302 @@
+{
+  "data": [
+    {
+      "id": "page-battlefield",
+      "title": "实时战场",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787146800000,
+      "canvasData": {
+        "x": 0,
+        "y": 0,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/battlefield.html",
+        "interactions": [
+          {
+            "trigger": "click",
+            "domId": "tab-tools",
+            "action": "navigate",
+            "targetPageId": "page-tools"
+          },
+          {
+            "trigger": "click",
+            "domId": "tab-live-army",
+            "action": "navigate",
+            "targetPageId": "page-live-army"
+          },
+          {
+            "trigger": "click",
+            "domId": "tab-simulator",
+            "action": "navigate",
+            "targetPageId": "page-simulator"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-battlefield-refined",
+      "title": "实时战场 · 精修稿",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787194700000,
+      "canvasData": {
+        "x": 0,
+        "y": 1911,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/battlefield-refined.html",
+        "interactions": [
+          {
+            "trigger": "click",
+            "domId": "tab-tools",
+            "action": "navigate",
+            "targetPageId": "page-tools-refined"
+          },
+          {
+            "trigger": "click",
+            "domId": "tab-live-army",
+            "action": "navigate",
+            "targetPageId": "page-live-army-refined"
+          },
+          {
+            "trigger": "click",
+            "domId": "tab-simulator",
+            "action": "navigate",
+            "targetPageId": "page-simulator-refined"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-tools",
+      "title": "工具中心",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787146800000,
+      "canvasData": {
+        "x": 420,
+        "y": 0,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/tools.html",
+        "interactions": [
+          {
+            "trigger": "click",
+            "domId": "tab-battlefield",
+            "action": "navigate",
+            "targetPageId": "page-battlefield"
+          },
+          {
+            "trigger": "click",
+            "domId": "tab-live-army",
+            "action": "navigate",
+            "targetPageId": "page-live-army"
+          },
+          {
+            "trigger": "click",
+            "domId": "tab-simulator",
+            "action": "navigate",
+            "targetPageId": "page-simulator"
+          },
+          {
+            "trigger": "click",
+            "domId": "open-tool-simulator",
+            "action": "navigate",
+            "targetPageId": "page-simulator"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-tools-refined",
+      "title": "工具中心 · 精修稿",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787194700000,
+      "canvasData": {
+        "x": 420,
+        "y": 1911,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/tools-refined.html",
+        "interactions": [
+          {
+            "trigger": "click",
+            "domId": "tab-battlefield",
+            "action": "navigate",
+            "targetPageId": "page-battlefield-refined"
+          },
+          {
+            "trigger": "click",
+            "domId": "tab-live-army",
+            "action": "navigate",
+            "targetPageId": "page-live-army-refined"
+          },
+          {
+            "trigger": "click",
+            "domId": "tab-simulator",
+            "action": "navigate",
+            "targetPageId": "page-simulator-refined"
+          },
+          {
+            "trigger": "click",
+            "domId": "open-tool-simulator",
+            "action": "navigate",
+            "targetPageId": "page-simulator-refined"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-live-army",
+      "title": "实时部队",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787146800000,
+      "canvasData": {
+        "x": 420,
+        "y": 637,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/live-army.html",
+        "interactions": [
+          {
+            "trigger": "click",
+            "domId": "tab-battlefield",
+            "action": "navigate",
+            "targetPageId": "page-battlefield"
+          },
+          {
+            "trigger": "click",
+            "domId": "tab-tools",
+            "action": "navigate",
+            "targetPageId": "page-tools"
+          },
+          {
+            "trigger": "click",
+            "domId": "tab-simulator",
+            "action": "navigate",
+            "targetPageId": "page-simulator"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-live-army-refined",
+      "title": "实时部队 · 精修稿",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787194700000,
+      "canvasData": {
+        "x": 420,
+        "y": 2548,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/live-army-refined.html",
+        "interactions": [
+          {
+            "trigger": "click",
+            "domId": "tab-battlefield",
+            "action": "navigate",
+            "targetPageId": "page-battlefield-refined"
+          },
+          {
+            "trigger": "click",
+            "domId": "tab-tools",
+            "action": "navigate",
+            "targetPageId": "page-tools-refined"
+          },
+          {
+            "trigger": "click",
+            "domId": "tab-simulator",
+            "action": "navigate",
+            "targetPageId": "page-simulator-refined"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-simulator",
+      "title": "战斗模拟",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787146800000,
+      "canvasData": {
+        "x": 420,
+        "y": 1274,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/simulator.html",
+        "interactions": [
+          {
+            "trigger": "click",
+            "domId": "tab-battlefield",
+            "action": "navigate",
+            "targetPageId": "page-battlefield"
+          },
+          {
+            "trigger": "click",
+            "domId": "tab-tools",
+            "action": "navigate",
+            "targetPageId": "page-tools"
+          },
+          {
+            "trigger": "click",
+            "domId": "tab-live-army",
+            "action": "navigate",
+            "targetPageId": "page-live-army"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-simulator-refined",
+      "title": "战斗模拟 · 精修稿",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787194700000,
+      "canvasData": {
+        "x": 420,
+        "y": 3185,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/simulator-refined.html",
+        "interactions": [
+          {
+            "trigger": "click",
+            "domId": "tab-battlefield",
+            "action": "navigate",
+            "targetPageId": "page-battlefield-refined"
+          },
+          {
+            "trigger": "click",
+            "domId": "tab-tools",
+            "action": "navigate",
+            "targetPageId": "page-tools-refined"
+          },
+          {
+            "trigger": "click",
+            "domId": "tab-live-army",
+            "action": "navigate",
+            "targetPageId": "page-live-army-refined"
+          }
+        ]
+      }
+    }
+  ],
+  "config": {
+    "autoLayout": true,
+    "deviceType": "mobile",
+    "projectName": "率土之滨监控 · 移动端 UI 样例",
+    "designLibrary": null
+  }
+}

@@ -15,9 +15,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.local.stzb.core.ui.EmptyPanel
@@ -25,6 +27,7 @@ import com.local.stzb.core.ui.ErrorPanel
 import com.local.stzb.core.ui.GlassCard
 import com.local.stzb.core.ui.LoadingPanel
 import com.local.stzb.core.ui.MacGlassHeader
+import com.local.stzb.core.ui.StatBlock
 import com.local.stzb.data.livearmy.LineupEvidence
 import com.local.stzb.data.livearmy.LiveArmy
 import com.local.stzb.data.livearmy.LiveArmyFreshness
@@ -39,7 +42,7 @@ fun LiveArmyScreen(
     modifier: Modifier = Modifier,
 ) {
     val snapshot = state.snapshot
-    Column(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         MacGlassHeader(
             title = "实时部队",
             subtitle = snapshot?.let { "当前 ${it.current.size} · 行军 ${it.moving} · 精确阵容 ${it.exactLineups}" } ?: "5028 与战报证据",
@@ -65,16 +68,31 @@ fun LiveArmyScreen(
 @Composable
 private fun LiveArmyCard(army: LiveArmy, onLocate: (Int) -> Unit) {
     GlassCard(Modifier.fillMaxWidth()) {
-        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("#${army.teamId} ${army.ownerName}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text(army.stateLabel, color = if (army.isMoving) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
+                Column {
+                    Text("#${army.teamId} ${army.ownerName}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    Text(listOf(army.ownerUnion, army.freshness.label).filter(String::isNotBlank).joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Surface(shape = RoundedCornerShape(999.dp), color = if (army.isMoving) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant) {
+                    Text(
+                        army.stateLabel,
+                        Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        color = if (army.isMoving) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
             }
-            Text(listOf(army.ownerUnion, army.freshness.label).filter(String::isNotBlank).joinToString(" · "), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text("${army.fromLocation} → ${army.currentLocation} → ${army.targetLocation}")
-            Text("士气 ${army.morale} · ${army.lineupEvidence.label}", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            if (army.heroes.isNotEmpty()) Text(army.heroes.joinToString(" / " ) { it.name }, fontWeight = FontWeight.SemiBold)
-            if (army.battles > 0) Text("${army.battles} 战 · 胜率 ${"%.1f".format(army.winRate)}%")
+            Text("${army.fromLocation} → ${army.currentLocation} → ${army.targetLocation}", style = MaterialTheme.typography.bodySmall)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                StatBlock("士气", army.morale.toString(), emphasis = true)
+                StatBlock("阵容证据", army.lineupEvidence.label)
+                if (army.battles > 0) StatBlock("战绩", "${army.battles}战·${"%.1f".format(army.winRate)}%")
+            }
+            if (army.heroes.isNotEmpty()) {
+                Text(army.heroes.joinToString(" / ") { it.name }, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.bodyMedium)
+            }
             Button(onClick = { onLocate(army.teamId) }, modifier = Modifier.fillMaxWidth()) { Text("回到战场定位") }
         }
     }

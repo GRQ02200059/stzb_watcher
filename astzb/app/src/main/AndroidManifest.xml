@@ -78,6 +78,27 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="User-enabled realtime battlefield overlay" />
         </service>
+
+        <service
+            android:name="com.local.stzb.feature.autoscroll.AutoScrollOverlayService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="User-enabled auto scroll floating button" />
+        </service>
+
+        <service
+            android:name="com.local.stzb.feature.autoscroll.AutoScrollAccessibilityService"
+            android:exported="false"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/auto_scroll_accessibility" />
+        </service>
     </application>
 
 </manifest>
