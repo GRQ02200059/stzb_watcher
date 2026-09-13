@@ -1,0 +1,12 @@
+{
+  "report": {
+    "schemaVersion": 1,
+    "battleId": 42,
+    "contentHash": "32c3d5ac64b34cb73b01878cdd55a1d3d9451b4b08f14438606152e535263e7f",
+    "battle": {"battle_id": 42, "atk_name": "赵云", "result": 1, "captured_at": 1700000010},
+    "heroes": [{"side": "atk", "pos": 0, "hero_id": 1001, "hero_name": "赵云", "level": 50}],
+    "skills": [{"side": "atk", "pos": 0, "skill_id": 2001, "skill_name": "一骑当千", "skill_level": 10}]
+  },
+  "canonical": "{\"battle\":{\"atk_name\":\"赵云\",\"battle_id\":42,\"captured_at\":1700000010,\"result\":1},\"heroes\":[{\"hero_id\":1001,\"hero_name\":\"赵云\",\"level\":50,\"pos\":0,\"side\":\"atk\"}],\"schemaVersion\":1,\"skills\":[{\"pos\":0,\"side\":\"atk\",\"skill_id\":2001,\"skill_level\":10,\"skill_name\":\"一骑当千\"}]}",
+  "sha256": "32c3d5ac64b34cb73b01878cdd55a1d3d9451b4b08f14438606152e535263e7f"
+}
