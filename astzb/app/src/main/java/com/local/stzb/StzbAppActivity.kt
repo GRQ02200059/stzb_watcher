@@ -38,6 +38,11 @@ class StzbAppActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 authViewModel.start()
             }
+            LaunchedEffect(uiState.state) {
+                if (uiState.state is AuthGateState.Ready) {
+                    (application as StzbApplication).scheduleBattleReportSyncOnce()
+                }
+            }
             AstzbTheme {
                 if (uiState.state is AuthGateState.Ready) {
                     val app = application as StzbApplication

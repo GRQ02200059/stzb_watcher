@@ -35,6 +35,12 @@ import com.local.stzb.profile.ProfileManager
 import com.local.stzb.profile.ProfileSnapshot
 import com.example.myapplication.LocalSocksCaptureServer
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import com.local.stzb.sync.AndroidBattleReportSource
+import com.local.stzb.sync.AndroidBattleReportWorkScheduler
+import com.local.stzb.sync.BattleReportSyncCoordinator
+import com.local.stzb.sync.BattleReportSyncLauncher
+import com.local.stzb.sync.BattleReportSyncTransport
+import com.local.stzb.sync.SyncOutcome
 
 class StzbApplication : Application() {
     val profileManager by lazy {
@@ -46,6 +52,12 @@ class StzbApplication : Application() {
     val authSessionStore: AuthSessionStore by lazy { AndroidAuthSessionStore(this) }
     val authTransport: AuthTransport by lazy {
         AuthRepository(AUTH_BASE_URL.toHttpUrl())
+    }
+    private val battleReportSyncLauncher by lazy {
+        BattleReportSyncLauncher(
+            currentProfileId = { profileManager.snapshot().current?.profileId },
+            scheduler = AndroidBattleReportWorkScheduler(this),
+        )
     }
     val battlefieldRepository: BattlefieldRepository get() =
         LegacyBattlefieldRepository(AndroidLegacyBattlefieldSource(Preferences(this)))
@@ -82,6 +94,21 @@ class StzbApplication : Application() {
             accessGuard = authAccessGuard,
             clientVersion = BuildConfig.VERSION_NAME,
         )
+    }
+
+    fun scheduleBattleReportSyncOnce() {
+        battleReportSyncLauncher.onAuthenticated()
+    }
+
+    suspend fun runBattleReportSync(profileId: String): SyncOutcome {
+        val snapshot = profileManager.snapshot()
+        val profile = snapshot.current?.takeIf { it.profileId == profileId }
+            ?: return SyncOutcome.PermanentFailure
+        val token = authSessionStore.readToken() ?: return SyncOutcome.SessionRejected
+        return BattleReportSyncCoordinator(
+            source = AndroidBattleReportSource(this),
+            transport = BattleReportSyncTransport(AUTH_BASE_URL.toHttpUrl()),
+        ).sync(profile, token, BuildConfig.VERSION_NAME)
     }
 
     override fun onCreate() {
