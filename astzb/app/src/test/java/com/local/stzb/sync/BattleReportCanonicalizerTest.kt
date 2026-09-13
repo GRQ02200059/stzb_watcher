@@ -73,4 +73,9 @@ class BattleReportCanonicalizerTest {
         )
         assertEquals(true, BattleReportCanonicalizer.hash(base).canonicalJson.contains("甲\\n\\\"乙\\\""))
     }
+
+    @Test
+    fun stringEscapingMatchesPythonJsonWithoutEscapingSlashOrUnicodeSeparators() {
+        assertEquals("\"</tag>\u2028\"", BattleReportCanonicalizer.canonicalJson("</tag>\u2028"))
+    }
 }

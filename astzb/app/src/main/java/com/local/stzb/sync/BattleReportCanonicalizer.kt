@@ -2,7 +2,6 @@ package com.local.stzb.sync
 
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
-import org.json.JSONObject
 
 object BattleReportCanonicalizer {
     const val SCHEMA_VERSION = 1
@@ -36,15 +35,37 @@ object BattleReportCanonicalizer {
 
     internal fun canonicalJson(value: Any?): String = when (value) {
         null -> "null"
-        is String -> JSONObject.quote(value)
+        is String -> quoteString(value)
         is Boolean -> if (value) "true" else "false"
         is Byte, is Short, is Int, is Long -> value.toString()
         is Map<*, *> -> value.entries
             .sortedBy { entry -> entry.key as String }
             .joinToString(",", "{", "}") { entry ->
-                JSONObject.quote(entry.key as String) + ":" + canonicalJson(entry.value)
+                quoteString(entry.key as String) + ":" + canonicalJson(entry.value)
             }
         is List<*> -> value.joinToString(",", "[", "]") { item -> canonicalJson(item) }
         else -> error("Unsupported canonical value")
+    }
+
+    private fun quoteString(value: String): String = buildString {
+        append('"')
+        value.forEach { char ->
+            when (char) {
+                '"' -> append("\\\"")
+                '\\' -> append("\\\\")
+                '\b' -> append("\\b")
+                '\u000C' -> append("\\f")
+                '\n' -> append("\\n")
+                '\r' -> append("\\r")
+                '\t' -> append("\\t")
+                else -> if (char.code < 0x20) {
+                    append("\\u")
+                    append(char.code.toString(16).padStart(4, '0'))
+                } else {
+                    append(char)
+                }
+            }
+        }
+        append('"')
     }
 }
