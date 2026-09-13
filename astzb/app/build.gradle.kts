@@ -39,8 +39,8 @@ android {
         applicationId = "com.local.stzb.random"
         minSdk = 33
         targetSdk = 35
-        versionCode = 10004
-        versionName = "1.0.2"
+        versionCode = 10006
+        versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
