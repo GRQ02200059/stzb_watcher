@@ -303,6 +303,7 @@ POST /v1/battle-reports/upload
 ## 8. 认证、安全与隐私
 
 - 两个新接口必须验证现有 session；
+- 注册、登录、session 验证和战报同步统一要求客户端版本不低于 1.2.0，旧 App 不得继续注册或登录；
 - 已撤销 session、被禁用账号或全局停服时拒绝同步；
 - session 仍只以哈希形式存储在服务器；
 - token、玩家名、UID 和完整战报不得进入服务日志；
@@ -316,6 +317,8 @@ POST /v1/battle-reports/upload
 当前服务器使用 HTTP，session token、玩家名、UID 和战报数据在链路上不具备传输加密保护。用户已确认复用该服务器；本功能不宣称链路安全。迁移 HTTPS 时应只替换集中配置的基础 URL，不改同步协议。
 
 本设计明确替代 `2026-08-16-android-startup-auth-design.md` 中“认证服务器不接收战报或游戏数据”的旧范围约束；其他认证安全约束继续有效。
+
+上线 1.2.0 门禁后，管理员通过 stzb-auth session revoke-all 一次性撤销所有既有 session，保留用户账号与密码哈希。所有用户必须安装 1.2.0 或更高版本并重新登录；旧客户端即使持有原有 token 或正确密码也不能通过版本门禁。
 
 ## 9. 错误处理与重试
 

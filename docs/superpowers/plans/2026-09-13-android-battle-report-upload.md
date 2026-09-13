@@ -11,6 +11,8 @@
 ## Global Constraints
 
 - Production base URL remains exactly http://152.136.236.184:9080.
+- Registration, login, session verification, and battle-report sync require client version 1.2.0 or newer.
+- After deploying that gate, revoke every active legacy session in one transaction while preserving user accounts and password hashes.
 - A new App process schedules at most one sync after authentication first enters AuthGateState.Ready.
 - Activity recreation, Compose recomposition, and foreground resume do not schedule another sync in the same process.
 - Only the current LocalProfile is synchronized; switching profiles does not trigger an immediate upload.
