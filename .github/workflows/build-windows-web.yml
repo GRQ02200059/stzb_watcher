@@ -60,10 +60,11 @@ jobs:
           architecture: x64
           cache: pip
           cache-dependency-path: packaging/pyinstaller/requirements-windows.lock
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '17.0.20.1+1'
+          # Temurin metadata maps JDK 17.0.20.1+1 to this SemVer.
+          java-version: '17.0.20+101'
           architecture: x64
       - uses: gradle/actions/setup-gradle@v4
         with:
