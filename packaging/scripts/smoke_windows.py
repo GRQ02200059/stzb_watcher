@@ -1,6 +1,6 @@
 """Verify the delivered ZIP, without importing application source or host runtimes."""
 import argparse
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 import hashlib
 import json
 import os
@@ -14,6 +14,7 @@ import tempfile
 import time
 import traceback
 import urllib.error
+import urllib.parse
 import urllib.request
 import zipfile
 
@@ -150,13 +151,14 @@ def verify_package(archive, checksums, logs, report):
         database = bundle / 'stzb.db'
         if not database.is_file():
             raise RuntimeError('First launch did not create stzb.db')
-        with sqlite3.connect(database) as connection:
+        with closing(sqlite3.connect(database)) as connection:
             connection.execute('SELECT 1 FROM battles_v2 LIMIT 1')
             connection.execute('CREATE TABLE packaging_smoke_marker (value TEXT)')
             connection.execute("INSERT INTO packaging_smoke_marker VALUES ('persisted')")
+            connection.commit()
         with running_app(bundle, work, logs / 'restart.log') as (process, base):
             wait_ready(process, base + '/')
-            with sqlite3.connect(database) as connection:
+            with closing(sqlite3.connect(database)) as connection:
                 if connection.execute('SELECT value FROM packaging_smoke_marker').fetchone() != ('persisted',):
                     raise RuntimeError('Data did not survive application restart')
         if list((bundle / '_internal').rglob('*.db')):

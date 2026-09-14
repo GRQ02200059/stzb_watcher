@@ -17,6 +17,7 @@ on:
     paths: &desktop_paths
       - '*.py'
       - 'requirements.txt'
+      - '.gitattributes'
       - 'intelligence/**'
       - 'query_agent/**'
       - 'score_center/**'

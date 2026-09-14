@@ -1,6 +1,6 @@
 # Windows 应用打包与验收流程
 
-状态：2026-09-14 设计稿。本文定义要实施的新流程；当前 CI 尚未实现这些验收步骤。
+状态：2026-09-14 新流程已实现，Windows 完整验收进行中。代码位于 `codex/windows-packaging-20260914`，尚未合并到主分支。
 
 ## 交付目标
 
@@ -17,6 +17,24 @@ Windows 实时抓包依赖 Npcap 系统驱动。未安装驱动时，应用应�
 - 当前 spec 收集整个 `battle-engine` 目录，但 Windows CI 没有编译 JVM 引擎，也没有准备随包 Java。
 - `battle_engine_adapter.py` 默认调用 Gradle 生成的 Unix 启动脚本，Windows 不能直接沿用该启动方式。
 - 2026-09-13 Windows 构建日志有 `Library wpcap.dll required via ctypes not found` 警告。这证明构建环境缺少该依赖，不足以判定用户遇到的具体报错。
+- 新 CI 的启动回归进一步发现：Windows Git 检出把协议 JSON 改成 CRLF，触发协议 SHA-256 校验失败。已对 `data/**` 设置 `-text` 保持原始字节；没有放松运行时校验。
+
+以上描述的是旧流程的故障；新流程修复路径、资源字节稳定性和 Windows Java 调用，并增加以下验收。
+
+## 在 Mac 上使用新流程
+
+尚未合并时，打开 Actions 中的 `Build Windows Web EXE`，在 `Run workflow` 中选择 `codex/windows-packaging-20260914`，输入版本号，保持 `publish_release=false`。也可运行：
+
+```sh
+gh workflow run build-windows-web.yml \
+  --ref codex/windows-packaging-20260914 \
+  -f release_tag=v1.1.0-web -F publish_release=false
+gh run list --workflow build-windows-web.yml --branch codex/windows-packaging-20260914
+```
+
+构建成功后下载 `STZB-Web-Windows-verified-<run-id>`。里面包含应用 ZIP、`SHA256SUMS.txt` 与 `smoke-report.json`。`windows-candidate-*` 是内部验收输入，不作为已通过验收的交付版本。
+
+合并后在主分支提交、推送相关代码即可触发构建。确实要创建 Release 时，手动运行并开启发布选项；发布失败不会覆盖已有 Release。
 
 ## 发布目录
 
@@ -45,7 +63,7 @@ STZB-Web-Windows-x64-<version>-<short-sha>/
 2. 数据库、档案和抓包输出使用可写应用目录。不要用当前工作目录推断这两种路径。
 3. 打包态通过绝对路径调用随包 `runtime/java/bin/java.exe`，使用参数列表传递 `-cp`、JAR 路径和主类 `com.stzb.battle.cli.BattleEngineCliKt`，不依赖 PATH、系统 Java 或 Unix shell 脚本。具体 JAR 与配置路径通过真实模拟请求验收。
 4. 浏览器应在本地服务已就绪后打开。启动失败时保留控制台错误和日志位置。
-5. 所有调用 Python 脚本的入口都要检查冻结环境：打包后的 `sys.executable` 是应用 exe，不能继续当成 Python 解释器执行 `.py` 文件。涉及的导入入口需用独立回归测试约束，再做局部适配。
+5. 打包后的 `sys.executable` 是应用 exe，不能当成 Python 解释器执行 `.py` 文件。已复核数据导入入口：它已有冻结环境分支，保留原实现。
 
 ## CI：构建 → 验收 → 发布
 
@@ -64,7 +82,7 @@ STZB-Web-Windows-x64-<version>-<short-sha>/
 2. 建立 Python 虚拟环境，按锁文件安装依赖，执行 `pip check`。
 3. 校验资源清单：所需文件必须存在、JSON 可解析、关键配置表非空；失败立即退出。
 4. 运行资源路径、启动器和引擎适配相关回归测试。
-5. 配置固定 Java 17 和 Gradle，在独立的 `battle-engine` 项目中运行 `gradle -p battle-engine test installDist`。不使用根目录 Android 构建作为桌面构建入口。
+5. 配置固定 Java 17 和 Gradle。镜像测试所需的 `paper.zip` 未纳入 Git，缺少时先从仓库内同一份 JSON 样例生成所需 ZIP 条目；不覆盖本地已有 ZIP，不改镜像源码与断言。然后在独立的 `battle-engine` 项目中运行 `gradle -p battle-engine test installDist`。不使用根目录 Android 构建作为桌面构建入口。
 6. 收集本次 `installDist` 的 JAR、固定版本 Windows Java 运行环境及其许可文件。下载的运行环境必须验证发布方校验值。
 7. 从明确的资源清单创建 PyInstaller 目录包；只复制运行所需内容，不递归收集开发仓库、历史 build 或账号资料。
 8. 写入版本、commit、运行时版本和资源清单摘要，生成候选 ZIP。
@@ -101,12 +119,13 @@ PowerShell 每个外部命令执行后显式检查 `$LASTEXITCODE`。不能只�
 
 | 文件 | 负责的变化 |
 | --- | --- |
+| `.gitattributes` | 带哈希清单的 `data/**` 禁止自动换行转换 |
 | `.github/workflows/build-windows-web.yml` | 构建、独立验收、发布依赖及日志上传 |
 | `packaging/scripts/build_web_exe.ps1` | 资源校验、干净构建、运行时收集、退出码与 ZIP |
 | `packaging/pyinstaller/stzb-web.spec` | onedir 与明确的运行资源清单 |
 | `packaging/pyinstaller/requirements-build.txt` 及 Windows 锁文件 | 固定构建依赖 |
 | 新增 `packaging/scripts/smoke_windows.py` | 进程生命周期、接口/对局/缺文件验收与报告 |
-| `api_server.py` | 已确认的资源路径及冻结环境脚本执行边界 |
+| `api_server.py` | 情报与协议资源路径、随包引擎健康检查路径 |
 | `battle_engine_adapter.py` | 打包态调用随包 Windows Java 与引擎 |
 | `run_web_exe.py` | 服务就绪后打开页面，启动失败可诊断 |
 | 对应 `test/` 文件 | 故障回归及正常启动验证 |

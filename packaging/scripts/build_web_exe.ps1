@@ -24,6 +24,19 @@ try {
     }
     Invoke-Checked { python -m pip check }
     Invoke-Checked { python -m unittest test.test_packaged_runtime test.test_web_launcher test.test_battle_engine_adapter test.test_windows_web_build_config test.test_windows_release_workflow }
+    # The mirrored engine test expects a ZIP which Git intentionally ignores.
+    # Reconstruct its one required entry from the checked-in JSON, preserving local ZIPs.
+    @'
+from pathlib import Path
+from zipfile import ZipFile, ZIP_DEFLATED
+root = Path('battle-engine/src/test/resources/assent/cfg')
+name = 'cap_20260311222842345_0000000b_zlib.json'
+if not (root / 'paper.zip').exists():
+    payload = (root / 'paper/11' / name).read_bytes()
+    with ZipFile(root / 'paper.zip', 'x', compression=ZIP_DEFLATED) as archive:
+        archive.writestr('0000000b/' + name, payload)
+'@ | python -
+    if ($LASTEXITCODE -ne 0) { throw 'Cannot prepare tracked engine test fixture' }
     Invoke-Checked { gradle --no-daemon -p battle-engine test installDist }
     Invoke-Checked { python -m PyInstaller --clean --noconfirm --distpath $Output --workpath $Work (Join-Path $Root "packaging/pyinstaller/stzb-web.spec") }
 
