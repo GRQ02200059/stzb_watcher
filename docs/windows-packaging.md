@@ -1,6 +1,6 @@
 # Windows 应用打包与验收流程
 
-状态：2026-09-14 新流程已实现，Windows 完整验收进行中。代码位于 `codex/windows-packaging-20260914`，尚未合并到主分支。
+状态：2026-09-14 新流程已实现并通过 Windows 完整验收。代码位于 `codex/windows-packaging-20260914`，尚未合并到主分支，未创建 Release。
 
 ## 交付目标
 
@@ -151,6 +151,22 @@ PowerShell 每个外部命令执行后显式检查 `$LASTEXITCODE`。不能只�
 - 移除必需配置后，验收稳定失败，CI 阻断发布。
 - 用户下载的是验收过的同一份文件，可以追溯 commit 和哈希。
 - 报告明确区分：本地测试、Windows exe 验收、Npcap/实际抓包验证。任何未执行的项均不得标记通过。
+
+## 本次验收记录
+
+- [Windows 构建与独立验收](https://github.com/GRQ02200059/stzb_watcher/actions/runs/34818046742)：成功。
+- [已验证下载包](https://github.com/GRQ02200059/stzb_watcher/actions/runs/34818046742/artifacts/10336837750)。
+- 应用构建 commit：`44aa78a7dbc0e45e9d4d4bb37b7ce7fc870e5e0c`。
+- ZIP SHA-256：`9cfdb294452b2b1e62e95a14306e4abcbc09115f9768b99dc91c8498de266a30`。
+- 中文及空格目录中，随包 Java `-version` 返回 0；Web 服务独立启动成功。
+- 40 个首页本地资源逐一核对字节一致；情报与研究接口成功，模拟接口读到 1400 条武将、2718 条战法。
+- 使用随包 Java/JAR 的真实模拟请求成功返回战斗事件。
+- 首次运行建库、重启保留数据、资源目录无数据库写入检查通过。
+- 移除必需 manifest 后，进程非零退出并报告 `FileNotFoundError`；验收成功识别故障。
+- 本地 26 项相关回归测试通过；YAML actionlint、PowerShell 语法和差异检查通过。
+- 未验证 Npcap 安装/权限/真实游戏抓包，以及外部认证服务；发布 job 按默认设置跳过。
+
+原包对照：run `34817687891` 的相同 JRE 在英文目录返回 0，在中文目录返回 2 并误报缺 `java.dll`；文件实际上存在。新包使用 UTF-8 PE manifest 后，同一中文目录检查返回 0，并通过真实模拟请求。
 
 ## 官方参考
 
