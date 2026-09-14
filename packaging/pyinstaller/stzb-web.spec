@@ -6,6 +6,7 @@ ROOT = Path(SPECPATH).resolve().parents[1]
 
 hiddenimports = [
     "api_server", "realtime_writer", "scrapy_v2", "profile_manager",
+    "desktop_battle_report_sync",
     "db_build", "db_extend", "db_import", "db_import_ext",
     "db_schema_v2", "sim_data", "battle_engine_adapter",
     *collect_submodules("intelligence"), *collect_submodules("query_agent"),

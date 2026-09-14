@@ -24,6 +24,7 @@ from score_center.api import register_score_center_api
 from score_center.repository import ScoreRepository
 from world_scene.api import register_world_scene_api
 from world_scene.store import WorldSceneStore
+from desktop_battle_report_sync import BattleReportSynchronizer
 
 import os, time, threading
 
@@ -62,7 +63,9 @@ _table_info_cache = {}
 AUTH_SERVICE_BASE_URL = os.environ.get(
     'STZB_AUTH_SERVICE_URL', 'http://152.136.236.184:9080'
 ).rstrip('/')
-AUTH_CLIENT_VERSION = os.environ.get('STZB_AUTH_CLIENT_VERSION', '1.0.2')
+AUTH_CLIENT_VERSION = os.environ.get('STZB_AUTH_CLIENT_VERSION', '1.2.0')
+_battle_report_sync_lock = threading.Lock()
+_battle_report_syncing_profiles = set()
 
 
 def _auth_service_request(path, payload):
@@ -94,6 +97,65 @@ def _auth_service_request(path, payload):
                 'message': '认证服务器暂时无法连接',
             },
         }, 503
+
+
+def _battle_report_service_request(path, payload):
+    body = json.dumps(payload, ensure_ascii=False, separators=(',', ':')).encode('utf-8')
+    request_obj = urllib.request.Request(
+        f'{AUTH_SERVICE_BASE_URL}/v1/{path.lstrip("/")}',
+        data=body,
+        headers={
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store',
+        },
+        method='POST',
+    )
+    try:
+        with urllib.request.urlopen(request_obj, timeout=20) as response:
+            if 'no-store' not in response.headers.get('Cache-Control', '').lower():
+                return {'ok': False, 'error': {'code': 'TRANSPORT_INVALID'}}, 502
+            raw = response.read(128 * 1024 + 1)
+            if len(raw) > 128 * 1024:
+                return {'ok': False, 'error': {'code': 'TRANSPORT_INVALID'}}, 502
+            return json.loads(raw.decode('utf-8')), response.status
+    except urllib.error.HTTPError as error:
+        try:
+            raw = error.read(128 * 1024 + 1)
+            if len(raw) > 128 * 1024:
+                raise ValueError
+            result = json.loads(raw.decode('utf-8'))
+        except (ValueError, UnicodeDecodeError, json.JSONDecodeError):
+            result = {'ok': False, 'error': {'code': 'TRANSPORT_UNAVAILABLE'}}
+        return result, error.code
+    except (urllib.error.URLError, TimeoutError, ValueError, json.JSONDecodeError):
+        return {'ok': False, 'error': {'code': 'TRANSPORT_UNAVAILABLE'}}, 503
+
+
+def _start_battle_report_sync(token, profile=None):
+    """Run one silent incremental report sync for the active desktop profile."""
+    if not isinstance(token, str) or not token:
+        return
+    active_profile = dict(profile or profile_manager.load_current_profile() or {})
+    profile_id = str(active_profile.get('profile_id') or '')
+    if not profile_id:
+        return
+    with _battle_report_sync_lock:
+        if profile_id in _battle_report_syncing_profiles:
+            return
+        _battle_report_syncing_profiles.add(profile_id)
+
+    def sync():
+        try:
+            BattleReportSynchronizer(_battle_report_service_request).sync(token, active_profile)
+        finally:
+            with _battle_report_sync_lock:
+                _battle_report_syncing_profiles.discard(profile_id)
+
+    threading.Thread(
+        target=sync,
+        daemon=True,
+        name='battle-report-sync',
+    ).start()
 
 REQUIRED_BV2_COLUMNS = {
     'wid_name': 'TEXT DEFAULT ""',
@@ -3980,6 +4042,8 @@ def api_local_auth_login():
         'password': password,
         'clientVersion': AUTH_CLIENT_VERSION,
     })
+    if status == 200 and isinstance(result, dict) and result.get('ok'):
+        _start_battle_report_sync(result.get('sessionToken'), profile_manager.load_current_profile())
     return jsonify(result), status
 
 
@@ -3995,6 +4059,8 @@ def api_local_auth_register():
         'password': password,
         'clientVersion': AUTH_CLIENT_VERSION,
     })
+    if status == 200 and isinstance(result, dict) and result.get('ok'):
+        _start_battle_report_sync(result.get('sessionToken'), profile_manager.load_current_profile())
     return jsonify(result), status
 
 
@@ -4008,6 +4074,8 @@ def api_local_auth_verify():
         'token': token,
         'clientVersion': AUTH_CLIENT_VERSION,
     })
+    if status == 200 and isinstance(result, dict) and result.get('ok'):
+        _start_battle_report_sync(token, profile_manager.load_current_profile())
     return jsonify(result), status
 
 
