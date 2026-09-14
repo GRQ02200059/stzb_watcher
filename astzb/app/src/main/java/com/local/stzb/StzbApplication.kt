@@ -41,6 +41,8 @@ import com.local.stzb.sync.BattleReportSyncCoordinator
 import com.local.stzb.sync.BattleReportSyncLauncher
 import com.local.stzb.sync.BattleReportSyncTransport
 import com.local.stzb.sync.SyncOutcome
+import com.local.stzb.data.research.HttpSharedLineupRankingsRepository
+import com.local.stzb.feature.research.SharedLineupRankingsViewModel
 
 class StzbApplication : Application() {
     val profileManager by lazy {
@@ -95,6 +97,10 @@ class StzbApplication : Application() {
             clientVersion = BuildConfig.VERSION_NAME,
         )
     }
+
+    fun createSharedLineupRankingsViewModel() = SharedLineupRankingsViewModel(
+        HttpSharedLineupRankingsRepository.production(this, BuildConfig.VERSION_NAME),
+    )
 
     fun scheduleBattleReportSyncOnce() {
         battleReportSyncLauncher.onAuthenticated()

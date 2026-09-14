@@ -95,7 +95,7 @@ fun LegacyToolsScreen(
                 ToolRow {
                     ToolTile(Icons.Outlined.AutoGraph, "团队报表", openTeamReport, Modifier.weight(1f))
                     ToolTile(Icons.Outlined.Science, "战术演练", openSimulator, Modifier.weight(1f))
-                    ToolTile(Icons.Outlined.AutoGraph, "战法研究", openResearch, Modifier.weight(1f))
+                    ToolTile(Icons.Outlined.AutoGraph, "全服阵容榜", openResearch, Modifier.weight(1f))
                 }
                 ToolRow {
                     ToolTile(Icons.Outlined.SwapVert, "自动滑动", openAutoScroll, Modifier.weight(1f))
