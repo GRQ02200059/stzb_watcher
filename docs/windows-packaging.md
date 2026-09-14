@@ -128,8 +128,13 @@ PowerShell 每个外部命令执行后显式检查 `$LASTEXITCODE`。不能只�
 | `api_server.py` | 情报与协议资源路径、随包引擎健康检查路径 |
 | `battle_engine_adapter.py` | 打包态调用随包 Windows Java 与引擎 |
 | `run_web_exe.py` | 服务就绪后打开页面，启动失败可诊断 |
-| 对应 `test/` 文件 | 故障回归及正常启动验证 |
-| `README.md`、Windows 包内说明 | 下载、完整解压、日志位置与 Npcap 使用条件 |
+| `test/test_packaged_runtime.py` | 隔离资源目录启动、随包 Java 命令回归 |
+| `test/test_windows_smoke.py` | HTTP 200 业务失败与进程提前退出必须拦截 |
+| `test/test_web_launcher.py` | 等服务就绪再开浏览器，超时不打开 |
+| `test/test_windows_web_build_config.py` | 维护目录包与验收流程的已有配置检查 |
+| `test/test_windows_release_workflow.py` | 维护手动发布与已验证产物的已有检查 |
+| `README.md`、`packaging/README-Windows.txt` | 下载、完整解压、日志位置与 Npcap 使用条件 |
+| `docs/windows-packaging.md` | 完整流程、文件职责与验证边界 |
 
 不修改 Android 模块、游戏协议算法、战斗规则或用户已有未提交工作。若打包验证发现这些范围内的其他问题，报告证据并单独确定修复范围。
 

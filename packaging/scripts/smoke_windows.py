@@ -22,8 +22,13 @@ import zipfile
 def fetch_json(url, payload=None):
     data = None if payload is None else json.dumps(payload).encode('utf-8')
     request = urllib.request.Request(url, data=data, headers={'Content-Type': 'application/json'})
-    with urllib.request.urlopen(request, timeout=45) as response:
-        body = json.load(response)
+    try:
+        with urllib.request.urlopen(request, timeout=45) as response:
+            body = json.load(response)
+    except urllib.error.HTTPError as error:
+        with error:
+            detail = error.read(65536).decode('utf-8', errors='replace')
+        raise RuntimeError(f'{url}: HTTP {error.code}: {detail}') from error
     if not isinstance(body, dict) or body.get('ok') is not True:
         raise RuntimeError(f'{url}: application request failed: {body}')
     return body

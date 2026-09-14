@@ -45,6 +45,26 @@ class WindowsSmokeTest(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, '7'):
                 self.smoke.wait_ready(process, 'http://127.0.0.1:1/', timeout=60)
 
+    def test_http_error_preserves_server_diagnostics(self):
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(b'{"ok":false,"error":"Java launch diagnostic"}')
+
+            def log_message(self, *args):
+                pass
+
+        with ThreadingHTTPServer(('127.0.0.1', 0), Handler) as server:
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                with self.assertRaisesRegex(RuntimeError, 'Java launch diagnostic'):
+                    self.smoke.fetch_json(f'http://127.0.0.1:{server.server_port}/')
+            finally:
+                server.shutdown()
+                thread.join()
+
 
 if __name__ == '__main__':
     unittest.main()
