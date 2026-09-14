@@ -1,5 +1,7 @@
 STZB 助手 Windows x64 便携版
 
+支持 Windows 10 1903 及以上版本、Windows 11（x64）。
+
 1. 将 ZIP 完整解压到当前用户可写的目录，再双击 STZB助手-Web.exe。
    请保留 _internal 和 runtime 目录，不要只复制 exe，不要从 ZIP 内直接运行。
 2. 程序就绪后自动打开浏览器；本地地址默认为 http://127.0.0.1:8080/。

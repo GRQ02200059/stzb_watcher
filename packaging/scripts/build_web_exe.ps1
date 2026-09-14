@@ -23,7 +23,7 @@ try {
         New-Item -ItemType Directory -Force $Path | Out-Null
     }
     Invoke-Checked { python -m pip check }
-    Invoke-Checked { python -m unittest test.test_packaged_runtime test.test_web_launcher test.test_battle_engine_adapter test.test_windows_web_build_config test.test_windows_release_workflow }
+    Invoke-Checked { python -m unittest test.test_packaged_runtime test.test_web_launcher test.test_battle_engine_adapter test.test_windows_web_build_config test.test_windows_release_workflow test.test_windows_java_manifest }
     # The mirrored engine test expects a ZIP which Git intentionally ignores.
     # Reconstruct its one required entry from the checked-in JSON, preserving local ZIPs.
     @'
@@ -48,6 +48,7 @@ if not (root / 'paper.zip').exists():
     Copy-Item -Recurse (Join-Path $Root "battle-engine/build/install/stzb-battle-engine/lib") (Join-Path $Runtime "battle-engine/lib")
     $Jlink = Join-Path $env:JAVA_HOME "bin/jlink.exe"
     Invoke-Checked { & $Jlink --add-modules java.se,jdk.unsupported,jdk.crypto.ec --strip-debug --no-header-files --no-man-pages --compress=2 --output (Join-Path $Runtime "java") }
+    Invoke-Checked { python packaging/scripts/prepare_java.py (Join-Path $Runtime "java/bin/java.exe") }
     Copy-Item (Join-Path $Root "packaging/README-Windows.txt") $Bundle
     Invoke-Checked { & (Join-Path $Runtime "java/bin/java.exe") -version }
 
@@ -65,6 +66,7 @@ if not (root / 'paper.zip').exists():
     $Info = @{
         version = $Version; commit = $Commit.Trim(); dirty = [bool]$Dirty
         target = "windows-x64"; builtAt = [DateTime]::UtcNow.ToString("o")
+        javaLauncherCodePage = "UTF-8 (adapted PE manifest)"
         python = (python --version); java = (Get-Content (Join-Path $Runtime "java/release") -Raw)
         dependencies = @(python -m pip freeze); files = $Files
         validation = "candidate; see separate smoke report"

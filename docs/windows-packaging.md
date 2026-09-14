@@ -8,6 +8,8 @@
 
 默认交付 PyInstaller `onedir` 目录包。原因是本项目同时包含 Python 服务、前端静态资源、配置表和 Kotlin/JVM 战斗引擎；目录包方便检查依赖，也避免每次启动都解压全部运行库。将来需要安装程序时，可以用安装器封装同一份已经验收的目录包。
 
+目标系统为 Windows 10 1903 及以上、Windows 11 x64。随包 Java 17 的 PE manifest 启用 UTF-8 进程代码页，保留其他原有设置；构建清单明确记录这一适配。对照验证已发现原始 Java 在非系统代码页可表示的目录中会误报 `java.dll` 缺失。
+
 Windows 实时抓包依赖 Npcap 系统驱动。未安装驱动时，应用应仍能打开并使用已有数据，抓包入口给出明确安装提示。不能把复制 `wpcap.dll` 当成驱动安装成功，也不能让该依赖的失败阻断整个 Web 服务。
 
 ## 已核实的现状
@@ -35,6 +37,8 @@ gh run list --workflow build-windows-web.yml --branch codex/windows-packaging-20
 构建成功后下载 `STZB-Web-Windows-verified-<run-id>`。里面包含应用 ZIP、`SHA256SUMS.txt` 与 `smoke-report.json`。`windows-candidate-*` 是内部验收输入，不作为已通过验收的交付版本。
 
 合并后在主分支提交、推送相关代码即可触发构建。确实要创建 Release 时，手动运行并开启发布选项；发布失败不会覆盖已有 Release。
+
+排查既有候选包时，可填写 `candidate_run_id`，用当前版本的验收器复验原 ZIP，省去重复编译；报告仍记录原包的 commit 与 SHA-256。此模式禁止发布 Release。正常构建时保持该字段为空。
 
 ## 发布目录
 
@@ -125,11 +129,13 @@ PowerShell 每个外部命令执行后显式检查 `$LASTEXITCODE`。不能只�
 | `packaging/pyinstaller/stzb-web.spec` | onedir 与明确的运行资源清单 |
 | `packaging/pyinstaller/requirements-build.txt` 及 Windows 锁文件 | 固定构建依赖 |
 | 新增 `packaging/scripts/smoke_windows.py` | 进程生命周期、接口/对局/缺文件验收与报告 |
+| `packaging/scripts/prepare_java.py` | 保留 Java 原有 manifest 设置，启用 UTF-8 路径并读回验证 |
 | `api_server.py` | 情报与协议资源路径、随包引擎健康检查路径 |
 | `battle_engine_adapter.py` | 打包态调用随包 Windows Java 与引擎 |
 | `run_web_exe.py` | 服务就绪后打开页面，启动失败可诊断 |
 | `test/test_packaged_runtime.py` | 隔离资源目录启动、随包 Java 命令回归 |
 | `test/test_windows_smoke.py` | HTTP 200 业务失败与进程提前退出必须拦截 |
+| `test/test_windows_java_manifest.py` | UTF-8 manifest 幂等、保留原有执行权限 |
 | `test/test_web_launcher.py` | 等服务就绪再开浏览器，超时不打开 |
 | `test/test_windows_web_build_config.py` | 维护目录包与验收流程的已有配置检查 |
 | `test/test_windows_release_workflow.py` | 维护手动发布与已验证产物的已有检查 |
@@ -151,3 +157,4 @@ PowerShell 每个外部命令执行后显式检查 `$LASTEXITCODE`。不能只�
 - [PyInstaller 目录包与单文件运行机制](https://pyinstaller.org/en/stable/operating-mode.html)
 - [Scapy Windows 安装与 Npcap 依赖](https://scapy.readthedocs.io/en/stable/installation.html)
 - [GitHub Actions 构建产物](https://docs.github.com/en/actions/concepts/workflows-and-actions/workflow-artifacts)
+- [Windows UTF-8 进程代码页](https://learn.microsoft.com/en-us/windows/apps/design/globalizing/use-utf8-code-page)
