@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import sim_data
@@ -40,7 +41,18 @@ class BattleEngineAdapter:
         self.run_cli = run_cli or self._run_cli
         # 默认走 installDist 产物：避免每次请求拉起 gradle/JVM，
         # 且 cwd 固定在 battle-engine，引擎才能定位 battle-config 资源。
-        self.cli_command = cli_command or [str(_INSTALL_CLI)]
+        if getattr(sys, 'frozen', False):
+            runtime = Path(sys.executable).resolve().parent / "runtime"
+            java = "java.exe" if sys.platform == "win32" else "java"
+            default_command = [
+                str(runtime / "java" / "bin" / java),
+                "-Dfile.encoding=UTF-8", "-cp",
+                str(runtime / "battle-engine" / "lib" / "*"),
+                "com.stzb.battle.cli.BattleEngineCliKt",
+            ]
+        else:
+            default_command = [str(_INSTALL_CLI)]
+        self.cli_command = cli_command or default_command
         self.timeout_sec = timeout_sec
 
     def simulate(self, payload):
@@ -296,12 +308,13 @@ class BattleEngineAdapter:
         env = dict(os.environ)
         # 强制引擎在 JDK 17 下运行：Kotlin 1.9.23 编译产物在更高版本 JVM 上可能异常。
         jdk17 = "/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home"
-        if os.path.isdir(jdk17):
+        if not getattr(sys, 'frozen', False) and os.path.isdir(jdk17):
             env["JAVA_HOME"] = jdk17
         proc = subprocess.run(
             command,
             input=json.dumps(cli_input, ensure_ascii=False),
             text=True,
+            encoding="utf-8",
             capture_output=True,
             timeout=self.timeout_sec,
             check=False,

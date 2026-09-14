@@ -16,11 +16,12 @@ class WindowsReleaseWorkflowTest(unittest.TestCase):
         self.assertNotIn('android_variant:', WORKFLOW)
         self.assertNotIn('ANDROID_KEYSTORE_BASE64', WORKFLOW)
 
-    def test_release_publish_is_manual_and_uploads_single_exe(self):
+    def test_release_publish_is_manual_and_uses_verified_artifact(self):
         self.assertIn("github.event_name == 'workflow_dispatch'", WORKFLOW)
-        self.assertIn('softprops/action-gh-release@v2', WORKFLOW)
-        self.assertIn('tag_name: ${{ inputs.release_tag }}', WORKFLOW)
-        self.assertIn('dist/STZB助手-Web.exe', WORKFLOW)
+        self.assertIn('gh release create', WORKFLOW)
+        self.assertIn('RELEASE_TAG: ${{ inputs.release_tag }}', WORKFLOW)
+        self.assertIn('STZB-Web-Windows-verified-', WORKFLOW)
+        self.assertIn('needs: verify', WORKFLOW)
         self.assertIn('contents: write', WORKFLOW)
         self.assertNotIn('app-release.apk', WORKFLOW)
         self.assertNotIn('Set up Java for Android', WORKFLOW)

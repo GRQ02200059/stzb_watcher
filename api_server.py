@@ -656,7 +656,7 @@ register_world_scene_api(app, _world_scene_connection)
 register_world_intelligence_api(app, _world_scene_connection)
 register_live_army_api(app, _world_scene_connection)
 _intelligence_snapshot_root = os.path.join(
-    BASE_DIR, 'data', 'intelligence', 'client-9.2.2'
+    RESOURCE_DIR, 'data', 'intelligence', 'client-9.2.2'
 )
 _intelligence_config_repository = IntelligenceConfigRepository(
     _intelligence_snapshot_root
@@ -1625,7 +1625,7 @@ def _data_quality_snapshot(conn, now=None):
         (previous_monday,),
         default=0,
     )
-    manifest_path = Path(BASE_DIR) / 'data/protocol/client-9.2.2/manifest.json'
+    manifest_path = Path(RESOURCE_DIR) / 'data/protocol/client-9.2.2/manifest.json'
     try:
         manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
     except (OSError, ValueError):
@@ -3271,10 +3271,7 @@ def _health_component(status, label, detail='', **extra):
 def api_hud_health():
     writer_stats = dict(getattr(_writer, 'stats', {}) or {})
     writer_errors = int(writer_stats.get('errors') or 0)
-    engine_path = (
-        Path(BASE_DIR)
-        / 'battle-engine/build/install/stzb-battle-engine/bin/stzb-battle-engine'
-    )
+    engine_path = Path(BattleEngineAdapter().cli_command[0])
     portrait_manifest = os.path.join(
         RESOURCE_DIR,
         'static',

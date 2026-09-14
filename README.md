@@ -44,8 +44,10 @@ Web 端用于查看战场情报、实时部队、队伍分析、积分和战术�
 
 1. 打开项目的 [Releases 页面](https://github.com/GRQ02200059/stzb_watcher/releases)。
 2. 进入最新版本。
-3. 在 `Assets` 中下载 `STZB助手-Web.exe`。
-4. 将文件保存到电脑上容易找到的位置。
+3. 对采用新打包流程的版本，在 `Assets` 中下载 `STZB-Web-Windows-x64-*.zip`。
+4. 完整解压到当前用户可写的目录，保留 `_internal` 和 `runtime` 子目录。
+
+未发布 Release 的构建，可在 [Windows Actions](https://github.com/GRQ02200059/stzb_watcher/actions/workflows/build-windows-web.yml) 下载 `STZB-Web-Windows-verified-*` 产物；只有通过独立 Windows 验收才会出现该产物。旧版本的单文件 EXE 不适用新流程的验收保证。
 
 不要下载 `Source code (zip)` 或 `Source code (tar.gz)`，那是项目文件，不是可直接使用的程序。
 
@@ -56,6 +58,10 @@ Web 端用于查看战场情报、实时部队、队伍分析、积分和战术�
 3. 如果浏览器没有自动打开，请手动访问：`http://127.0.0.1:8080`。
 4. 按页面提示登录。
 5. 保持程序窗口运行，即可继续使用。
+
+新目录包内置 Python 与 Java，无需自行安装。Windows 实时抓包仍需安装 [Npcap](https://npcap.com/#download) 并启用 WinPcap API compatibility；没有驱动时可用 `STZB助手-Web.exe --no-sniffer` 启动已有数据分析。具体步骤和错误日志采集见包内 `README-Windows.txt`。
+
+Mac 开发后的构建、验收和发布方式见 [Windows 打包流程](docs/windows-packaging.md)。
 
 关闭程序后，网页服务也会停止。下次使用时重新双击 EXE 即可。
 

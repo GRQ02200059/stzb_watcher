@@ -1,1 +1,3 @@
-pyinstaller==6.11.1
+# Canonical Windows x64 / Python 3.11 dependency lock (includes runtime deps).
+# Install with: python -m pip install --require-hashes -r packaging/pyinstaller/requirements-build.txt
+-r requirements-windows.lock

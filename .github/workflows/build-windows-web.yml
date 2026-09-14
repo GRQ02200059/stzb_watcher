@@ -4,67 +4,176 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: 'Release 标签，例如 v1.0.0-web'
+        description: '版本号（仅字母、数字、点、横线），例如 v1.1.0-web'
         required: true
-        default: 'v1.0.0-web'
+        default: 'dev'
         type: string
       publish_release:
-        description: '构建成功后发布到 GitHub Releases'
+        description: '验收成功后发布同一份 ZIP 到 GitHub Releases'
         required: true
         default: false
         type: boolean
-  push:
-    paths:
-      - 'run_web_exe.py'
-      - 'api_server.py'
-      - 'realtime_writer.py'
+  pull_request:
+    paths: &desktop_paths
+      - '*.py'
+      - 'requirements.txt'
+      - 'intelligence/**'
+      - 'query_agent/**'
+      - 'score_center/**'
+      - 'world_scene/**'
+      - 'protocol_evidence/**'
       - 'static/**'
-      - 'packaging/pyinstaller/**'
-      - 'packaging/scripts/build_web_exe.ps1'
+      - 'data/**'
+      - 'protocol/**'
+      - 'hero_scraper/output/**'
+      - 'battle-engine/**'
+      - 'packaging/**'
+      - 'test/test_packaged_runtime.py'
+      - 'test/test_web_launcher.py'
+      - 'test/test_windows*.py'
       - '.github/workflows/build-windows-web.yml'
+  push:
+    paths: *desktop_paths
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: windows-web-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+env:
+  PYTHONIOENCODING: utf-8
+  PYTHONUTF8: '1'
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2022
+    timeout-minutes: 35
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
         with:
-          python-version: '3.11'
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.9'
+          architecture: x64
           cache: pip
-          cache-dependency-path: packaging/pyinstaller/requirements-build.txt
-      - name: Install dependencies
+          cache-dependency-path: packaging/pyinstaller/requirements-windows.lock
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17.0.20.1+1'
+          architecture: x64
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: Install locked Windows dependencies
         shell: pwsh
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-          python -m pip install -r packaging/pyinstaller/requirements-build.txt
-      - name: Build Web EXE
+          python -m venv build/packaging-venv
+          if ($LASTEXITCODE -ne 0) { throw 'venv failed' }
+          $venvScripts = Join-Path $PWD 'build/packaging-venv/Scripts'
+          $venvScripts | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          & "$venvScripts/python.exe" -m pip install --require-hashes -r packaging/pyinstaller/requirements-windows.lock
+          if ($LASTEXITCODE -ne 0) { throw 'Dependency installation failed' }
+      - name: Build candidate package
         shell: pwsh
-        run: .\packaging\scripts\build_web_exe.ps1
-      - name: Verify artifact
-        shell: pwsh
+        env:
+          BUILD_VERSION: ${{ inputs.release_tag || format('dev-{0}', github.run_number) }}
         run: |
-          $exe = 'dist/STZB助手-Web.exe'
-          if (-not (Test-Path $exe)) { throw "Missing $exe" }
-          Get-Item $exe | Format-List FullName,Length,LastWriteTime
-      - name: Upload artifact
+          ./packaging/scripts/build_web_exe.ps1 -Version $env:BUILD_VERSION
+          python -m unittest test.test_windows_smoke -v
+          if ($LASTEXITCODE -ne 0) { throw 'Smoke verifier tests failed' }
+          New-Item -ItemType Directory -Force build/candidate | Out-Null
+          Copy-Item dist/windows/*.zip, dist/windows/SHA256SUMS.txt, packaging/scripts/smoke_windows.py build/candidate/
+      - name: Upload candidate for independent verification
         uses: actions/upload-artifact@v4
         with:
-          name: STZB-Web-Windows
-          path: dist/STZB助手-Web.exe
+          name: windows-candidate-${{ github.run_id }}
+          path: build/candidate/
+          retention-days: 7
           if-no-files-found: error
-
-      - name: Publish GitHub Release
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_release == true }}
-        uses: softprops/action-gh-release@v2
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: ${{ inputs.release_tag }}
-          name: STZB Web ${{ inputs.release_tag }}
-          generate_release_notes: true
-          files: dist/STZB助手-Web.exe
+          name: windows-build-logs-${{ github.run_id }}
+          path: |
+            build/windows-logs/
+            build/windows/stzb-web/warn-stzb-web.txt
+            battle-engine/build/reports/tests/
+          if-no-files-found: ignore
+
+  verify:
+    needs: build
+    runs-on: windows-2022
+    timeout-minutes: 12
+    steps:
+      # No source checkout: the executable must run entirely from the downloaded ZIP.
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-candidate-${{ github.run_id }}
+          path: candidate
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.9'
+          architecture: x64
+      - name: Verify downloaded EXE and inject missing-resource failure
+        shell: pwsh
+        run: |
+          $archives = @(Get-ChildItem candidate/*.zip)
+          if ($archives.Count -ne 1) { throw 'Expected exactly one candidate ZIP' }
+          python candidate/smoke_windows.py --archive $archives[0].FullName --checksums candidate/SHA256SUMS.txt --logs smoke-logs
+          if ($LASTEXITCODE -ne 0) { throw 'Delivered Windows app failed smoke verification' }
+          New-Item -ItemType Directory -Force deliverable | Out-Null
+          Copy-Item candidate/*.zip, candidate/SHA256SUMS.txt, smoke-logs/smoke-report.json deliverable/
+      - name: Upload verified distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: STZB-Web-Windows-verified-${{ github.run_id }}
+          path: deliverable/
+          retention-days: 30
+          if-no-files-found: error
+      - name: Upload smoke diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-smoke-logs-${{ github.run_id }}
+          path: smoke-logs/
+          if-no-files-found: warn
+
+  publish:
+    needs: verify
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_release == true }}
+    runs-on: windows-2022
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: STZB-Web-Windows-verified-${{ github.run_id }}
+          path: deliverable
+      - name: Publish the verified bytes without rebuilding
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          if ($env:RELEASE_TAG -eq 'dev' -or $env:RELEASE_TAG -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$') {
+            throw 'Publishing requires an explicit version tag'
+          }
+          git show-ref --verify --quiet "refs/tags/$env:RELEASE_TAG"
+          if ($LASTEXITCODE -eq 0) {
+            $tagCommit = git rev-parse "refs/tags/$($env:RELEASE_TAG)^{commit}"
+            if ($LASTEXITCODE -ne 0 -or $tagCommit.Trim() -ne $env:GITHUB_SHA) { throw 'Tag points at a different commit' }
+          }
+          $files = @(Get-ChildItem deliverable -File | ForEach-Object { $_.FullName })
+          gh release create $env:RELEASE_TAG @files --target $env:GITHUB_SHA --title "STZB Web $env:RELEASE_TAG" --generate-notes
+          if ($LASTEXITCODE -ne 0) { throw 'Release creation failed; existing releases are not overwritten' }
