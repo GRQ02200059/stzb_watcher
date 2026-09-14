@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import socket
 import sqlite3
 import subprocess
@@ -56,12 +57,8 @@ def running_app(bundle, working_directory, log_file):
     with socket.socket() as listener:
         listener.bind(('127.0.0.1', 0))
         port = listener.getsockname()[1]
-    # Whitelist OS necessities only: no CI JAVA_HOME, PYTHONPATH or developer PATH.
-    allowed = {'SYSTEMROOT', 'WINDIR', 'TEMP', 'TMP', 'USERPROFILE',
-               'APPDATA', 'LOCALAPPDATA', 'COMSPEC', 'SYSTEMDRIVE'}
-    env = {key: value for key, value in os.environ.items() if key.upper() in allowed}
+    env = runtime_environment()
     system32 = Path(os.environ['SystemRoot']) / 'System32'
-    env['PATH'] = str(system32)
     command = [str(bundle / 'STZB助手-Web.exe'), '--no-browser', '--no-sniffer',
                '--host', '127.0.0.1', '--port', str(port)]
     with log_file.open('wb') as log:
@@ -74,6 +71,34 @@ def running_app(bundle, working_directory, log_file):
             subprocess.run([str(system32 / 'taskkill.exe'), '/PID', str(process.pid), '/T', '/F'],
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
             process.wait(timeout=10)
+
+
+def runtime_environment():
+    # Whitelist OS necessities only: no CI JAVA_HOME, PYTHONPATH or developer PATH.
+    allowed = {'SYSTEMROOT', 'WINDIR', 'TEMP', 'TMP', 'USERPROFILE',
+               'APPDATA', 'LOCALAPPDATA', 'COMSPEC', 'SYSTEMDRIVE'}
+    env = {key: value for key, value in os.environ.items() if key.upper() in allowed}
+    system32 = Path(os.environ['SystemRoot']) / 'System32'
+    env['PATH'] = str(system32)
+    return env
+
+
+def java_diagnostics(bundle):
+    runtime = bundle / 'runtime/java'
+
+    def probe(java):
+        process = subprocess.run([str(java), '-version'], env=runtime_environment(),
+                                 capture_output=True, encoding='utf-8', errors='replace', timeout=15)
+        return {'returncode': process.returncode, 'output': process.stdout + process.stderr}
+
+    result = {'javaDllPresent': (runtime / 'bin/java.dll').is_file(),
+              'unicodeDirectory': probe(runtime / 'bin/java.exe')}
+    if result['unicodeDirectory']['returncode'] != 0:
+        with tempfile.TemporaryDirectory(prefix='STZBJavaASCII-') as directory:
+            copied = Path(directory) / 'java'
+            shutil.copytree(runtime, copied)
+            result['asciiDirectory'] = probe(copied / 'bin/java.exe')
+    return result
 
 
 def verify_inventory(bundle):
@@ -146,6 +171,7 @@ def verify_package(archive, checksums, logs, report):
         bundle = extracted / 'STZB-Web'
         info = verify_inventory(bundle)
         report['commit'] = info['commit']
+        report['javaDiagnostics'] = java_diagnostics(bundle)
         work = Path(temp) / 'unrelated empty working directory'
         work.mkdir()
         with running_app(bundle, work, logs / 'startup.log') as (process, base):
